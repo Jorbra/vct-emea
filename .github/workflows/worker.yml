@@ -1,4 +1,5 @@
-# Keeps the site's information fresh: every 10 minutes, GitHub runs scripts/worker.mjs for a few minutes.
+# Keeps the site's information fresh: about every 10 minutes (GitHub may run it much later), scripts/worker.mjs reads for a few minutes.
+# What a visitor asks for does not wait for this: the site reads it itself (lib/readsoon.js).
 name: Read Liquipedia and vlr.gg
 on:
   schedule:
@@ -12,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm

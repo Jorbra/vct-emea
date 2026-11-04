@@ -1662,7 +1662,7 @@ test("team information: inactive players, former players and former staff", asyn
 });
 
 test("the list of pages to read, and what is saved in the database", async () => {
-  const { askToRead, itemsMention, itemsStamp, readBlob, readItems, saveBlob, saveItem, takeRequest } = await import("../lib/lpstore.js");
+  const { askToRead, hasRequests, itemsMention, itemsStamp, readBlob, readItems, saveBlob, saveItem, takeRequest, takeTurn } = await import("../lib/lpstore.js");
   const { requestFetch } = await import("../lib/teamfetch.js");
   const { requestVlr } = await import("../lib/vlrfetch.js");
   const { findLogo, logoFiles, saveTagLogo } = await import("../lib/db.js");
@@ -1687,6 +1687,19 @@ test("the list of pages to read, and what is saved in the database", async () =>
     assert.equal(takeRequest("lp:").id, "lp:team:b");
     for (let n = 0; n < 5; n += 1) askToRead(`lp:x${n}`, {}, false, 3);
     assert.equal(db.prepare("SELECT count(*) n FROM lp_requests").get().n, 3); // a bounded list
+
+    // one turn every 30 seconds, per source; nothing waits, nothing to read
+    const start = Date.parse("2026-11-04T12:00:00Z");
+    assert.equal(takeTurn("lp", start), true);
+    assert.equal(takeTurn("lp", start + 29000), false);
+    assert.equal(takeTurn("vlr", start + 29000), true); // each source has its own
+    assert.equal(takeTurn("lp", start + 30000), true);
+    const undoBefore = db.prepare("SELECT count(*) n FROM undolog").get().n;
+    takeTurn("lp", start + 60000);
+    assert.equal(db.prepare("SELECT count(*) n FROM undolog").get().n, undoBefore); // the undo button does not see it
+    assert.equal(hasRequests(), true);
+    db.exec("DELETE FROM lp_requests");
+    assert.equal(hasRequests(), false);
 
     // the information
     const stamp = itemsStamp();

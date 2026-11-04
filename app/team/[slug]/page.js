@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import TeamPage from "../../../components/TeamPage";
 import { getDb, getState } from "../../../lib/db.js";
 import { linkFormer, linkResults, linkVlr } from "../../../lib/directory.js";
+import { readSoon } from "../../../lib/readsoon.js";
 import { requestVlr, teamVlrId, vlrBlocked, vlrDue } from "../../../lib/vlrfetch.js";
 import { LANG_COOKIE, normLang } from "../../../lib/i18n.js";
 import { lpData } from "../../../lib/lpdata.js";
@@ -35,6 +36,7 @@ export default async function Page({ params, searchParams }) {
   // the server reads the site's own teams by itself
   const lpNow = (update && updateDue(entry)) || teamOutdated(entry); // old information: this page needs the former members now
   if (lpNow || (!p && requestDue(entry))) requestFetch({ kind: "team", name }, Date.now(), lpNow);
+  readSoon();
   const lang = normLang((await cookies()).get(LANG_COOKIE)?.value);
   const lp = entry && entry.page
     ? { ...entry, results: linkResults(entry.results, dir), inactivePlayers: entry.inactivePlayers || [], formerPlayers: linkFormer(entry.formerPlayers, dir), formerStaff: linkFormer(entry.formerStaff, dir) }

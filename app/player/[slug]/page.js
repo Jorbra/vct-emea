@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import PlayerPage from "../../../components/PlayerPage";
 import { getDb, getState } from "../../../lib/db.js";
 import { baseTitle, linkResults, linkVlr } from "../../../lib/directory.js";
+import { readSoon } from "../../../lib/readsoon.js";
 import { requestVlr, vlrBlocked, vlrDue } from "../../../lib/vlrfetch.js";
 import { vlrId } from "../../../lib/vlrinfo.js";
 import { LANG_COOKIE, normLang } from "../../../lib/i18n.js";
@@ -61,6 +62,7 @@ export default async function Page({ params, searchParams }) {
   const { slug } = await params;
   const profile = load(slug, (await searchParams).maj === "1");
   if (!profile) notFound();
+  readSoon();
   return <PlayerPage profile={profile} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />;
 }
 

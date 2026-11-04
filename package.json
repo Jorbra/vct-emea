@@ -10,7 +10,8 @@
     "players": "node scripts/update-players.mjs",
     "teams": "node scripts/update-teams.mjs",
     "worker": "node scripts/worker.mjs",
-    "turso-import": "node scripts/turso-import.mjs"
+    "turso-import": "node scripts/turso-import.mjs",
+    "local-copy": "node scripts/local-copy.mjs"
   },
   "dependencies": {
     "libsql": "0.5.29",

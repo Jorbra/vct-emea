@@ -11,7 +11,7 @@ Site de tournoi en Next.js (JavaScript) avec une base SQLite.
 
 - **Vercel** affiche le site (région `fra1`, voir `vercel.json`). Il n'a pas de disque durable : la base, les fiches et les logos sont dans Turso.
 - **Turso** garde la base. Chaque serveur en a une copie locale : les lectures sont locales, les écritures vont à Turso, et une page voit ce qui a été enregistré ailleurs en 10 secondes au plus.
-- **GitHub Actions** lance `scripts/worker.mjs` toutes les 10 minutes environ (`.github/workflows/worker.yml`) : une page Liquipedia et une page vlr.gg toutes les 30 secondes pendant quelques minutes, et les annonces Discord. Une fiche demandée attend donc ce passage. GitHub désactive cette tâche après 60 jours sans activité sur le dépôt.
+- **GitHub Actions** lance `scripts/worker.mjs` toutes les 10 minutes environ (`.github/workflows/worker.yml`) : une page Liquipedia et une page vlr.gg toutes les 30 secondes pendant quelques minutes, et les annonces Discord. Ce passage peut arriver bien plus tard que prévu : une fiche demandée par un visiteur ne l'attend pas, le site la lit lui-même juste après avoir affiché la page. Les deux partagent un tour de 30 secondes par source. GitHub désactive cette tâche après 60 jours sans activité sur le dépôt.
 
 Variables à définir sur Vercel : `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `ADMIN_PASSWORD`, `SESSION_SECRET`. Secrets à définir sur GitHub : `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, et `DISCORD_WEBHOOK_URL` si besoin.
 

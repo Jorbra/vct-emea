@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import LpTournamentPage from "../../../components/LpTournamentPage";
 import { LANG_COOKIE, normLang } from "../../../lib/i18n.js";
 import { lpData } from "../../../lib/lpdata.js";
+import { readSoon } from "../../../lib/readsoon.js";
 import { teamSlug } from "../../../lib/paths.js";
 import { requestDue, requestFetch, updateDue } from "../../../lib/teamfetch.js";
 
@@ -33,6 +34,7 @@ export default async function Page({ params, searchParams }) {
   const { page } = await params;
   const t = load(page, (await searchParams).maj === "1"); // opened from the search bar: read again now
   if (!t) notFound();
+  readSoon();
   return <LpTournamentPage t={t} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />;
 }
 
