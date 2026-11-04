@@ -982,6 +982,8 @@ td.cmpw { color: var(--win, #6fcf6f); font-weight: 700; }
 .searchname { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .searchsub { flex: none; max-width: 45%; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 640px) { .searchbar { flex: 1 1 100%; order: 3; } .searchres { left: 0; right: auto; width: 100%; } }
+/* once the header wraps, its last row has no margin under it: the title's margin no longer separates it from the breadcrumb */
+@media (max-width: 940px) { .crumbs { margin-top: 10px; } }
 /* the editor's way in: a button on touch screens only, on every page outside the editor */
 .edfab.touchonly { display: none; position: fixed; right: 12px; bottom: 12px; z-index: 30; box-shadow: 0 4px 14px rgba(0, 0, 0, .4); text-decoration: none; }
 @media (hover: none) and (pointer: coarse) { .edfab.touchonly { display: inline-flex; } }
