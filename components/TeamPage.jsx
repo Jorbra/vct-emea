@@ -16,6 +16,7 @@ import { byLeaveYear, teamProfile } from "../lib/teams.js";
 import { playerHref } from "../lib/playerstats.js";
 import LpImg from "./LpImg.jsx";
 import { VlrCredit, VlrResults } from "./VlrBlocks.jsx";
+import { AlertsButton } from "./MatchAlerts.jsx";
 import { TeamMaps } from "./EventStats.jsx";
 import { siteHref, teamHref, teamSlug } from "../lib/paths.js";
 import { formatMatchTime } from "../lib/schedule.js";
@@ -346,6 +347,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating }) {
           <div className="tname">{p.name}{t.tag ? <span className="ttag">{t.tag}</span> : null}<FavStar slug={slug} /></div>
           <div className="tsub">{tr("{w} wins, {l} losses", tot)} · {tr("{n} events", { n: p.events.length })}</div>
           <TeamLinks lp={lp} />
+          <p><AlertsButton /></p>
         </div>
       </div>
 

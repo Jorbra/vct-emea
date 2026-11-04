@@ -13,9 +13,8 @@ for (const suffix of ["", "-wal", "-shm"]) fs.rmSync(target + suffix, { force: t
 
 loadTursoEnv();
 const { getDb } = await import("../lib/db.js");
-const db = getDb();
-db.sync();
-db.exec(`VACUUM INTO '${target.replace(/\\/g, "/").replace(/'/g, "''")}'`);
+const { exportCopy } = await import("../lib/backup.js");
+exportCopy(getDb(), target);
 const size = Math.round(fs.statSync(target).size / 1024);
 console.log(`Online data copied to data/kickoff.db (${size} KB).`);
 

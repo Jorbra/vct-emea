@@ -14,7 +14,6 @@ if (!fs.existsSync(path.join(dataDir, "kickoff.db"))) throw new Error(`No data/k
 
 const started = Date.now();
 const db = getDb();
-db.sync();
 if (db.prepare("SELECT value FROM kv WHERE key = 'imported'").get() && !process.argv.includes("--again")) {
   console.log("Turso already holds imported data: nothing done. Add --again to replace it.");
   process.exit(0);

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { exportCopy } from "../../../lib/backup.js";
 import { getDb } from "../../../lib/db.js";
 import { isAdmin, unauthorised } from "../../../lib/session.js";
 
@@ -11,7 +12,7 @@ export async function GET() {
   if (!(await isAdmin())) return unauthorised();
   const day = new Date().toISOString().slice(0, 10);
   const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "copy-")), "copy.db");
-  getDb().exec(`VACUUM INTO '${file.replace(/\\/g, "/").replace(/'/g, "''")}'`);
+  exportCopy(getDb(), file);
   const data = fs.readFileSync(file);
   fs.rmSync(path.dirname(file), { recursive: true, force: true });
   return new Response(data, {

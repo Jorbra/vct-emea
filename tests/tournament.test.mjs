@@ -2092,3 +2092,59 @@ test("scheduling a whole round, and reading the oldest team information again", 
   assert.equal(nextStale(["a", "b", "c", "d"], info, now), "b"); // the oldest
   assert.equal(nextStale(["c", "d"], info, now), undefined); // recent, or no page
 });
+
+test("push alerts: favorite teams only, once each, at the planned time, dead browsers forgotten", async () => {
+  const { isPushEndpoint, removePushSub, savePushSub, sendPushes, vapidKeys } = await import("../lib/push.js");
+  const { setMatchLive } = await import("../lib/db.js");
+  const { saveKickoffScore, setKickoffMatch } = await import("../lib/kactions.js");
+  assert.equal(isPushEndpoint("https://fcm.googleapis.com/fcm/send/abc"), true);
+  assert.equal(isPushEndpoint("https://web.push.apple.com/abc"), true);
+  assert.equal(isPushEndpoint("https://updates.push.services.mozilla.com/wpush/v2/abc"), true);
+  assert.equal(isPushEndpoint("http://fcm.googleapis.com/x"), false);
+  assert.equal(isPushEndpoint("https://localhost/x"), false);
+  assert.equal(isPushEndpoint("https://fcm.googleapis.com.evil.test/x"), false);
+  const db = openDb(":memory:");
+  assert.deepEqual(vapidKeys(db), vapidKeys(db)); // made once, then kept
+  const keys = { p256dh: "p", auth: "a" };
+  const fan = "https://fcm.googleapis.com/fan";
+  const all = "https://fcm.googleapis.com/all";
+  const other = "https://fcm.googleapis.com/other";
+  assert.equal(savePushSub(db, { endpoint: "https://evil.test/x", keys, teams: [] }).ok, false);
+  assert.equal(savePushSub(db, { endpoint: fan, keys, teams: ["team-vitality"] }).ok, true);
+  assert.equal(savePushSub(db, { endpoint: all, keys, teams: [] }).ok, true);
+  assert.equal(savePushSub(db, { endpoint: other, keys, teams: ["fnatic"] }).ok, true);
+  assert.equal(setKickoffMatch(db, { id: "u1-1", a: 1, b: 2 }).ok, true);
+  let got = [];
+  const send = async (sub, payload) => { got.push([sub.endpoint, JSON.parse(payload)]); };
+  const now = Date.now();
+  assert.equal(await sendPushes(db, getState(db), now, send), 0); // the first look sends nothing
+  // the planned time comes: the followers of the team and those who follow everything are told, once
+  const state = () => { const s = getState(db); s.times = { ...s.times, kickoff: { ...(s.times && s.times.kickoff), "u1-1": new Date(now - 60000).toISOString() } }; return s; };
+  assert.equal(await sendPushes(db, state(), now, send), 2);
+  assert.deepEqual(got.map((g) => g[0]).sort(), [all, fan].sort());
+  assert.match(got[0][1].body, /Team Vitality vs Karmine Corp/);
+  assert.ok(!got[0][1].body.includes("**"));
+  assert.equal(got[0][1].url.startsWith("/"), true);
+  got = [];
+  assert.equal(await sendPushes(db, state(), now, send), 0);
+  // marked live afterwards: still the same start, no second alert
+  assert.equal(setMatchLive(db, { event: "kickoff", id: "u1-1", live: true }).ok, true);
+  assert.equal(await sendPushes(db, state(), now, send), 0);
+  // the result: one browser no longer exists and is forgotten, the other one still gets it
+  assert.equal(saveKickoffScore(db, { id: "u1-1", sa: 2, sb: 1 }).ok, true);
+  const gone = async (sub, payload) => { if (sub.endpoint === fan) throw Object.assign(new Error("gone"), { statusCode: 410 }); return send(sub, payload); };
+  assert.equal(await sendPushes(db, state(), now, gone), 1);
+  assert.deepEqual(db.prepare("SELECT endpoint FROM push_subs ORDER BY endpoint").all().map((r) => r.endpoint), [all, other]);
+  assert.equal(removePushSub(db, all).ok, true);
+  assert.equal(db.prepare("SELECT COUNT(*) AS n FROM push_subs").get().n, 1);
+  // a planned time long past announces nothing, and Discord (no `now`) ignores planned times
+  const { announcements } = await import("../lib/discord.js");
+  assert.equal(setKickoffMatch(db, { id: "u1-2", a: 3, b: 4 }).ok, true);
+  const s = getState(db);
+  s.times = { kickoff: { "u1-2": new Date(now - 3 * 3600 * 1000).toISOString() } };
+  assert.equal(announcements(s, now).some((a) => a.key === "kickoff:u1-2:l"), false);
+  s.times = { kickoff: { "u1-2": new Date(now - 60000).toISOString() } };
+  assert.equal(announcements(s, now).some((a) => a.key === "kickoff:u1-2:l"), true);
+  assert.equal(announcements(s).some((a) => a.key === "kickoff:u1-2:l"), false);
+});
+

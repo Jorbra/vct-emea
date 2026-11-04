@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // libsql is a native module: keep it out of the bundle, and make sure the server gets its files for Linux.
-  serverExternalPackages: ["libsql"],
+  serverExternalPackages: ["libsql", "web-push"],
   outputFileTracingIncludes: {
     "/**": ["./node_modules/libsql/**", "./node_modules/@libsql/**", "./node_modules/detect-libc/**", "./node_modules/@neon-rs/**"],
   },

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 
 const KEY = "vct-favorites"; // kept per visitor, in the browser
 
-const read = () => {
+export const readFavorites = () => {
   try {
     const list = JSON.parse(localStorage.getItem(KEY) || "[]");
     return Array.isArray(list) ? list.filter((x) => typeof x === "string") : [];
@@ -16,14 +16,14 @@ const read = () => {
 export function useFavorites() {
   const [list, setList] = useState([]);
   useEffect(() => {
-    const sync = () => setList(read());
+    const sync = () => setList(readFavorites());
     sync();
     window.addEventListener("vct-favorites", sync);
     window.addEventListener("storage", sync);
     return () => { window.removeEventListener("vct-favorites", sync); window.removeEventListener("storage", sync); };
   }, []);
   const toggle = useCallback((slug) => {
-    const cur = read();
+    const cur = readFavorites();
     const next = cur.includes(slug) ? cur.filter((x) => x !== slug) : [...cur, slug];
     try {
       localStorage.setItem(KEY, JSON.stringify(next));
