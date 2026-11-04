@@ -465,7 +465,7 @@ a.btn { display: inline-block; text-decoration: none; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .redsub { color: #e0646c; } }
 :root[data-theme="dark"] .redsub { color: #e0646c; }
 
-.mark img { display: block; width: 100%; max-width: 170px; height: auto; margin: 0 auto; }
+.mark img { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto; }
 .kick::before { width: 16px; height: 16px; background: url(/brand/emea-icon.png) center / contain no-repeat; clip-path: none; }
 
 .tbd.prize { gap: 10px; margin: 5px 0; }
