@@ -93,6 +93,21 @@ function suggest(known, q) {
   return [...starts.sort(byName), ...has.sort(byName)].slice(0, MAX_SUGGESTIONS);
 }
 
+const NOTE_FOR = 4000;
+
+/** The answer to an action. "Saved" goes away by itself after a few seconds; an error stays until the next action. */
+function SaveNote({ note, inline = false }) {
+  const [gone, setGone] = useState(null);
+  useEffect(() => {
+    if (!note.text || !note.ok) return undefined;
+    const t = setTimeout(() => setGone(note), NOTE_FOR);
+    return () => clearTimeout(t);
+  }, [note]);
+  if (!note.text || gone === note) return null;
+  const Tag = inline ? "span" : "p";
+  return <Tag className={note.ok ? "okmsg" : "err"} role="status">{note.text}</Tag>;
+}
+
 /** A name field with a suggestion list under it (flags, or team logos and tags), filled from the known players, staff or teams. onPick(p) replaces onChange(p.name) when given. */
 function NameInput({ kind, value, onChange, onPick, ...rest }) {
   const known = useContext(KnownNames)[kind];
@@ -416,7 +431,7 @@ function TeamForm({ team, onSave }) {
       <div className="row">
         <button type="button" className="btn pri" onClick={() => save(false)}>{tr("Save team")}</button>
         <button type="button" className="btn" onClick={() => save(true)}>{tr("Reset to TBD")}</button>
-        {note.text && <span className={note.ok ? "okmsg" : "err"} role="status">{note.text}</span>}
+        <SaveNote note={note} inline />
       </div>
     </fieldset>
   );
@@ -656,7 +671,7 @@ function SlotForm({ event, slot, team, onSaved, endpoint = "/api/q/slot", full =
         <div className="row">
           <button type="button" className="btn pri" onClick={() => save(false)}>{tr("Save team")}</button>
           <button type="button" className="btn" onClick={() => save(true)}>{event === "gc" ? tr("Remove team") : tr("Reset to TBD")}</button>
-          {note.text && <span className={note.ok ? "okmsg" : "err"} role="status">{note.text}</span>}
+          <SaveNote note={note} inline />
         </div>
     </>
   );
@@ -737,7 +752,7 @@ function KickoffAdmin({ data, onChange, view, setView }) {
   const pick = (m, k) => <TeamPick m={m} k={k} teams={data.teams} used={kickPlacedElsewhere(data.manual, m.id)} onPick={(v) => setSides(m, { [k]: v })} />;
   return (
     <div className="qadmin">
-      {msg.text && <p className={msg.ok ? "okmsg" : "err"} role="status">{msg.text}</p>}
+      <SaveNote note={msg} />
       <div className="nav4" role="tablist" aria-label={tr("Kickoff")}>
         {[["teams", "Teams"], ["matches", "Matches"]].map(([k, l]) => (
           <button key={k} role="tab" aria-selected={view === k} onClick={() => setView(k)}>{tr(l)}</button>
@@ -832,7 +847,7 @@ function RegionalAdmin({ event, label, data, onChange, view, setView }) {
   const pick = (m, k) => <TeamPick m={m} k={k} teams={data.teams} used={placedElsewhere(data.manual, event, m.id)} onPick={(v) => setSides(m, { [k]: v })} />;
   return (
     <div className="qadmin">
-      {msg.text && <p className={msg.ok ? "okmsg" : "err"} role="status">{msg.text}</p>}
+      <SaveNote note={msg} />
       <div className="nav4" role="tablist" aria-label={label}>
         {[["teams", "Teams"], ["matches", "Matches"]].map(([k, l]) => (
           <button key={k} role="tab" aria-selected={view === k} onClick={() => setView(k)}>{tr(l)}</button>
@@ -947,7 +962,7 @@ function QualifierAdmin({ event, data, onChange }) {
   const todo = bracket.matches.filter((m) => m.a && m.b && !m.bye);
   return (
     <div className="qadmin">
-      {msg.text && <p className={msg.ok ? "okmsg" : "err"} role="status">{msg.text}</p>}
+      <SaveNote note={msg} />
       <section>
         <h2>{tr("Teams")} <small>{count}/64</small></h2>
         <p className="hint">{tr("The logo is found by itself in public/logos from the short tag only (for example VIT.png); no tag, no logo.")}</p>
@@ -1264,7 +1279,7 @@ function AdminView({ initial, isAdmin, start }) {
         const info = initial.info[ev] || INFO_DEFAULTS[ev];
         return <EventInfoForm key={ev + JSON.stringify(info)} event={ev} info={info} onSaved={(m) => { setMsg({ ok: true, text: m }); router.refresh(); }} onError={(m) => setMsg({ ok: false, text: m })} />;
       })()}
-      {msg.text && home && <p className={msg.ok ? "okmsg" : "err"} role="status">{msg.text}</p>}
+      {home && <SaveNote note={msg} />}
       {tab === "home" && <AdminHome initial={initial} onOpen={openEvent} call={call} onDone={(m) => { setMsg({ ok: true, text: m }); router.refresh(); }} />}
       {!home && (initial.qualifiers[tab] && tab !== "gc" || tab === "matches" || (["kickoff", "tr", "mena", "gc"].includes(tab) && kview === "matches")) && (
         <BulkSchedule key={`bulk-${eventForAdmin(nav)}`} items={matchesOf(eventForAdmin(nav), eventData(initial, eventForAdmin(nav)))} call={call} />
@@ -1276,7 +1291,7 @@ function AdminView({ initial, isAdmin, start }) {
           ))}
         </div>
       )}
-      {msg.text && <p className={msg.ok ? "okmsg" : "err"} role="status">{msg.text}</p>}
+      <SaveNote note={msg} />
 
       {tab === "teams" && (
         <div className="tforms">
