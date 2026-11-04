@@ -1,17 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import { THIRD, buildBracket, matchId, podium, roundsFor } from "../lib/bracket.js";
 import { Crest } from "./Crest.jsx";
 import TeamCard from "./TeamCard.jsx";
 import { useT } from "./lang.jsx";
 import { Schedule } from "./matchTime.jsx";
 import { matchesOf } from "../lib/matchlist.js";
+import { useOpenMatch } from "./openMatch.js";
 
 const CELL = 56; // px per first-round match; every later round doubles it
 
 /** Name, crest and score of one side of a match. */
-function Side({ slot, slots, m, side, bye }) {
+function Side({ slot, slots, m, side, bye, lit }) {
   const tr = useT();
   const team = slot ? slots[slot - 1] : null;
   const res = m.winner != null;
@@ -20,7 +21,7 @@ function Side({ slot, slots, m, side, bye }) {
   let label = team ? team.name : bye ? "" : tr("TBD");
   if (!team && m.bye) label = tr("BYE");
   return (
-    <div className={"bl" + (res ? (win ? " bw" : " lo") : "")}>
+    <div className={"bl" + (res ? (win ? " bw" : " lo") : "") + (lit ? " lit" : "")} data-s={team ? slot : undefined}>
       <Crest team={team} />
       <span className={"tn" + (team ? "" : " tbdn")}>{label}</span>
       <span className="bs">{res && score != null && !m.bye ? score : ""}</span>
@@ -28,23 +29,98 @@ function Side({ slot, slots, m, side, bye }) {
   );
 }
 
-function MatchBox({ m, slots }) {
+/** One match. Clicks and hovers are handled once, by the bracket around it. lit: the side of the team being followed, "a" or "b". */
+const MatchBox = memo(function MatchBox({ m, slots, lit, canOpen }) {
+  const tr = useT();
   const emptyR1 = m.first && !m.a && !m.b;
+  const can = canOpen && !emptyR1 && !m.bye;
+  const nameOf = (s) => (s && slots[s - 1] ? slots[s - 1].name : tr("TBD"));
   return (
-    <div className={"bbox qbox" + (emptyR1 ? " void" : "")}>
-      <Side slot={m.a} slots={slots} m={m} side="a" bye={emptyR1} />
-      <Side slot={m.b} slots={slots} m={m} side="b" bye={emptyR1} />
+    <div className={"bbox qbox" + (emptyR1 ? " void" : "") + (can ? " can" : "") + (lit ? " lit" : "")} data-m={m.id}
+      {...(can ? { "data-open": "1", role: "button", tabIndex: 0, "aria-label": `${nameOf(m.a)} vs ${nameOf(m.b)}` } : {})}>
+      <Side slot={m.a} slots={slots} m={m} side="a" bye={emptyR1} lit={lit === "a"} />
+      <Side slot={m.b} slots={slots} m={m} side="b" bye={emptyR1} lit={lit === "b"} />
     </div>
   );
-}
+});
 
-export function BigBracket({ slots, scores, bo }) {
+const plain = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
+
+export function BigBracket({ event, slots, scores, bo }) {
   const tr = useT();
   const bracket = useMemo(() => buildBracket(slots, scores, bo), [slots, scores, bo]);
   const third = bracket.byId[matchId("third", 0)];
   const rounds = roundsFor(slots.length);
+  const open = useOpenMatch();
+  const box = useRef(null);
+  const drag = useRef(null);
+  const moved = useRef(false);
+  const [hover, setHover] = useState(0);
+  const [found, setFound] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const canOpen = !!(open && event);
+  const followed = hover || found;
+  const litOf = (m) => (!followed ? "" : m.a === followed ? "a" : m.b === followed ? "b" : "");
+
+  function openFrom(target) {
+    const el = target.closest("[data-open]");
+    if (el && canOpen) open(event, el.dataset.m);
+  }
+  // Dragging with the mouse moves the bracket; a finger already does. A real drag is not a click.
+  function down(e) {
+    if (e.pointerType !== "mouse" || e.button !== 0) return;
+    const el = box.current;
+    drag.current = { x: e.clientX, y: e.clientY, left: el.scrollLeft, top: el.scrollTop };
+    moved.current = false;
+  }
+  function move(e) {
+    const d = drag.current;
+    if (!d) {
+      const side = e.target.closest && e.target.closest("[data-s]");
+      const s = side && e.pointerType === "mouse" ? Number(side.dataset.s) : 0;
+      if (s !== hover) setHover(s);
+      return;
+    }
+    const dx = e.clientX - d.x;
+    const dy = e.clientY - d.y;
+    if (!moved.current && Math.abs(dx) + Math.abs(dy) < 6) return;
+    if (!moved.current) { moved.current = true; setDragging(true); setHover(0); }
+    box.current.scrollLeft = d.left - dx;
+    box.current.scrollTop = d.top - dy;
+  }
+  function up() {
+    drag.current = null;
+    setDragging(false);
+  }
+  /** The team's last match, in the middle of the bracket's window. */
+  function show(slot) {
+    const mine = bracket.matches.filter((m) => m.a === slot || m.b === slot);
+    const last = mine.filter((m) => m.round !== "third").pop() || mine[mine.length - 1];
+    const el = box.current;
+    const target = last && el && el.querySelector(`[data-m="${last.id}"]`);
+    if (!target) return;
+    const a = el.getBoundingClientRect();
+    const b = target.getBoundingClientRect();
+    el.scrollLeft += b.left - a.left - (el.clientWidth - b.width) / 2;
+    el.scrollTop += b.top - a.top - (el.clientHeight - b.height) / 2;
+  }
+  function find(text) {
+    const q = plain(text);
+    const i = q ? slots.findIndex((t) => t && plain(t.name) === q) : -1;
+    setFound(i + 1);
+    if (i >= 0) show(i + 1);
+  }
+  const listId = `qteams-${event || "x"}`;
   return (
-    <div className="qbracket" tabIndex={0} aria-label={tr("Bracket")}>
+    <>
+    <div className="qfind">
+      <input type="search" list={listId} placeholder={tr("Find a team")} aria-label={tr("Find a team")} onChange={(e) => find(e.target.value)} />
+      <datalist id={listId}>{slots.filter(Boolean).map((t) => <option key={t.name} value={t.name} />)}</datalist>
+    </div>
+    <div ref={box} className={"qbracket" + (dragging ? " dragging" : "") + (found ? " finding" : "")} tabIndex={0} aria-label={tr("Bracket")}
+      onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onPointerLeave={() => { up(); setHover(0); }}
+      onClick={(e) => { if (moved.current) { moved.current = false; return; } openFrom(e.target); }}
+      onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target.closest("[data-open]")) { e.preventDefault(); openFrom(e.target); } }}>
       {rounds.map((r, ri) => (
         <div className="qcol" key={r.key} style={{ "--cell": `${CELL * 2 ** ri}px` }}>
           <div className="qh">{tr(r.name)}</div>
@@ -52,19 +128,20 @@ export function BigBracket({ slots, scores, bo }) {
             const m = bracket.byId[matchId(r.key, i)];
             return (
               <div key={m.id} className={"qcell" + (ri < rounds.length - 1 ? (i % 2 ? " lo" : " up") : "") + (ri > 0 ? " in" : "")}>
-                <MatchBox m={m} slots={slots} />
+                <MatchBox m={m} slots={slots} lit={litOf(m)} canOpen={canOpen} />
               </div>
             );
           })}
           {r.key === "gf" && (
             <div className="qthird">
               <div className="qh">{tr(THIRD.name)}</div>
-              <MatchBox m={third} slots={slots} />
+              <MatchBox m={third} slots={slots} lit={litOf(third)} canOpen={canOpen} />
             </div>
           )}
         </div>
       ))}
     </div>
+    </>
   );
 }
 
@@ -176,7 +253,7 @@ export default function Qualifier({ event, data, onGo, next = "playoffs", qualif
 
       <section>
         <h2>{tr("Results")}</h2>
-        <BigBracket slots={slots} scores={scores} bo={bo} />
+        <BigBracket event={event} slots={slots} scores={scores} bo={bo} />
       </section>
     </div>
   );
