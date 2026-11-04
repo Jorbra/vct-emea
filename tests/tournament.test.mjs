@@ -2127,8 +2127,10 @@ test("push alerts: favorite teams only, once each, at the planned time, dead bro
   assert.equal(got[0][1].url.startsWith("/"), true);
   got = [];
   assert.equal(await sendPushes(db, state(), now, send), 0);
-  // marked live afterwards: still the same start, no second alert
+  // marked live afterwards: its own alert, once
   assert.equal(setMatchLive(db, { event: "kickoff", id: "u1-1", live: true }).ok, true);
+  assert.ok((await sendPushes(db, state(), now, send)) > 0);
+  assert.match(got[got.length - 1][1].body, /EN DIRECT/);
   assert.equal(await sendPushes(db, state(), now, send), 0);
   // the result: one browser no longer exists and is forgotten, the other one still gets it
   assert.equal(saveKickoffScore(db, { id: "u1-1", sa: 2, sb: 1 }).ok, true);
@@ -2142,10 +2144,10 @@ test("push alerts: favorite teams only, once each, at the planned time, dead bro
   assert.equal(setKickoffMatch(db, { id: "u1-2", a: 3, b: 4 }).ok, true);
   const s = getState(db);
   s.times = { kickoff: { "u1-2": new Date(now - 3 * 3600 * 1000).toISOString() } };
-  assert.equal(announcements(s, now).some((a) => a.key === "kickoff:u1-2:l"), false);
+  assert.equal(announcements(s, now).some((a) => a.key.startsWith("kickoff:u1-2:t:")), false);
   s.times = { kickoff: { "u1-2": new Date(now - 60000).toISOString() } };
-  assert.equal(announcements(s, now).some((a) => a.key === "kickoff:u1-2:l"), true);
-  assert.equal(announcements(s).some((a) => a.key === "kickoff:u1-2:l"), false);
+  assert.equal(announcements(s, now).some((a) => a.key.startsWith("kickoff:u1-2:t:")), true);
+  assert.equal(announcements(s).some((a) => a.key.startsWith("kickoff:u1-2:t:")), false);
 });
 
 
@@ -2170,4 +2172,62 @@ test("a whole copy of the database, images included, as Turso gives them", async
   copy.close();
   db.close();
   try { fs.rmSync(dir, { recursive: true, force: true }); } catch { /* Windows may still hold it */ }
+});
+
+test("three alerts for a match, and clearing it lets it ring again", async () => {
+  const { announcements, forgetAnnouncements, nextAnnouncements } = await import("../lib/discord.js");
+  const { setMatchLive, setMatchTime } = await import("../lib/db.js");
+  const { clearMatch } = await import("../lib/mclear.js");
+  const { setKickoffMatch, saveKickoffScore } = await import("../lib/kactions.js");
+  const { sendPushes } = await import("../lib/push.js");
+  const { readItems } = await import("../lib/lpstore.js");
+  const db = openDb(":memory:");
+  const event = "kickoff";
+  const m = getState(db).kickoff;
+  const id = "u1-1";
+  assert.equal(setKickoffMatch(db, { id, a: 1, b: 2 }).ok, true);
+  const now = Date.parse("2027-01-15T15:10:00Z");
+  const look = () => nextAnnouncements(db, getState(db), { table: "pushed", now }).map((a) => a.text.slice(0, 24));
+  assert.deepEqual(look(), []); // the first look only notes what is known
+  // the time comes
+  assert.equal(setMatchTime(db, { event, id, at: "2027-01-15T15:00:00.000Z" }).ok, true);
+  assert.equal(look().length, 1);
+  assert.deepEqual(look(), []); // once
+  // the same match then goes live: its own alert
+  assert.equal(setMatchLive(db, { event, id, live: true, a: 0, b: 0 }).ok, true);
+  assert.match(look()[0], /EN DIRECT/);
+  assert.deepEqual(look(), []);
+  // no time alert for a match already live
+  assert.equal(setMatchTime(db, { event, id, at: "2027-01-15T15:05:00.000Z" }).ok, true);
+  assert.deepEqual(look(), []);
+  // live stopped, then again: it rings again
+  assert.equal(setMatchLive(db, { event, id, live: false }).ok, true);
+  forgetAnnouncements(db, event, id, true);
+  look(); // the new time, now that it is not live
+  assert.equal(setMatchLive(db, { event, id, live: true, a: 0, b: 0 }).ok, true);
+  assert.match(look()[0], /EN DIRECT/);
+  // the result: its own alert too
+  assert.equal(saveKickoffScore(db, { id, sa: 2, sb: 1 }).ok, true);
+  assert.equal(look().length, 1);
+  assert.deepEqual(look(), []);
+  // cleared and played again: all of it rings again
+  assert.equal(clearMatch(db, { event, id }).ok, true);
+  assert.equal(db.prepare("SELECT count(*) n FROM pushed WHERE \"key\" LIKE 'kickoff:u1-1:%'").get().n, 0);
+  assert.equal(setKickoffMatch(db, { id, a: 1, b: 2 }).ok, true);
+  assert.equal(setMatchLive(db, { event, id, live: true, a: 0, b: 0 }).ok, true);
+  assert.match(look()[0], /EN DIRECT/);
+  assert.equal(announcements(getState(db), now).length, 1);
+  // another match is not touched
+  assert.ok(m.teams.length > 2);
+
+  // a trace of each sending, without any browser's address
+  db.prepare("INSERT INTO push_subs (endpoint, p256dh, auth, teams) VALUES ('https://fcm.googleapis.com/fcm/send/secretpart', 'a', 'b', '[]'), ('https://web.push.apple.com/secretpart2', 'a', 'b', '[\"nobody\"]')").run();
+  assert.equal(saveKickoffScore(db, { id, sa: 2, sb: 0 }).ok, true);
+  const sent = await sendPushes(db, getState(db), now, async () => { const e = new Error("no"); e.statusCode = 500; throw e; });
+  assert.equal(sent, 0);
+  const last = readItems("meta", db).push_last;
+  assert.equal(last.subs, 2);
+  assert.equal(last.skipped, 1);
+  assert.deepEqual(last.problems, ["fcm.googleapis.com: 500"]);
+  assert.ok(!JSON.stringify(last).includes("secretpart"));
 });
