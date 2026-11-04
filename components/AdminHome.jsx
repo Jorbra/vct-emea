@@ -91,6 +91,41 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
 }
 
 /** Writing, editing and removing news. Plain text: line breaks are kept. */
+/** Where the rosters typed here and Liquipedia's differ, and a button to follow Liquipedia. */
+function RosterDiffs({ list, call, onDone }) {
+  const tr = useT();
+  const [err, setErr] = useState("");
+  const follow = async (key) => {
+    setErr("");
+    try {
+      const j = await call("/api/roster-sync", { key });
+      onDone(tr.server(j.message));
+    } catch (e) {
+      setErr(tr.server(e.message));
+    }
+  };
+  return (
+    <section>
+      <h2>{tr("Roster differences")} <small>({list.length})</small></h2>
+      {list.length === 0 ? <p className="note">{tr("Rosters match Liquipedia for the teams read so far.")}</p> : (
+        <ul className="ahhist">
+          {list.map((d) => (
+            <li key={d.key}>
+              <b><a href={`/team/${d.key}`}>{d.name}</a></b>
+              <span>
+                {d.onlySite.length > 0 && <>{tr("Here, not on Liquipedia:")} {d.onlySite.join(", ")}. </>}
+                {d.onlyLp.length > 0 && <>{tr("On Liquipedia, not here:")} {d.onlyLp.join(", ")}.</>}
+              </span>
+              <button type="button" className="btn" onClick={() => follow(d.key)}>{tr("Follow Liquipedia")}</button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {err && <p className="err" role="alert">{err}</p>}
+    </section>
+  );
+}
+
 function NewsEditor({ news, call, onDone }) {
   const tr = useT();
   const [edit, setEdit] = useState(null);
@@ -227,6 +262,7 @@ function Manage({ admin, call, onDone }) {
           </ul>
         )}
       </section>
+      <RosterDiffs list={admin.rosterDiffs || []} call={call} onDone={onDone} />
       <NewsEditor news={admin.news || []} call={call} onDone={onDone} />
       <Voters voters={admin.voters || []} call={call} onDone={onDone} />
       <Seasons seasons={admin.seasons || []} call={call} onDone={onDone} />

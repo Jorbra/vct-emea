@@ -828,6 +828,22 @@ a.btn { display: inline-block; text-decoration: none; }
 .mxlinks { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 10px; }
 .adm .mxform input, .adm .mxform select { text-align: left; font-size: 13px; padding: 6px 8px; }
 .mxmaps { display: grid; grid-template-columns: minmax(110px, 1.4fr) 70px 70px minmax(100px, 1fr); gap: 6px 8px; align-items: center; max-width: 560px; }
+@media (max-width: 640px) {
+  table.cards thead { display: none; }
+  table.cards, table.cards tbody, table.cards tr, table.cards td { display: block; width: 100%; }
+  table.cards tr { padding: 8px 0; border-bottom: 1px solid var(--line); }
+  table.cards tr:last-child { border-bottom: 0; }
+  table.cards td { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 12px; white-space: normal; text-align: end; }
+  table.cards td::before { content: attr(data-label); flex: none; color: var(--muted); font-size: 12px; text-align: start; }
+  table.cards td .tach { justify-content: flex-end; flex-wrap: wrap; }
+}
+.mmpage { width: min(760px, 100%); max-height: none; margin: 14px auto 0; }
+.cmpform { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 14px; margin: 12px 0 16px; }
+.cmpform .f { flex: 1 1 200px; margin: 0; }
+td.cmpw { color: var(--win, #6fcf6f); font-weight: 700; }
+.tin { color: var(--win, #6fcf6f); }
+.tout { color: var(--muted); }
+.newsbody h2 { margin-top: 18px; }
 .mxrow { display: contents; }
 .mxteam .crest { width: 24px; height: 24px; font-size: 10px; border-radius: 6px; flex: none; }
 .mxteam { display: flex; align-items: center; gap: 8px; grid-column: 1 / -1; margin-top: 8px; padding: 5px 10px; border-radius: 4px; background: var(--surface-2); font-weight: 700; font-size: 13px; }

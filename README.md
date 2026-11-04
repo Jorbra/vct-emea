@@ -226,6 +226,17 @@ La navigation tient dans une seule carte (site et éditeur) : la bande du haut p
 - **Qualifiers MENA** : `ME Qualifier 1 / 2` et `NA Qualifier 1 / 2` (`/vctemea/mena/me-qualifier-1/overview`…, éditeur `/admin/vctemea/mena/me-qualifier-1`…) : un tableau comme les autres qualifiers ; le vainqueur de chacun remplit tout seul sa place des MENA Qualifier Playoffs.
 - **Game Changers EMEA** : un vrai tournoi à **8 équipes en double élimination** (quarts du tableau supérieur choisis à la main, les perdants descendent dans le tableau inférieur, Grande finale en Bo5), avec Aperçu (format, programme, classement 1-8, participants, tableau) et Statistiques. Les équipes de l'ancienne liste GC ont été reprises dans les 8 places. Éditeur : `/admin/vctgcemea/teams` et `/admin/vctgcemea/matches`.
 
+## Pages ajoutées
+
+- `/match/<événement>/<id>` : la page d'un match, avec son image de partage (`/api/og/...`) et ses données pour les moteurs de recherche.
+- `/transfers` : arrivées et départs, d'après les équipes lues sur Liquipedia.
+- `/compare?a=...&b=...` : deux joueurs côte à côte. `/rankings` : classements sur les statistiques saisies.
+- `/about` : sources, mention de site non officiel, données gardées. `/sitemap.xml` et `/robots.txt` pour les moteurs de recherche.
+- `/api/calendar?team=<équipe>` : le calendrier d'une équipe, à s'abonner depuis sa page.
+- Page d'accueil de l'éditeur : « Écarts d'effectif », pour suivre Liquipedia en un clic (annulable).
+
+Les alertes partent dans la langue du navigateur abonné ; Discord est en français, ou dans `DISCORD_LANG`.
+
 ## Alertes et tâches régulières
 
 Les alertes de match passent par les services de notification des navigateurs (`public/sw.js`, `lib/push.js`) : elles arrivent même site fermé, pour les équipes favorites du visiteur, ou pour tous les matchs s'il n'en a aucune. Elles partent juste après chaque action d'un éditeur. Pour les matchs dont l'heure prévue arrive sans action, il faut un passage régulier : un service gratuit comme cron-job.org peut appeler `/api/tick` chaque minute (à appeler plus souvent, il ne fait rien de plus, chaque tâche ayant son tour dans la base).

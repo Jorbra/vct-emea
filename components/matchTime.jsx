@@ -245,7 +245,7 @@ export function countdownText(ms, lang = "fr") {
  * (or the date and time, with the switch off), the round, both teams. Scrolls sideways, with arrows.
  * events: [{ event, items (from matchesOf), times, live, href }]; showEvent adds the event name (home page).
  */
-export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent = false }) {
+export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent = false, today = false, skipToday = false }) {
   const tr = useT();
   const [now, setNow] = useState(null); // the visitor's clock, known once on the client
   const [countdown, setCountdown] = useState(true);
@@ -270,7 +270,10 @@ export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent 
     .sort((x, y) => (y.at || "").localeCompare(x.at || ""));
   // the visitor's favorite teams first (their matches keep their order among themselves)
   const isFav = (m) => (fav.has(teamSlug(m.a && m.a.name)) || fav.has(teamSlug(m.b && m.b.name)) ? 1 : 0);
-  const cards = (recent ? played : [...live, ...next]).sort((x, y) => isFav(y) - isFav(x)).slice(0, max);
+  // today: what is on, and what starts on the visitor's day
+  const sameDay = (at) => { const d = new Date(at); const n = new Date(now); return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate(); };
+  const coming = today ? next.filter((m) => sameDay(m.at)) : skipToday ? next.filter((m) => !sameDay(m.at)) : next;
+  const cards = (recent ? played : skipToday ? coming : [...live, ...coming]).sort((x, y) => isFav(y) - isFav(x)).slice(0, max);
   const n = cards.length;
   // arrows only when the strip overflows, each greyed at its end
   useEffect(() => {
@@ -298,8 +301,8 @@ export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent 
   );
   return (
     <section className="mstrip">
-      <h2>{recent ? tr("Recent results") : tr("Upcoming matches")}</h2>
-      {!recent && (
+      <h2>{recent ? tr("Recent results") : today ? tr("Today") : tr("Upcoming matches")}</h2>
+      {!recent && !today && (
         <div className="toggles">
           <label className="sw"><input type="checkbox" checked={countdown} onChange={(e) => toggle(e.target.checked)} /> {tr("Show countdown")}</label>
         </div>

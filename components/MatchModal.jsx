@@ -52,7 +52,35 @@ function Compare({ m, state }) {
   );
 }
 
-function MatchModal({ e, m, state, onClose }) {
+/** The window over the page, or the same content as a page of its own. */
+function Shell({ page, title, boxRef, onClose, children }) {
+  if (page) return <div className="mm mmpage" ref={boxRef} tabIndex={-1}>{children}</div>;
+  return (
+    <div className="mmback" onClick={onClose}>
+      <div className="mm" role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} ref={boxRef} onClick={(ev) => ev.stopPropagation()}>{children}</div>
+    </div>
+  );
+}
+
+/** Copies the address of the match's page. */
+function CopyLink({ href }) {
+  const tr = useT();
+  const [done, setDone] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.origin + href);
+      setDone(true);
+      setTimeout(() => setDone(false), 3000);
+    } catch { /* the browser refuses: the address bar still has it */ }
+  };
+  return <button type="button" className="btn" onClick={copy}>{done ? tr("Link copied") : tr("Copy the link")}</button>;
+}
+
+/** A match on a page of its own. */
+export const MatchCard = (props) => <MatchModal {...props} page onClose={NOTHING} />;
+const NOTHING = () => {};
+
+function MatchModal({ e, m, state, onClose, page = false }) {
   const tr = useT();
   const ref = useRef(null);
   const at = e.times[m.id] || "";
@@ -60,28 +88,30 @@ function MatchModal({ e, m, state, onClose }) {
   const ex = e.extra[m.id] || { stream: "", vod: "", maps: [] };
   const done = m.sa != null && m.sb != null;
   const [when, setWhen] = useState("");
+  const [origin, setOrigin] = useState("");
+  useEffect(() => setOrigin(window.location.origin), []);
   const [icsUrl, setIcsUrl] = useState("");
   useEffect(() => setWhen(at ? formatMatchTime(at, tr.lang, true) : ""), [at, tr.lang]);
   const name = (t) => (t && t.name) || tr("TBD");
   const title = `${name(m.a)} vs ${name(m.b)} · ${tr(EVENT_NAMES[e.event] || "")}`;
-  const calItem = at && !done ? { uid: `${e.event}-${m.id}`, title, at, bo: m.bo, url: typeof window !== "undefined" ? window.location.origin + e.href : e.href } : null;
+  const calItem = at && !done ? { uid: `${e.event}-${m.id}`, title, at, bo: m.bo, url: origin + e.href } : null;
   const google = calItem ? googleCalendarUrl(calItem) : "";
   useEffect(() => {
     if (!calItem) return undefined;
     const u = URL.createObjectURL(new Blob([icsFile([calItem])], { type: "text/calendar" }));
     setIcsUrl(u);
     return () => URL.revokeObjectURL(u);
-  }, [calItem && calItem.at, title]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [calItem && calItem.at, title, origin]); // eslint-disable-line react-hooks/exhaustive-deps
   const [playing, setPlaying] = useState("");
   const [cmp, setCmp] = useState(false);
   // Escape closes, focus moves into the dialog and back on close
   useEffect(() => {
     const prev = document.activeElement;
-    ref.current && ref.current.focus();
-    const onKey = (ev) => { if (ev.key === "Escape") onClose(); };
+    if (!page) ref.current && ref.current.focus();
+    const onKey = (ev) => { if (ev.key === "Escape" && !page) onClose(); };
     window.addEventListener("keydown", onKey);
     return () => { window.removeEventListener("keydown", onKey); prev && prev.focus && prev.focus(); };
-  }, [onClose]);
+  }, [onClose, page]);
   const stream = ex.stream || e.stream || "";
   const label = m.round.map(([k, v]) => tr(k, v)).join(" · ");
   const team = (t, side) => {
@@ -93,9 +123,8 @@ function MatchModal({ e, m, state, onClose }) {
   const score = done ? `${m.sa} : ${m.sb}` : live ? `${live.a} : ${live.b}` : "vs";
   const who = (player) => (state && knownPlayer(state, player) ? <a href={playerHref(player)}>{player}</a> : player);
   return (
-    <div className="mmback" onClick={onClose}>
-      <div className="mm" role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} ref={ref} onClick={(ev) => ev.stopPropagation()}>
-        <button type="button" className="mmclose" aria-label={tr("Close")} onClick={onClose}>×</button>
+    <Shell page={page} title={title} boxRef={ref} onClose={onClose}>
+        {!page && <button type="button" className="mmclose" aria-label={tr("Close")} onClick={onClose}>×</button>}
         <div className="mmhead">
           <a href={e.href}>{tr(EVENT_NAMES[e.event] || "")}</a>
           <span>{label}{m.bo ? ` · Bo${m.bo}` : ""}</span>
@@ -150,8 +179,8 @@ function MatchModal({ e, m, state, onClose }) {
           {state && m.a && m.b && m.a.name && m.b.name && <button type="button" className="btn" aria-pressed={cmp} onClick={() => setCmp(!cmp)}>{tr("Compare the teams")}</button>}
           {google && <a className="btn" href={google} target="_blank" rel="noopener noreferrer">{tr("Add to Google Calendar")}</a>}
           {google && icsUrl && <a className="btn" href={icsUrl} download={`match-${m.id}.ics`}>{tr("Add to my calendar (.ics)")}</a>}
+          {page ? <CopyLink href={`/match/${e.event}/${m.id}`} /> : <a className="btn" href={`/match/${e.event}/${m.id}`}>{tr("Match page")}</a>}
         </div>
-      </div>
-    </div>
+    </Shell>
   );
 }

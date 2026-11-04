@@ -2231,3 +2231,101 @@ test("three alerts for a match, and clearing it lets it ring again", async () =>
   assert.deepEqual(last.problems, ["fcm.googleapis.com: 500"]);
   assert.ok(!JSON.stringify(last).includes("secretpart"));
 });
+
+test("formats of the visitor's language, and one line per stay at a team", async () => {
+  const { dayText, moneyText, periodText } = await import("../lib/format.js");
+  const { mergeStints } = await import("../lib/teams.js");
+  assert.match(dayText("2026-11-03", "fr"), /3 nov\.? 2026/);
+  assert.match(dayText("2026-11-03", "en"), /2026/);
+  assert.equal(dayText("2025-12-??", "fr"), "2025-12-??");
+  assert.equal(dayText("", "fr"), "");
+  assert.match(periodText("2024-11-07 — 2025-09-06", "fr"), /7 nov\.? 2024 — 6 sept\.? 2025/);
+  assert.equal(periodText("2026-11-03 — Present", "en").endsWith("Present"), true);
+  assert.match(moneyText("$1,000,000", "fr").replace(/\s/g, " "), /1 000 000 .?\$/);
+  assert.match(moneyText("$6,650.78", "fr").replace(/\s/g, " "), /6 650,78 .?\$/);
+  assert.match(moneyText("$2,250,000 USD", "fr").replace(/\s/g, " "), /2 250 000/);
+  assert.equal(moneyText("-", "fr"), "-");
+  assert.equal(moneyText("", "fr"), "");
+  // Derke: player, then inactive, then gone: one stay. Another stay later stays apart.
+  const merged = mergeStints([
+    { id: "Derke", role: "Inactive", join: "2024-08-28", leave: "2024-10-21", newTeam: "Team Vitality" },
+    { id: "Hiro", role: "", join: "2024-06-15", leave: "2024-09-03", newTeam: "NAVI" },
+    { id: "Derke", role: "", join: "2021-04-08", leave: "2024-08-28", newTeam: "Fnatic (Inactive)" },
+    { id: "Enzo", role: "", join: "2022-09-22", leave: "2022-11-30", newTeam: "Apeks" },
+    { id: "Enzo", role: "", join: "2022-05-09", leave: "2022-09-22", newTeam: "Fnatic" },
+    { id: "Enzo", role: "", join: "2022-03-31", leave: "2022-05-09", newTeam: "Fnatic" },
+    { id: "Twice", role: "", join: "2024-01-01", leave: "2024-02-01", newTeam: "A" },
+    { id: "Twice", role: "", join: "2020-01-01", leave: "2021-01-01", newTeam: "B" },
+  ]);
+  assert.deepEqual(merged.map((p) => [p.id, p.join, p.leave, p.newTeam, p.role]), [
+    ["Derke", "2021-04-08", "2024-10-21", "Team Vitality", ""],
+    ["Hiro", "2024-06-15", "2024-09-03", "NAVI", ""],
+    ["Enzo", "2022-03-31", "2022-11-30", "Apeks", ""],
+    ["Twice", "2024-01-01", "2024-02-01", "A", ""],
+    ["Twice", "2020-01-01", "2021-01-01", "B", ""],
+  ]);
+  assert.deepEqual(mergeStints(undefined), []);
+});
+
+test("alerts in the visitor's language", async () => {
+  const { alertText } = await import("../lib/discord.js");
+  const { savePushSub, sendPushes } = await import("../lib/push.js");
+  const { setKickoffMatch } = await import("../lib/kactions.js");
+  const { setMatchLive } = await import("../lib/db.js");
+  const live = { kind: "live", a: "Fnatic", b: "Liquid", event: "kickoff", bo: 3 };
+  assert.match(alertText(live, "fr"), /EN DIRECT : Fnatic vs Liquid/);
+  assert.match(alertText(live, "en"), /LIVE : Fnatic vs Liquid/);
+  assert.match(alertText(live, "tr"), /CANLI/);
+  assert.match(alertText(live, "ar"), /مباشر/);
+  assert.match(alertText({ ...live, kind: "time" }, "en"), /It's time/);
+  assert.match(alertText({ ...live, kind: "result", sa: 2, sb: 1 }, "fr"), /Fnatic 2 – 1 Liquid/);
+  const db = openDb(":memory:");
+  const sub = (host, lang) => savePushSub(db, { endpoint: `https://${host}/x`, keys: { p256dh: "a", auth: "b" }, teams: [], lang });
+  assert.equal(sub("fcm.googleapis.com", "en").ok, true);
+  assert.equal(sub("web.push.apple.com", "ar").ok, true);
+  assert.equal(sub("updates.push.services.mozilla.com", "xx").ok, true); // an unknown language: the default
+  assert.equal(db.prepare("SELECT lang FROM push_subs WHERE endpoint LIKE '%mozilla%'").get().lang, "fr");
+  const now = Date.now();
+  await sendPushes(db, getState(db), now, async () => {}); // the first look only notes
+  assert.equal(setKickoffMatch(db, { id: "u1-1", a: 1, b: 2 }).ok, true);
+  assert.equal(setMatchLive(db, { event: "kickoff", id: "u1-1", live: true }).ok, true);
+  const got = {};
+  await sendPushes(db, getState(db), now, async (s, payload) => { got[new URL(s.endpoint).hostname] = JSON.parse(payload); });
+  assert.match(got["fcm.googleapis.com"].body, /LIVE/);
+  assert.match(got["web.push.apple.com"].body, /مباشر/);
+  assert.match(got["updates.push.services.mozilla.com"].body, /EN DIRECT/);
+  assert.equal(got["fcm.googleapis.com"].url, "/match/kickoff/u1-1"); // the match's own page
+  assert.ok(!got["fcm.googleapis.com"].body.includes("**"));
+  db.close();
+});
+
+test("transfers, and where rosters differ from Liquipedia", async () => {
+  const { transfers } = await import("../lib/transfers.js");
+  const { rosterDiffs, saveRosterEverywhere } = await import("../lib/rosterdiff.js");
+  const info = {
+    nope: { name: "Nope", page: "" },
+    fnc: { name: "Fnatic", page: "Fnatic", roster: [{ id: "New", cc: "fr", join: "2026-10-01" }, { id: "Old", join: "?" }], formerPlayers: [
+      { id: "Gone", leave: "2026-09-01", newTeam: "NRG", newTeamName: "NRG", cc: "gb" },
+      { id: "Rest", leave: "2026-09-02", newTeam: "Fnatic (Inactive)" },
+      { id: "Unknown", leave: "2025-12-??", newTeam: "X" },
+    ] },
+  };
+  const list = transfers(info);
+  assert.deepEqual(list.map((x) => [x.date, x.kind, x.id, x.to || ""]), [["2026-10-01", "in", "New", ""], ["2026-09-01", "out", "Gone", "NRG"]]);
+  assert.equal(transfers(info, 1).length, 1);
+  assert.deepEqual(transfers({}), []);
+
+  const db = openDb(":memory:");
+  db.prepare("UPDATE kteams SET name = 'Fnatic', roster = 'Alfajer|tr, Boaster|gb, Spare|fr|sub' WHERE slot = 1").run();
+  db.prepare("UPDATE rteams SET name = 'Fnatic', roster = '' WHERE event = 'tr' AND slot = 1").run();
+  const lp = { fnatic: { name: "Fnatic", page: "Fnatic", roster: [{ id: "alfajer", cc: "tr" }, { id: "Crashies", cc: "us" }] }, other: { page: "", roster: [] } };
+  const d = rosterDiffs(getState(db), lp).find((x) => x.key === "fnatic");
+  assert.deepEqual(d.onlySite, ["Boaster"]);
+  assert.deepEqual(d.onlyLp, ["Crashies"]);
+  assert.match(d.roster, /alfajer\|tr, Crashies\|us/);
+  assert.match(d.roster, /Spare\|fr\|sub/); // substitutes stay
+  assert.ok(saveRosterEverywhere(db, "Fnatic", d.roster) >= 2);
+  assert.equal(db.prepare("SELECT roster FROM kteams WHERE slot = 1").get().roster, d.roster);
+  assert.equal(rosterDiffs(getState(db), lp).some((x) => x.key === "fnatic"), false); // nothing more to do
+  db.close();
+});

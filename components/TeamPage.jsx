@@ -12,7 +12,8 @@ import { MatchStrip } from "./matchTime.jsx";
 import { EVENT_NAMES, MatchModalProvider } from "./MatchModal.jsx";
 import { useOpenMatch } from "./openMatch.js";
 import { useFavorites } from "./favorites.js";
-import { byLeaveYear, teamProfile } from "../lib/teams.js";
+import { byLeaveYear, mergeStints, teamProfile } from "../lib/teams.js";
+import { dayText, moneyText } from "../lib/format.js";
 import { playerHref } from "../lib/playerstats.js";
 import LpImg from "./LpImg.jsx";
 import { VlrCredit, VlrResults } from "./VlrBlocks.jsx";
@@ -78,6 +79,15 @@ function MatchTable({ rows, slug }) {
 
 const https = (url) => /^https?:\/\//i.test(url || ""); // links come from another site: only web addresses are shown
 
+/** Subscribes the visitor's calendar to this team's matches. */
+function TeamCalendar({ slug }) {
+  const tr = useT();
+  const [host, setHost] = useState("");
+  useEffect(() => setHost(window.location.host), []);
+  const feed = `/api/calendar?team=${slug}`;
+  return <a className="btn" href={host ? `webcal://${host}${feed}` : feed} title={tr("Team calendar")}>📅 {tr("Team calendar")}</a>;
+}
+
 /** Adds or removes the team from the visitor's favorites. */
 function FavStar({ slug }) {
   const tr = useT();
@@ -101,7 +111,7 @@ function People({ list, role = false }) {
   return (
     <div className="tablewrap">
       <table className="tpeople">
-        <thead><tr><th>{tr("Player")}</th><th>{tr("Name")}</th>{role && <th>{tr("Role")}</th>}<th>{tr("Joined")}</th></tr></thead>
+        <thead><tr><th>{tr(role ? "Member" : "Player")}</th><th>{tr("Name")}</th>{role && <th>{tr("Role")}</th>}<th>{tr("Joined")}</th></tr></thead>
         <tbody>
           {list.map((p) => (
             <tr key={p.id}>
@@ -113,8 +123,8 @@ function People({ list, role = false }) {
                 </span>
               </td>
               <td>{p.name || "–"}</td>
-              {role && <td>{p.role || "–"}</td>}
-              <td className="nowrap">{p.join || "–"}</td>
+              {role && <td>{p.role ? tr(p.role) : "–"}</td>}
+              <td className="nowrap">{p.join ? dayText(p.join, tr.lang) : "–"}</td>
             </tr>
           ))}
         </tbody>
@@ -145,15 +155,16 @@ function LpPeople({ lp }) {
 }
 
 /** People who are no longer active: when they were there, their role and where they went. A long list starts closed. */
-function PastPeople({ title, list, inactive = false }) {
+function PastPeople({ title, list: raw, inactive = false, staff = false }) {
   const tr = useT();
+  const list = mergeStints(raw);
   if (!list.length) return null;
   const showRole = list.some((p) => p.role);
   const showNew = list.some((p) => p.newTeam);
   const table = (
     <div className="tablewrap">
       <table className="tpeople">
-        <thead><tr><th>{tr("Player")}</th><th>{tr("Name")}</th>{showRole && <th>{tr("Role")}</th>}<th>{tr("Joined")}</th><th>{tr(inactive ? "Inactive since" : "Left")}</th>{showNew && <th>{tr("New team")}</th>}</tr></thead>
+        <thead><tr><th>{tr(staff ? "Member" : "Player")}</th><th>{tr("Name")}</th>{showRole && <th>{tr("Role")}</th>}<th>{tr("Joined")}</th><th>{tr(inactive ? "Inactive since" : "Left")}</th>{showNew && <th>{tr("New team")}</th>}</tr></thead>
         <tbody>
           {byLeaveYear(list).map(({ year, people }) => (
             <Fragment key={year}>
@@ -163,8 +174,8 @@ function PastPeople({ title, list, inactive = false }) {
                   <td className="nowrap"><span className="pt"><Flag cc={p.cc} /><a href={playerHref(p.id)}>{p.id}</a></span></td>
                   <td>{p.name || "–"}</td>
                   {showRole && <td>{p.role ? tr(p.role) : "–"}</td>}
-                  <td className="nowrap">{p.join || "–"}</td>
-                  <td className="nowrap">{p.leave || "–"}</td>
+                  <td className="nowrap">{p.join ? dayText(p.join, tr.lang) : "–"}</td>
+                  <td className="nowrap">{p.leave ? dayText(p.leave, tr.lang) : "–"}</td>
                   {showNew && <td>{p.newTeamHref ? <a href={p.newTeamHref}>{p.newTeam}</a> : p.newTeam ? tr(p.newTeam) : "–"}</td>}
                 </tr>
               ))}
@@ -189,7 +200,7 @@ function LpPast({ lp }) {
     <>
       <PastPeople title="Inactive players" list={lp.inactivePlayers} inactive />
       <PastPeople title="Former players" list={lp.formerPlayers} />
-      <PastPeople title="Former coaches and staff" list={lp.formerStaff} />
+      <PastPeople title="Former coaches and staff" list={lp.formerStaff} staff />
     </>
   );
 }
@@ -204,28 +215,28 @@ function LpAchievements({ lp }) {
         <section>
           <h2>{tr("Achievements")}</h2>
           <div className="tablewrap">
-            <table>
+            <table className="cards">
               <thead><tr><th>{tr("Date")}</th><th>{tr("Place")}</th><th>{tr("Tier")}</th><th>{tr("Tournament")}</th><th>{tr("Last match")}</th><th>{tr("Prize")}</th></tr></thead>
               <tbody>
                 {lp.results.map((r, i) => (
                   <tr key={i}>
-                    <td className="nowrap">{r.date}</td>
-                    <td className="nowrap"><b>{r.place}</b></td>
-                    <td className="nowrap">{r.tier}</td>
-                    <td>
+                    <td className="nowrap" data-label={tr("Date")}>{dayText(r.date, tr.lang)}</td>
+                    <td className="nowrap" data-label={tr("Place")}><b>{r.place}</b></td>
+                    <td className="nowrap" data-label={tr("Tier")}>{r.tier}</td>
+                    <td data-label={tr("Tournament")}>
                       <span className="tach">
                         <LpImg f={r.tournamentLogo} dark={r.tournamentLogoDark} />
                         {r.tournamentHref ? <a href={r.tournamentHref}>{r.tournament}</a> : r.tournament}
                       </span>
                     </td>
-                    <td className="nowrap">
+                    <td className="nowrap" data-label={tr("Last match")}>
                       <span className="tach">
                         <span className="tachs">{r.score}</span>
                         {r.opponentLogo && <LpImg f={r.opponentLogo} dark={r.opponentLogoDark} />}
                         {r.opponent && (r.opponentHref ? <a href={r.opponentHref} title={r.opponentName}>{r.opponent}</a> : <span title={r.opponentName}>{r.opponent}</span>)}
                       </span>
                     </td>
-                    <td className="nowrap">{r.prize}</td>
+                    <td className="nowrap" data-label={tr("Prize")}>{moneyText(r.prize, tr.lang)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -253,9 +264,9 @@ function LpFacts({ lp }) {
         {lp.coach && <><dt>{tr("Coach:")}</dt><dd>{lp.coach}</dd></>}
         {lp.igl && <><dt>{tr("In-game leader:")}</dt><dd>{lp.igl}</dd></>}
         {lp.manager && <><dt>{tr("Manager:")}</dt><dd>{lp.manager}</dd></>}
-        {lp.winnings && <><dt>{tr("Winnings:")}</dt><dd>{lp.winnings}</dd></>}
-        {lp.created[0] && <><dt>{tr("Created:")}</dt><dd>{lp.created[0]}</dd></>}
-        {lp.created[1] && <><dt>{tr("On VALORANT:")}</dt><dd>{lp.created[1]}</dd></>}
+        {lp.winnings && <><dt>{tr("Winnings:")}</dt><dd>{moneyText(lp.winnings, tr.lang)}</dd></>}
+        {lp.created[0] && <><dt>{tr("Created:")}</dt><dd>{dayText(lp.created[0], tr.lang)}</dd></>}
+        {lp.created[1] && <><dt>{tr("On VALORANT:")}</dt><dd>{dayText(lp.created[1], tr.lang)}</dd></>}
       </dl>
     </div>
   );
@@ -347,7 +358,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating }) {
           <div className="tname">{p.name}{t.tag ? <span className="ttag">{t.tag}</span> : null}<FavStar slug={slug} /></div>
           <div className="tsub">{tr("{w} wins, {l} losses", tot)} · {tr("{n} events", { n: p.events.length })}</div>
           <TeamLinks lp={lp} />
-          <p><AlertsButton /></p>
+          <p><AlertsButton /> <TeamCalendar slug={slug} /></p>
         </div>
       </div>
 

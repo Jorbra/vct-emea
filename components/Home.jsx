@@ -153,7 +153,8 @@ function HomeView({ initial }) {
       <MyTeams initial={initial} />
       <LatestNews news={initial.news} />
       <MatchModalProvider state={initial} events={matchEvents}>
-        <MatchStrip events={matchEvents} Crest={Crest} showEvent />
+        <MatchStrip events={matchEvents} Crest={Crest} showEvent today />
+        <MatchStrip events={matchEvents} Crest={Crest} showEvent skipToday />
         <MatchStrip events={matchEvents} Crest={Crest} showEvent recent />
       </MatchModalProvider>
 
@@ -207,7 +208,7 @@ function HomeView({ initial }) {
       </section>
 
       <RoadToKickoff status={ev} />
-      <p className="note"><a href="/calendar">{tr("Calendar")}</a> · <a href="/predictions">{tr("Predictions")}</a> · <a href="/news">{tr("News")}</a> · <a href="/archives">{tr("Archives of past seasons")}</a></p>
+      <p className="note"><a href="/calendar">{tr("Calendar")}</a> · <a href="/predictions">{tr("Predictions")}</a> · <a href="/rankings">{tr("Rankings")}</a> · <a href="/transfers">{tr("Transfers")}</a> · <a href="/compare">{tr("Compare")}</a> · <a href="/news">{tr("News")}</a> · <a href="/archives">{tr("Archives of past seasons")}</a> · <a href="/about">{tr("About")}</a></p>
 
       <section>
         <h2>VCT Game Changers EMEA</h2>

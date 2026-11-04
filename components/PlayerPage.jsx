@@ -12,6 +12,7 @@ import SearchBar from "./SearchBar.jsx";
 import { useAutoRefresh } from "./autoRefresh.js";
 import { EVENT_NAMES, siteHref, teamHref, teamSlug } from "../lib/paths.js";
 import { localeOf } from "../lib/i18n.js";
+import { dayText, moneyText, periodText } from "../lib/format.js";
 
 /** A name, linked to its page on this site when it has one. */
 const Named = ({ href, title, children }) => (href ? <a href={href} title={title}>{children}</a> : <span title={title}>{children}</span>);
@@ -23,18 +24,18 @@ function Achievements({ list }) {
     <section>
       <h2>{tr("Achievements")}</h2>
       <div className="tablewrap">
-        <table>
+        <table className="cards">
           <thead><tr><th>{tr("Date")}</th><th>{tr("Place")}</th><th>{tr("Tier")}</th><th>{tr("Tournament")}</th><th>{tr("Team")}</th><th>{tr("Last match")}</th><th>{tr("Prize")}</th></tr></thead>
           <tbody>
             {list.map((r, i) => (
               <tr key={i}>
-                <td className="nowrap">{r.date}</td>
-                <td className="nowrap"><b>{r.place}</b></td>
-                <td className="nowrap">{r.tier}</td>
-                <td><span className="tach"><LpImg f={r.tournamentLogo} dark={r.tournamentLogoDark} /><Named href={r.tournamentHref}>{r.tournament}</Named></span></td>
-                <td className="nowrap"><span className="tach">{r.teamLogo && <LpImg f={r.teamLogo} dark={r.teamLogoDark} />}<Named href={r.teamHref} title={r.teamName}>{r.team}</Named></span></td>
-                <td className="nowrap"><span className="tach"><span className="tachs">{r.score}</span>{r.opponentLogo && <LpImg f={r.opponentLogo} dark={r.opponentLogoDark} />}{r.opponent && <Named href={r.opponentHref} title={r.opponentName}>{r.opponent}</Named>}</span></td>
-                <td className="nowrap">{r.prize}</td>
+                <td className="nowrap" data-label={tr("Date")}>{dayText(r.date, tr.lang)}</td>
+                <td className="nowrap" data-label={tr("Place")}><b>{r.place}</b></td>
+                <td className="nowrap" data-label={tr("Tier")}>{r.tier}</td>
+                <td data-label={tr("Tournament")}><span className="tach"><LpImg f={r.tournamentLogo} dark={r.tournamentLogoDark} /><Named href={r.tournamentHref}>{r.tournament}</Named></span></td>
+                <td className="nowrap" data-label={tr("Team")}><span className="tach">{r.teamLogo && <LpImg f={r.teamLogo} dark={r.teamLogoDark} />}<Named href={r.teamHref} title={r.teamName}>{r.team}</Named></span></td>
+                <td className="nowrap" data-label={tr("Last match")}><span className="tach"><span className="tachs">{r.score}</span>{r.opponentLogo && <LpImg f={r.opponentLogo} dark={r.opponentLogoDark} />}{r.opponent && <Named href={r.opponentHref} title={r.opponentName}>{r.opponent}</Named>}</span></td>
+                <td className="nowrap" data-label={tr("Prize")}>{moneyText(r.prize, tr.lang)}</td>
               </tr>
             ))}
           </tbody>
@@ -66,10 +67,10 @@ function PlayerSide({ p }) {
         <dl>
           {lp.nationality.length > 0 && <><dt>{tr("Nationality:")}</dt><dd>{lp.nationality.map((n) => countryName(n, tr.lang)).join(", ")}</dd></>}
           {lp.status && <><dt>{tr("Status:")}</dt><dd>{tr(lp.status)}</dd></>}
-          {lp.roles && <><dt>{tr("Role:")}</dt><dd>{lp.roles}</dd></>}
+          {lp.roles && <><dt>{tr("Role:")}</dt><dd>{tr(lp.roles)}</dd></>}
           {lp.years && <><dt>{tr("Years active:")}</dt><dd>{present(lp.years)}</dd></>}
           {otherTeam && <><dt>{tr("Team on Liquipedia:")}</dt><dd>{lp.team}</dd></>}
-          {lp.winnings && <><dt>{tr("Winnings:")}</dt><dd>{lp.winnings}</dd></>}
+          {lp.winnings && <><dt>{tr("Winnings:")}</dt><dd>{moneyText(lp.winnings, tr.lang)}</dd></>}
         </dl>
       </div>
       {lp.history.length > 0 && (
@@ -79,7 +80,7 @@ function PlayerSide({ p }) {
             {lp.history.map((h, i) => (
               <li key={i}>
                 <Named href={h.href}>{h.team}</Named>{h.note ? <small> ({tr(h.note)})</small> : null}
-                <small className="phperiod">{present(h.period)}</small>
+                <small className="phperiod">{present(periodText(h.period, tr.lang))}</small>
               </li>
             ))}
           </ul>
@@ -103,7 +104,7 @@ function View({ p }) {
     p.team ? <a href={teamHref(p.team)}>{p.team}</a> : "",
     p.role ? tr(p.role) : "",
     p.sub ? tr("Sub") : "",
-    p.join ? `${tr("Joined")} ${p.join}` : "",
+    p.join ? `${tr("Joined")} ${dayText(p.join, tr.lang)}` : "",
   ].filter(Boolean);
   return (
     <div className="wrap teampage">
@@ -118,12 +119,12 @@ function View({ p }) {
         <div>
           <div className="tname"><span className="pt"><Flag cc={p.cc} /><span>{p.name}</span>{p.captain && <span className="tcapt" title={tr("Captain")}>C</span>}</span></div>
           {about.length > 0 && <div className="tsub">{about.map((x, i) => <Fragment key={i}>{i ? " · " : ""}{x}</Fragment>)}</div>}
-          {links.length > 0 && <div className="tlinks">{links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer">{l.type} ↗</a>)}</div>}
+          <div className="tlinks"><a href={`/compare?a=${encodeURIComponent(p.name)}`}>{tr("Compare")}</a>{links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer">{l.type} ↗</a>)}</div>
         </div>
       </div>
       {p.lpState === "pending" && <p className="note lpwait" role="status">{tr("Looking for this information…")}</p>}
       {p.updating && <p className="note lpwait" role="status">{tr("Updating this information…")}</p>}
-      {p.lpState === "none" && !p.onSite && !p.vlr && !p.updating && <p className="note">{tr("No information found for now.")}</p>}
+      {p.lpState === "none" && !p.onSite && !p.teamOnSite && !p.vlr && !p.updating && !p.lines.length && <p className="note">{tr("No information found for now.")}</p>}
       {p.totals && (
         <div className="pstatbar">
           <div><b>{p.totals.acs}</b><span>ACS</span></div>
@@ -150,7 +151,7 @@ function View({ p }) {
               </div>
             </section>
           )}
-          {p.onSite && (
+          {(p.onSite || p.teamOnSite) && (
             <section>
               <h2>{tr("{team}'s matches", { team: p.team })}</h2>
               {played.length === 0 ? <p className="note">{tr("No match yet.")}</p> : (

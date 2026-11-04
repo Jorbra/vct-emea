@@ -9,7 +9,7 @@ import { vlrId } from "../../../lib/vlrinfo.js";
 import { LANG_COOKIE, normLang } from "../../../lib/i18n.js";
 import { lpData } from "../../../lib/lpdata.js";
 import { teamSlug } from "../../../lib/paths.js";
-import { playerProfile } from "../../../lib/playerstats.js";
+import { outsiderProfile, playerProfile } from "../../../lib/playerstats.js";
 import { sharedPreview } from "../../../lib/preview.js";
 import { requestDue, requestFetch, updateDue } from "../../../lib/teamfetch.js";
 import { siteTeams } from "../../../lib/teams.js";
@@ -47,7 +47,7 @@ function load(slug, update = false) {
   const onVlr = (lp ? vlrId(lp.links, "player") : "") || (searchFound.people && searchFound.people[key] && searchFound.people[key].vlrId) || "";
   const vlrNow = !!onVlr && update && updateDue(vlrEntry) && !vlrBlocked(vlrInfo);
   if (onVlr && (vlrNow || vlrDue(vlrEntry))) requestVlr({ kind: "player", key, id: onVlr }, vlrNow);
-  const person = site || { name, cc, role: (known && known.role) || "", team: otherTeam, teamSlug: teamSlug(otherTeam), realName: "", slug: key, matches: [], mvps: [], lines: [], totals: null };
+  const person = site || { name, cc, role: (known && known.role) || "", team: otherTeam, teamSlug: teamSlug(otherTeam), realName: "", slug: key, ...outsiderProfile(state, key, teamSlug(otherTeam)) };
   const t = siteTeams(state).find((x) => teamSlug(x.name) === person.teamSlug);
   return {
     ...person, onSite: !!site, cc: person.cc || (lp && lp.nationality[0] ? lp.nationality[0].cc : ""),

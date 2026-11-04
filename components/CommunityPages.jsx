@@ -141,8 +141,8 @@ function PredictionsView({ matches, ranking }) {
             {ranking.length === 0 ? <p className="note">{tr("The ranking starts with the first results.")}</p> : (
               <div className="tablewrap wide">
                 <table>
-                  <thead><tr><th>#</th><th>{tr("Name")}</th><th>{tr("Right picks")}</th></tr></thead>
-                  <tbody>{ranking.map((r, i) => <tr key={r.name}><td>{i + 1}</td><td>{r.name}</td><td><b>{r.good}</b> / {r.total}</td></tr>)}</tbody>
+                  <thead><tr><th>#</th><th>{tr("Name")}</th><th>{tr("Right picks")}</th><th>{tr("Success rate")}</th></tr></thead>
+                  <tbody>{ranking.map((r, i) => <tr key={r.name}><td>{i + 1}</td><td>{r.name}</td><td><b>{r.good}</b> / {r.total}</td><td>{Math.round((r.good / r.total) * 100)}%</td></tr>)}</tbody>
                 </table>
               </div>
             )}

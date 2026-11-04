@@ -40,7 +40,7 @@ async function subscribe() {
   }
   if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: bytes });
   const { endpoint, keys } = sub.toJSON();
-  await json("/api/push", "POST", { endpoint, keys, teams: readFavorites() });
+  await json("/api/push", "POST", { endpoint, keys, teams: readFavorites(), lang: document.documentElement.lang });
 }
 
 async function unsubscribe() {
