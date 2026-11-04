@@ -141,6 +141,17 @@ function HomeView({ initial }) {
         <SearchBar /><div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
 
+      <nav className="sitenav" aria-label={tr("Home")}>
+        <a href="/calendar">{tr("Calendar")}</a>
+        <a href="/predictions">{tr("Predictions")}</a>
+        <a href="/rankings">{tr("Rankings")}</a>
+        <a href="/transfers">{tr("Transfers")}</a>
+        <a href="/compare">{tr("Compare")}</a>
+        <a href="/news">{tr("News")}</a>
+        <a href="/archives">{tr("Archives of past seasons")}</a>
+        <a className="navend" href="/about">{tr("About")}</a>
+      </nav>
+
       <div className="hero">
         <div>
           <div className="herokick">Champions Tour 2027</div>
@@ -208,7 +219,6 @@ function HomeView({ initial }) {
       </section>
 
       <RoadToKickoff status={ev} />
-      <p className="note"><a href="/calendar">{tr("Calendar")}</a> · <a href="/predictions">{tr("Predictions")}</a> · <a href="/rankings">{tr("Rankings")}</a> · <a href="/transfers">{tr("Transfers")}</a> · <a href="/compare">{tr("Compare")}</a> · <a href="/news">{tr("News")}</a> · <a href="/archives">{tr("Archives of past seasons")}</a> · <a href="/about">{tr("About")}</a></p>
 
       <section>
         <h2>VCT Game Changers EMEA</h2>

@@ -649,6 +649,13 @@ a.btn { display: inline-block; text-decoration: none; }
 .home section { margin-bottom: 28px; }
 .home h2 a { color: inherit; text-decoration: none; }
 .home h2 a:hover { text-decoration: underline; }
+/* the home page's links: a bar under the header; on phones it scrolls by itself, so the page never does */
+.sitenav { display: flex; gap: 2px; margin: 10px 0 16px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.sitenav::-webkit-scrollbar { display: none; }
+.sitenav a { flex: none; padding: 9px 12px; color: var(--fg); font: 600 15px var(--font-body); text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.sitenav a:hover { color: var(--link); border-bottom-color: var(--link); }
+.sitenav a:focus-visible { outline: 2px solid var(--link); outline-offset: -2px; }
+.sitenav .navend { margin-inline-start: auto; color: var(--muted); }
 .hero { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px 24px; background: var(--band); color: var(--band-fg); padding: 22px 24px; border-radius: 6px; margin-bottom: 26px; }
 .hero p { margin: 6px 0 0; opacity: .85; max-width: 60ch; }
 .herokick { font: 700 13px var(--font-display); letter-spacing: .12em; text-transform: uppercase; opacity: .8; }
