@@ -18,7 +18,7 @@ export function Crest({ team }) {
   if (logo && !broken) {
     return (
       <div className="crest logo">
-        <img ref={ref} src={logo} alt="" onError={() => setBroken(true)} />
+        <img ref={ref} src={logo} alt="" loading="lazy" onError={() => setBroken(true)} />
       </div>
     );
   }
