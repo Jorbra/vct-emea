@@ -9,6 +9,8 @@ import { EVENT_NAMES, teamHref } from "../lib/paths.js";
 import { OpenMatchCtx } from "./openMatch.js";
 import { embedUrl, googleCalendarUrl, icsFile } from "../lib/media.js";
 import { compareTeams, knownPlayer, playerHref } from "../lib/playerstats.js";
+import { parseRoster } from "../lib/tournament.js";
+import { Flag } from "./TeamCard.jsx";
 
 export { EVENT_NAMES };
 
@@ -60,6 +62,30 @@ function Shell({ page, title, boxRef, onClose, children }) {
       <div className="mm" role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} ref={boxRef} onClick={(ev) => ev.stopPropagation()}>{children}</div>
     </div>
   );
+}
+
+/** The players of the two teams, each under its team. Nothing when neither has a roster yet. */
+function Rosters({ a, b }) {
+  const tr = useT();
+  const side = (t, cls) => {
+    const list = parseRoster(t && t.roster);
+    return (
+      <ul className={"mmroster " + cls}>
+        {list.map((p) => {
+          const href = playerHref(p.name);
+          return (
+            <li key={p.name}>
+              {p.cc && <Flag cc={p.cc} />}
+              <span className="tn">{href ? <a href={href}>{p.name}</a> : p.name}</span>
+              {p.sub && <small>{tr("Sub")}</small>}
+            </li>
+          );
+        })}
+      </ul>
+    );
+  };
+  if (!parseRoster(a && a.roster).length && !parseRoster(b && b.roster).length) return null;
+  return <div className="mmrosters">{side(a, "a")}{side(b, "b")}</div>;
 }
 
 /** Copies the address of the match's page. */
@@ -135,6 +161,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
           <div className={"mmscore" + (live ? " lv" : "")}>{score}</div>
           {team(m.b, "b")}
         </div>
+        <Rosters a={m.a} b={m.b} />
         {ex.maps.length > 0 && (
           <table className="mmmaps">
             <tbody>

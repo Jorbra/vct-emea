@@ -903,6 +903,15 @@ td.cmpw { color: var(--win, #6fcf6f); font-weight: 700; }
 .mmmaps td { padding: 8px 6px; border-bottom: 1px solid var(--line); }
 .mmmaps .mms { width: 50px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--muted); }
 .mmmaps .mms.w { color: var(--fg); }
+.mmrosters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; padding: 10px 0; border-bottom: 1px solid var(--line); direction: ltr; }
+.mmroster { list-style: none; margin: 0; padding: 0; display: grid; align-content: start; gap: 4px; font-size: 14px; }
+.mmroster li { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.mmroster.a li { flex-direction: row-reverse; text-align: right; }
+.mmroster .tn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.mmroster a { color: inherit; text-decoration: none; }
+.mmroster a:hover { text-decoration: underline; }
+.mmroster small { flex: none; color: var(--muted); font-size: 11px; }
+.mmroster .flag { flex: none; }
 .mmmap { text-align: center; }
 .mmmap b { display: block; }
 .mmmap small { color: var(--muted); font-size: 12px; }
