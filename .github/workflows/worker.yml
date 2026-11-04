@@ -1,0 +1,25 @@
+# Keeps the site's information fresh: every 10 minutes, GitHub runs scripts/worker.mjs for a few minutes.
+name: Read Liquipedia and vlr.gg
+on:
+  schedule:
+    - cron: "7,17,27,37,47,57 * * * *"
+  workflow_dispatch: {}
+concurrency:
+  group: worker
+  cancel-in-progress: false
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --omit=dev
+      - run: npm run worker
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}

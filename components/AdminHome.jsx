@@ -1,0 +1,262 @@
+"use client";
+
+import { localeOf } from "../lib/i18n.js";
+import { useEffect, useMemo, useState } from "react";
+import { useT } from "./lang.jsx";
+import { LiveBadge } from "./matchTime.jsx";
+import { EVENT_NAMES } from "../lib/paths.js";
+import { editorAgenda, eventData, matchesOf } from "../lib/matchlist.js";
+import { formatMatchTime, TIME_EVENTS } from "../lib/schedule.js";
+import { eventStatus, formatDates } from "../lib/status.js";
+
+const GROUPS = [
+  ["Europe", ["q1", "q2", "playoffs"]],
+  ["Türkiye", ["trq1", "trq2", "tr"]],
+  ["MENA", ["meq1", "meq2", "naq1", "naq2", "mena"]],
+  ["Kickoff", ["kickoff"]],
+  ["VCT GC EMEA", ["gc"]],
+];
+
+/** The editor's home page: what needs doing now, the next matches, and where each event stands. */
+export default function AdminHome({ initial, onOpen, call, onDone }) {
+  const tr = useT();
+  const [now, setNow] = useState(null); // the editor's clock, known once on the client
+  useEffect(() => {
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(t);
+  }, []);
+  const status = useMemo(() => eventStatus(initial), [initial]);
+  const agenda = useMemo(() => (now == null ? { live: [], late: [], next: [] } : editorAgenda(initial, now)), [initial, now]);
+  const counts = useMemo(() => Object.fromEntries(TIME_EVENTS.map((e) => {
+    const list = matchesOf(e, eventData(initial, e)).filter((m) => m.a && m.b);
+    return [e, { ready: list.length, played: list.filter((m) => m.sa != null).length }];
+  })), [initial]);
+
+  const row = (m, badge) => (
+    <button type="button" key={m.event + m.id} className="ahrow" onClick={() => onOpen(m.event, true)}>
+      <span className="ahwhen">{badge || (m.at ? formatMatchTime(m.at, tr.lang, true) : "–")}</span>
+      <span className="ahteams">{(m.a && m.a.name) || tr("TBD")} vs {(m.b && m.b.name) || tr("TBD")}</span>
+      <span className="ahwhere">{tr(EVENT_NAMES[m.event])} · {m.round.map(([k, v]) => tr(k, v)).join(" · ")}</span>
+    </button>
+  );
+  const todo = agenda.live.length + agenda.late.length;
+  return (
+    <div className="adhome">
+      <section>
+        <h2>{tr("To do")}</h2>
+        {todo === 0 && <p className="note">{now == null ? " " : tr("Nothing waiting: no match is live or waiting for its score.")}</p>}
+        {agenda.live.length > 0 && <div className="ahlist">{agenda.live.map((m) => row(m, <LiveBadge />))}</div>}
+        {agenda.late.length > 0 && (
+          <>
+            <h3 className="sub">{tr("Waiting for their score")} <small>({agenda.late.length})</small></h3>
+            <div className="ahlist">{agenda.late.map((m) => row(m))}</div>
+          </>
+        )}
+      </section>
+      {agenda.next.length > 0 && (
+        <section>
+          <h2>{tr("Upcoming matches")}</h2>
+          <div className="ahlist">{agenda.next.map((m) => row(m))}</div>
+        </section>
+      )}
+      <section>
+        <h2>{tr("Events")}</h2>
+        {GROUPS.map(([title, events]) => (
+          <div className="evgroup" key={title}>
+            <h3>{title}</h3>
+            <div className="evgrid">
+              {events.map((e) => {
+                const st = status[e];
+                const c = counts[e] || { ready: 0, played: 0 };
+                return (
+                  <button type="button" key={e} className={"evcard " + st.state} onClick={() => onOpen(e, false)}>
+                    <span className="evtop">
+                      <span className={"evstate " + st.state}>{tr(st.state === "done" ? "Finished" : st.state === "live" ? "Live" : "Upcoming")}</span>
+                      <span className="evcount">{st.of ? `${st.teams}/${st.of}` : st.teams} {tr("teams")}</span>
+                    </span>
+                    <span className="evtitle">{tr(EVENT_NAMES[e])}</span>
+                    <span className="evdates">{formatDates(initial.info && initial.info[e], tr.lang) || tr("Dates to be announced")}</span>
+                    <span className="evmeta">{tr("{p} of {n} matches played", { p: c.played, n: c.ready })}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </section>
+      {initial.admin && <Manage admin={initial.admin} call={call} onDone={onDone} />}
+    </div>
+  );
+}
+
+/** Writing, editing and removing news. Plain text: line breaks are kept. */
+function NewsEditor({ news, call, onDone }) {
+  const tr = useT();
+  const [edit, setEdit] = useState(null);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [err, setErr] = useState("");
+  const send = async (payload) => {
+    setErr("");
+    try {
+      const j = await call("/api/news", payload);
+      setEdit(null); setTitle(""); setBody("");
+      onDone(tr.server(j.message));
+    } catch (e) {
+      setErr(tr.server(e.message));
+    }
+  };
+  return (
+    <section>
+      <h2>{tr("News")}</h2>
+      {news.length > 0 && (
+        <ul className="ahhist">
+          {news.map((n) => (
+            <li key={n.id}>
+              <a href={`/news/${n.id}`}><b>{n.title}</b></a>
+              <button type="button" className="btn" onClick={() => { setEdit(n.id); setTitle(n.title); setBody(n.body); }}>{tr("Edit")}</button>
+              <button type="button" className="btn danger" onClick={() => send({ remove: n.id })}>{tr("Remove")}</button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <form className="newsform" onSubmit={(e) => { e.preventDefault(); send({ id: edit, title, body }); }}>
+        <label className="f">{tr("Title")}<input value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} /></label>
+        <label className="f">{tr("Text")}<textarea rows={5} maxLength={10000} value={body} onChange={(e) => setBody(e.target.value)} /></label>
+        <div className="row">
+          <button className="btn pri" type="submit" disabled={!title.trim() || !body.trim()}>{edit ? tr("Save") : tr("Publish")}</button>
+          {edit && <button type="button" className="btn" onClick={() => { setEdit(null); setTitle(""); setBody(""); }}>{tr("Cancel")}</button>}
+          {err && <span className="err">{err}</span>}
+        </div>
+      </form>
+    </section>
+  );
+}
+
+/** Removing a visitor from the predictions, for an unsuitable name. */
+function Voters({ voters, call, onDone }) {
+  const tr = useT();
+  if (!voters.length) return null;
+  const remove = async (name) => {
+    const j = await call("/api/predictions", { remove: name });
+    onDone(tr.server(j.message));
+  };
+  return (
+    <section>
+      <h2>{tr("Predictions")} <small>({voters.length})</small></h2>
+      <details>
+        <summary>{tr("Participants")}</summary>
+        <ul className="ahhist">
+          {voters.map((v) => <li key={v.name}><b>{v.name}</b><button type="button" className="btn danger" onClick={() => remove(v.name)}>{tr("Remove")}</button></li>)}
+        </ul>
+      </details>
+    </section>
+  );
+}
+
+/** Freezing the season as an archive, and clearing the results to start the next one. */
+function Seasons({ seasons, call, onDone }) {
+  const tr = useT();
+  const [name, setName] = useState("");
+  const [sure, setSure] = useState(false);
+  const [err, setErr] = useState("");
+  useEffect(() => {
+    if (!sure) return undefined;
+    const t = setTimeout(() => setSure(false), 5000);
+    return () => clearTimeout(t);
+  }, [sure]);
+  const send = async (body) => {
+    setErr("");
+    try {
+      const j = await call("/api/seasons", body);
+      setName(""); setSure(false);
+      onDone(tr.server(j.message));
+    } catch (e) {
+      setErr(tr.server(e.message));
+    }
+  };
+  return (
+    <section>
+      <h2>{tr("Seasons")}</h2>
+      <p className="note">{tr("Archive a finished season: it stays readable on the site. Then clear the results to start the next one (teams and rosters stay).")}</p>
+      {seasons.length > 0 && (
+        <ul className="ahhist">
+          {seasons.map((s) => (
+            <li key={s.slug}><a href={`/archives/${s.slug}/vctemea/eu/playoff/overview`}><b>{s.name}</b></a><button type="button" className="btn danger" onClick={() => send({ remove: s.slug })}>{tr("Remove")}</button></li>
+          ))}
+        </ul>
+      )}
+      <form className="ahnew" onSubmit={(e) => { e.preventDefault(); send({ name }); }}>
+        <label className="f">{tr("Season name")}<input value={name} maxLength={40} placeholder="VCT 2027" onChange={(e) => setName(e.target.value)} /></label>
+        <button className="btn pri" type="submit" disabled={!name.trim()}>{tr("Archive the season")}</button>
+        <button type="button" className={"btn" + (sure ? " danger" : "")} onClick={() => (sure ? send({ clear: true }) : setSure(true))}>{sure ? tr("Sure?") : tr("Clear all results")}</button>
+        {err && <span className="err">{err}</span>}
+      </form>
+    </section>
+  );
+}
+
+/** The change history, the database copy and, for the main account, the other editors' accounts. */
+function Manage({ admin, call, onDone }) {
+  const tr = useT();
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [err, setErr] = useState("");
+  const send = async (body) => {
+    setErr("");
+    try {
+      const j = await call("/api/editors", body);
+      setName(""); setPassword("");
+      onDone(tr.server(j.message));
+    } catch (e) {
+      setErr(tr.server(e.message));
+    }
+  };
+  const fmt = (at) => new Intl.DateTimeFormat(localeOf(tr.lang), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(at));
+  const label = (m) => (m.startsWith("Undone: ") ? tr("Undone: {what}", { what: tr.server(m.slice(8)) }) : tr.server(m));
+  return (
+    <>
+      <section>
+        <h2>{tr("History")}</h2>
+        {admin.history.length === 0 ? <p className="note">{tr("No change yet.")}</p> : (
+          <ul className="ahhist">
+            {admin.history.map((h, i) => (
+              <li key={i}><time>{fmt(h.at)}</time><b>{h.who || tr("Main account")}</b><span>{label(h.message)}</span></li>
+            ))}
+          </ul>
+        )}
+      </section>
+      <NewsEditor news={admin.news || []} call={call} onDone={onDone} />
+      <Voters voters={admin.voters || []} call={call} onDone={onDone} />
+      <Seasons seasons={admin.seasons || []} call={call} onDone={onDone} />
+      <section>
+        <h2>{tr("Streaming (OBS)")}</h2>
+        <p className="note">{tr("In OBS, add a browser source with this page: it shows the live match, or the next one, on a transparent background.")} <a href="/overlay" target="_blank" rel="noopener noreferrer">/overlay</a></p>
+      </section>
+      <section>
+        <h2>{tr("Backups")}</h2>
+        <p className="note">{tr("A copy of the database is made every day in data/backups (the last 14 are kept). Keep one somewhere else too.")}</p>
+        <a className="btn" href="/api/backup">{tr("Download a copy now")}</a>
+      </section>
+      {!admin.who && (
+        <section>
+          <h2>{tr("Editor accounts")}</h2>
+          {admin.editors.length > 0 && (
+            <ul className="ahhist">
+              {admin.editors.map((e) => (
+                <li key={e.name}><b>{e.name}</b><span>{fmt(e.created)}</span><button type="button" className="btn danger" onClick={() => send({ remove: e.name })}>{tr("Remove")}</button></li>
+              ))}
+            </ul>
+          )}
+          <form className="ahnew" onSubmit={(e) => { e.preventDefault(); send({ name, password }); }}>
+            <label className="f">{tr("Name")}<input value={name} autoComplete="off" onChange={(e) => setName(e.target.value)} /></label>
+            <label className="f">{tr("Password (at least 4 characters)")}<input type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} /></label>
+            <button className="btn pri" type="submit" disabled={!name || !password}>{tr("Add an account")}</button>
+            {err && <span className="err">{err}</span>}
+          </form>
+        </section>
+      )}
+    </>
+  );
+}

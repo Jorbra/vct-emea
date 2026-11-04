@@ -1,0 +1,24 @@
+{
+  "name": "vct-kickoff",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "node --test tests/*.test.mjs",
+    "players": "node scripts/update-players.mjs",
+    "teams": "node scripts/update-teams.mjs",
+    "worker": "node scripts/worker.mjs",
+    "turso-import": "node scripts/turso-import.mjs"
+  },
+  "dependencies": {
+    "libsql": "0.5.29",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "engines": {
+    "node": ">=20.9"
+  }
+}
