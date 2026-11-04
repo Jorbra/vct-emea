@@ -93,6 +93,9 @@ function suggest(known, q) {
   return [...starts.sort(byName), ...has.sort(byName)].slice(0, MAX_SUGGESTIONS);
 }
 
+/** The names of a team's players, without its substitutes. */
+const starters = (team) => (team ? parseRoster(team.roster).filter((p) => !p.sub).map((p) => p.name) : []);
+
 const NOTE_FOR = 4000;
 
 /** The answer to an action. "Saved" goes away by itself after a few seconds; an error stays until the next action. */
@@ -514,7 +517,7 @@ function ScoreRow({ m, name, teamOf, pickA, pickB, onSaved, endpoint = "/api/mat
       <span className="bo">Bo{m.bo}</span>
       <TimeEdit id={m.id} call={call} ready={!!ready} done={!!res} max={needWins(m.bo)} />
       <ExtraEdit id={m.id} call={call} bo={m.bo} nameA={m.a ? name(m.a) : ""} nameB={m.b ? name(m.b) : ""}
-        players={teamOf ? [m.a, m.b].flatMap((t) => { const x = t ? teamOf(t) : null; return x ? parseRoster(x.roster).filter((p) => !p.sub).map((p) => p.name) : []; }) : []} />
+        playersA={starters(m.a && teamOf ? teamOf(m.a) : null)} playersB={starters(m.b && teamOf ? teamOf(m.b) : null)} />
       {/* no score typed yet: nothing to save (the teams and the time are saved as soon as they are chosen) */}
       <button className="btn pri" disabled={!ready || busy || (sa === "" && sb === "")} title={sa === "" && sb === "" ? tr("Type the score once the match is over. The teams and the time are already saved.") : ""} onClick={() => send()}>{tr("Save")}</button>
       <button className={"btn" + (sure ? " danger" : "")} disabled={busy || !canClear} title={tr("Removes the score, the teams chosen by hand, the time and the details of this match.")} onClick={clearAll}>{sure ? tr("Sure?") : tr("Clear")}</button>
@@ -782,7 +785,7 @@ function KickoffAdmin({ data, onChange, view, setView }) {
                   <>
                     <TimeEdit id={m.id} call={call} ready={!!(m.a && m.b)} done={m.winner != null} max={needWins(m.bo)} />
                     <ExtraEdit id={m.id} call={call} bo={m.bo} nameA={m.a ? data.teams[m.a - 1].name : ""} nameB={m.b ? data.teams[m.b - 1].name : ""}
-                      players={[m.a, m.b].flatMap((t) => (t ? parseRoster(data.teams[t - 1].roster).filter((p) => !p.sub).map((p) => p.name) : []))} />
+                      playersA={starters(m.a ? data.teams[m.a - 1] : null)} playersB={starters(m.b ? data.teams[m.b - 1] : null)} />
                   </>
                 )} />
             </>
