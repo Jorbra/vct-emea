@@ -2148,3 +2148,26 @@ test("push alerts: favorite teams only, once each, at the planned time, dead bro
   assert.equal(announcements(s).some((a) => a.key === "kickoff:u1-2:l"), false);
 });
 
+
+test("a whole copy of the database, images included, as Turso gives them", async () => {
+  const { bindable, exportCopy } = await import("../lib/backup.js");
+  const bytes = new Uint8Array([0, 1, 255]);
+  assert.deepEqual(bindable(bytes.buffer), Buffer.from(bytes));
+  assert.deepEqual(bindable(bytes), Buffer.from(bytes));
+  assert.equal(bindable(undefined), null);
+  assert.equal(bindable("x"), "x");
+  assert.equal(bindable(3), 3);
+  const db = openDb(":memory:");
+  db.prepare("INSERT INTO lp_logos (file, data) VALUES (?, ?)").run("A.png", Buffer.from(bytes));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "copy-"));
+  const file = path.join(dir, "copy.db");
+  // what a direct connection answers: an ArrayBuffer for an image
+  const asTurso = { prepare: (sql) => ({ all: (...a) => db.prepare(sql).all(...a).map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, Buffer.isBuffer(v) ? v.buffer.slice(v.byteOffset, v.byteOffset + v.byteLength) : v]))) }) };
+  exportCopy(asTurso, file);
+  const copy = openDb(file);
+  assert.deepEqual(Buffer.from(copy.prepare("SELECT data FROM lp_logos WHERE file = 'A.png'").get().data), Buffer.from(bytes));
+  assert.equal(getState(copy).kickoff.teams.length, getState(db).kickoff.teams.length);
+  copy.close();
+  db.close();
+  try { fs.rmSync(dir, { recursive: true, force: true }); } catch { /* Windows may still hold it */ }
+});

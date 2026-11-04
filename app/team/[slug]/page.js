@@ -33,16 +33,15 @@ export default async function Page({ params, searchParams }) {
   const known = dir.teams[key];
   if (!p && !entry && !known) notFound();
   const name = p ? p.name : known ? known.name : entry.name;
-  // the server reads the site's own teams by itself
   const lpNow = (update && updateDue(entry)) || teamOutdated(entry); // old information: this page needs the former members now
-  if (lpNow || (!p && requestDue(entry))) requestFetch({ kind: "team", name }, Date.now(), lpNow);
+  if (lpNow || requestDue(entry)) requestFetch({ kind: "team", name }, Date.now(), lpNow);
   readSoon();
   const lang = normLang((await cookies()).get(LANG_COOKIE)?.value);
   const lp = entry && entry.page
     ? { ...entry, results: linkResults(entry.results, dir), inactivePlayers: entry.inactivePlayers || [], formerPlayers: linkFormer(entry.formerPlayers, dir), formerStaff: linkFormer(entry.formerStaff, dir) }
     : null;
   const outside = p ? null : { name, tag: known ? known.tag : "", logo: known ? known.logo : "", pending: !entry };
-  return <TeamPage initial={p ? initial : null} slug={key} lang={lang} lp={lp} org={orgOf(teamInfo, key)} outside={outside} vlr={linkVlr(vlrEntry, dir)} updating={!!entry && (lpNow || vlrNow)} />;
+  return <TeamPage initial={p ? initial : null} slug={key} lang={lang} lp={lp} org={orgOf(teamInfo, key)} outside={outside} vlr={linkVlr(vlrEntry, dir)} updating={!entry || lpNow || vlrNow} />;
 }
 
 export async function generateMetadata({ params }) {
