@@ -1119,6 +1119,11 @@ a.rdbox:hover { border-color: var(--link); }
 .predteam.on { background: var(--lime); border-color: var(--lime); color: var(--lime-ink); }
 /* editor: faster input */
 .bulksched .einfogrid label.f input { height: 38px; box-sizing: border-box; }
+.roundtime { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 8px 0; border-top: 1px solid var(--line); }
+.roundtime .rtname { flex: 1 1 180px; min-width: 0; font-weight: 600; }
+.roundtime .rtname small { color: var(--muted); font-weight: 400; }
+.roundtime input { height: 38px; box-sizing: border-box; flex: 0 1 220px; min-width: 0; }
+.roundtime .rthint { flex: 1 1 100%; margin: 0; font-size: 12px; }
 .lpbox { position: relative; }
 .lpmore { position: absolute; top: -8px; right: -8px; width: 18px; height: 18px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--surface-2); color: var(--fg); font-size: 11px; line-height: 1; cursor: pointer; opacity: .75; }
 .lpmore:hover, .lpmore:focus-visible { opacity: 1; border-color: var(--link); }

@@ -740,7 +740,7 @@ function TournamentView({ initial, start, archive }) {
               {info.venue && <><dt>{tr("Venue:")}</dt><dd>{info.venue}</dd></>}
               <dt>{tr("Start Date:")}</dt><dd>{formatDate(info.start, tr.lang) || tr("TBA")}</dd>
               <dt>{tr("End Date:")}</dt><dd>{formatDate(info.end, tr.lang) || tr("TBA")}</dd>
-              <dt>{tr("Teams:")}</dt><dd>{isKick ? "12" : isTr ? "8" : isMena ? "4" : isOther ? "–" : qd ? `${qd.slots.filter(Boolean).length}/64` : `16 (${tr("{n} confirmed", { n: named })})`}</dd>
+              <dt>{tr("Teams:")}</dt><dd>{isKick ? "12" : isTr ? "8" : isMena ? "4" : isOther ? "–" : qd ? `${qd.slots.filter(Boolean).length}/${qd.slots.length}` : `16 (${tr("{n} confirmed", { n: named })})`}</dd>
               {info.tier && <><dt>{tr("Tier:")}</dt><dd>{info.tier}</dd></>}
             </dl>
             <h3>{tr("Chronology")}</h3>

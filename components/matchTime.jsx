@@ -169,6 +169,7 @@ export function Schedule({ items, Crest }) {
   const list = items.filter((m) => times[m.id] && !isLive(m)).map((m) => ({ ...m, at: times[m.id] })).sort((x, y) => x.at.localeCompare(y.at));
   // days in the visitor's time zone, so a group is computed on the client
   const [days, setDays] = useState([]);
+  const [whole, setWhole] = useState(false);
   useEffect(() => {
     const key = (iso) => { const t = new Date(iso); return `${t.getFullYear()}-${t.getMonth()}-${t.getDate()}`; };
     const out = [];
@@ -201,6 +202,9 @@ export function Schedule({ items, Crest }) {
       </div>
     );
   };
+  // a very long schedule starts folded, so the rest of the page stays within reach
+  const long = list.length > 32;
+  let left = long && !whole ? 12 : Infinity;
   return (
     <section>
       <h2>{tr("Schedule")}</h2>
@@ -211,13 +215,22 @@ export function Schedule({ items, Crest }) {
             {now.map((m) => row(m, true))}
           </div>
         )}
-        {days.map((d) => (
-          <div key={d.k} className="schd">
-            <DayHead iso={d.items[0].at} />
-            {d.items.map((m) => row(m, false))}
-          </div>
-        ))}
+        {days.map((d) => {
+          const shown = d.items.slice(0, left);
+          left -= shown.length;
+          return shown.length > 0 && (
+            <div key={d.k} className="schd">
+              <DayHead iso={d.items[0].at} />
+              {shown.map((m) => row(m, false))}
+            </div>
+          );
+        })}
       </div>
+      {long && (
+        <button type="button" className="more" aria-expanded={whole} onClick={() => setWhole(!whole)}>
+          {whole ? tr("Show fewer matches ⌃") : tr("Show all {n} matches ⌄", { n: list.length })}
+        </button>
+      )}
     </section>
   );
 }
@@ -451,18 +464,75 @@ export function ExtraEdit({ id, call, bo = 3, nameA = "", nameB = "", teamA = nu
   );
 }
 
-/** Editor: gives a whole round its times at once. items: the event's matches (from matchesOf). */
-export function BulkSchedule({ items, call }) {
-  const tr = useT();
-  const { event, onSaved } = useMatchTimes();
+/** The event's rounds in order: [{ label, ids }]. An empty first-round line of a qualifier is not a match. */
+function groupRounds(items, tr) {
   const rounds = [];
   for (const m of items) {
-    // an empty first-round line of a qualifier is not a match
-    if (m.id.startsWith("r64") && !(m.a && m.b)) continue;
+    if (m.first && !(m.a && m.b)) continue;
     const label = m.round.map(([k, v]) => tr(k, v)).join(" · ");
     const r = rounds.find((x) => x.label === label);
     if (r) r.ids.push(m.id); else rounds.push({ label, ids: [m.id] });
   }
+  return rounds;
+}
+
+/** One round of RoundTimes: every one of its matches gets this day and time; empty takes their time away. */
+function RoundTimeRow({ round, saved, mixed, call }) {
+  const tr = useT();
+  const { event, onSaved } = useMatchTimes();
+  const [v, setV] = useState(saved);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  async function save(e) {
+    e.preventDefault();
+    setErr("");
+    setBusy(true);
+    try {
+      const at = v ? new Date(v).toISOString() : "";
+      const j = await call("/api/mtime/bulk", { event, items: round.ids.map((id) => ({ id, at })) });
+      onSaved && onSaved(tr.server(j.message));
+    } catch (x) {
+      setErr(tr.server(x.message));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <form className="roundtime" onSubmit={save}>
+      <span className="rtname">{round.label} <small>({round.ids.length})</small></span>
+      <input type="datetime-local" aria-label={tr("Day and time of {round}", { round: round.label })} value={v} onChange={(e) => setV(e.target.value)} />
+      <button className="btn" type="submit" disabled={busy || (v === saved && !mixed)}>{tr("Save")}</button>
+      {mixed && !v && <span className="hint rthint">{tr("Its matches have different times.")}</span>}
+      {err && <span className="err">{err}</span>}
+    </form>
+  );
+}
+
+/** Editor: the day and time of each round, all its matches at once. */
+export function RoundTimes({ items, call }) {
+  const tr = useT();
+  const { times } = useMatchTimes();
+  const rounds = groupRounds(items, tr);
+  if (!rounds.length) return null;
+  return (
+    <details className="einfo roundtimes" open>
+      <summary><b>{tr("Day and time of each round")}</b></summary>
+      <p className="hint">{tr("Every match of the round gets this day and time. Leave it empty to remove them.")}</p>
+      {rounds.map((r) => {
+        const found = new Set(r.ids.map((id) => times[id] || ""));
+        const mixed = found.size > 1;
+        const saved = mixed ? "" : toLocalInput([...found][0]);
+        return <RoundTimeRow key={`${r.label}|${[...found].join()}`} round={r} saved={saved} mixed={mixed} call={call} />;
+      })}
+    </details>
+  );
+}
+
+/** Editor: spreads a whole round's matches over time. items: the event's matches (from matchesOf). */
+export function BulkSchedule({ items, call }) {
+  const tr = useT();
+  const { event, onSaved } = useMatchTimes();
+  const rounds = groupRounds(items, tr);
   const [round, setRound] = useState("");
   const [start, setStart] = useState("");
   const [gap, setGap] = useState(120);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ROUNDS, THIRD, buildBracket, matchId, podium } from "../lib/bracket.js";
+import { THIRD, buildBracket, matchId, podium, roundsFor } from "../lib/bracket.js";
 import { Crest } from "./Crest.jsx";
 import TeamCard from "./TeamCard.jsx";
 import { useT } from "./lang.jsx";
@@ -29,7 +29,7 @@ function Side({ slot, slots, m, side, bye }) {
 }
 
 function MatchBox({ m, slots }) {
-  const emptyR1 = m.round === "r64" && !m.a && !m.b;
+  const emptyR1 = m.first && !m.a && !m.b;
   return (
     <div className={"bbox qbox" + (emptyR1 ? " void" : "")}>
       <Side slot={m.a} slots={slots} m={m} side="a" bye={emptyR1} />
@@ -42,15 +42,16 @@ export function BigBracket({ slots, scores, bo }) {
   const tr = useT();
   const bracket = useMemo(() => buildBracket(slots, scores, bo), [slots, scores, bo]);
   const third = bracket.byId[matchId("third", 0)];
+  const rounds = roundsFor(slots.length);
   return (
     <div className="qbracket" tabIndex={0} aria-label={tr("Bracket")}>
-      {ROUNDS.map((r, ri) => (
+      {rounds.map((r, ri) => (
         <div className="qcol" key={r.key} style={{ "--cell": `${CELL * 2 ** ri}px` }}>
           <div className="qh">{tr(r.name)}</div>
           {Array.from({ length: r.count }, (_, i) => {
             const m = bracket.byId[matchId(r.key, i)];
             return (
-              <div key={m.id} className={"qcell" + (ri < ROUNDS.length - 1 ? (i % 2 ? " lo" : " up") : "") + (ri > 0 ? " in" : "")}>
+              <div key={m.id} className={"qcell" + (ri < rounds.length - 1 ? (i % 2 ? " lo" : " up") : "") + (ri > 0 ? " in" : "")}>
                 <MatchBox m={m} slots={slots} />
               </div>
             );
@@ -71,9 +72,10 @@ export function BigBracket({ slots, scores, bo }) {
 export default function Qualifier({ event, data, onGo, next = "playoffs", qualify = 4 }) {
   const tr = useT();
   const { slots, scores, bo } = data;
+  const size = slots.length;
   const bracket = useMemo(() => buildBracket(slots, scores, bo), [slots, scores, bo]);
   const [more, setMore] = useState(false);
-  const [view, setView] = useState("all"); // top16 | top64 | all
+  const [view, setView] = useState(size > 64 ? "top16" : "all"); // top16 | top64 (every team) | all
   const [opts, setOpts] = useState({ rosters: true, compact: true, hover: true });
 
   const nameOf = (slot) => (slot && slots[slot - 1] ? slot : null);
@@ -90,6 +92,7 @@ export default function Qualifier({ event, data, onGo, next = "playoffs", qualif
     { place: "9-16", ids: losers("r16") },
     { place: "17-32", ids: losers("r32") },
     { place: "33-64", ids: losers("r64") },
+    ...(size > 64 ? [{ place: "65-128", ids: losers("r128") }, { place: "129-256", ids: losers("r256") }] : []),
   ];
   const shown = more ? rows : rows.slice(0, 4);
 
@@ -109,7 +112,7 @@ export default function Qualifier({ event, data, onGo, next = "playoffs", qualif
       <section>
         <h2>{tr("Format")}</h2>
         <ul className="fmt">
-          <li>{tr("Single-elimination bracket of up to 64 teams, with a Third Place Match")}</li>
+          <li>{tr("Single-elimination bracket of up to {n} teams, with a Third Place Match", { n: size })}</li>
           <li>{qualify === 1 ? tr("The winner qualifies for the Qualifier Playoffs") : qualify === 2 ? tr("The two best teams qualify for the Qualifier Playoffs") : tr("The four best teams qualify for the Qualifier Playoffs")}</li>
         </ul>
       </section>
@@ -140,20 +143,20 @@ export default function Qualifier({ event, data, onGo, next = "playoffs", qualif
             </tbody>
           </table>
           <button className="more" aria-expanded={more} onClick={() => setMore(!more)}>
-            {more ? tr("Hide places 5 to 64 ⌃") : tr("Show places 5 to 64 ⌄")}
+            {more ? tr("Hide places 5 to {n} ⌃", { n: size }) : tr("Show places 5 to {n} ⌄", { n: size })}
           </button>
         </div>
       </section>
 
       <section>
-        <h2>{tr("Participants")} <small>{all.filter(Boolean).length}/64</small></h2>
+        <h2>{tr("Participants")} <small>{all.filter(Boolean).length}/{size}</small></h2>
         <div className="toggles">
           <label className="sw"><input type="checkbox" checked={opts.rosters} onChange={(e) => setOpts({ ...opts, rosters: e.target.checked })} /> {tr("Show rosters")}</label>
           <label className="sw"><input type="checkbox" checked={opts.compact} onChange={(e) => setOpts({ ...opts, compact: e.target.checked })} /> {tr("Compact view")}</label>
           <label className="sw"><input type="checkbox" checked={opts.hover} onChange={(e) => setOpts({ ...opts, hover: e.target.checked })} /> {tr("Enable hover")}</label>
         </div>
         <div className="tabs sub" role="tablist" aria-label={tr("Participants")}>
-          {[["top16", "Top 16"], ["top64", "Top 64"], ["all", "Show All"]].map(([k, l]) => (
+          {[["top16", "Top 16"], ["top64", `Top ${size}`], ["all", "Show All"]].map(([k, l]) => (
             <button key={k} role="tab" aria-selected={view === k} onClick={() => setView(k)}>{tr(l)}</button>
           ))}
         </div>
@@ -165,8 +168,8 @@ export default function Qualifier({ event, data, onGo, next = "playoffs", qualif
         )}
         {(view === "top64" || view === "all") && (
           <>
-            <h3 className="sub redsub">Top 64</h3>
-            {cards(pad(all.filter(Boolean), 64))}
+            <h3 className="sub redsub">Top {size}</h3>
+            {cards(pad(all.filter(Boolean), size))}
           </>
         )}
       </section>

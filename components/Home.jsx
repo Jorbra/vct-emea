@@ -187,7 +187,7 @@ function HomeView({ initial }) {
         <div className="evgroup">
           <h3>Europe</h3>
           <div className="evgrid">
-            {card("q1", "Qualifier 1", tr("64 teams · top 4 go on"), tr("Qualified"))}
+            {card("q1", "Qualifier 1", tr("256 teams · top 4 go on"), tr("Qualified"))}
             {card("q2", "Qualifier 2", tr("64 teams · top 4 go on"), tr("Qualified"))}
             {card("playoffs", "Qualifier Playoffs", tr("Swiss + bracket"), tr("To the Kickoff"))}
           </div>

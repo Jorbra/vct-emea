@@ -8,14 +8,14 @@ import { EmeaMark } from "./Brand.jsx";
 import { Crest } from "./Crest.jsx";
 import KickoffBoard from "./KickoffBoard.jsx";
 import { useAutoRefresh } from "./autoRefresh.js";
-import { BO_CHOICES, ROUNDS, THIRD, buildBracket } from "../lib/bracket.js";
+import { BO_CHOICES, THIRD, buildBracket, roundsFor } from "../lib/bracket.js";
 import { buildKickoff, kickPlacedElsewhere } from "../lib/kickoff.js";
 import { buildRegional, isOpening, placedElsewhere } from "../lib/regional.js";
 import { adminHref, adminNavForEvent, eventForAdmin, parseAdminPath, siteHrefForAdmin } from "../lib/paths.js";
 import AdminHome from "./AdminHome.jsx";
 import { INFO_DEFAULTS, INFO_TIERS, TYPE_LABEL } from "../lib/einfo.js";
 import { formatDates } from "../lib/status.js";
-import { BulkSchedule, ExtraEdit, MatchTimes, TimeEdit, useMatchTimes } from "./matchTime.jsx";
+import { BulkSchedule, ExtraEdit, MatchTimes, RoundTimes, TimeEdit, useMatchTimes } from "./matchTime.jsx";
 import { eventData, matchesOf } from "../lib/matchlist.js";
 import VALORANT_PLAYERS from "../lib/valorant-players.json"; // refreshed with: npm run players
 import VALORANT_TEAMS from "../lib/valorant-teams.json"; // refreshed with: npm run teams
@@ -949,7 +949,8 @@ function QualifierAdmin({ event, data, onChange }) {
   const name = (slot) => (slot && data.slots[slot - 1] ? data.slots[slot - 1].name : "TBD");
   const teamOf = (slot) => data.slots[slot - 1] || null;
   const lines = text.split(/\r?\n/);
-  const count = lines.slice(0, 64).filter((l) => l.trim()).length;
+  const size = data.slots.length;
+  const count = lines.slice(0, size).filter((l) => l.trim()).length;
 
   async function run(path, body) {
     setBusy(true);
@@ -963,16 +964,16 @@ function QualifierAdmin({ event, data, onChange }) {
       setBusy(false);
     }
   }
-  const rounds = [...ROUNDS, THIRD];
+  const rounds = [...roundsFor(size), THIRD];
   const todo = bracket.matches.filter((m) => m.a && m.b && !m.bye);
   return (
     <div className="qadmin">
       <SaveNote note={msg} />
       <section>
-        <h2>{tr("Teams")} <small>{count}/64</small></h2>
+        <h2>{tr("Teams")} <small>{count}/{size}</small></h2>
         <p className="hint">{tr("The logo is found by itself in public/logos from the short tag only (for example VIT.png); no tag, no logo.")}</p>
         <div className="slotgrid">
-          {Array.from({ length: 32 }, (_, k) => (
+          {Array.from({ length: size / 2 }, (_, k) => (
             <div className="slotpair" key={k}>
               <div className="plhead">{tr("Match {n}", { n: k + 1 })}</div>
               {[2 * k, 2 * k + 1].map((i) => (
@@ -983,7 +984,7 @@ function QualifierAdmin({ event, data, onChange }) {
         </div>
         <details className="bulk">
           <summary>{tr("Bulk import (one team per line)")}</summary>
-          <p className="hint">{tr("One team per line, in bracket order: lines 1 and 2 meet in the first round, 3 and 4, and so on. A blank line leaves an empty slot (a bye). Up to 64 lines. Optional: Name ; player|fr, player|de ; coach|fr|coach")}</p>
+          <p className="hint">{tr("One team per line, in bracket order: lines 1 and 2 meet in the first round, 3 and 4, and so on. A blank line leaves an empty slot (a bye). Up to {n} lines. Optional: Name ; player|fr, player|de ; coach|fr|coach", { n: size })}</p>
           <textarea className="qtext" rows={12} value={text} onChange={(e) => setText(e.target.value)} aria-label={tr("Teams")} spellCheck={false} />
           <div className="row">
             <button className="btn pri" disabled={busy} onClick={() => run("/api/q/teams", { text })}>{tr("Save teams")}</button>
@@ -1287,7 +1288,10 @@ function AdminView({ initial, isAdmin, start }) {
       {home && <SaveNote note={msg} />}
       {tab === "home" && <AdminHome initial={initial} onOpen={openEvent} call={call} onDone={(m) => { setMsg({ ok: true, text: m }); router.refresh(); }} />}
       {!home && (initial.qualifiers[tab] && tab !== "gc" || tab === "matches" || (["kickoff", "tr", "mena", "gc"].includes(tab) && kview === "matches")) && (
-        <BulkSchedule key={`bulk-${eventForAdmin(nav)}`} items={matchesOf(eventForAdmin(nav), eventData(initial, eventForAdmin(nav)))} call={call} />
+        <>
+          <RoundTimes key={`rounds-${eventForAdmin(nav)}`} items={matchesOf(eventForAdmin(nav), eventData(initial, eventForAdmin(nav)))} call={call} />
+          <BulkSchedule key={`bulk-${eventForAdmin(nav)}`} items={matchesOf(eventForAdmin(nav), eventData(initial, eventForAdmin(nav)))} call={call} />
+        </>
       )}
       {!home && region === "eu" && top === "playoffs" && (
         <div className="nav4" role="tablist" aria-label={tr("Playoffs")}>
