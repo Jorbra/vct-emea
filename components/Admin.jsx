@@ -517,6 +517,7 @@ function ScoreRow({ m, name, teamOf, pickA, pickB, onSaved, endpoint = "/api/mat
       <span className="bo">Bo{m.bo}</span>
       <TimeEdit id={m.id} call={call} ready={!!ready} done={!!res} max={needWins(m.bo)} />
       <ExtraEdit id={m.id} call={call} bo={m.bo} nameA={m.a ? name(m.a) : ""} nameB={m.b ? name(m.b) : ""}
+        teamA={m.a && teamOf ? teamOf(m.a) : null} teamB={m.b && teamOf ? teamOf(m.b) : null}
         playersA={starters(m.a && teamOf ? teamOf(m.a) : null)} playersB={starters(m.b && teamOf ? teamOf(m.b) : null)} />
       {/* no score typed yet: nothing to save (the teams and the time are saved as soon as they are chosen) */}
       <button className="btn pri" disabled={!ready || busy || (sa === "" && sb === "")} title={sa === "" && sb === "" ? tr("Type the score once the match is over. The teams and the time are already saved.") : ""} onClick={() => send()}>{tr("Save")}</button>
@@ -785,6 +786,7 @@ function KickoffAdmin({ data, onChange, view, setView }) {
                   <>
                     <TimeEdit id={m.id} call={call} ready={!!(m.a && m.b)} done={m.winner != null} max={needWins(m.bo)} />
                     <ExtraEdit id={m.id} call={call} bo={m.bo} nameA={m.a ? data.teams[m.a - 1].name : ""} nameB={m.b ? data.teams[m.b - 1].name : ""}
+                      teamA={m.a ? data.teams[m.a - 1] : null} teamB={m.b ? data.teams[m.b - 1] : null}
                       playersA={starters(m.a ? data.teams[m.a - 1] : null)} playersB={starters(m.b ? data.teams[m.b - 1] : null)} />
                   </>
                 )} />

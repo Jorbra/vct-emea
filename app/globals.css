@@ -829,7 +829,8 @@ a.btn { display: inline-block; text-decoration: none; }
 .adm .mxform input, .adm .mxform select { text-align: left; font-size: 13px; padding: 6px 8px; }
 .mxmaps { display: grid; grid-template-columns: minmax(110px, 1.4fr) 70px 70px minmax(100px, 1fr); gap: 6px 8px; align-items: center; max-width: 560px; }
 .mxrow { display: contents; }
-.mxteam { grid-column: 1 / -1; margin-top: 8px; padding: 5px 10px; border-radius: 4px; background: var(--surface-2); font-weight: 700; font-size: 13px; }
+.mxteam .crest { width: 24px; height: 24px; font-size: 10px; border-radius: 6px; flex: none; }
+.mxteam { display: flex; align-items: center; gap: 8px; grid-column: 1 / -1; margin-top: 8px; padding: 5px 10px; border-radius: 4px; background: var(--surface-2); font-weight: 700; font-size: 13px; }
 .mxh { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mxform .row { display: flex; align-items: center; gap: 10px; }
 @media (max-width: 700px) { .mrowa .mxtra { grid-row: 4; } }

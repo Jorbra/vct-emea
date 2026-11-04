@@ -2,6 +2,7 @@
 
 import { localeOf } from "../lib/i18n.js";
 import { Fragment, createContext, useContext, useEffect, useRef, useState } from "react";
+import { Crest } from "./Crest.jsx";
 import { useT } from "./lang.jsx";
 import { MAP_POOL, formatMatchTime, planRound } from "../lib/schedule.js";
 import { useOpenMatch } from "./openMatch.js";
@@ -341,7 +342,7 @@ function WhenText({ iso }) {
  * Editor: a match's details, opened from its row: stream and VOD links, and its maps (map, score of each team, who picked it).
  * As many map rows as the match can have (Bo1: 1, Bo3: 3, Bo5: 5); empty rows are not saved.
  */
-export function ExtraEdit({ id, call, bo = 3, nameA = "", nameB = "", playersA = [], playersB = [] }) {
+export function ExtraEdit({ id, call, bo = 3, nameA = "", nameB = "", teamA = null, teamB = null, playersA = [], playersB = [] }) {
   const tr = useT();
   const players = [...playersA, ...playersB];
   const { event, extra, onSaved } = useMatchTimes();
@@ -421,12 +422,13 @@ export function ExtraEdit({ id, call, bo = 3, nameA = "", nameB = "", playersA =
               <span className="mxh">{tr("Player")}</span><span className="mxh">K</span><span className="mxh">D</span><span className="mxh">A</span><span className="mxh">ACS</span>
               {v.pstats.map((p, i) => {
                 // each team's players under its name, then any other line
-                const heading = i === 0 && playersA.length ? nameA
-                  : i === playersA.length && playersB.length ? nameB
-                    : i === players.length && players.length ? tr("Other players") : "";
+                const inA = i === 0 && playersA.length > 0;
+                const inB = i === playersA.length && playersB.length > 0;
+                const heading = inA ? nameA : inB ? nameB : i === players.length && players.length ? tr("Other players") : "";
+                const team = inA ? teamA : inB ? teamB : null;
                 return (
                   <Fragment key={i}>
-                    {heading && <span className="mxteam">{heading}</span>}
+                    {heading && <span className="mxteam">{team && <Crest team={team} />}{heading}</span>}
                     <span className="mxrow">
                       <input aria-label={tr("Player")} value={p.name} maxLength={30} onChange={(e) => setStat(i, "name", e.target.value)} />
                       {["k", "d", "a", "acs"].map((k) => <input key={k} type="number" min="0" max="999" aria-label={`${p.name} ${k.toUpperCase()}`} value={p[k]} onChange={(e) => setStat(i, k, e.target.value)} />)}
