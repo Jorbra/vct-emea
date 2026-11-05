@@ -104,6 +104,7 @@ const HOW = [
   {
     title: "Les alertes",
     points: [
+      "Un match passe en direct tout seul à son heure, dès que ses deux équipes sont connues, et en sort à l'arrivée du résultat. Sans résultat après 6 heures, il attend son score. Tu peux retirer un direct à la main : il ne revient pas, sauf si tu changes l'horaire.",
       "Les visiteurs choisissent d'être alertés depuis la page d'une équipe : à l'heure du match, quand il passe en direct et au résultat.",
       "Si un lien Discord est réglé sur Vercel (DISCORD_WEBHOOK_URL), les mêmes annonces y partent, regroupées.",
       "Le travail régulier part à chaque visite du site et à chaque appel de https://vct-emea.vercel.app/api/tick. Un service comme cron-job.org qui appelle cette adresse garde tout à l'heure, même sans visiteur.",

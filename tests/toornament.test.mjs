@@ -188,3 +188,37 @@ test("Discord: 128 lines make a few messages, none too long; a pasted flag list 
   assert.match(r.message, /^2 flags saved\. Not understood or not found: c1, nobody\.$/);
   assert.equal(getQualifier(db, "meq1").slots[0].roster, "a1|fr, a2");
 });
+
+test("a match goes live at its time, leaves with its result, and stays off when taken off", async () => {
+  const { withAutoLive } = await import("../lib/matchlist.js");
+  const { setMatchLive, getState } = await import("../lib/db.js");
+  const db = fresh();
+  round(db, start(), teams());
+  const now = Date.now();
+  const iso = (ago) => new Date(now - ago).toISOString();
+  const at = (id, ago) => assert.equal(setMatchTime(db, { event: "meq1", id, at: iso(ago) }).ok, true);
+  at("qf-1", 60000); // begun
+  at("qf-2", -3600000); // still to come
+  at("qf-3", 7 * 3600000); // long ago, no result
+  at("sf-1", 60000); // its teams are not known
+  at("qf-4", 60000);
+  let live = getState(db).live.meq1;
+  assert.deepEqual(Object.keys(live).sort(), ["qf-1", "qf-4"]);
+  assert.deepEqual(live["qf-1"], { a: 0, b: 0 });
+  // a result ends it
+  assert.equal(saveQualifierScore(db, { event: "meq1", id: "qf-1", sa: 2, sb: 0 }).ok, true);
+  assert.equal(getState(db).live.meq1["qf-1"], undefined);
+  // taken off by hand: it does not come back, until asked or given a new time
+  assert.equal(setMatchLive(db, { event: "meq1", id: "qf-4", live: false }).ok, true);
+  assert.equal(getState(db).live.meq1["qf-4"], undefined);
+  assert.equal(setMatchLive(db, { event: "meq1", id: "qf-4", live: true }).ok, true);
+  assert.ok(getState(db).live.meq1["qf-4"]);
+  assert.equal(setMatchLive(db, { event: "meq1", id: "qf-4", live: false }).ok, true);
+  at("qf-4", 30000);
+  assert.ok(getState(db).live.meq1["qf-4"]);
+  // a score in progress is kept
+  assert.equal(setMatchLive(db, { event: "meq1", id: "qf-4", live: true, a: 1, b: 0 }).ok, true);
+  assert.deepEqual(getState(db).live.meq1["qf-4"], { a: 1, b: 0 });
+  // the sum is made in one place
+  assert.deepEqual(withAutoLive({ live: {}, times: {} }, {}, now).kickoff, {});
+});
