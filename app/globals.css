@@ -681,6 +681,16 @@ a.btn { display: inline-block; text-decoration: none; }
 .guide ul { margin: 0; padding-inline-start: 20px; display: grid; gap: 6px; }
 .guidetoc { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-bottom: 20px; font-size: 14px; }
 .guidetoc a { color: var(--link); text-decoration: none; }
+.loglist { list-style: none; padding: 0 !important; gap: 0 !important; }
+.loglist li { display: grid; grid-template-columns: 44px 104px 76px minmax(0, 1fr); gap: 8px; align-items: baseline; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.logtime { color: var(--muted); font-variant-numeric: tabular-nums; }
+.logkind { justify-self: start; padding: 1px 7px; border-radius: 4px; font-size: 12px; font-weight: 700; background: var(--surface-2); }
+.logkind.ajout { color: var(--zone-adv); }
+.logkind.modification { color: var(--link); }
+.logkind.correction { color: var(--danger); }
+.logkind.donnees { color: var(--muted); }
+.logarea { color: var(--muted); font-size: 12px; }
+@media (max-width: 560px) { .loglist li { grid-template-columns: 44px auto minmax(0, 1fr); } .logtext { grid-column: 1 / -1; } }
 .pulse { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 10px; margin-bottom: 22px; }
 .pulsecard { display: grid; gap: 6px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; color: var(--fg); text-decoration: none; }
 .pulsecard:hover { border-color: var(--link); }
