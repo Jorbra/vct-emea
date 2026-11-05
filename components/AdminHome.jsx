@@ -43,6 +43,7 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
   const todo = agenda.live.length + agenda.late.length;
   return (
     <div className="adhome">
+      <p className="guidelink"><a className="btn" href="/admin/nouveautes">{tr("What's new and how it works")}</a></p>
       <section>
         <h2>{tr("To do")}</h2>
         {todo === 0 && <p className="note">{now == null ? " " : tr("Nothing waiting: no match is live or waiting for its score.")}</p>}
