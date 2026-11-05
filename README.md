@@ -244,6 +244,16 @@ Les alertes partent dans la langue du navigateur abonné ; Discord est en franç
 - `/parcours/<événement>/<équipe>` : le parcours d une équipe, à partager.
 - Éditeur : « Saisie rapide » sur la page d un qualifier, « Importer des nationalités » sur l accueil.
 
+## Journal du site
+
+La page `/admin/nouveautes` se remplit seule : chaque commit y apparaît (API GitHub, relue toutes les 5 minutes), et les changements de données viennent de l'historique du site. Pour une ligne claire en français, ajoute au message du commit une ligne par changement :
+
+```
+Journal: Ajout | Site | Le texte affiché
+```
+
+Types : Ajout, Modification, Correction, Données. Zones : Site, Éditeur, Coulisses. Sans cette ligne, le titre du commit est affiché. Si le dépôt passe en privé, ajoute une variable `GITHUB_TOKEN` sur Vercel.
+
 ## Alertes et tâches régulières
 
 Les alertes de match passent par les services de notification des navigateurs (`public/sw.js`, `lib/push.js`) : elles arrivent même site fermé, pour les équipes favorites du visiteur, ou pour tous les matchs s'il n'en a aucune. Elles partent juste après chaque action d'un éditeur. Pour les matchs dont l'heure prévue arrive sans action, il faut un passage régulier : un service gratuit comme cron-job.org peut appeler `/api/tick` chaque minute (à appeler plus souvent, il ne fait rien de plus, chaque tâche ayant son tour dans la base).

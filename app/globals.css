@@ -690,6 +690,7 @@ a.btn { display: inline-block; text-decoration: none; }
 .logkind.correction { color: var(--danger); }
 .logkind.donnees { color: var(--muted); }
 .logarea { color: var(--muted); font-size: 12px; }
+.loglist.data li { grid-template-columns: 44px 90px minmax(0, 1fr); }
 @media (max-width: 560px) { .loglist li { grid-template-columns: 44px auto minmax(0, 1fr); } .logtext { grid-column: 1 / -1; } }
 .pulse { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 10px; margin-bottom: 22px; }
 .pulsecard { display: grid; gap: 6px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; color: var(--fg); text-decoration: none; }

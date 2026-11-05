@@ -1,4 +1,8 @@
-// The editors' page: the whole site's log and how things work. In French. Each update: a new line at the top of LOG, with its date and time.
+// The editors' page: the whole site's log and how things work. In French.
+// LOG holds what came before the log filled itself; every later update comes from its commit (lib/changelog.js).
+import { mergeLog, parisDay, parisTime } from "../lib/changelog.js";
+import { serverFr } from "../lib/i18n.js";
+import { EVENT_NAMES } from "../lib/paths.js";
 
 // Newest day first. kind: Ajout, Modification, Correction or Données. area: Site (what visitors see), Éditeur or Coulisses.
 const LOG = [
@@ -114,19 +118,35 @@ const HOW = [
   },
 ];
 
-export default function AdminGuide() {
+/** A line of the site's history in words: Toornament's rounds name their event. */
+const historyText = (message) => {
+  const m = /^Toornament: (\w+) updated \((\d+)\)\.$/.exec(message);
+  return m ? `${EVENT_NAMES[m[1]] || m[1]} mis à jour depuis Toornament (${m[2]} changements).` : serverFr(message);
+};
+
+export default function AdminGuide({ auto = [], stale = false, history = [] }) {
+  const log = mergeLog(auto, LOG);
+  const dataDays = [];
+  for (const h of history) {
+    const date = parisDay(h.at);
+    let d = dataDays.find((x) => x.date === date);
+    if (!d) { d = { date, items: [] }; dataDays.push(d); }
+    d.items.push(h);
+  }
   return (
     <div className="wrap guide">
       <p><a className="btn" href="/admin">‹ Retour à l'éditeur</a></p>
       <h1>Nouveautés et mode d'emploi</h1>
       <nav className="guidetoc" aria-label="Sommaire">
         <a href="#nouveautes">Journal du site</a>
+        <a href="#donnees">Changements de données</a>
         {HOW.map((h, i) => <a key={h.title} href={`#aide-${i}`}>{h.title}</a>)}
       </nav>
       <section id="nouveautes">
         <h2>Journal du site</h2>
-        <p className="hint">Toutes les mises à jour depuis la mise en ligne sur Vercel, du plus récent au plus ancien. Heures de Paris.</p>
-        {LOG.map((n) => (
+        <p className="hint">Toutes les mises à jour depuis la mise en ligne sur Vercel, du plus récent au plus ancien. Heures de Paris. Chaque envoi sur le site s'ajoute ici tout seul, quelques minutes plus tard.</p>
+        {stale && <p className="hint">GitHub ne répond pas pour le moment : les dernières lignes connues sont affichées.</p>}
+        {log.map((n) => (
           <div key={n.date}>
             <h3>{n.date}</h3>
             <ul className="loglist">
@@ -136,6 +156,25 @@ export default function AdminGuide() {
                   <span className={`logkind ${kind.toLowerCase().replace("é", "e")}`}>{kind}</span>
                   <span className="logarea">{area}</span>
                   <span className="logtext">{text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </section>
+      <section id="donnees">
+        <h2>Changements de données</h2>
+        <p className="hint">Ce qui change dans le tournoi, tout seul ou par un éditeur : résultats, horaires, équipes. Les 60 derniers.</p>
+        {dataDays.length === 0 && <p className="note">Aucun changement pour l'instant.</p>}
+        {dataDays.map((d) => (
+          <div key={d.date}>
+            <h3>{d.date}</h3>
+            <ul className="loglist data">
+              {d.items.map((h, i) => (
+                <li key={i}>
+                  <span className="logtime">{parisTime(h.at)}</span>
+                  <span className="logarea">{h.who || "Éditeur"}</span>
+                  <span className="logtext">{historyText(h.message)}</span>
                 </li>
               ))}
             </ul>
