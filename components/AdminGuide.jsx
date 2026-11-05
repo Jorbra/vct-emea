@@ -137,7 +137,7 @@ export default function AdminGuide({ auto = [], stale = false, history = [] }) {
     <div className="wrap guide">
       <p><a className="btn" href="/admin">‹ Retour à l'éditeur</a></p>
       <h1>Nouveautés et mode d'emploi</h1>
-      <nav className="guidetoc" aria-label="Sommaire">
+      <nav className="guidetoc" id="sommaire" aria-label="Sommaire">
         <a href="#nouveautes">Journal du site</a>
         <a href="#donnees">Changements de données</a>
         {HOW.map((h, i) => <a key={h.title} href={`#aide-${i}`}>{h.title}</a>)}
@@ -161,6 +161,7 @@ export default function AdminGuide({ auto = [], stale = false, history = [] }) {
             </ul>
           </div>
         ))}
+        <a className="guidetop" href="#sommaire">↑ Sommaire</a>
       </section>
       <section id="donnees">
         <h2>Changements de données</h2>
@@ -180,11 +181,13 @@ export default function AdminGuide({ auto = [], stale = false, history = [] }) {
             </ul>
           </div>
         ))}
+        <a className="guidetop" href="#sommaire">↑ Sommaire</a>
       </section>
       {HOW.map((h, i) => (
         <section key={h.title} id={`aide-${i}`}>
           <h2>{h.title}</h2>
           <ul>{h.points.map((x) => <li key={x}>{x}</li>)}</ul>
+          <a className="guidetop" href="#sommaire">↑ Sommaire</a>
         </section>
       ))}
     </div>
