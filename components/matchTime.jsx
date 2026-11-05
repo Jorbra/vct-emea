@@ -170,6 +170,9 @@ export function Schedule({ items, Crest }) {
   // days in the visitor's time zone, so a group is computed on the client
   const [days, setDays] = useState([]);
   const [whole, setWhole] = useState(false);
+  const [dayF, setDayF] = useState("");
+  const [roundF, setRoundF] = useState("");
+  const [teamF, setTeamF] = useState("");
   useEffect(() => {
     const key = (iso) => { const t = new Date(iso); return `${t.getFullYear()}-${t.getMonth()}-${t.getDate()}`; };
     const out = [];
@@ -204,10 +207,29 @@ export function Schedule({ items, Crest }) {
   };
   // a very long schedule starts folded, so the rest of the page stays within reach
   const long = list.length > 32;
-  let left = long && !whole ? 12 : Infinity;
+  const plain = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const q = plain(teamF.trim());
+  const filtering = !!(dayF || roundF || q);
+  const passes = (m) => (!roundF || label(m) === roundF) && (!q || plain(m.a && m.a.name).includes(q) || plain(m.b && m.b.name).includes(q));
+  const shownDays = days.filter((d) => !dayF || d.k === dayF).map((d) => ({ ...d, items: d.items.filter(passes) })).filter((d) => d.items.length);
+  const dayName = (iso) => new Intl.DateTimeFormat(localeOf(tr.lang), { weekday: "long", day: "numeric", month: "long" }).format(new Date(iso));
+  let left = long && !whole && !filtering ? 12 : Infinity;
   return (
     <section>
       <h2>{tr("Schedule")}</h2>
+      {long && (
+        <div className="schfilters">
+          <select aria-label={tr("Day")} value={dayF} onChange={(e) => setDayF(e.target.value)}>
+            <option value="">{tr("All days")}</option>
+            {days.map((d) => <option key={d.k} value={d.k}>{dayName(d.items[0].at)}</option>)}
+          </select>
+          <select aria-label={tr("Round")} value={roundF} onChange={(e) => setRoundF(e.target.value)}>
+            <option value="">{tr("All rounds")}</option>
+            {[...new Set(list.map(label))].map((l) => <option key={l} value={l}>{l}</option>)}
+          </select>
+          <input type="search" aria-label={tr("Find a team")} placeholder={tr("Find a team")} value={teamF} onChange={(e) => setTeamF(e.target.value)} />
+        </div>
+      )}
       <div className="sched">
         {now.length > 0 && (
           <div className="schd live">
@@ -215,7 +237,8 @@ export function Schedule({ items, Crest }) {
             {now.map((m) => row(m, true))}
           </div>
         )}
-        {days.map((d) => {
+        {filtering && !shownDays.length && <p className="note">{tr("No match found.")}</p>}
+        {shownDays.map((d) => {
           const shown = d.items.slice(0, left);
           left -= shown.length;
           return shown.length > 0 && (
@@ -226,7 +249,7 @@ export function Schedule({ items, Crest }) {
           );
         })}
       </div>
-      {long && (
+      {long && !filtering && (
         <button type="button" className="more" aria-expanded={whole} onClick={() => setWhole(!whole)}>
           {whole ? tr("Show fewer matches ⌃") : tr("Show all {n} matches ⌄", { n: list.length })}
         </button>

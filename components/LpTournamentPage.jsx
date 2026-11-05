@@ -1,6 +1,7 @@
 "use client";
 
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
+import SiteNav from "./SiteNav.jsx";
 import { ThemeSwitch } from "./theme.jsx";
 import { EmeaMark } from "./Brand.jsx";
 import LpImg from "./LpImg.jsx";
@@ -19,6 +20,7 @@ function View({ t }) {
         <SearchBar />
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
+      <SiteNav />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › <span>{tr("Tournaments")}</span> › <span>{t.name}</span></nav>
       <div className="thead">
         {t.logo && <span className="thlogo"><LpImg f={t.logo} dark={t.logoDark} /></span>}

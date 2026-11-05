@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
+import SiteNav from "./SiteNav.jsx";
 import { ThemeSwitch } from "./theme.jsx";
 import { EmeaMark } from "./Brand.jsx";
 import { Crest } from "./Crest.jsx";
@@ -18,6 +19,7 @@ function Top({ title, crumbs = [] }) {
         <SearchBar />
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
+      <SiteNav />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a>{crumbs.map(([t, h]) => <span key={t}> › {h ? <a href={h}>{t}</a> : t}</span>)}</nav>
     </>
   );

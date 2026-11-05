@@ -92,6 +92,62 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
 
 /** Writing, editing and removing news. Plain text: line breaks are kept. */
 /** Where the rosters typed here and Liquipedia's differ, and a button to follow Liquipedia. */
+/** How following Toornament is going, event by event. */
+function SyncStatus({ list }) {
+  const tr = useT();
+  const when = (iso) => (iso ? new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "–");
+  const events = Object.keys(list);
+  return (
+    <details className="einfo">
+      <summary><b>{tr("Following Toornament")}</b></summary>
+      <p className="hint">{tr("Teams, line-ups, times and results follow Toornament by themselves. What you change by hand stays as you wrote it.")}</p>
+      {events.length === 0 ? <p className="note">{tr("Not read yet.")}</p> : (
+        <div className="tablewrap"><table>
+          <thead><tr><th>{tr("Event")}</th><th>{tr("Last read")}</th><th>{tr("Last change")}</th><th>{tr("Teams")}</th><th>{tr("To check")}</th></tr></thead>
+          <tbody>{events.map((e) => {
+            const m = list[e];
+            const notes = [m.error, m.guessed ? tr("{n} scores estimated: only the winner was given", { n: m.guessed }) : "", m.kept ? tr("{n} kept as changed by hand", { n: m.kept }) : "", m.mismatch ? tr("{n} results not placed", { n: m.mismatch }) : ""].filter(Boolean);
+            return <tr key={e}><td>{tr(EVENT_NAMES[e] || e)}</td><td>{when(m.at)}</td><td>{when(m.changedAt)}</td><td>{m.teams || "–"}</td><td>{notes.join(" · ") || "–"}</td></tr>;
+          })}</tbody>
+        </table></div>
+      )}
+    </details>
+  );
+}
+
+/** Flags in bulk: one "player, country" per line. */
+function FlagImport({ call, onDone }) {
+  const tr = useT();
+  const [text, setText] = useState("");
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function save() {
+    setBusy(true);
+    setNote("");
+    try {
+      const j = await call("/api/q/flags", { text });
+      setNote(tr.server(j.message));
+      setText("");
+      onDone(tr.server(j.message));
+    } catch (e) {
+      setNote(tr.server(e.message));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <details className="einfo">
+      <summary><b>{tr("Import nationalities")}</b></summary>
+      <p className="hint">{tr("One player per line: nickname, country. The country is a two-letter code (fr) or an English name (France). Every qualifier's rosters are updated.")}</p>
+      <textarea className="qtext" rows={6} value={text} onChange={(e) => setText(e.target.value)} aria-label={tr("Import nationalities")} spellCheck={false} placeholder={"NeFi, pl\nTITOUNE, France"} />
+      <div className="row">
+        <button type="button" className="btn pri" disabled={busy || !text.trim()} onClick={save}>{tr("Save flags")}</button>
+        {note && <span className="hint">{note}</span>}
+      </div>
+    </details>
+  );
+}
+
 function RosterDiffs({ list, call, onDone }) {
   const tr = useT();
   const [err, setErr] = useState("");
@@ -263,6 +319,8 @@ function Manage({ admin, call, onDone }) {
         )}
       </section>
       <RosterDiffs list={admin.rosterDiffs || []} call={call} onDone={onDone} />
+      <SyncStatus list={admin.sync || {}} />
+      <FlagImport call={call} onDone={onDone} />
       <NewsEditor news={admin.news || []} call={call} onDone={onDone} />
       <Voters voters={admin.voters || []} call={call} onDone={onDone} />
       <Seasons seasons={admin.seasons || []} call={call} onDone={onDone} />

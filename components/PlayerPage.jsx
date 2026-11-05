@@ -2,6 +2,7 @@
 
 import { Fragment } from "react";
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
+import SiteNav from "./SiteNav.jsx";
 import { ThemeSwitch } from "./theme.jsx";
 import { EmeaMark } from "./Brand.jsx";
 import { Crest } from "./Crest.jsx";
@@ -113,6 +114,7 @@ function View({ p }) {
         <SearchBar />
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
+      <SiteNav />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › {p.team ? <><a href={teamHref(p.team)}>{p.team}</a> › </> : null}<span>{p.name}</span></nav>
       <div className="thead">
         {p.team ? (p.teamOnSite ? <Crest team={team} /> : <span className="thlogo"><LpImg f={p.teamLogo} /></span>) : null}

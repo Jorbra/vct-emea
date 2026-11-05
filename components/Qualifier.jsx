@@ -8,11 +8,15 @@ import { useT } from "./lang.jsx";
 import { Schedule } from "./matchTime.jsx";
 import { matchesOf } from "../lib/matchlist.js";
 import { useOpenMatch } from "./openMatch.js";
+import { useFavorites } from "./favorites.js";
+import { formatMatchTime } from "../lib/schedule.js";
+import { teamSlug } from "../lib/paths.js";
+import { useMatchTimes } from "./matchTime.jsx";
 
 const CELL = 56; // px per first-round match; every later round doubles it
 
 /** Name, crest and score of one side of a match. */
-function Side({ slot, slots, m, side, bye, lit }) {
+function Side({ slot, slots, m, side, bye, lit, fav }) {
   const tr = useT();
   const team = slot ? slots[slot - 1] : null;
   const res = m.winner != null;
@@ -21,7 +25,7 @@ function Side({ slot, slots, m, side, bye, lit }) {
   let label = team ? team.name : bye ? "" : tr("TBD");
   if (!team && m.bye) label = tr("BYE");
   return (
-    <div className={"bl" + (res ? (win ? " bw" : " lo") : "") + (lit ? " lit" : "")} data-s={team ? slot : undefined}>
+    <div className={"bl" + (res ? (win ? " bw" : " lo") : "") + (lit ? " lit" : "") + (fav ? " fav" : "")} data-s={team ? slot : undefined}>
       <Crest team={team} />
       <span className={"tn" + (team ? "" : " tbdn")}>{label}</span>
       <span className="bs">{res && score != null && !m.bye ? score : ""}</span>
@@ -30,7 +34,7 @@ function Side({ slot, slots, m, side, bye, lit }) {
 }
 
 /** One match. Clicks and hovers are handled once, by the bracket around it. lit: the side of the team being followed, "a" or "b". */
-const MatchBox = memo(function MatchBox({ m, slots, lit, canOpen }) {
+const MatchBox = memo(function MatchBox({ m, slots, lit, canOpen, favs }) {
   const tr = useT();
   const emptyR1 = m.first && !m.a && !m.b;
   const can = canOpen && !emptyR1 && !m.bye;
@@ -38,8 +42,8 @@ const MatchBox = memo(function MatchBox({ m, slots, lit, canOpen }) {
   return (
     <div className={"bbox qbox" + (emptyR1 ? " void" : "") + (can ? " can" : "") + (lit ? " lit" : "")} data-m={m.id}
       {...(can ? { "data-open": "1", role: "button", tabIndex: 0, "aria-label": `${nameOf(m.a)} vs ${nameOf(m.b)}` } : {})}>
-      <Side slot={m.a} slots={slots} m={m} side="a" bye={emptyR1} lit={lit === "a"} />
-      <Side slot={m.b} slots={slots} m={m} side="b" bye={emptyR1} lit={lit === "b"} />
+      <Side slot={m.a} slots={slots} m={m} side="a" bye={emptyR1} lit={lit === "a"} fav={favs.includes("a")} />
+      <Side slot={m.b} slots={slots} m={m} side="b" bye={emptyR1} lit={lit === "b"} fav={favs.includes("b")} />
     </div>
   );
 });
@@ -61,6 +65,21 @@ export function BigBracket({ event, slots, scores, bo }) {
   const canOpen = !!(open && event);
   const followed = hover || found;
   const litOf = (m) => (!followed ? "" : m.a === followed ? "a" : m.b === followed ? "b" : "");
+  const fav = useFavorites();
+  const { times } = useMatchTimes() || {};
+  const favSlots = useMemo(() => slots.map((t, i) => (t && fav.list.includes(teamSlug(t.name)) ? i + 1 : 0)).filter(Boolean), [slots, fav.list]);
+  const favsOf = (m) => `${favSlots.includes(m.a) ? "a" : ""}${favSlots.includes(m.b) ? "b" : ""}`;
+  /** Where a followed team stands: its next match, or how it ended. */
+  const standing = (slot) => {
+    const mine = bracket.matches.filter((m) => m.a === slot || m.b === slot);
+    const next = mine.find((m) => m.winner == null && !m.bye);
+    if (next) {
+      const other = next.a === slot ? next.b : next.a;
+      const at = times && times[next.id];
+      return `${tr("Next match")} : ${other && slots[other - 1] ? slots[other - 1].name : tr("TBD")}${at ? ` · ${formatMatchTime(at, tr.lang, true)}` : ""}`;
+    }
+    return bracket.byId[matchId("gf", 0)].winner === slot ? tr("Winner") : mine.some((m) => m.loser === slot) ? tr("Eliminated") : "";
+  };
 
   function openFrom(target) {
     const el = target.closest("[data-open]");
@@ -117,6 +136,18 @@ export function BigBracket({ event, slots, scores, bo }) {
       <input type="search" list={listId} placeholder={tr("Find a team")} aria-label={tr("Find a team")} onChange={(e) => find(e.target.value)} />
       <datalist id={listId}>{slots.filter(Boolean).map((t) => <option key={t.name} value={t.name} />)}</datalist>
     </div>
+    {favSlots.length > 0 && (
+      <ul className="qfavs" aria-label={tr("My teams")}>
+        {favSlots.map((slot) => (
+          <li key={slot}>
+            <button type="button" className="qfav" aria-pressed={found === slot} onClick={() => { const on = found !== slot; setFound(on ? slot : 0); if (on) show(slot); }}>
+              <Crest team={slots[slot - 1]} /><b>{slots[slot - 1].name}</b><small>{standing(slot)}</small>
+            </button>
+            <a className="qfavrun" href={`/parcours/${event}/${teamSlug(slots[slot - 1].name)}`}>{tr("Run")} ›</a>
+          </li>
+        ))}
+      </ul>
+    )}
     <div ref={box} className={"qbracket" + (dragging ? " dragging" : "") + (found ? " finding" : "")} tabIndex={0} aria-label={tr("Bracket")}
       onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onPointerLeave={() => { up(); setHover(0); }}
       onClick={(e) => { if (moved.current) { moved.current = false; return; } openFrom(e.target); }}
@@ -128,14 +159,14 @@ export function BigBracket({ event, slots, scores, bo }) {
             const m = bracket.byId[matchId(r.key, i)];
             return (
               <div key={m.id} className={"qcell" + (ri < rounds.length - 1 ? (i % 2 ? " lo" : " up") : "") + (ri > 0 ? " in" : "")}>
-                <MatchBox m={m} slots={slots} lit={litOf(m)} canOpen={canOpen} />
+                <MatchBox m={m} slots={slots} lit={litOf(m)} canOpen={canOpen} favs={favsOf(m)} />
               </div>
             );
           })}
           {r.key === "gf" && (
             <div className="qthird">
               <div className="qh">{tr(THIRD.name)}</div>
-              <MatchBox m={third} slots={slots} lit={litOf(third)} canOpen={canOpen} />
+              <MatchBox m={third} slots={slots} lit={litOf(third)} canOpen={canOpen} favs={favsOf(third)} />
             </div>
           )}
         </div>
@@ -165,11 +196,7 @@ export default function Qualifier({ event, data, onGo, next = "playoffs", qualif
     { place: "2", ids: [second], cls: "p2", kick: qualify >= 2 },
     { place: "3", ids: [third], cls: "p3", kick: qualify >= 3 },
     { place: "4", ids: [fourth], kick: qualify >= 4 },
-    { place: "5-8", ids: losers("qf") },
-    { place: "9-16", ids: losers("r16") },
-    { place: "17-32", ids: losers("r32") },
-    { place: "33-64", ids: losers("r64") },
-    ...(size > 64 ? [{ place: "65-128", ids: losers("r128") }, { place: "129-256", ids: losers("r256") }] : []),
+    ...roundsFor(size).filter((r) => r.count >= 4).reverse().map((r) => ({ place: `${r.count + 1}-${r.count * 2}`, ids: losers(r.key) })),
   ];
   const shown = more ? rows : rows.slice(0, 4);
 

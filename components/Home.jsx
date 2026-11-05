@@ -4,6 +4,9 @@ import { useMemo } from "react";
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
 import { ThemeSwitch } from "./theme.jsx";
 import SearchBar from "./SearchBar.jsx";
+import SiteNav from "./SiteNav.jsx";
+import { useEffect, useState } from "react";
+import { EVENT_NAMES } from "../lib/paths.js";
 import { EmeaMark } from "./Brand.jsx";
 import { Crest } from "./Crest.jsx";
 import { useAutoRefresh } from "./autoRefresh.js";
@@ -18,6 +21,54 @@ import { eventData, matchesOf } from "../lib/matchlist.js";
 import { TIME_EVENTS } from "../lib/schedule.js";
 import { MatchStrip } from "./matchTime.jsx";
 import { MatchModalProvider } from "./MatchModal.jsx";
+
+const sameDay = (iso, now) => { const a = new Date(iso); const b = new Date(now); return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
+
+/** Each event being played today: how far it has gone, and the way to its bracket. */
+function TodayPulse({ events }) {
+  const tr = useT();
+  const [now, setNow] = useState(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(t);
+  }, []);
+  if (now == null) return null;
+  const rows = events.map((e) => {
+    const list = e.items.filter((m) => (e.times[m.id] && sameDay(e.times[m.id], now)) || (e.live[m.id] && m.sa == null));
+    return { e, total: list.length, done: list.filter((m) => m.sa != null).length, live: list.filter((m) => e.live[m.id] && m.sa == null).length };
+  }).filter((r) => r.total);
+  if (!rows.length) return null;
+  return (
+    <section className="pulse" aria-label={tr("Today")}>
+      {rows.slice(0, 4).map(({ e, total, done, live }) => (
+        <a key={e.event} className="pulsecard" href={e.href}>
+          <b>{tr(EVENT_NAMES[e.event])}</b>
+          <span className="pulsebar" aria-hidden="true"><i style={{ width: `${Math.round((done / total) * 100)}%` }} /></span>
+          <span className="pulsetext">{tr("{done} of {total} matches finished today", { done, total })}{live ? ` · ${tr("{n} live", { n: live })}` : ""}</span>
+          <span className="evgo">{tr("Open")} ›</span>
+        </a>
+      ))}
+    </section>
+  );
+}
+
+/** While matches are being played, the latest results come before the matches of the next days. */
+function HomeStrips({ events, state }) {
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const now = Date.now();
+    setBusy(events.some((e) => e.items.some((m) => e.times[m.id] && m.sa != null && now - new Date(e.times[m.id]).getTime() < 24 * 3600e3)));
+  }, [events]);
+  return (
+    <MatchModalProvider state={state} events={events}>
+      <MatchStrip events={events} Crest={Crest} showEvent today />
+      {busy && <MatchStrip events={events} Crest={Crest} showEvent recent />}
+      <MatchStrip events={events} Crest={Crest} showEvent skipToday />
+      {!busy && <MatchStrip events={events} Crest={Crest} showEvent recent />}
+    </MatchModalProvider>
+  );
+}
 
 export default function Home(props) {
   return (
@@ -141,16 +192,7 @@ function HomeView({ initial }) {
         <SearchBar /><div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
 
-      <nav className="sitenav" aria-label={tr("Home")}>
-        <a href="/calendar">{tr("Calendar")}</a>
-        <a href="/predictions">{tr("Predictions")}</a>
-        <a href="/rankings">{tr("Rankings")}</a>
-        <a href="/transfers">{tr("Transfers")}</a>
-        <a href="/compare">{tr("Compare")}</a>
-        <a href="/news">{tr("News")}</a>
-        <a href="/archives">{tr("Archives of past seasons")}</a>
-        <a className="navend" href="/about">{tr("About")}</a>
-      </nav>
+      <SiteNav />
 
       <div className="hero">
         <div>
@@ -161,13 +203,10 @@ function HomeView({ initial }) {
         <a className="btn pri" href={siteHref("kickoff")}>Kickoff ›</a>
       </div>
 
+      <TodayPulse events={matchEvents} />
       <MyTeams initial={initial} />
       <LatestNews news={initial.news} />
-      <MatchModalProvider state={initial} events={matchEvents}>
-        <MatchStrip events={matchEvents} Crest={Crest} showEvent today />
-        <MatchStrip events={matchEvents} Crest={Crest} showEvent skipToday />
-        <MatchStrip events={matchEvents} Crest={Crest} showEvent recent />
-      </MatchModalProvider>
+      <HomeStrips events={matchEvents} state={initial} />
 
       <section>
         <h2><a href={siteHref("kickoff")}>VCT 2027: EMEA Kickoff</a></h2>
@@ -187,8 +226,8 @@ function HomeView({ initial }) {
         <div className="evgroup">
           <h3>Europe</h3>
           <div className="evgrid">
-            {card("q1", "Qualifier 1", tr("256 teams · top 4 go on"), tr("Qualified"))}
-            {card("q2", "Qualifier 2", tr("64 teams · top 4 go on"), tr("Qualified"))}
+            {card("q1", "Qualifier 1", tr("{n} teams · top 4 go on", { n: initial.qualifiers.q1.slots.length }), tr("Qualified"))}
+            {card("q2", "Qualifier 2", tr("{n} teams · top 4 go on", { n: initial.qualifiers.q2.slots.length }), tr("Qualified"))}
             {card("playoffs", "Qualifier Playoffs", tr("Swiss + bracket"), tr("To the Kickoff"))}
           </div>
         </div>

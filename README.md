@@ -237,6 +237,13 @@ La navigation tient dans une seule carte (site et éditeur) : la bande du haut p
 
 Les alertes partent dans la langue du navigateur abonné ; Discord est en français, ou dans `DISCORD_LANG`.
 
+## Suivi de Toornament
+
+`lib/toornament.js` relit les qualifiers EU, ME et NA sur Toornament : équipes, line-ups, horaires, matchs en cours et résultats. Ce qu un éditeur change à la main reste tel quel. Le suivi tourne à chaque visite et via `/api/tick` (au plus un événement toutes les 30 secondes, une minute par événement autour de ses matchs). Son état se lit dans l éditeur, section « Suivi de Toornament ».
+
+- `/parcours/<événement>/<équipe>` : le parcours d une équipe, à partager.
+- Éditeur : « Saisie rapide » sur la page d un qualifier, « Importer des nationalités » sur l accueil.
+
 ## Alertes et tâches régulières
 
 Les alertes de match passent par les services de notification des navigateurs (`public/sw.js`, `lib/push.js`) : elles arrivent même site fermé, pour les équipes favorites du visiteur, ou pour tous les matchs s'il n'en a aucune. Elles partent juste après chaque action d'un éditeur. Pour les matchs dont l'heure prévue arrive sans action, il faut un passage régulier : un service gratuit comme cron-job.org peut appeler `/api/tick` chaque minute (à appeler plus souvent, il ne fait rien de plus, chaque tâche ayant son tour dans la base).

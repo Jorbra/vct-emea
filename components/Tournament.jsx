@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
+import SiteNav from "./SiteNav.jsx";
 import { ThemeSwitch } from "./theme.jsx";
 import SearchBar from "./SearchBar.jsx";
 import { EmeaMark } from "./Brand.jsx";
@@ -648,6 +649,7 @@ function TournamentView({ initial, start, archive }) {
         <h1 className="brandh"><a className="homelink" href="/" title={tr("Home")}><EmeaMark /></a><span>{event === "playoffs" ? <>{evTitle}{tab === "swiss" ? tr(" - Swiss Stage") : ""}</> : evTitle}</span></h1>
         <SearchBar /><div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
+      <SiteNav />
 
       {archive && <div className="archbar"><b>{tr("Archive")} · {archive.name}</b><a href="/">{tr("Back to the current season")}</a></div>}
       {!isGc && (

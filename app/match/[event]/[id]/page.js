@@ -6,6 +6,7 @@ import { LANG_COOKIE, makeT, normLang } from "../../../../lib/i18n.js";
 import { eventData, matchesOf } from "../../../../lib/matchlist.js";
 import { EVENT_NAMES, siteHref } from "../../../../lib/paths.js";
 import { TIME_EVENTS } from "../../../../lib/schedule.js";
+import { workSoon } from "../../../../lib/readsoon.js";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,7 @@ function load(event, id) {
 
 /** A match's own page (/match/kickoff/u1-1): what its window shows, at an address that can be shared. */
 export default async function Page({ params }) {
+  workSoon();
   const { event, id } = await params;
   const data = load(event, id);
   if (!data) notFound();

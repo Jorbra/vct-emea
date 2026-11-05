@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
+import SiteNav from "./SiteNav.jsx";
 import { ThemeSwitch } from "./theme.jsx";
 import { EmeaMark } from "./Brand.jsx";
 import { Crest } from "./Crest.jsx";
@@ -109,6 +110,7 @@ function View({ initial }) {
         <SearchBar />
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
+      <SiteNav />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › <span>{tr("Calendar")}</span></nav>
       <div className="calbar">
         <div className="navpills" role="group" aria-label={tr("Region")}>

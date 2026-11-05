@@ -1,6 +1,7 @@
 "use client";
 
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
+import SiteNav from "./SiteNav.jsx";
 import { ThemeSwitch } from "./theme.jsx";
 import { EmeaMark } from "./Brand.jsx";
 import SearchBar from "./SearchBar.jsx";
@@ -15,6 +16,7 @@ function View() {
         <SearchBar />
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
+      <SiteNav />
       <div className="nf">
         <div className="nfcode">404</div>
         <h2>{tr("This page does not exist.")}</h2>

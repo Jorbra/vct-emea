@@ -932,6 +932,67 @@ function GcAdmin({ teams, onChange }) {
   );
 }
 
+/** One click per result: the matches waiting for one, by start time, in a compact list. */
+function QuickScores({ event, todo, name, onChange }) {
+  const tr = useT();
+  const { times } = useMatchTimes();
+  const [q, setQ] = useState("");
+  const [busy, setBusy] = useState("");
+  const [gone, setGone] = useState({});
+  const [err, setErr] = useState("");
+  const plain = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const wait = todo.filter((m) => m.winner == null && !gone[m.id]).filter((m) => !q || plain(name(m.a)).includes(plain(q)) || plain(name(m.b)).includes(plain(q)));
+  if (!todo.some((m) => m.winner == null)) return null;
+  const groups = [];
+  for (const m of [...wait].sort((a, b) => (times[a.id] || "z").localeCompare(times[b.id] || "z"))) {
+    const at = times[m.id] || "";
+    const g = groups[groups.length - 1];
+    if (g && g.at === at) g.items.push(m); else groups.push({ at, items: [m] });
+  }
+  const results = (bo) => {
+    const need = Math.ceil(bo / 2);
+    const lose = Array.from({ length: need }, (_, i) => i);
+    return [...lose.map((x) => [need, x]), ...[...lose].reverse().map((x) => [x, need])];
+  };
+  async function save(m, sa, sb) {
+    setBusy(m.id);
+    setErr("");
+    try {
+      await call("/api/q/score", { event, id: m.id, sa, sb });
+      setGone((g) => ({ ...g, [m.id]: true }));
+      onChange();
+    } catch (e) {
+      setErr(tr.server(e.message));
+    } finally {
+      setBusy("");
+    }
+  }
+  return (
+    <section>
+      <h2>{tr("Quick scores")} <small>{wait.length}</small></h2>
+      <p className="hint">{tr("One click per result; the winner goes through at once. Undo brings the last one back.")}</p>
+      <input className="quickfind" type="search" placeholder={tr("Find a team")} aria-label={tr("Find a team")} value={q} onChange={(e) => setQ(e.target.value)} />
+      {err && <p className="err">{err}</p>}
+      {groups.map((g, i) => (
+        <details key={g.at || "none"} className="quickgroup" open={i === 0}>
+          <summary><b>{g.at ? new Date(g.at).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : tr("No time")}</b> <small>({g.items.length})</small></summary>
+          {g.items.map((m) => (
+            <div className="quickrow" key={m.id}>
+              <span className="tn qa">{name(m.a)}</span>
+              <span className="quickbtns">
+                {results(m.bo).map(([sa, sb]) => (
+                  <button type="button" key={`${sa}-${sb}`} className={"quickbtn" + (sa > sb ? " a" : " b")} disabled={busy === m.id} onClick={() => save(m, sa, sb)}>{sa}-{sb}</button>
+                ))}
+              </span>
+              <span className="tn qb">{name(m.b)}</span>
+            </div>
+          ))}
+        </details>
+      ))}
+    </section>
+  );
+}
+
 /** One Qualifier: paste the teams in bracket order, set the best-of per round, enter scores. */
 function QualifierAdmin({ event, data, onChange }) {
   const tr = useT();
@@ -1008,6 +1069,7 @@ function QualifierAdmin({ event, data, onChange }) {
           <button className="btn" disabled={busy} onClick={() => run("/api/q/config", { bo: Object.fromEntries(rounds.map((r) => [r.key, bo[r.key] ?? data.bo[r.key] ?? r.bo])) })}>{tr("Save formats")}</button>
         </div>
       </section>
+      <QuickScores event={event} todo={todo} name={name} onChange={onChange} />
       <section>
         <h2>{tr("Scores")}</h2>
         {todo.length === 0 && <p className="hint">{tr("No match to play yet. Matches appear here once both teams are known.")}</p>}

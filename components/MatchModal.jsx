@@ -89,7 +89,7 @@ function Rosters({ a, b }) {
 }
 
 /** Copies the address of the match's page. */
-function CopyLink({ href }) {
+export function CopyLink({ href }) {
   const tr = useT();
   const [done, setDone] = useState(false);
   const copy = async () => {

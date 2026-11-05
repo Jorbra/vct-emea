@@ -5,6 +5,7 @@ import { getDb, getState } from "../../lib/db.js";
 import { LANG_COOKIE, normLang } from "../../lib/i18n.js";
 import { parseSitePath, siteHref } from "../../lib/paths.js";
 import { eventPreview, sharedPreview } from "../../lib/preview.js";
+import { workSoon } from "../../lib/readsoon.js";
 
 // Always read the database on request: results change while the event runs.
 export const dynamic = "force-dynamic";
@@ -19,6 +20,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
+  workSoon();
   const { slug = [] } = await params;
   const path = "/" + slug.join("/");
   const start = parseSitePath(path);

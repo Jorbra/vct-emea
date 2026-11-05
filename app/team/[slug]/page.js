@@ -10,6 +10,7 @@ import { lpData } from "../../../lib/lpdata.js";
 import { requestDue, requestFetch, teamOutdated, updateDue } from "../../../lib/teamfetch.js";
 import { orgOf, teamProfile } from "../../../lib/teams.js";
 import { sharedPreview, teamPreview } from "../../../lib/preview.js";
+import { workSoon } from "../../../lib/readsoon.js";
 
 // Always read the database on request: results change while the events run.
 export const dynamic = "force-dynamic";
@@ -19,6 +20,7 @@ export const dynamic = "force-dynamic";
  * known to Liquipedia: what Liquipedia says, read when the page is first opened.
  */
 export default async function Page({ params, searchParams }) {
+  workSoon();
   const { slug } = await params;
   const update = (await searchParams).maj === "1"; // opened from the search bar: read again now
   const key = String(slug || "").toLowerCase();

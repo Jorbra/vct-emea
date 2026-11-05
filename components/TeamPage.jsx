@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
+import SiteNav from "./SiteNav.jsx";
 import { ThemeSwitch } from "./theme.jsx";
 import SearchBar from "./SearchBar.jsx";
 import { EmeaMark } from "./Brand.jsx";
@@ -299,6 +300,7 @@ function OutsideTeam({ lp, org = [], outside, vlr, updating }) {
         <h1 className="brandh"><a className="homelink" href="/" title={tr("Home")}><EmeaMark /></a><span>{outside.name}</span></h1>
         <SearchBar /><div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
+      <SiteNav />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › <span>{tr("Teams")}</span> › <span>{outside.name}</span></nav>
       <div className="thead">
         {outside.logo && <span className="thlogo"><LpImg f={outside.logo} /></span>}
@@ -350,7 +352,11 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating }) {
         <h1 className="brandh"><a className="homelink" href="/" title={tr("Home")}><EmeaMark /></a><span>{p.name}</span></h1>
         <SearchBar /><div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
+      <SiteNav />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › <span>{tr("Teams")}</span> › <span>{p.name}</span></nav>
+      {p.events.some((e) => e.matches.length) && (
+        <p className="pathlinks">{tr("Run")} : {p.events.filter((e) => e.matches.length).map((e, n) => <span key={e.event}>{n ? " · " : ""}<a href={`/parcours/${e.event}/${slug}`}>{tr(EVENT_NAMES[e.event])}</a></span>)}</p>
+      )}
 
       <div className="thead">
         <Crest team={t} />
