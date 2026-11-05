@@ -6,6 +6,7 @@ import { LANG_COOKIE, makeT, normLang } from "../../../../lib/i18n.js";
 import { eventData, matchesOf } from "../../../../lib/matchlist.js";
 import { EVENT_NAMES, siteHref } from "../../../../lib/paths.js";
 import { TIME_EVENTS } from "../../../../lib/schedule.js";
+import { scoreLabel } from "../../../../lib/scoretext.js";
 import { workSoon } from "../../../../lib/readsoon.js";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +52,7 @@ export async function generateMetadata({ params }) {
   const tr = makeT(normLang((await cookies()).get(LANG_COOKIE)?.value));
   const a = (m.a && m.a.name) || tr("TBD");
   const b = (m.b && m.b.name) || tr("TBD");
-  const score = m.sa != null && m.sb != null ? ` ${m.sa} – ${m.sb} ` : " vs ";
+  const score = m.sa != null && m.sb != null ? ` ${scoreLabel(m, tr)} ` : " vs ";
   const title = `${a}${score}${b} · VCT EMEA`;
   const description = [tr(EVENT_NAMES[event]), m.round.map(([k, v]) => tr(k, v)).join(" · "), m.bo ? `Bo${m.bo}` : "", e.times[id] ? new Date(e.times[id]).toUTCString().slice(0, 22) : ""].filter(Boolean).join(" · ");
   const image = `/api/og/${event}/${id}`;

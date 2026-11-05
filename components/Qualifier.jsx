@@ -8,6 +8,7 @@ import { useT } from "./lang.jsx";
 import { Schedule } from "./matchTime.jsx";
 import { matchesOf } from "../lib/matchlist.js";
 import { useOpenMatch } from "./openMatch.js";
+import { parseNote, sideScore } from "../lib/scoretext.js";
 import { useFavorites } from "./favorites.js";
 import { formatMatchTime } from "../lib/schedule.js";
 import { teamSlug } from "../lib/paths.js";
@@ -16,7 +17,7 @@ import { useMatchTimes } from "./matchTime.jsx";
 const CELL = 56; // px per first-round match; every later round doubles it
 
 /** Name, crest and score of one side of a match. */
-function Side({ slot, slots, m, side, bye, lit, fav }) {
+function Side({ slot, slots, m, side, bye, lit, fav, note }) {
   const tr = useT();
   const team = slot ? slots[slot - 1] : null;
   const res = m.winner != null;
@@ -28,13 +29,13 @@ function Side({ slot, slots, m, side, bye, lit, fav }) {
     <div className={"bl" + (res ? (win ? " bw" : " lo") : "") + (lit ? " lit" : "") + (fav ? " fav" : "")} data-s={team ? slot : undefined}>
       <Crest team={team} />
       <span className={"tn" + (team ? "" : " tbdn")}>{label}</span>
-      <span className="bs">{res && score != null && !m.bye ? score : ""}</span>
+      <span className="bs" title={note && note.kind === "ff" ? tr("Forfeit") : undefined}>{res && score != null && !m.bye ? sideScore({ note, win: m.winner === m.a ? "a" : "b" }, side, score) : ""}</span>
     </div>
   );
 }
 
 /** One match. Clicks and hovers are handled once, by the bracket around it. lit: the side of the team being followed, "a" or "b". */
-const MatchBox = memo(function MatchBox({ m, slots, lit, canOpen, favs }) {
+const MatchBox = memo(function MatchBox({ m, slots, lit, canOpen, favs, note }) {
   const tr = useT();
   const emptyR1 = m.first && !m.a && !m.b;
   const can = canOpen && !emptyR1 && !m.bye;
@@ -42,15 +43,15 @@ const MatchBox = memo(function MatchBox({ m, slots, lit, canOpen, favs }) {
   return (
     <div className={"bbox qbox" + (emptyR1 ? " void" : "") + (can ? " can" : "") + (lit ? " lit" : "")} data-m={m.id}
       {...(can ? { "data-open": "1", role: "button", tabIndex: 0, "aria-label": `${nameOf(m.a)} vs ${nameOf(m.b)}` } : {})}>
-      <Side slot={m.a} slots={slots} m={m} side="a" bye={emptyR1} lit={lit === "a"} fav={favs.includes("a")} />
-      <Side slot={m.b} slots={slots} m={m} side="b" bye={emptyR1} lit={lit === "b"} fav={favs.includes("b")} />
+      <Side slot={m.a} slots={slots} m={m} side="a" bye={emptyR1} lit={lit === "a"} fav={favs.includes("a")} note={note} />
+      <Side slot={m.b} slots={slots} m={m} side="b" bye={emptyR1} lit={lit === "b"} fav={favs.includes("b")} note={note} />
     </div>
   );
 });
 
 const plain = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
 
-export function BigBracket({ event, slots, scores, bo }) {
+export function BigBracket({ event, slots, scores, bo, notes = {} }) {
   const tr = useT();
   const bracket = useMemo(() => buildBracket(slots, scores, bo), [slots, scores, bo]);
   const third = bracket.byId[matchId("third", 0)];
@@ -159,14 +160,14 @@ export function BigBracket({ event, slots, scores, bo }) {
             const m = bracket.byId[matchId(r.key, i)];
             return (
               <div key={m.id} className={"qcell" + (ri < rounds.length - 1 ? (i % 2 ? " lo" : " up") : "") + (ri > 0 ? " in" : "")}>
-                <MatchBox m={m} slots={slots} lit={litOf(m)} canOpen={canOpen} favs={favsOf(m)} />
+                <MatchBox m={m} slots={slots} lit={litOf(m)} canOpen={canOpen} favs={favsOf(m)} note={m.winner != null ? notes[m.id] && parseNote(notes[m.id]) : null} />
               </div>
             );
           })}
           {r.key === "gf" && (
             <div className="qthird">
               <div className="qh">{tr(THIRD.name)}</div>
-              <MatchBox m={third} slots={slots} lit={litOf(third)} canOpen={canOpen} favs={favsOf(third)} />
+              <MatchBox m={third} slots={slots} lit={litOf(third)} canOpen={canOpen} favs={favsOf(third)} note={third.winner != null ? notes[third.id] && parseNote(notes[third.id]) : null} />
             </div>
           )}
         </div>
@@ -280,7 +281,7 @@ export default function Qualifier({ event, data, onGo, next = "playoffs", qualif
 
       <section>
         <h2>{tr("Results")}</h2>
-        <BigBracket event={event} slots={slots} scores={scores} bo={bo} />
+        <BigBracket event={event} slots={slots} scores={scores} bo={bo} notes={data.notes} />
       </section>
     </div>
   );

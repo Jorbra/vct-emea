@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { scoreLabel } from "../../../../../lib/scoretext.js";
 import { getDb, getState } from "../../../../../lib/db.js";
 import { eventData, matchesOf } from "../../../../../lib/matchlist.js";
 import { EVENT_NAMES } from "../../../../../lib/paths.js";
@@ -38,7 +39,7 @@ export async function GET(_req, { params }) {
   if (!m) return new Response("Not found", { status: 404 });
   const done = m.sa != null && m.sb != null;
   const live = !done && state.live && state.live[event] && state.live[event][id];
-  const middle = done ? `${m.sa} : ${m.sb}` : live ? `${live.la} : ${live.lb}` : "VS";
+  const middle = done ? scoreLabel(m, (x) => (x === "Forfeit" ? "FORFAIT" : x === "Win" ? "VICTOIRE" : x), ":") : live ? `${live.la} : ${live.lb}` : "VS";
   const round = m.round.map(([k, v]) => String(k).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ""))).join(" · ");
   return new ImageResponse(
     (

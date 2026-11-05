@@ -1,6 +1,7 @@
 "use client";
 
 import { localeOf } from "../lib/i18n.js";
+import { scoreLabel, sideScore } from "../lib/scoretext.js";
 import { Fragment, createContext, useContext, useEffect, useRef, useState } from "react";
 import { Crest } from "./Crest.jsx";
 import { useT } from "./lang.jsx";
@@ -199,7 +200,7 @@ export function Schedule({ items, Crest }) {
         <span className="schr">{label(m)}{m.bo ? <span className="bobadge">Bo{m.bo}</span> : null}</span>
         <span className="schteams">
           {side(m.a, m.win === "a", m.win === "b")}
-          <span className={"schs" + (live ? " lv" : "")}>{done ? `${m.sa} – ${m.sb}` : live && liveOf(m) ? `${liveOf(m).a} – ${liveOf(m).b}` : "vs"}</span>
+          <span className={"schs" + (live ? " lv" : "")}>{done ? scoreLabel(m, tr) : live && liveOf(m) ? `${liveOf(m).a} – ${liveOf(m).b}` : "vs"}</span>
           {side(m.b, m.win === "b", m.win === "a")}
         </span>
       </div>
@@ -360,8 +361,8 @@ export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent 
                 </span>
                 {showEvent && <span className="mcev">{EVENT_SHORT[m.event]}</span>}
                 <span className="mcr">{label(m)}</span>
-                {line(m.a, recent ? m.sa : m.live && m.score ? m.score.a : null, recent && m.win === "a", recent && m.win === "b")}
-                {line(m.b, recent ? m.sb : m.live && m.score ? m.score.b : null, recent && m.win === "b", recent && m.win === "a")}
+                {line(m.a, recent ? sideScore(m, "a", m.sa) : m.live && m.score ? m.score.a : null, recent && m.win === "a", recent && m.win === "b")}
+                {line(m.b, recent ? sideScore(m, "b", m.sb) : m.live && m.score ? m.score.b : null, recent && m.win === "b", recent && m.win === "a")}
                 {m.live && m.stream && <a className="mcstream" href={m.stream} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>▶ {tr("Watch")}</a>}
               </div>
             );

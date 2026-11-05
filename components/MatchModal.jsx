@@ -10,6 +10,7 @@ import { OpenMatchCtx } from "./openMatch.js";
 import { embedUrl, googleCalendarUrl, icsFile } from "../lib/media.js";
 import { compareTeams, knownPlayer, playerHref } from "../lib/playerstats.js";
 import { parseRoster } from "../lib/tournament.js";
+import { scoreLabel } from "../lib/scoretext.js";
 import { Flag } from "./TeamCard.jsx";
 
 export { EVENT_NAMES };
@@ -146,7 +147,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
     const inner = <><Crest team={t} /><span className="tn">{name(t)}</span></>;
     return <div className={"mmteam " + side + (won ? " w" : m.win ? " lo" : "")}>{href ? <a href={href}>{inner}</a> : inner}</div>;
   };
-  const score = done ? `${m.sa} : ${m.sb}` : live ? `${live.a} : ${live.b}` : "vs";
+  const score = done ? scoreLabel(m, tr, ":") : live ? `${live.a} : ${live.b}` : "vs";
   const who = (player) => (state && knownPlayer(state, player) ? <a href={playerHref(player)}>{player}</a> : player);
   return (
     <Shell page={page} title={title} boxRef={ref} onClose={onClose}>

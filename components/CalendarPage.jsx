@@ -14,6 +14,7 @@ import { AlertsButton } from "./MatchAlerts.jsx";
 import { useAutoRefresh } from "./autoRefresh.js";
 import { localeOf } from "../lib/i18n.js";
 import { allMatches, eventData, matchesOf } from "../lib/matchlist.js";
+import { scoreLabel } from "../lib/scoretext.js";
 import { EVENT_NAMES, siteHref, teamSlug } from "../lib/paths.js";
 import { TIME_EVENTS } from "../lib/schedule.js";
 
@@ -45,7 +46,7 @@ function Agenda({ days }) {
             <span className="schr">{tr(EVENT_NAMES[m.event])}</span>
             <span className="schteams">
               <span className={"scht" + (m.win === "a" ? " w" : m.win ? " lo" : "")}><Crest team={m.a} /><span className="tn">{(m.a && m.a.name) || tr("TBD")}</span></span>
-              <span className="schs">{done ? `${m.sa} – ${m.sb}` : "vs"}</span>
+              <span className="schs">{done ? scoreLabel(m, tr) : "vs"}</span>
               <span className={"scht" + (m.win === "b" ? " w" : m.win ? " lo" : "")}><Crest team={m.b} /><span className="tn">{(m.b && m.b.name) || tr("TBD")}</span></span>
             </span>
           </div>

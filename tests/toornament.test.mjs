@@ -5,6 +5,8 @@ import { applySync, planSync, readMatch, readParticipant, syncDue } from "../lib
 import { openDb, getQualifier, getMatchTimes, getMatchLive } from "../lib/db.js";
 import { buildBracket, roundsFor } from "../lib/bracket.js";
 import { groupMessages } from "../lib/discord.js";
+import { matchesOf } from "../lib/matchlist.js";
+import { scoreLabel } from "../lib/scoretext.js";
 import { importFlags, setQualifierSlot, saveQualifierScore } from "../lib/qactions.js";
 import { setMatchTime } from "../lib/db.js";
 
@@ -72,11 +74,25 @@ test("a result on Toornament's side reversed from the site's, a forfeit and a nu
   rows[1].status = "completed"; rows[1].a.result = "win"; rows[1].b.result = "loss"; rows[1].a.forfeit = true;
   win(rows[2], 13, 7);
   const plan = round(db, rows);
-  assert.equal(plan.guessed, 2);
+  assert.equal(plan.guessed, 0);
+  const notes = getQualifier(db, "meq1").notes;
+  assert.deepEqual(notes, { "qf-2": "ff", "qf-3": "raw:13-7" });
+  const items = matchesOf("meq1", getQualifier(db, "meq1"));
+  const tr = (x) => x;
+  assert.equal(scoreLabel(items.find((m) => m.id === "qf-1"), tr), "1 – 2");
+  assert.equal(scoreLabel(items.find((m) => m.id === "qf-2"), tr), "Forfeit");
+  assert.equal(scoreLabel(items.find((m) => m.id === "qf-3"), tr), "13 – 7");
+  // a winner with no number at all, and a score corrected by hand drops the note
+  rows[3].status = "completed"; rows[3].a.result = "win"; rows[3].b.result = "loss";
+  const again = round(db, rows);
+  assert.equal(again.guessed, 1);
+  assert.equal(getQualifier(db, "meq1").notes["qf-4"], "win");
+  assert.equal(saveQualifierScore(db, { event: "meq1", id: "qf-3", sa: 2, sb: 1 }).ok, true);
+  assert.equal(getQualifier(db, "meq1").notes["qf-3"], undefined);
   const s = getQualifier(db, "meq1").scores;
   assert.deepEqual([s["qf-1"].sa, s["qf-1"].sb], [1, 2]); // site's a is A, who lost
   assert.deepEqual([s["qf-2"].sa, s["qf-2"].sb], [2, 0]);
-  assert.deepEqual([s["qf-3"].sa, s["qf-3"].sb], [2, 0]);
+  assert.deepEqual([s["qf-3"].sa, s["qf-3"].sb], [2, 1]);
 });
 
 test("what an editor changed by hand stays; what Toornament wrote follows it", () => {

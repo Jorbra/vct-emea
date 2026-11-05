@@ -14,6 +14,7 @@ import { EVENT_NAMES, MatchModalProvider } from "./MatchModal.jsx";
 import { useOpenMatch } from "./openMatch.js";
 import { useFavorites } from "./favorites.js";
 import { byLeaveYear, mergeStints, teamProfile } from "../lib/teams.js";
+import { scoreLabel } from "../lib/scoretext.js";
 import { dayText, moneyText } from "../lib/format.js";
 import { playerHref } from "../lib/playerstats.js";
 import LpImg from "./LpImg.jsx";
@@ -62,7 +63,7 @@ function MatchTable({ rows, slug }) {
                 <td className="nowrap"><When iso={m.at} /></td>
                 <td>{tr(EVENT_NAMES[m.event])}</td>
                 <td>{m.round.map(([k, v]) => tr(k, v)).join(" · ")} <span className="bobadge">Bo{m.bo}</span></td>
-                <td className="tscore">{done ? `${f} – ${g}` : m.live ? tr("LIVE") : "vs"}</td>
+                <td className="tscore">{done ? scoreLabel({ sa: f, sb: g, note: m.note && m.note.kind === "raw" && side === "b" ? { kind: "raw", a: m.note.b, b: m.note.a } : m.note }, tr) : m.live ? tr("LIVE") : "vs"}</td>
                 <td>
                   <span className="topp">
                     <Crest team={opp} />

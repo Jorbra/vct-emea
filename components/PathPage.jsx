@@ -10,6 +10,7 @@ import { CopyLink } from "./MatchModal.jsx";
 import { useAutoRefresh } from "./autoRefresh.js";
 import { useEffect, useState } from "react";
 import { formatMatchTime } from "../lib/schedule.js";
+import { scoreLabel } from "../lib/scoretext.js";
 import { EVENT_NAMES, teamHref } from "../lib/paths.js";
 
 function When({ iso }) {
@@ -51,7 +52,7 @@ function View({ event, href, team, rows, slug }) {
             <a className={"pathrow" + (m.sa == null ? " todo" : m.won ? " won" : " lost")} href={`/match/${event}/${m.id}`}>
               <span className="pathround">{label(m)}{m.bo ? <small> · Bo{m.bo}</small> : null}<When iso={m.at} /></span>
               <span className="pathopp"><Crest team={m.opp} /><span className="tn">{(m.opp && m.opp.name) || tr("TBD")}</span></span>
-              <span className="pathres">{m.sa == null ? tr("To play") : `${m.mine} – ${m.theirs}`}</span>
+              <span className="pathres">{m.sa == null ? tr("To play") : scoreLabel({ sa: m.mine, sb: m.theirs, note: m.note }, tr)}</span>
             </a>
           </li>
         ))}

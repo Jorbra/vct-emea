@@ -20,7 +20,7 @@ function load(event, slug) {
     const a = of(m.a);
     return {
       id: m.id, round: m.round, bo: m.bo, at: times[m.id] || "", opp: a ? m.b : m.a,
-      sa: m.sa, mine: a ? m.sa : m.sb, theirs: a ? m.sb : m.sa, won: m.win === (a ? "a" : "b"), team: a ? m.a : m.b,
+      sa: m.sa, note: m.note && m.note.kind === "raw" && !a ? { kind: "raw", a: m.note.b, b: m.note.a } : m.note || null, mine: a ? m.sa : m.sb, theirs: a ? m.sb : m.sa, won: m.win === (a ? "a" : "b"), team: a ? m.a : m.b,
     };
   });
   return rows.length ? { rows, team: rows[0].team } : null;
