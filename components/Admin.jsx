@@ -240,9 +240,11 @@ function Flag({ cc }) {
   return <img className="aflag" src={`https://flagcdn.com/w40/${cc}.png`} alt={cc.toUpperCase()} width="24" height="18" />;
 }
 
-function Login() {
+/** The way in. A signed-in account with no access is told so; the password form stays one click away, for the main password. */
+function Login({ denied = "" }) {
   const tr = useT();
   const router = useRouter();
+  const [showForm, setShowForm] = useState(!denied);
   const [pw, setPw] = useState("");
   const [who, setWho] = useState("");
   const [err, setErr] = useState("");
@@ -259,7 +261,14 @@ function Login() {
   return (
     <div className="adm wrap">
       <div className="topbar"><h1 className="brandh"><EmeaMark /><span>{tr("Editor")}</span></h1><div className="prefs"><ThemeSwitch /><LangSwitch /></div></div>
-      <form className="loginform" onSubmit={submit}>
+      {denied && (
+        <div className="noaccess" role="alert">
+          <h2>{tr("You do not have access to the editor")}</h2>
+          <p>{tr("Your account {name} cannot open the editor. If you should have access, ask the site's main account.", { name: denied })}</p>
+          {!showForm && <button type="button" className="linklike" onClick={() => setShowForm(true)}>{tr("I have an editor password")}</button>}
+        </div>
+      )}
+      {showForm && <form className="loginform" onSubmit={submit}>
         <label className="f" htmlFor="who">
           {tr("Name (empty for the main account)")}
           <input id="who" autoComplete="username" value={who} onChange={(e) => setWho(e.target.value)} />
@@ -270,7 +279,7 @@ function Login() {
         </label>
         <button className="btn pri" type="submit">{tr("Sign in")}</button>
         <span className="err">{err}</span>
-      </form>
+      </form>}
       <p><a href="/">{tr("← Back to the site")}</a></p>
     </div>
   );
@@ -1183,7 +1192,7 @@ function EventInfoForm({ event, info, onSaved, onError }) {
   );
 }
 
-function AdminView({ initial, isAdmin, start }) {
+function AdminView({ initial, isAdmin, denied = "", start }) {
   const tr = useT();
   const router = useRouter();
   // Changes made elsewhere (another editor, another tab, the database) show up by themselves; nothing while typing.
@@ -1241,7 +1250,7 @@ function AdminView({ initial, isAdmin, start }) {
   const name = (id) => (id && byId[id] && byId[id].name) || "TBD";
   const teamOf = (id) => byId[id] || null;
   const rec = useMemo(() => records(teams, matches), [teams, matches]);
-  if (!isAdmin) return <Login />;
+  if (!isAdmin) return <Login denied={denied} />;
 
   const swiss = matches.filter((m) => m.stage === "swiss");
   const elim = matches.filter((m) => m.stage === "elim");

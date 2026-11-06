@@ -678,6 +678,9 @@ a.btn { display: inline-block; text-decoration: none; }
 .acctbox summary { cursor: pointer; }
 .acctform { display: grid; gap: 10px; margin-top: 10px; }
 .acctform .btn { justify-self: start; }
+.noaccess { margin: 16px 0; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-inline-start: 4px solid var(--danger); border-radius: 6px; }
+.noaccess h2 { margin: 0 0 6px; }
+.noaccess p { margin: 0 0 8px; }
 .acctroles { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; }
 .acctroles li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .acctroles small { color: var(--muted); }
