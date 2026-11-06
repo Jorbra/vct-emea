@@ -94,8 +94,21 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
 /** Writing, editing and removing news. Plain text: line breaks are kept. */
 /** Where the rosters typed here and Liquipedia's differ, and a button to follow Liquipedia. */
 /** Visitors' accounts: no e-mail exists, so a forgotten password comes through here. Only for the main account. */
-function VisitorAccounts({ count, call, onDone }) {
+function VisitorAccounts({ count, roles, call, onDone }) {
   const tr = useT();
+  const [list, setList] = useState(roles);
+  const [info, setInfo] = useState("");
+  async function role(value) {
+    setErr(""); setInfo(""); setGiven(null);
+    try {
+      const j = await call("/api/accounts", { action: "role", name, role: value });
+      setList(j.roles);
+      setInfo(tr.server(j.message));
+      setName("");
+    } catch (e) {
+      setErr(tr.server(e.message));
+    }
+  }
   const [name, setName] = useState("");
   const [given, setGiven] = useState(null);
   const [sure, setSure] = useState(false);
@@ -129,6 +142,13 @@ function VisitorAccounts({ count, call, onDone }) {
         <button type="button" className={"btn" + (sure ? " danger" : "")} disabled={!name.trim()} onClick={() => (sure ? remove() : setSure(true))}>{sure ? tr("Confirm: delete") : tr("Delete the account")}</button>
       </div>
       {err && <p className="err">{err}</p>}
+      <div className="row">
+        <button type="button" className="btn" disabled={!name.trim()} onClick={() => role("owner")}>{tr("Make it the main account")}</button>
+        <button type="button" className="btn" disabled={!name.trim()} onClick={() => role("editor")}>{tr("Give editor access")}</button>
+        <button type="button" className="btn" disabled={!name.trim()} onClick={() => role("")}>{tr("Take away the access")}</button>
+      </div>
+      {info && <p className="hint" role="status">{info}</p>}
+      {list.length > 0 && <ul className="acctroles">{list.map((r) => <li key={r.name}><b>{r.name}</b> <small>{r.role === "owner" ? tr("Main account") : tr("Editor")}</small></li>)}</ul>}
       {given && <p className="note" role="status">{tr("New password for {name}:", { name: given.name })} <code>{given.password}</code></p>}
     </details>
   );
@@ -363,7 +383,7 @@ function Manage({ admin, call, onDone }) {
       <RosterDiffs list={admin.rosterDiffs || []} call={call} onDone={onDone} />
       <SyncStatus list={admin.sync || {}} />
       <FlagImport call={call} onDone={onDone} />
-      {!admin.who && <VisitorAccounts count={admin.accounts || 0} call={call} onDone={onDone} />}
+      {!admin.who && <VisitorAccounts count={admin.accounts || 0} roles={admin.roles || []} call={call} onDone={onDone} />}
       <NewsEditor news={admin.news || []} call={call} onDone={onDone} />
       <Voters voters={admin.voters || []} call={call} onDone={onDone} />
       <Seasons seasons={admin.seasons || []} call={call} onDone={onDone} />

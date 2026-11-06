@@ -2,7 +2,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { openDb } from "../lib/db.js";
-import { changePassword, cleanFavorites, cleanPrefs, deleteAccount, logIn, makeAccountToken, readAccount, readAccountToken, removeAccount, resetPassword, saveAccount, signUp } from "../lib/accounts.js";
+import { accountEditor, listRoles, setRole, changePassword, cleanFavorites, cleanPrefs, deleteAccount, logIn, makeAccountToken, readAccount, readAccountToken, removeAccount, resetPassword, saveAccount, signUp } from "../lib/accounts.js";
 import { makeToken, readToken } from "../lib/auth.js";
 
 const T1 = "a".repeat(40);
@@ -16,7 +16,7 @@ test("sign up: the name and password are checked, the password never kept nor re
   assert.equal(signUp(db, { name: "Lucas", password: "court" }).ok, false);
   const r = signUp(db, { ...good, token: T1, favorites: ["fnatic", "BAD SLUG", 3], prefs: { theme: "light", lang: "xx", evil: 1 } });
   assert.equal(r.ok, true);
-  assert.deepEqual(r.account, { name: "Lucas", token: T1, favorites: ["fnatic"], prefs: { theme: "light" } });
+  assert.deepEqual(r.account, { name: "Lucas", token: T1, favorites: ["fnatic"], prefs: { theme: "light" }, role: "" });
   assert.equal(signUp(db, { name: "LUCAS", password: "autre-mot-1" }).status, 409);
   const raw = db.prepare("SELECT * FROM accounts").get();
   assert.ok(!JSON.stringify(raw).includes("un-bon-mot"));
@@ -57,7 +57,7 @@ test("a second device brings its favorites and predictions; then the account dec
     // a favorite removed on a device is gone: no union after the login
     assert.equal(saveAccount(db, "Lucas", { favorites: ["b"], prefs: { countdown: false, lang: "tr" } }).ok, true);
     assert.equal(saveAccount(db, "Lucas", { prefs: { theme: "dark" } }).ok, true);
-    assert.deepEqual(readAccount(db, "Lucas"), { name: "Lucas", token: T1, favorites: ["b"], prefs: { countdown: false, lang: "tr", theme: "dark" } });
+    assert.deepEqual(readAccount(db, "Lucas"), { name: "Lucas", token: T1, favorites: ["b"], prefs: { countdown: false, lang: "tr", theme: "dark" }, role: "" });
     assert.equal(hash, hash);
   });
 });
@@ -97,3 +97,33 @@ test("deleting takes the predictions too; a new password from an editor works an
   assert.deepEqual(cleanFavorites("no"), []);
   assert.deepEqual(cleanPrefs({ countdown: true, theme: "red" }), { countdown: true });
 });
+
+test("editor access: nothing by default, given and taken at once, never your own by accident", () => {
+  const db = openDb(":memory:");
+  const s = "secret-secret-secret-secret";
+  signUp(db, good);
+  signUp(db, { name: "Autre", password: "encore-un-mot" });
+  const owner = makeAccountToken(s, "Lucas", 1);
+  const other = makeAccountToken(s, "Autre", 1);
+  assert.equal(accountEditor(db, owner, s), null);
+  assert.equal(setRole(db, { name: "lucas", role: "boss" }).ok, false);
+  assert.equal(setRole(db, { name: "nobody", role: "editor" }).ok, false);
+  assert.equal(setRole(db, { name: "lucas", role: "owner" }).ok, true);
+  assert.deepEqual(accountEditor(db, owner, s), { who: "", account: "Lucas" }); // same as the main account
+  assert.equal(setRole(db, { name: "autre", role: "editor", by: "Lucas" }).name, "Autre");
+  assert.deepEqual(accountEditor(db, other, s), { who: "Autre", account: "Autre" }); // an editor: not the main one
+  assert.deepEqual(listRoles(db), [{ name: "Lucas", role: "owner" }, { name: "Autre", role: "editor" }]);
+  assert.equal(setRole(db, { name: "LUCAS", role: "", by: "Lucas" }).status, 409);
+  assert.equal(setRole(db, { name: "Autre", role: "", by: "Lucas" }).ok, true);
+  assert.equal(accountEditor(db, other, s), null);
+  // a signature, an expiry and a new password all still count
+  assert.equal(accountEditor(db, owner, "other"), null);
+  assert.equal(accountEditor(db, `${owner}x`, s), null);
+  assert.equal(changePassword(db, "Lucas", { password: "un-bon-mot", next: "nouveau-mot" }).ok, true);
+  assert.equal(accountEditor(db, owner, s), null);
+  assert.equal(readAccount(db, "Lucas").role, "owner");
+  // an account never gives itself anything: the sign-up ignores any role sent
+  const r = signUp(db, { name: "Malin", password: "un-long-mot", role: "owner" });
+  assert.equal(r.account.role, "");
+});
+

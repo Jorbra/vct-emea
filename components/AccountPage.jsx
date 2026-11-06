@@ -61,12 +61,57 @@ function Door({ onIn }) {
   );
 }
 
+/** For the main account: who can open the editor. */
+function EditorAccessPanel() {
+  const tr = useT();
+  const [roles, setRoles] = useState([]);
+  const [name, setName] = useState("");
+  const [note, setNote] = useState({ ok: true, text: "" });
+  useEffect(() => {
+    fetch("/api/accounts").then((r) => (r.ok ? r.json() : null)).then((j) => { if (j) setRoles(j.roles); }).catch(() => { /* offline */ });
+  }, []);
+  async function give(who, role) {
+    setNote({ ok: true, text: "" });
+    const r = await fetch("/api/accounts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "role", name: who, role }) }).catch(() => null);
+    const j = r ? await r.json().catch(() => ({})) : {};
+    if (!r || !r.ok) { setNote({ ok: false, text: tr.server(j.error || "Network error") }); return; }
+    setRoles(j.roles);
+    setName("");
+    setNote({ ok: true, text: tr.server(j.message) });
+  }
+  return (
+    <section className="acctbox">
+      <h2>{tr("Editor access")}</h2>
+      <p className="hint">{tr("Write the exact name of an account on the site. It can then open the editor as soon as it is signed in. It takes effect at once.")}</p>
+      <form className="acctform" onSubmit={(e) => { e.preventDefault(); give(name, "editor"); }}>
+        <label className="f">{tr("Account name")}<input value={name} onChange={(e) => setName(e.target.value)} autoCapitalize="none" autoCorrect="off" spellCheck={false} required /></label>
+        <button className="btn pri" type="submit" disabled={!name.trim()}>{tr("Give editor access")}</button>
+      </form>
+      {note.text && <p className={note.ok ? "hint" : "err"} role="status">{note.text}</p>}
+      {roles.length > 0 && (
+        <ul className="acctroles">
+          {roles.map((r) => (
+            <li key={r.name}>
+              <b>{r.name}</b> <small>{r.role === "owner" ? tr("Main account") : tr("Editor")}</small>
+              {r.role === "editor" && <button type="button" className="btn" onClick={() => give(r.name, "")}>{tr("Take away")}</button>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 function Inside({ name, onOut }) {
   const tr = useT();
   const [pw, setPw] = useState({ password: "", next: "" });
   const [note, setNote] = useState({ ok: true, text: "" });
   const [del, setDel] = useState("");
   const [delErr, setDelErr] = useState("");
+  const [role, setRole] = useState("");
+  useEffect(() => {
+    fetch("/api/account").then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.account) setRole(j.account.role || ""); }).catch(() => { /* offline */ });
+  }, []);
   const say = (ok, text) => setNote({ ok, text });
   async function logout() {
     await post({ action: "logout" }).catch(() => { /* the mark goes anyway */ });
@@ -105,8 +150,12 @@ function Inside({ name, onOut }) {
           <li>{tr("your language, theme and countdown choice")}</li>
         </ul>
         <p className="hint">{tr("Match alerts are turned on device by device, since each one asks for its own permission. They follow your favorite teams.")}</p>
-        <button type="button" className="btn" onClick={logout}>{tr("Log out")}</button>
+        <div className="row">
+          {role && <a className="btn pri" href="/admin">{tr("Open the editor")}</a>}
+          <button type="button" className="btn" onClick={logout}>{tr("Log out")}</button>
+        </div>
       </section>
+      {role === "owner" && <EditorAccessPanel />}
       <section className="acctbox">
         <h2>{tr("Change my password")}</h2>
         <form onSubmit={change} className="acctform">
