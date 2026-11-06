@@ -167,6 +167,7 @@ function AboutView() {
         <p>{tr("Team, player and tournament information comes from")} <a href="https://liquipedia.net/valorant/" target="_blank" rel="noopener noreferrer">Liquipedia</a>{tr(", under the CC-BY-SA licence; it may have been reformatted here.")}</p>
         <p>{tr("Career statistics and some recent results come from")} <a href="https://www.vlr.gg/" target="_blank" rel="noopener noreferrer">vlr.gg</a>.</p>
         <h2>{tr("Your data")}</h2>
+        <p>{tr("An account is optional. It keeps your name, your password in a form nobody can read back, your favorite teams, predictions and settings, until you delete it from your account page.")}</p>
         <p>{tr("No account is needed to read the site. Your favorite teams stay in your browser. If you turn alerts on, the site keeps your browser's notification address and the teams you follow, until you turn them off. If you play predictions, it keeps the name you chose and your picks.")}</p>
       </article>
     </div>

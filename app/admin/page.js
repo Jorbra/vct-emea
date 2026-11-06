@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { readItems } from "../../lib/lpstore.js";
+import { countAccounts } from "../../lib/accounts.js";
 import { notFound, redirect } from "next/navigation";
 import Admin from "../../components/Admin";
 import { getDb, getState } from "../../lib/db.js";
@@ -29,6 +30,6 @@ export default async function Page({ params }) {
   // Nothing from the database is sent to someone who is not signed in.
   const db = getDb();
   const state = me ? getState(db) : null;
-  const initial = me ? { ...state, admin: { sync: readItems("tsync_meta"), rosterDiffs: rosterDiffs(state, readTeamInfo()), who: me.who, undo: lastAction(db), history: listHistory(db), editors: me.who ? [] : listEditors(db), seasons: listSeasons(db), news: listNews(db), voters: listVoters(db) } } : null;
+  const initial = me ? { ...state, admin: { sync: readItems("tsync_meta"), accounts: countAccounts(db), rosterDiffs: rosterDiffs(state, readTeamInfo()), who: me.who, undo: lastAction(db), history: listHistory(db), editors: me.who ? [] : listEditors(db), seasons: listSeasons(db), news: listNews(db), voters: listVoters(db) } } : null;
   return <Admin initial={initial} isAdmin={!!me} lang={lang} start={start} />;
 }

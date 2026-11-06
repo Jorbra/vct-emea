@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { pushAccount } from "./account.js";
 import { THEME_COOKIE } from "../lib/theme.js";
 import { useT } from "./lang.jsx";
 
@@ -30,6 +31,7 @@ export function ThemeSwitch() {
     const next = theme === "light" ? "dark" : "light";
     document.documentElement.dataset.theme = next;
     document.cookie = `${THEME_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
+    pushAccount({ prefs: { theme: next } });
     setTheme(next);
   };
 

@@ -93,6 +93,47 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
 
 /** Writing, editing and removing news. Plain text: line breaks are kept. */
 /** Where the rosters typed here and Liquipedia's differ, and a button to follow Liquipedia. */
+/** Visitors' accounts: no e-mail exists, so a forgotten password comes through here. Only for the main account. */
+function VisitorAccounts({ count, call, onDone }) {
+  const tr = useT();
+  const [name, setName] = useState("");
+  const [given, setGiven] = useState(null);
+  const [sure, setSure] = useState(false);
+  const [err, setErr] = useState("");
+  async function reset() {
+    setErr(""); setGiven(null);
+    try {
+      const j = await call("/api/accounts", { action: "reset", name });
+      setGiven({ name: j.name, password: j.password });
+    } catch (e) {
+      setErr(tr.server(e.message));
+    }
+  }
+  async function remove() {
+    setErr(""); setGiven(null);
+    try {
+      const j = await call("/api/accounts", { action: "remove", name });
+      setName(""); setSure(false);
+      onDone(tr.server(j.message));
+    } catch (e) {
+      setErr(tr.server(e.message));
+    }
+  }
+  return (
+    <details className="einfo">
+      <summary><b>{tr("Visitors' accounts")}</b> <small>({count})</small></summary>
+      <p className="hint">{tr("Someone has lost their password: write their exact name and give them a new one. It is shown only once. Ask them to change it afterwards.")}</p>
+      <div className="row">
+        <input aria-label={tr("Name")} placeholder={tr("Name")} value={name} autoCapitalize="none" spellCheck={false} onChange={(e) => { setName(e.target.value); setSure(false); }} />
+        <button type="button" className="btn" disabled={!name.trim()} onClick={reset}>{tr("New password")}</button>
+        <button type="button" className={"btn" + (sure ? " danger" : "")} disabled={!name.trim()} onClick={() => (sure ? remove() : setSure(true))}>{sure ? tr("Confirm: delete") : tr("Delete the account")}</button>
+      </div>
+      {err && <p className="err">{err}</p>}
+      {given && <p className="note" role="status">{tr("New password for {name}:", { name: given.name })} <code>{given.password}</code></p>}
+    </details>
+  );
+}
+
 /** How following Toornament is going, event by event. */
 function SyncStatus({ list }) {
   const tr = useT();
@@ -322,6 +363,7 @@ function Manage({ admin, call, onDone }) {
       <RosterDiffs list={admin.rosterDiffs || []} call={call} onDone={onDone} />
       <SyncStatus list={admin.sync || {}} />
       <FlagImport call={call} onDone={onDone} />
+      {!admin.who && <VisitorAccounts count={admin.accounts || 0} call={call} onDone={onDone} />}
       <NewsEditor news={admin.news || []} call={call} onDone={onDone} />
       <Voters voters={admin.voters || []} call={call} onDone={onDone} />
       <Seasons seasons={admin.seasons || []} call={call} onDone={onDone} />

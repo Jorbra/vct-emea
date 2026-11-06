@@ -5,6 +5,7 @@ import { THEME_COOKIE, normTheme } from "../lib/theme.js";
 import { isAdmin } from "../lib/session.js";
 import EditorAccess from "../components/EditorAccess";
 import MatchAlerts from "../components/MatchAlerts";
+import AccountSync from "../components/AccountSync";
 
 export async function generateMetadata() {
   // the site's own address, so that links shared on Discord or X can show its picture
@@ -46,6 +47,7 @@ export default async function RootLayout({ children }) {
         <div id="content" tabIndex={-1}>{children}</div>
         <EditorAccess lang={lang} isAdmin={await isAdmin()} />
         <MatchAlerts />
+        <AccountSync />
       </body>
     </html>
   );

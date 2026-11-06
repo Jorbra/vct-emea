@@ -2,6 +2,7 @@
 import { createContext, useContext, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { LANG_COOKIE, LANGS, makeT } from "../lib/i18n.js";
+import { pushAccount } from "./account.js";
 
 const Ctx = createContext(makeT("fr"));
 
@@ -19,6 +20,7 @@ export function LangSwitch() {
   const router = useRouter();
   const pick = (l) => {
     document.cookie = `${LANG_COOKIE}=${l}; path=/; max-age=31536000; samesite=lax`;
+    pushAccount({ prefs: { lang: l } });
     router.refresh();
   };
   return (

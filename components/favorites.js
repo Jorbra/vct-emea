@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { pushAccount } from "./account.js";
 
 const KEY = "vct-favorites"; // kept per visitor, in the browser
 
@@ -29,6 +30,7 @@ export function useFavorites() {
       localStorage.setItem(KEY, JSON.stringify(next));
     } catch { /* not remembered */ }
     setList(next);
+    pushAccount({ favorites: next });
     window.dispatchEvent(new Event("vct-favorites"));
   }, []);
   return { list, toggle, has: (slug) => list.includes(slug) };

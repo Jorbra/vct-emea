@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
+import { accountName } from "./account.js";
 import SiteNav from "./SiteNav.jsx";
 import { ThemeSwitch } from "./theme.jsx";
 import { EmeaMark } from "./Brand.jsx";
@@ -92,6 +93,7 @@ function PredictionsView({ matches, ranking }) {
   useEffect(() => {
     const t = visitorToken();
     setToken(t);
+    setName((x) => x || accountName());
     if (t) load(t);
   }, [load]);
   const pick = async (m, team) => {

@@ -2,6 +2,7 @@
 
 import { localeOf } from "../lib/i18n.js";
 import { scoreLabel, sideScore } from "../lib/scoretext.js";
+import { pushAccount } from "./account.js";
 import { Fragment, createContext, useContext, useEffect, useRef, useState } from "react";
 import { Crest } from "./Crest.jsx";
 import { useT } from "./lang.jsx";
@@ -327,6 +328,7 @@ export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent 
   const toggle = (v) => {
     setCountdown(v);
     try { localStorage.setItem(COUNTDOWN_KEY, v ? "1" : "0"); } catch { /* not remembered */ }
+    pushAccount({ prefs: { countdown: v } });
   };
   const go = (dir) => { const el = ref.current; if (el) el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: "smooth" }); };
   const line = (t, score, won = false, lost = false) => (

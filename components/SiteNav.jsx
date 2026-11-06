@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { accountName } from "./account.js";
 import { useT } from "./lang.jsx";
 
 const LINKS = [
@@ -12,11 +14,19 @@ const LINKS = [
 export default function SiteNav() {
   const tr = useT();
   const path = usePathname() || "";
+  const [who, setWho] = useState(""); // known once in the browser
+  useEffect(() => {
+    const sync = () => setWho(accountName());
+    sync();
+    window.addEventListener("vct-account", sync);
+    return () => window.removeEventListener("vct-account", sync);
+  }, []);
   const on = (href) => (path === href || path.startsWith(`${href}/`) ? "page" : undefined);
   return (
     <nav className="sitenav" aria-label={tr("Navigation")}>
       {LINKS.map(([href, label]) => <a key={href} href={href} aria-current={on(href)}>{tr(label)}</a>)}
-      <a className="navend" href="/about" aria-current={on("/about")}>{tr("About")}</a>
+      <a className="navacct" href="/compte" aria-current={on("/compte")}>{who || tr("My account")}</a>
+      <a className="navabout" href="/about" aria-current={on("/about")}>{tr("About")}</a>
     </nav>
   );
 }
