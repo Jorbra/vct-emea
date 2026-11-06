@@ -117,6 +117,7 @@ const HOW = [
       "Les alertes de match restent à activer sur chaque appareil, car chacun demande sa propre autorisation.",
       "Mot de passe oublié : le compte principal de l'éditeur en donne un nouveau dans « Comptes des visiteurs », sur l'accueil. Il s'affiche une seule fois. Vérifie que la demande vient bien de la bonne personne, car le site ne peut pas le prouver.",
       "Un compte peut ouvrir l'éditeur sans second mot de passe : dans « Comptes des visiteurs », « Faire le compte principal » lui donne tous les droits, et « Donner l'accès éditeur » les droits d'un éditeur. Le compte principal peut aussi donner ou retirer l'accès éditeur depuis sa page « Mon compte ». Un retrait agit immédiatement.",
+      "Le bouton « Éditer » sur téléphone et la touche E sur ordinateur n'existent que pour les comptes qui ont accès à l'éditeur. Pour les autres, rien ne s'affiche. L'adresse /admin reste disponible et demande le mot de passe.",
       "Se déconnecter de l'éditeur déconnecte aussi le compte. Le mot de passe principal (ADMIN_PASSWORD) reste valable en secours.",
       "Après 8 mauvais mots de passe, un compte est bloqué 15 minutes. Chacun peut supprimer son compte depuis sa page.",
     ],
