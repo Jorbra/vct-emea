@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { readFavorites, useFavorites } from "./favorites.js";
+import { readPlayers, usePlayers } from "./players.js";
 import { useT } from "./lang.jsx";
 
 const KEY = "vct-alerts";
@@ -40,7 +41,7 @@ async function subscribe() {
   }
   if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: bytes });
   const { endpoint, keys } = sub.toJSON();
-  await json("/api/push", "POST", { endpoint, keys, teams: readFavorites(), lang: document.documentElement.lang });
+  await json("/api/push", "POST", { endpoint, keys, teams: readFavorites(), players: readPlayers(), lang: document.documentElement.lang });
 }
 
 async function unsubscribe() {
@@ -99,7 +100,7 @@ export function AlertsButton() {
 
 /** On every page: keeps the server up to date with the visitor's favorite teams. */
 export default function MatchAlerts() {
-  const favKey = useFavorites().list.join();
+  const favKey = useFavorites().list.join() + "|" + usePlayers().list.join();
   useEffect(() => {
     if (!readOn() || blocker() || Notification.permission !== "granted") return;
     subscribe().catch(() => { /* offline: done at the next visit */ });

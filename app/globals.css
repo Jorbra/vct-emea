@@ -1190,6 +1190,12 @@ td.cmpw { color: var(--win, #6fcf6f); font-weight: 700; }
 .lftbar .tabs small { color: var(--muted); font-weight: 400; }
 .lftfind { flex: 0 1 280px; min-width: 0; height: 36px; box-sizing: border-box; padding: 0 10px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; font: 14px var(--font-body); }
 .vlrstats { margin-top: 14px; }
+.favstar.small { font-size: 14px; padding: 0 4px; margin-inline-start: 4px; }
+.followhint { margin: 6px 0; }
+.pickem { margin-bottom: 18px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; display: grid; gap: 10px; }
+.pickem h3 { margin: 0; }
+.pickgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 8px; }
+.pickgrid input, .pickem select { height: 38px; box-sizing: border-box; padding: 0 10px; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; font: 14px var(--font-body); }
 .statsbar { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 16px; margin: 10px 0; }
 .statstable td:first-child, .statstable th:first-child { color: var(--muted); }
 .statstable .vlragents a { color: inherit; }

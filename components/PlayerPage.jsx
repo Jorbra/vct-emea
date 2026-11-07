@@ -14,6 +14,8 @@ import { useAutoRefresh } from "./autoRefresh.js";
 import { EVENT_NAMES, siteHref, teamHref, teamSlug } from "../lib/paths.js";
 import { localeOf } from "../lib/i18n.js";
 import { dayText, moneyText, periodText } from "../lib/format.js";
+import FollowStar from "./FollowStar.jsx";
+import { AlertsButton } from "./MatchAlerts.jsx";
 
 /** A name, linked to its page on this site when it has one. */
 const Named = ({ href, title, children }) => (href ? <a href={href} title={title}>{children}</a> : <span title={title}>{children}</span>);
@@ -156,8 +158,9 @@ function View({ p }) {
       <div className="thead">
         {p.team ? (p.teamOnSite ? <Crest team={team} /> : <span className="thlogo"><LpImg f={p.teamLogo} /></span>) : null}
         <div>
-          <div className="tname"><span className="pt"><Flag cc={p.cc} /><span>{p.name}</span>{p.captain && <span className="tcapt" title={tr("Captain")}>C</span>}</span></div>
+          <div className="tname"><span className="pt"><Flag cc={p.cc} /><span>{p.name}</span><FollowStar slug={p.slug || teamSlug(p.name)} />{p.captain && <span className="tcapt" title={tr("Captain")}>C</span>}</span></div>
           {about.length > 0 && <div className="tsub">{about.map((x, i) => <Fragment key={i}>{i ? " · " : ""}{x}</Fragment>)}</div>}
+          <p className="hint followhint">{tr("Follow this player to be alerted when they become a free agent or sign with a team.")} <AlertsButton /></p>
           <div className="tlinks"><a href={`/compare?a=${encodeURIComponent(p.name)}`}>{tr("Compare")}</a>{links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer">{l.type} ↗</a>)}</div>
         </div>
       </div>

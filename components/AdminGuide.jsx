@@ -94,6 +94,14 @@ const HOW = [
     ],
   },
   {
+    title: "Pronostics, suivi des joueurs",
+    points: [
+      "« Qui se qualifie ? », sur la page Pronostics : avant le premier match d'un qualifier dont les équipes sont connues, chacun choisit les qualifiés et le vainqueur (1 point par qualifié, 2 pour le vainqueur ; 3 points quand une seule équipe passe). Le classement s'affiche à la fin.",
+      "Une étoile sur la fiche d'un joueur ou sur la page LFT permet de le suivre. Avec les alertes activées, on est prévenu quand il devient libre ou quand il signe. Le suivi passe par le compte.",
+      "Les statistiques vlr.gg suivent aussi le Q2, les ME, NA, la Türkiye, les playoffs et le Kickoff : vlr.gg les range dans quelques grands événements, la phase écrite sur chaque match dit lequel.",
+    ],
+  },
+  {
     title: "Saisir un score",
     points: [
       "Sur la page d'un qualifier, « Saisie rapide » liste les matchs sans résultat, par heure de début. Un clic sur 2-0, 2-1, 1-2 ou 0-2 enregistre le score à gauche pour l'équipe de gauche.",

@@ -7,6 +7,7 @@ import { EmeaMark } from "./Brand.jsx";
 import SearchBar from "./SearchBar.jsx";
 import SiteNav from "./SiteNav.jsx";
 import { accountName, applyAccount, deviceFavorites, deviceToken, forgetAccount } from "./account.js";
+import { readPlayers } from "./players.js";
 
 async function post(body) {
   const r = await fetch("/api/account", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -30,7 +31,7 @@ function Door({ onIn }) {
     setBusy(true);
     try {
       const theme = document.documentElement.dataset.theme;
-      const j = await post({ action: mode, name, password, token: deviceToken(), favorites: deviceFavorites(), prefs: { lang: tr.lang, ...(theme ? { theme } : {}) } });
+      const j = await post({ action: mode, name, password, token: deviceToken(), favorites: deviceFavorites(), prefs: { lang: tr.lang, ...(theme ? { theme } : {}), players: readPlayers() } });
       applyAccount(j.account);
       setPassword("");
       onIn(j.account.name);

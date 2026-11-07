@@ -10,6 +10,7 @@ import { Crest } from "./Crest.jsx";
 import SearchBar from "./SearchBar.jsx";
 import { localeOf } from "../lib/i18n.js";
 import { EVENT_NAMES } from "../lib/paths.js";
+import Pickem from "./Pickem.jsx";
 
 function Top({ title, crumbs = [] }) {
   const tr = useT();
@@ -79,7 +80,7 @@ function visitorToken() {
   }
 }
 
-function PredictionsView({ matches, ranking }) {
+function PredictionsView({ matches, ranking, pickem }) {
   const tr = useT();
   const [token, setToken] = useState("");
   const [me, setMe] = useState({ name: "", picks: {} });
@@ -118,6 +119,7 @@ function PredictionsView({ matches, ranking }) {
       {ok && <p className="okmsg" role="status">{ok}</p>}
       <div className="cols">
         <main>
+          {pickem && <Pickem events={pickem.events} boards={pickem.boards} token={token} name={me.name || name.trim()} />}
           <section>
             <h2>{tr("Open matches")}</h2>
             {matches.length === 0 && <p className="note">{tr("No match to predict for now.")}</p>}
@@ -156,4 +158,4 @@ function PredictionsView({ matches, ranking }) {
     </div>
   );
 }
-export const Predictions = ({ matches, ranking, lang }) => <LangProvider lang={lang}><PredictionsView matches={matches} ranking={ranking} /></LangProvider>;
+export const Predictions = ({ matches, ranking, pickem, lang }) => <LangProvider lang={lang}><PredictionsView matches={matches} ranking={ranking} pickem={pickem} /></LangProvider>;

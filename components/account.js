@@ -25,8 +25,10 @@ export function applyAccount(account) {
     localStorage.setItem(TOKEN_KEY, account.token);
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(account.favorites || []));
     if (typeof account.prefs?.countdown === "boolean") localStorage.setItem(COUNTDOWN_KEY, account.prefs.countdown ? "1" : "0");
+    if (Array.isArray(account.prefs?.players)) localStorage.setItem("vct-players", JSON.stringify(account.prefs.players));
   });
   window.dispatchEvent(new Event("vct-favorites"));
+  window.dispatchEvent(new Event("vct-players"));
   window.dispatchEvent(new Event("vct-account"));
 }
 
@@ -36,7 +38,9 @@ export function forgetAccount() {
     localStorage.removeItem(MARK);
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(FAVORITES_KEY);
+    localStorage.removeItem("vct-players");
   });
   window.dispatchEvent(new Event("vct-favorites"));
+  window.dispatchEvent(new Event("vct-players"));
   window.dispatchEvent(new Event("vct-account"));
 }
