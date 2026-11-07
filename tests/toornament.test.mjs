@@ -251,7 +251,7 @@ test("vlr.gg: its pages are read, its score in maps wins over a score in rounds,
     + `<div class="vm-stats-game " data-game-id="all"><div class="ovw-row"><div class="ovw-player-name text-of">Pa1ze</div><div data-col="acs"><span class="side mod-both">300</span></div><span data-col="kills"><span class="side mod-both">20</span></span><span data-col="deaths"><span class="side mod-both">10</span></span><span data-col="assists"><span class="side mod-both">5</span></span></div></div>`;
   const p = V.parseVlrMatch(page);
   assert.deepEqual([p.a, p.b, p.sa, p.sb, p.bo], ["B", "A", 2, 1, 3]);
-  assert.deepEqual(p.maps, [{ map: "Lotus", a: 13, b: 7 }]);
+  assert.deepEqual(p.maps, [{ map: "Lotus", a: 13, b: 7, rows: [] }]);
   assert.deepEqual(p.players, [{ name: "Pa1ze", k: 20, d: 10, a: 5, acs: 300 }]);
   const where = V.findSiteMatch([{ id: "qf-1", a: { name: "A" }, b: { name: "B" } }], "B", "A");
   assert.deepEqual(where, { id: "qf-1", swap: true });

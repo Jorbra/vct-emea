@@ -11,6 +11,7 @@ import { embedUrl, googleCalendarUrl, icsFile } from "../lib/media.js";
 import { compareTeams, knownPlayer, playerHref } from "../lib/playerstats.js";
 import { parseRoster } from "../lib/tournament.js";
 import { scoreLabel } from "../lib/scoretext.js";
+import VlrStats from "./VlrStats.jsx";
 import { Flag } from "./TeamCard.jsx";
 
 export { EVENT_NAMES };
@@ -53,6 +54,28 @@ function Compare({ m, state }) {
       </tbody>
     </table>
   );
+}
+
+/**
+ * The players' numbers, one table per team: a player goes with the team whose roster names them; those no roster names go to the team
+ * still short of players. Without rosters at all, one table as before.
+ */
+export function teamsOf(pstats, m) {
+  const names = (t) => new Set(parseRoster(t && t.roster).map((p) => p.name.toLowerCase()));
+  const ra = names(m.a);
+  const rb = names(m.b);
+  if (!ra.size && !rb.size) return [{ list: pstats }];
+  const a = [];
+  const b = [];
+  const rest = [];
+  for (const p of pstats) {
+    const n = String(p.name).toLowerCase();
+    if (ra.has(n)) a.push(p); else if (rb.has(n)) b.push(p); else rest.push(p);
+  }
+  const half = Math.ceil(pstats.length / 2);
+  for (const p of rest) (a.length < half ? a : b).push(p);
+  const byAcs = (x, y) => y.acs - x.acs;
+  return [{ team: m.a, list: a.sort(byAcs) }, { team: m.b, list: b.sort(byAcs) }].filter((g) => g.list.length);
 }
 
 /** The window over the page, or the same content as a page of its own. */
@@ -184,12 +207,16 @@ function MatchModal({ e, m, state, onClose, page = false }) {
           </table>
         )}
         {ex.mvp && <p className="mmmvp"><b>MVP</b> {who(ex.mvp)}</p>}
-        {(ex.pstats || []).length > 0 && (
-          <table className="mmstats">
-            <thead><tr><th>{tr("Player")}</th><th>K</th><th>D</th><th>A</th><th>ACS</th></tr></thead>
-            <tbody>{ex.pstats.map((p) => <tr key={p.name}><td>{who(p.name)}</td><td>{p.k}</td><td>{p.d}</td><td>{p.a}</td><td><b>{p.acs}</b></td></tr>)}</tbody>
+        {ex.details && (ex.details.all || []).length > 0 && <VlrStats details={ex.details} m={m} />}
+        {!(ex.details && (ex.details.all || []).length) && (ex.pstats || []).length > 0 && teamsOf(ex.pstats, m).map((g, i) => (
+          <table className="mmstats" key={i}>
+            <thead>
+              {g.team !== undefined && <tr className="mmstatsteam"><th colSpan={5}><span className="mmstatsname"><Crest team={g.team} />{name(g.team)}</span></th></tr>}
+              <tr><th>{tr("Player")}</th><th>K</th><th>D</th><th>A</th><th>ACS</th></tr>
+            </thead>
+            <tbody>{g.list.map((p) => <tr key={p.name}><td>{who(p.name)}</td><td>{p.k}</td><td>{p.d}</td><td>{p.a}</td><td><b>{p.acs}</b></td></tr>)}</tbody>
           </table>
-        )}
+        ))}
         {cmp && state && m.a && m.b && m.a.name && m.b.name && <Compare m={m} state={state} />}
         {playing && (
           <div className="mmplayer">
