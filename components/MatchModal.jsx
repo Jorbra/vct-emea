@@ -13,6 +13,7 @@ import { parseRoster } from "../lib/tournament.js";
 import { scoreLabel } from "../lib/scoretext.js";
 import VlrStats from "./VlrStats.jsx";
 import { Flag } from "./TeamCard.jsx";
+import { MotmVote } from "./Fans.jsx";
 
 export { EVENT_NAMES };
 
@@ -30,6 +31,24 @@ export function MatchModalProvider({ events, children, state = null }) {
       {children}
       {m && <MatchModal e={e} m={m} state={state} onClose={() => setCur(null)} />}
     </OpenMatchCtx.Provider>
+  );
+}
+
+/** Their earlier meetings on the site, the latest first. */
+function HeadToHead({ m, state }) {
+  const tr = useT();
+  const c = useMemo(() => compareTeams(state, m.a, m.b, m.id), [state, m.a, m.b, m.id]);
+  if (!c.meetings.length) return null;
+  return (
+    <section className="h2h">
+      <h3>{tr("Head to head")} <small>{m.a.name} {c.h2h.a} – {c.h2h.b} {m.b.name}</small></h3>
+      <ul>{c.meetings.slice(0, 5).map((x) => (
+        <li key={x.event + x.id}><a href={`/match/${x.event}/${x.id}`}>
+          <span className="h2hev">{tr(EVENT_NAMES[x.event] || x.event)} · {x.round.map(([k, v]) => tr(k, v)).join(" · ")}</span>
+          <b className={x.won === "a" ? "w" : "lo"}>{x.note && x.note.kind === "ff" ? tr("Forfeit") : `${x.sa} – ${x.sb}`}</b>
+        </a></li>
+      ))}</ul>
+    </section>
   );
 }
 
@@ -145,6 +164,12 @@ function MatchModal({ e, m, state, onClose, page = false }) {
     return () => { on = false; };
   }, [e.event, m.id, ex.hasDetails, ex.details]);
   const done = m.sa != null && m.sb != null;
+  // without an MVP given by an editor: the best ACS of vlr.gg's table
+  const autoMvp = useMemo(() => ((details && details.all) || []).filter((r) => r.acs != null).sort((x, y) => y.acs - x.acs || (y.r || 0) - (x.r || 0))[0] || null, [details]);
+  const candidates = useMemo(() => {
+    const fromTable = ((details && details.all) || []).map((r) => r.name).filter(Boolean);
+    return [...new Set(fromTable.length ? fromTable : [...parseRoster(m.a && m.a.roster), ...parseRoster(m.b && m.b.roster)].map((p) => p.name))];
+  }, [details, m.a, m.b]);
   const [when, setWhen] = useState("");
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
@@ -215,6 +240,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
           </table>
         )}
         {ex.mvp && <p className="mmmvp"><b>MVP</b> {who(ex.mvp)}</p>}
+        {!ex.mvp && done && autoMvp && <p className="mmmvp"><b>MVP</b> {who(autoMvp.name)} <small>{tr("best ACS: {acs}", { acs: autoMvp.acs })}</small></p>}
         {details && (details.all || []).length > 0 && <VlrStats details={details} m={m} />}
         {!(details && (details.all || []).length) && !(ex.hasDetails && !details) && (ex.pstats || []).length > 0 && teamsOf(ex.pstats, m).map((g, i) => (
           <table className="mmstats" key={i}>
@@ -225,6 +251,8 @@ function MatchModal({ e, m, state, onClose, page = false }) {
             <tbody>{g.list.map((p) => <tr key={p.name}><td>{who(p.name)}</td><td>{p.k}</td><td>{p.d}</td><td>{p.a}</td><td><b>{p.acs}</b></td></tr>)}</tbody>
           </table>
         ))}
+        {done && state && <MotmVote event={e.event} id={m.id} candidates={candidates} />}
+        {state && m.a && m.b && m.a.name && m.b.name && <HeadToHead m={m} state={state} />}
         {cmp && state && m.a && m.b && m.a.name && m.b.name && <Compare m={m} state={state} />}
         {playing && (
           <div className="mmplayer">

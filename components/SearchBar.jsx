@@ -18,10 +18,11 @@ function addLive(own, live) {
     const seen = new Set(list.map((x) => x.href));
     return [...list, ...(more || []).filter((x) => !seen.has(x.href))].slice(0, MAX_SHOWN);
   };
-  return { events: add(res.events, live.events), teams: add(res.teams, live.teams), players: add(res.players, live.players) };
+  return { ...res, events: add(res.events, live.events), teams: add(res.teams, live.teams), players: add(res.players, live.players) };
 }
 
 /** A result's address: its page is read again when it is opened from here. */
+// a map has no picture: its first letter
 const openHref = (href) => (/^\/(team|player|tournament)\//.test(href || "") ? `${href}?maj=1` : href);
 
 /** The picture of a result: a team's crest, a Liquipedia logo (one per theme when there are two), a player's flag. */
@@ -33,6 +34,7 @@ function Pic({ r }) {
   }
   if (r.logo) return <img className="lpimg" src={logoUrl(r.logo)} alt="" loading="lazy" />;
   if (r.type === "player") return <Flag cc={r.cc} />;
+  if (r.type === "map") return <span className="lpimg none mapletter" aria-hidden="true">{r.name.charAt(0)}</span>;
   return <span className="lpimg none" aria-hidden="true" />;
   /* eslint-enable @next/next/no-img-element */
 }
@@ -92,7 +94,7 @@ export default function SearchBar() {
     return () => { document.removeEventListener("mousedown", onDown); window.removeEventListener("keydown", onKey); };
   }, []);
 
-  const groups = res ? [["Tournaments", res.events], ["Teams", res.teams], ["Players", res.players]].filter(([, l]) => l.length) : [];
+  const groups = res ? [["Tournaments", res.events], ["Teams", res.teams], ["Players", res.players], ["Matches", res.matches || []], ["Maps", res.maps || []]].filter(([, l]) => l.length) : [];
   const flat = groups.flatMap(([, l]) => l);
   const go = (r) => {
     if (!r || !r.href) return;
@@ -111,7 +113,7 @@ export default function SearchBar() {
   return (
     <div className="searchbar" ref={box} role="search">
       <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M16.5 16.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-      <input ref={input} type="search" value={q} placeholder={tr("Search: tournament, team, player")} aria-label={tr("Search: tournament, team, player")}
+      <input ref={input} type="search" value={q} placeholder={tr("Search: tournament, team, player, match")} aria-label={tr("Search: tournament, team, player, match")}
         role="combobox" aria-expanded={!!shown} aria-controls="searchres" autoComplete="off" spellCheck="false"
         onChange={(e) => { setQ(e.target.value); setOpen(true); }} onFocus={() => setOpen(true)} onKeyDown={onKey} />
       {shown && (

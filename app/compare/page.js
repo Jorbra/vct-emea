@@ -8,6 +8,8 @@ import { readSoon } from "../../lib/readsoon.js";
 import { requestDue, requestFetch } from "../../lib/teamfetch.js";
 import { requestVlr, vlrDue } from "../../lib/vlrfetch.js";
 import { vlrId } from "../../lib/vlrinfo.js";
+import { getDb, getState } from "../../lib/db.js";
+import { playerTournament, readDetails, tournamentStats } from "../../lib/tstats.js";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Comparer des joueurs · VCT EMEA", description: "Deux joueurs côte à côte : statistiques, rôle, titres et gains." };
@@ -40,6 +42,11 @@ export default async function Page({ searchParams }) {
   const data = lpData();
   const a = qa ? person(qa, data) : null;
   const b = qb ? person(qb, data) : null;
+  if (a || b) {
+    const db = getDb();
+    const stats = tournamentStats(getState(db), readDetails(db));
+    for (const p of [a, b]) if (p) { const t = playerTournament(stats, teamSlug(p.name)); p.season = t ? { maps: t.maps, r: t.r, acs: t.acs, kd: t.kd, kast: t.kast, adr: t.adr, hs: t.hs, fk: t.fk, fd: t.fd } : null; }
+  }
   readSoon();
   return <ComparePage a={a} b={b} qa={qa} qb={qb} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />;
 }

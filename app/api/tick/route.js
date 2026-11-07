@@ -4,6 +4,7 @@ import { announceIfDue } from "../../../lib/notify.js";
 import { syncIfDue } from "../../../lib/toornament.js";
 import { vlrMatchesIfDue } from "../../../lib/vlrmatch.js";
 import { lftIfDue } from "../../../lib/lft.js";
+import { noteWorked } from "../../../lib/health.js";
 import { sitePlayers } from "../../../lib/playerstats.js";
 import { lpTick, readPlayerInfo, readTeamInfo, siteTeamNames } from "../../../lib/teamfetch.js";
 import { nextVlr, readVlrInfo, vlrTick } from "../../../lib/vlrfetch.js";
@@ -24,5 +25,6 @@ export async function GET() {
     lpTick(() => siteTeamNames(getDb()), people, failed),
     vlrTick((seen) => nextVlr(people().map((p) => p.name), siteTeamNames(getDb()), readPlayerInfo(), readTeamInfo(), readVlrInfo(), seen), failed.vlr),
   ]);
+  noteWorked("tick");
   return NextResponse.json({ ok: true });
 }

@@ -16,7 +16,7 @@ export async function GET() {
 export async function POST(req) {
   const b = await readBody(req);
   if (!b) return badRequest();
-  return answer(savePushSub(getDb(), { endpoint: b.endpoint, keys: b.keys, teams: b.teams, players: b.players, lang: b.lang }));
+  return answer(savePushSub(getDb(), { endpoint: b.endpoint, keys: b.keys, teams: b.teams, players: b.players, lang: b.lang, digest: b.digest === true }));
 }
 
 export async function DELETE(req) {

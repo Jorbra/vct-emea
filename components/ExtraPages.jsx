@@ -104,6 +104,26 @@ function CompareView({ a, b, qa, qb }) {
           </table>
         </div>
       )}
+      {a && b && (a.season || b.season) && (
+        <div className="tablewrap wide">
+          <h2>{tr("This season on the site")}</h2>
+          <table>
+            <thead><tr><th><a href={a.href}>{a.name}</a></th><th /><th><a href={b.href}>{b.name}</a></th></tr></thead>
+            <tbody>
+              {[["Maps", "maps", false], ["Rating", "r", true], ["ACS", "acs", false], ["K/D", "kd", true], ["KAST", "kast", false, "%"], ["ADR", "adr", false], ["HS%", "hs", false, "%"], ["FK", "fk", false], ["FD", "fd", false, "", true]].map(([label, k, two, unit = "", low = false]) => {
+                const va = a.season ? a.season[k] : null;
+                const vb = b.season ? b.season[k] : null;
+                const show = (v) => (v == null ? "–" : (two ? Number(v).toFixed(2) : v) + unit);
+                const both = va != null && vb != null;
+                const wa = both && (low ? va < vb : va > vb);
+                const wb = both && (low ? vb < va : vb > va);
+                return <tr key={k}><td className={wa ? "cmpw" : ""}>{show(va)}</td><th scope="row">{label === "Maps" ? tr("Maps") : label}</th><td className={wb ? "cmpw" : ""}>{show(vb)}</td></tr>;
+              })}
+            </tbody>
+          </table>
+          <p className="hint">{tr("The matches of this site's events, from vlr.gg's tables. Averages per map.")}</p>
+        </div>
+      )}
       {a && b && (a.waiting || b.waiting) && <p className="note lpwait" role="status">{tr("Looking for this information…")}</p>}
       <p className="note">{tr("Statistics and recent results from")} vlr.gg · {tr("Information from")} Liquipedia (CC-BY-SA).</p>
     </div>

@@ -21,6 +21,8 @@ import { eventData, matchesOf } from "../lib/matchlist.js";
 import { TIME_EVENTS } from "../lib/schedule.js";
 import { MatchStrip } from "./matchTime.jsx";
 import { MatchModalProvider } from "./MatchModal.jsx";
+import HomeNext from "./HomeNext.jsx";
+import { InstallButton } from "./Fans.jsx";
 
 const sameDay = (iso, now) => { const a = new Date(iso); const b = new Date(now); return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
 
@@ -200,9 +202,10 @@ function HomeView({ initial }) {
           <div className="herotitle">{tr("Road to the EMEA Kickoff")}</div>
           <p>{tr("Every qualifier, the Qualifier Playoffs and the Kickoff, with results updated live.")}</p>
         </div>
-        <a className="btn pri" href={siteHref("kickoff")}>Kickoff ›</a>
+        <div className="heroacts"><a className="btn pri" href={siteHref("kickoff")}>Kickoff ›</a><InstallButton /></div>
       </div>
 
+      <HomeNext initial={initial} />
       <TodayPulse events={matchEvents} />
       <MyTeams initial={initial} />
       <LatestNews news={initial.news} />

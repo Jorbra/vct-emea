@@ -94,6 +94,20 @@ const HOW = [
     ],
   },
   {
+    title: "Récaps, cartes, communauté, santé du site",
+    points: [
+      "Récap d'un qualifier : /recap/q1 (lien sur l'accueil et dans Stats). Qualifiés et leur parcours, meilleurs joueurs, plus gros matchs, cartes les plus serrées. Il se remplit pendant le tournoi.",
+      "Accueil : compte à rebours du prochain tournoi avec ses premiers matchs (dès que Toornament donne les horaires, sinon sa date de début).",
+      "Fiche d'une carte : /map/lotus (lien depuis Stats › Cartes). Part des manches gagnées en attaque et en défense, équipes et joueurs les plus forts. L'attaque et la défense viennent des pages vlr.gg ; les anciens matchs sont relus petit à petit pour les avoir.",
+      "Fenêtre d'un match : face-à-face des deux équipes sur le site, MVP automatique (meilleur ACS) si aucun n'est saisi, et vote du public pour le joueur du match (ouvert 7 jours après le match).",
+      "Pronostics : classement de la saison (1 point par bon pronostic + les points de « Qui se qualifie ? ») avec badges, et groupes entre amis avec leur propre classement (lien à partager).",
+      "Comparer des joueurs : en plus de vlr.gg, les stats de la saison sur les matchs du site.",
+      "Appli : bouton « Installer l'appli » sur l'accueil ; les pages déjà ouvertes restent lisibles sans réseau. Alertes : option « un seul résumé à 22 h » pour les résultats.",
+      "Recherche : trouve aussi les matchs (« fnatic heretics ») et les cartes.",
+      "Santé du site, en haut de l'accueil de l'éditeur : dernière fois que le cron, Toornament, vlr.gg, Liquipedia et les alertes ont marché, et leur dernier problème.",
+    ],
+  },
+  {
     title: "Pronostics, suivi des joueurs",
     points: [
       "« Qui se qualifie ? », sur la page Pronostics : avant le premier match d'un qualifier dont les équipes sont connues, chacun choisit les qualifiés et le vainqueur (1 point par qualifié, 2 pour le vainqueur ; 3 points quand une seule équipe passe). Le classement s'affiche à la fin.",

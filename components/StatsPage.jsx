@@ -93,19 +93,20 @@ function Teams({ teams }) {
   );
 }
 
-function Maps({ maps }) {
+function Maps({ maps, event }) {
   const tr = useT();
   const total = maps.reduce((n, m) => n + m.played, 0);
   return (
     <div className="vlrscroll">
       <table className="vlrtable statstable">
-        <thead><tr><th className="vlrp">{tr("Map")}</th><th>{tr("Played")}</th><th>%</th><th>{tr("Average gap")}</th><th>{tr("Overtime")}</th><th>{tr("Closest map")}</th></tr></thead>
+        <thead><tr><th className="vlrp">{tr("Map")}</th><th>{tr("Played")}</th><th>%</th><th>{tr("Attack")}</th><th>{tr("Average gap")}</th><th>{tr("Overtime")}</th><th>{tr("Closest map")}</th></tr></thead>
         <tbody>
           {maps.map((m) => (
             <tr key={m.map}>
-              <td className="vlrp"><b>{m.map}</b></td>
+              <td className="vlrp"><a href={`/map/${encodeURIComponent(m.map.toLowerCase())}${event ? `?e=${event}` : ""}`}><b>{m.map}</b></a></td>
               <td>{m.played}</td>
               <td>{total ? Math.round((m.played / total) * 100) : 0}%</td>
+              <td>{m.attack != null ? `${m.attack}%` : "–"}</td>
               <td>{m.diff} {tr("rounds")}</td>
               <td>{m.overtime}</td>
               <td>{m.closest ? <a href={`/match/${m.closest.event}/${m.closest.id}`}>{m.closest.ta} {m.closest.a}–{m.closest.b} {m.closest.tb}</a> : "–"}</td>
@@ -135,13 +136,13 @@ function View({ stats, event, events }) {
       )}
       {!stats ? <p className="note">{tr("The numbers appear once the first matches have their vlr.gg table.")}</p> : (
         <>
-          <p className="note">{tr(EVENT_NAMES[event] || event)} · {tr("{n} maps played", { n: stats.maps.reduce((n, m) => n + m.played, 0) })} · {tr("Averages per map.")}</p>
+          <p className="note">{tr(EVENT_NAMES[event] || event)} · {tr("{n} maps played", { n: stats.maps.reduce((n, m) => n + m.played, 0) })} · {tr("Averages per map.")} <a href={`/recap/${event}`}>{tr("Recap")} ›</a></p>
           <div className="tabs sub" role="tablist" aria-label={tr("Stats")}>
             {[["players", "Players"], ["teams", "Teams"], ["maps", "Maps"]].map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>{tr(l)}</button>)}
           </div>
           {tab === "players" && <Players list={stats.players} />}
           {tab === "teams" && <Teams teams={stats.teams} />}
-          {tab === "maps" && <Maps maps={stats.maps} />}
+          {tab === "maps" && <Maps maps={stats.maps} event={event} />}
           <p className="vlrcredit">{tr("Numbers from")} <a href="https://www.vlr.gg/" target="_blank" rel="noopener noreferrer">vlr.gg</a></p>
         </>
       )}

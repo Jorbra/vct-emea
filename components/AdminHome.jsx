@@ -44,6 +44,7 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
   return (
     <div className="adhome">
       <p className="guidelink"><a className="btn" href="/admin/nouveautes">{tr("What's new and how it works")}</a></p>
+      {initial.admin && initial.admin.health && <Health rows={initial.admin.health} />}
       <section>
         <h2>{tr("To do")}</h2>
         {todo === 0 && <p className="note">{now == null ? " " : tr("Nothing waiting: no match is live or waiting for its score.")}</p>}
@@ -88,6 +89,40 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
       </section>
       {initial.admin && <Manage admin={initial.admin} call={call} onDone={onDone} />}
     </div>
+  );
+}
+
+const HEALTH = {
+  cron: ["Outside scheduler (cron-job.org)", "Calls /api/tick every few minutes."],
+  toornament: ["Toornament", "Teams, times and results of the qualifiers."],
+  vlr: ["vlr.gg", "Maps, players' numbers, streams."],
+  liquipedia: ["Liquipedia", "Rosters, logos, transfers, LFT."],
+  alerts: ["Alerts", "Last sending: sent / browsers."],
+  regular: ["Work started by visits", "Each visit can start a round."],
+};
+
+/** What runs by itself: when it last worked, and its last problem. */
+function Health({ rows }) {
+  const tr = useT();
+  const when = (iso) => (iso ? new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : tr("never"));
+  const bad = rows.filter((r) => r.late || (r.problem && r.problem.at && Date.now() - new Date(r.problem.at).getTime() < 6 * 3600000)).length;
+  return (
+    <section>
+      <details className="einfo health" open={bad > 0}>
+        <summary><b>{tr("Site health")}</b> <span className={"hstate " + (bad ? "bad" : "ok")}>{bad ? tr("{n} to look at", { n: bad }) : tr("All good")}</span></summary>
+        <div className="tablewrap"><table>
+          <thead><tr><th>{tr("Part")}</th><th>{tr("Last worked")}</th><th>{tr("Last problem")}</th></tr></thead>
+          <tbody>{rows.map((r) => (
+            <tr key={r.part} className={r.late ? "late" : ""}>
+              <td><b>{tr(HEALTH[r.part][0])}</b><br /><small>{tr(HEALTH[r.part][1])}</small></td>
+              <td>{r.late ? "⚠️ " : "✅ "}{when(r.at)}{r.note ? ` · ${r.note}` : ""}</td>
+              <td>{r.problem ? <><small>{when(r.problem.at)}</small><br />{r.problem.message}</> : "–"}</td>
+            </tr>
+          ))}</tbody>
+        </table></div>
+        <p className="hint">{tr("⚠️: nothing has worked for longer than usual. A problem stays shown until the next one.")}</p>
+      </details>
+    </section>
   );
 }
 

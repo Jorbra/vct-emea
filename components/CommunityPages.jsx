@@ -11,6 +11,7 @@ import SearchBar from "./SearchBar.jsx";
 import { localeOf } from "../lib/i18n.js";
 import { EVENT_NAMES } from "../lib/paths.js";
 import Pickem from "./Pickem.jsx";
+import { Groups, SeasonTable } from "./Fans.jsx";
 
 function Top({ title, crumbs = [] }) {
   const tr = useT();
@@ -80,7 +81,7 @@ function visitorToken() {
   }
 }
 
-function PredictionsView({ matches, ranking, pickem }) {
+function PredictionsView({ matches, ranking, pickem, group }) {
   const tr = useT();
   const [token, setToken] = useState("");
   const [me, setMe] = useState({ name: "", picks: {} });
@@ -142,20 +143,21 @@ function PredictionsView({ matches, ranking, pickem }) {
           </section>
         </main>
         <aside>
+          {group && (
+            <section>
+              <h2>{tr("Ranking")} · {group.name}</h2>
+              <SeasonTable ranking={group.ranking} me={me.name} />
+            </section>
+          )}
+          <Groups token={token} group={group} named={!!me.name} />
           <section>
-            <h2>{tr("Ranking")}</h2>
-            {ranking.length === 0 ? <p className="note">{tr("The ranking starts with the first results.")}</p> : (
-              <div className="tablewrap wide">
-                <table>
-                  <thead><tr><th>#</th><th>{tr("Name")}</th><th>{tr("Right picks")}</th><th>{tr("Success rate")}</th></tr></thead>
-                  <tbody>{ranking.map((r, i) => <tr key={r.name}><td>{i + 1}</td><td>{r.name}</td><td><b>{r.good}</b> / {r.total}</td><td>{Math.round((r.good / r.total) * 100)}%</td></tr>)}</tbody>
-                </table>
-              </div>
-            )}
+            <h2>{tr("Season ranking")}</h2>
+            <p className="hint">{tr("1 point per right prediction, plus the points of Who qualifies?.")}</p>
+            <SeasonTable ranking={ranking} me={me.name} />
           </section>
         </aside>
       </div>
     </div>
   );
 }
-export const Predictions = ({ matches, ranking, pickem, lang }) => <LangProvider lang={lang}><PredictionsView matches={matches} ranking={ranking} pickem={pickem} /></LangProvider>;
+export const Predictions = ({ matches, ranking, pickem, group, lang }) => <LangProvider lang={lang}><PredictionsView matches={matches} ranking={ranking} pickem={pickem} group={group} /></LangProvider>;
