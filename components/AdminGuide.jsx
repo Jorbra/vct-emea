@@ -76,6 +76,16 @@ const HOW = [
     ],
   },
   {
+    title: "Les détails des matchs (vlr.gg)",
+    points: [
+      "Pour chaque match terminé du Q1, le site lit sa page vlr.gg : le score en cartes (2-0, 2-1), le score de chaque carte, les statistiques des joueurs (K/D/A, ACS), le stream et la VOD quand elle sort.",
+      "Le score en cartes de vlr.gg remplace le score de rounds donné par Toornament, seulement s'il désigne le même gagnant.",
+      "Une page toutes les 10 secondes au plus, quelques-unes à chaque passage du cron ou d'une visite. Si vlr.gg refuse, tout s'arrête pour 24 heures.",
+      "Les détails qu'un éditeur a saisis ou modifiés à la main ne sont jamais écrasés. Les forfaits n'ont pas de page de statistiques.",
+      "Pour un autre tournoi, il faut ajouter le numéro de son événement vlr.gg dans lib/vlrmatch.js (VLR_EVENTS).",
+    ],
+  },
+  {
     title: "Saisir un score",
     points: [
       "Sur la page d'un qualifier, « Saisie rapide » liste les matchs sans résultat, par heure de début. Un clic sur 2-0, 2-1, 1-2 ou 0-2 enregistre le score à gauche pour l'équipe de gauche.",

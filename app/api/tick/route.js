@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb, getState } from "../../../lib/db.js";
 import { announceIfDue } from "../../../lib/notify.js";
 import { syncIfDue } from "../../../lib/toornament.js";
+import { vlrMatchesIfDue } from "../../../lib/vlrmatch.js";
 import { sitePlayers } from "../../../lib/playerstats.js";
 import { lpTick, readPlayerInfo, readTeamInfo, siteTeamNames } from "../../../lib/teamfetch.js";
 import { nextVlr, readVlrInfo, vlrTick } from "../../../lib/vlrfetch.js";
@@ -16,6 +17,7 @@ export async function GET() {
   const people = () => sitePlayers(getState(getDb()), readTeamInfo());
   await syncIfDue();
   await announceIfDue();
+  await vlrMatchesIfDue();
   await Promise.all([
     lpTick(() => siteTeamNames(getDb()), people, failed),
     vlrTick((seen) => nextVlr(people().map((p) => p.name), siteTeamNames(getDb()), readPlayerInfo(), readTeamInfo(), readVlrInfo(), seen), failed.vlr),

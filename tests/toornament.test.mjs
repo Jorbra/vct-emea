@@ -238,3 +238,38 @@ test("a match goes live at its time, leaves with its result, and stays off when 
   // the sum is made in one place
   assert.deepEqual(withAutoLive({ live: {}, times: {} }, {}, now).kickoff, {});
 });
+
+test("vlr.gg: its pages are read, its score in maps wins over a score in rounds, never against Toornament's winner", async () => {
+  const V = await import("../lib/vlrmatch.js");
+  const { vlrScores } = await import("../lib/toornament.js");
+  const list = `<a href="/1/a-vs-b" class="wf-module-item match-item"><div class="match-item-vs-team-name"> <div class="text-of"> A </div> </div><div class="match-item-vs-team-name"> <div class="text-of"> B </div> </div><div class="ml mod-completed"></div><div class="match-item-vod"><div class="wf-module-label"> Stats: </div> Overview </div></a>`
+    + `<a href="/2/c-vs-d" class="wf-module-item match-item"><div class="match-item-vs-team-name"> <div class="text-of"> C </div> </div><div class="match-item-vs-team-name"> <div class="text-of"> D </div> </div><div class="ml mod-completed"></div><div class="match-item-vod"><div class="wf-module-label"> Stats: </div> Unavailable </div></a>`;
+  assert.deepEqual(V.parseEventMatches(list).map((m) => [m.id, m.a, m.b, m.done, m.stats]), [["1", "A", "B", true, true], ["2", "C", "D", true, false]]);
+  const page = `<div class="match-header-link-name mod-1"><div class="wf-title-med ">B</div></div><div class="match-header-link-name mod-2"><div class="wf-title-med ">A</div></div>`
+    + `<div class="match-header-vs-score"> <span>2</span> : <span>1</span> </div><div class="match-header-vs-note"> Bo3</div>`
+    + `<div class="vm-stats-game " data-game-id="10"><div class="score mod-win">13</div><div class="map"><div class="map-name"> Lotus </div></div><div class="score ">7</div></div>`
+    + `<div class="vm-stats-game " data-game-id="all"><div class="ovw-row"><div class="ovw-player-name text-of">Pa1ze</div><div data-col="acs"><span class="side mod-both">300</span></div><span data-col="kills"><span class="side mod-both">20</span></span><span data-col="deaths"><span class="side mod-both">10</span></span><span data-col="assists"><span class="side mod-both">5</span></span></div></div>`;
+  const p = V.parseVlrMatch(page);
+  assert.deepEqual([p.a, p.b, p.sa, p.sb, p.bo], ["B", "A", 2, 1, 3]);
+  assert.deepEqual(p.maps, [{ map: "Lotus", a: 13, b: 7 }]);
+  assert.deepEqual(p.players, [{ name: "Pa1ze", k: 20, d: 10, a: 5, acs: 300 }]);
+  const where = V.findSiteMatch([{ id: "qf-1", a: { name: "A" }, b: { name: "B" } }], "B", "A");
+  assert.deepEqual(where, { id: "qf-1", swap: true });
+  const d = V.detailsFor(p, where.swap, 3);
+  assert.deepEqual(d.score, { sa: 1, sb: 2 });
+  assert.deepEqual(d.extra.maps, [{ map: "Lotus", a: 7, b: 13, pick: "" }]);
+  assert.equal(V.detailsFor({ ...p, bo: 1 }, false, 3).score, null); // another format: not this match
+  assert.deepEqual(vlrScores({ "meq1:qf-1": { score: { sa: 2, sb: 1 } }, "meq1:qf-2": { score: null }, "q1:qf-1": { score: { sa: 2, sb: 0 } } }, "meq1"), { "qf-1": { sa: 2, sb: 1 } });
+
+  // in the round: a 13 – 7 from Toornament becomes vlr.gg's 2 – 1; a vlr.gg score naming the other winner is not used
+  const db = fresh();
+  const rows = start();
+  round(db, rows, teams());
+  win(rows[0], 13, 7);
+  win(rows[1], 13, 9);
+  const plan = planSync({ event: "meq1", rows, teams: null, site: { ...site(db), vlr: { "qf-1": { sa: 2, sb: 1 }, "qf-2": { sa: 0, sb: 2 } } }, last: store["tsync:meq1"] });
+  applySync(db, "meq1", plan, save);
+  const q = getQualifier(db, "meq1");
+  assert.deepEqual([q.scores["qf-1"].sa, q.scores["qf-1"].sb, q.notes["qf-1"]], [2, 1, undefined]);
+  assert.equal(q.notes["qf-2"], "raw:13-9");
+});
