@@ -10,6 +10,15 @@ import { Flag } from "./TeamCard.jsx";
 import { localeOf } from "../lib/i18n.js";
 import { teamSlug } from "../lib/paths.js";
 
+/** Liquipedia's role in the visitor's words: a benched player was "Inactive" before being let go. */
+const roleText = (p, tr) => {
+  if (!p.role) return p.staff ? "" : tr("Player");
+  if (/^inactive$/i.test(p.role)) return tr("Player (benched)");
+  if (/^substitute$/i.test(p.role)) return tr("Substitute");
+  if (/^stand-?in$/i.test(p.role)) return tr("Stand-in");
+  return p.role;
+};
+
 const plain = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
 function View({ list, at, pages }) {
@@ -49,7 +58,7 @@ function View({ list, at, pages }) {
                   <td className="nowrap" data-label={tr("Free since")}>{days ? days(p.date) : p.date}</td>
                   <td data-label={tr("Player")}><span className="pt">{p.cc ? <Flag cc={p.cc} /> : null}<a href={`/player/${teamSlug(p.name)}`}>{p.name}</a></span></td>
                   <td data-label={tr("Former team")}>{p.fromHref ? <a href={p.fromHref}>{p.from}</a> : p.from}</td>
-                  <td data-label={tr("Role")}>{p.role || (p.staff ? "" : tr("Player"))}</td>
+                  <td data-label={tr("Role")}>{roleText(p, tr)}</td>
                   <td data-label={tr("Source")}>{p.url ? <a href={p.url} target="_blank" rel="noopener noreferrer">{tr("Announcement")}</a> : "–"}</td>
                 </tr>
               ))}
