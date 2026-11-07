@@ -1186,6 +1186,9 @@ td.cmpw { color: var(--win, #6fcf6f); font-weight: 700; }
 .mmstats, .mmcmp { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
 .mmstats th, .mmstats td, .mmcmp th, .mmcmp td { padding: 6px; border-bottom: 1px solid var(--line); text-align: center; }
 .mmstats td:first-child, .mmstats th:first-child { text-align: left; }
+.lftbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-bottom: 10px; }
+.lftbar .tabs small { color: var(--muted); font-weight: 400; }
+.lftfind { flex: 0 1 280px; min-width: 0; height: 36px; box-sizing: border-box; padding: 0 10px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; font: 14px var(--font-body); }
 .vlrstats { margin-top: 14px; }
 .vlrtabs { margin-bottom: 8px; }
 .vlrtabs small { color: var(--muted); font-weight: 400; }

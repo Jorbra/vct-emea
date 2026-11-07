@@ -12,7 +12,7 @@ export default function sitemap() {
   const db = getDb();
   const state = getState(db);
   const paths = [
-    "/", "/calendar", "/news", "/predictions", "/transfers", "/rankings", "/compare", "/about",
+    "/", "/calendar", "/news", "/predictions", "/transfers", "/lft", "/rankings", "/compare", "/about",
     ...Object.keys(EVENT_NAMES).map((e) => siteHref(e)),
     ...siteTeams(state).map((t) => teamHref(t.name)).filter(Boolean),
     ...allMatches(state).filter((m) => m.a && m.b && m.a.name && m.b.name).map((m) => `/match/${m.event}/${m.id}`),

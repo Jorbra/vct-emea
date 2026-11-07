@@ -86,6 +86,14 @@ const HOW = [
     ],
   },
   {
+    title: "La page LFT",
+    points: [
+      "La page /lft liste les joueurs et le staff de la région EMEA (Europe, Türkiye, MENA et CEI) libérés par leur équipe ces six derniers mois, sans nouvelle équipe annoncée depuis.",
+      "Elle se remplit avec les pages de transferts mensuelles de Liquipedia, lues une à la fois pendant le travail régulier. Le mois en cours est relu toutes les 3 heures, les autres une fois par jour.",
+      "Un joueur mis sur le banc (« Inactive ») n'y figure pas. Un joueur qui a signé sans que Liquipedia l'ait noté peut y rester.",
+    ],
+  },
+  {
     title: "Saisir un score",
     points: [
       "Sur la page d'un qualifier, « Saisie rapide » liste les matchs sans résultat, par heure de début. Un clic sur 2-0, 2-1, 1-2 ou 0-2 enregistre le score à gauche pour l'équipe de gauche.",
