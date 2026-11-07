@@ -273,3 +273,20 @@ test("vlr.gg: its pages are read, its score in maps wins over a score in rounds,
   assert.deepEqual([q.scores["qf-1"].sa, q.scores["qf-1"].sb, q.notes["qf-1"]], [2, 1, undefined]);
   assert.equal(q.notes["qf-2"], "raw:13-9");
 });
+
+test("vlr.gg names written differently: found by the round, where a team plays once", async () => {
+  const V = await import("../lib/vlrmatch.js");
+  assert.deepEqual(["Round of 256", "Round of 16", "Round of 8", "Round of 4", "Grand Final", "Third Place Match", "?"].map(V.roundKey), ["r256", "r16", "qf", "sf", "gf", "third", ""]);
+  const items = [
+    { id: "r256-1", a: { name: "FRG Esports" }, b: { name: "Cavalry" } },
+    { id: "r256-2", a: { name: "ONYX" }, b: { name: "Oxygen Gaming" } },
+    { id: "r256-3", a: { name: "Burger" }, b: { name: "Hivemind" } },
+    { id: "r128-1", a: { name: "FRG Esports" }, b: { name: "AMNESIA" } },
+  ];
+  assert.deepEqual(V.findSiteMatch(items, "FRG", "Cavalry Esports", "r256"), { id: "r256-1", swap: false });
+  assert.deepEqual(V.findSiteMatch(items, "Oxygen Gaming", "Team Onyx", "r256"), { id: "r256-2", swap: true });
+  assert.deepEqual(V.findSiteMatch(items, "Enisorail", "Hivemind", "r256"), { id: "r256-3", swap: false }); // renamed: the other team decides
+  assert.deepEqual(V.findSiteMatch(items, "FRG", "AMNESIA", "r128"), { id: "r128-1", swap: false });
+  assert.equal(V.findSiteMatch(items, "FRG", "Cavalry Esports"), null); // without the round, only exact names
+  assert.equal(V.findSiteMatch(items, "Nobody", "Else", "r256"), null);
+});
