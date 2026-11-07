@@ -91,6 +91,43 @@ function PlayerSide({ p }) {
   );
 }
 
+/** The player's numbers in the tournaments, from vlr.gg's tables: averages per map, agents and each match. */
+function Tournament({ t }) {
+  const tr = useT();
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  const fix = (v) => (v == null ? "–" : Number(v).toFixed(2));
+  return (
+    <section>
+      <h2>{tr("Tournament stats")}</h2>
+      <div className="pstatbar">
+        <div><b>{fix(t.r)}</b><span>{tr("Rating")}</span></div>
+        <div><b>{t.acs ?? "–"}</b><span>ACS</span></div>
+        <div><b>{fix(t.kd)}</b><span>K/D</span></div>
+        <div><b>{t.kast != null ? `${t.kast}%` : "–"}</b><span>KAST</span></div>
+        <div><b>{t.adr ?? "–"}</b><span>ADR</span></div>
+        <div><b>{t.hs != null ? `${t.hs}%` : "–"}</b><span>HS%</span></div>
+        <div><b>{t.maps}</b><span>{tr("Maps")}</span></div>
+      </div>
+      {t.agents.length > 0 && <p className="note">{tr("Agents")} : {t.agents.map((a) => `${cap(a.name)} (${a.n})`).join(" · ")}</p>}
+      <div className="tablewrap">
+        <table>
+          <thead><tr><th>{tr("Match")}</th><th>{tr("Score")}</th><th>R</th><th>ACS</th><th>K/D/A</th><th>{tr("Agents")}</th></tr></thead>
+          <tbody>
+            {t.matches.map((m) => (
+              <tr key={m.event + m.id} className={m.won ? "w" : "l"}>
+                <td><a href={`/match/${m.event}/${m.id}`}>{tr("vs {team}", { team: m.opponent })}</a> <small className="muted">{m.round.map(([k, v]) => tr(k, v)).join(" · ")}</small></td>
+                <td>{m.score[0] ?? "–"} – {m.score[1] ?? "–"}</td>
+                <td>{fix(m.r)}</td><td><b>{m.acs ?? "–"}</b></td><td>{m.k}/{m.d}/{m.a}</td><td>{m.agents.map(cap).join(", ")}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="vlrcredit">{tr("Numbers from")} <a href="https://www.vlr.gg/" target="_blank" rel="noopener noreferrer">vlr.gg</a> · <a href="/stats">{tr("All the tournament's stats")}</a></p>
+    </section>
+  );
+}
+
 function View({ p }) {
   const tr = useT();
   useAutoRefresh();
@@ -139,6 +176,7 @@ function View({ p }) {
       {!p.totals && p.mvps.length > 0 && <div className="pstatbar"><div><b>{p.mvps.length}</b><span>MVP</span></div></div>}
       <div className={lp ? "cols" : undefined}>
         <main>
+          {p.tour && <Tournament t={p.tour} />}
           <VlrStats vlr={p.vlr} />
           {p.lines.length > 0 && (
             <section>

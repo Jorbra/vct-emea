@@ -136,6 +136,14 @@ function MatchModal({ e, m, state, onClose, page = false }) {
   const at = e.times[m.id] || "";
   const live = !!e.live[m.id] && m.sa == null ? e.live[m.id] : null;
   const ex = e.extra[m.id] || { stream: "", vod: "", maps: [] };
+  // vlr.gg's table is fetched when the match is opened; its own page brings it along
+  const [details, setDetails] = useState(ex.details || null);
+  useEffect(() => {
+    if (ex.details || !ex.hasDetails) return undefined;
+    let on = true;
+    fetch(`/api/details?event=${e.event}&id=${m.id}`).then((r) => (r.ok ? r.json() : null)).then((j) => { if (on && j) setDetails(j.details); }).catch(() => { /* offline */ });
+    return () => { on = false; };
+  }, [e.event, m.id, ex.hasDetails, ex.details]);
   const done = m.sa != null && m.sb != null;
   const [when, setWhen] = useState("");
   const [origin, setOrigin] = useState("");
@@ -207,8 +215,8 @@ function MatchModal({ e, m, state, onClose, page = false }) {
           </table>
         )}
         {ex.mvp && <p className="mmmvp"><b>MVP</b> {who(ex.mvp)}</p>}
-        {ex.details && (ex.details.all || []).length > 0 && <VlrStats details={ex.details} m={m} />}
-        {!(ex.details && (ex.details.all || []).length) && (ex.pstats || []).length > 0 && teamsOf(ex.pstats, m).map((g, i) => (
+        {details && (details.all || []).length > 0 && <VlrStats details={details} m={m} />}
+        {!(details && (details.all || []).length) && !(ex.hasDetails && !details) && (ex.pstats || []).length > 0 && teamsOf(ex.pstats, m).map((g, i) => (
           <table className="mmstats" key={i}>
             <thead>
               {g.team !== undefined && <tr className="mmstatsteam"><th colSpan={5}><span className="mmstatsname"><Crest team={g.team} />{name(g.team)}</span></th></tr>}

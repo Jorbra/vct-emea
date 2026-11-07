@@ -6,7 +6,7 @@ import { accountName } from "./account.js";
 import { useT } from "./lang.jsx";
 
 const LINKS = [
-  ["/calendar", "Calendar"], ["/predictions", "Predictions"], ["/rankings", "Rankings"], ["/transfers", "Transfers"], ["/lft", "LFT"],
+  ["/calendar", "Calendar"], ["/predictions", "Predictions"], ["/live", "Live"], ["/stats", "Stats"], ["/transfers", "Transfers"], ["/lft", "LFT"],
   ["/compare", "Compare"], ["/news", "News"], ["/archives", "Archives of past seasons"],
 ];
 

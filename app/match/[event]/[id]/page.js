@@ -8,6 +8,7 @@ import { EVENT_NAMES, siteHref } from "../../../../lib/paths.js";
 import { TIME_EVENTS } from "../../../../lib/schedule.js";
 import { scoreLabel } from "../../../../lib/scoretext.js";
 import { workSoon } from "../../../../lib/readsoon.js";
+import { detailsOf } from "../../../../lib/tstats.js";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ function load(event, id) {
     times: (state.times && state.times[event]) || {}, live: (state.live && state.live[event]) || {},
     extra: (state.extra && state.extra[event]) || {}, stream: (state.info && state.info[event] && state.info[event].stream) || "",
   };
+  if (e.extra[id] && e.extra[id].hasDetails) e.extra = { ...e.extra, [id]: { ...e.extra[id], details: detailsOf(getDb(), event, id) } };
   return { state, e, m };
 }
 

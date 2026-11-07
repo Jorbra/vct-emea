@@ -13,6 +13,7 @@ import { outsiderProfile, playerProfile } from "../../../lib/playerstats.js";
 import { sharedPreview } from "../../../lib/preview.js";
 import { requestDue, requestFetch, updateDue } from "../../../lib/teamfetch.js";
 import { siteTeams } from "../../../lib/teams.js";
+import { playerTournament, readDetails, tournamentStats } from "../../../lib/tstats.js";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,7 @@ function load(slug, update = false) {
     ...person, onSite: !!site, cc: person.cc || (lp && lp.nationality[0] ? lp.nationality[0].cc : ""),
     realName: person.realName || (lp ? lp.name : ""),
     teamLogo: t ? t.logo : (dir.teams[person.teamSlug] || {}).logo || "", teamTag: t ? t.tag : "", teamOnSite: !!t,
+    tour: playerTournament(tournamentStats(state, readDetails(getDb())), key),
     lp, lpState: lp ? "ready" : entry ? "none" : "pending", vlr: linkVlr(vlrEntry, dir), updating: !!entry && (lpNow || vlrNow),
   };
 }

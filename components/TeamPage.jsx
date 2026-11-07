@@ -330,7 +330,35 @@ function OutsideTeam({ lp, org = [], outside, vlr, updating }) {
   );
 }
 
-function TeamView({ initial, slug, lp, org = [], vlr, updating }) {
+/** The team's numbers in the tournaments, from vlr.gg's tables. */
+function TeamTournament({ s }) {
+  const tr = useT();
+  const pct = s.maps ? Math.round((s.mapsWon / s.maps) * 100) : 0;
+  const diff = s.roundsW - s.roundsL;
+  return (
+    <section>
+      <h2>{tr("Tournament stats")}</h2>
+      <div className="pstatbar">
+        <div><b>{s.mapsWon} – {s.maps - s.mapsWon}</b><span>{tr("Maps")}</span></div>
+        <div><b>{pct}%</b><span>{tr("Maps won")}</span></div>
+        <div><b>{s.roundsW} – {s.roundsL}</b><span>{tr("Rounds")}</span></div>
+        <div><b>{diff > 0 ? `+${diff}` : diff}</b><span>+/–</span></div>
+      </div>
+      <div className="tablewrap">
+        <table>
+          <thead><tr><th>{tr("Map")}</th><th>{tr("Played")}</th><th>{tr("Won")}</th><th>%</th></tr></thead>
+          <tbody>{s.byMap.map((m) => <tr key={m.map}><td>{m.map}</td><td>{m.played}</td><td>{m.won}</td><td>{Math.round((m.won / m.played) * 100)}%</td></tr>)}</tbody>
+        </table>
+      </div>
+      {s.best.length > 0 && (
+        <p className="note">{tr("Best players")} : {s.best.map((p, i) => <span key={p.slug}>{i ? " · " : ""}<a href={`/player/${p.slug}`}>{p.name}</a> ({tr("rating")} {Number(p.r).toFixed(2)}, ACS {p.acs})</span>)}</p>
+      )}
+      <p className="vlrcredit">{tr("Numbers from")} <a href="https://www.vlr.gg/" target="_blank" rel="noopener noreferrer">vlr.gg</a> · <a href="/stats">{tr("All the tournament's stats")}</a></p>
+    </section>
+  );
+}
+
+function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null }) {
   const tr = useT();
   useAutoRefresh();
   const p = useMemo(() => teamProfile(initial, slug), [initial, slug]);
@@ -382,7 +410,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating }) {
               <h2>{tr("Matches")}</h2>
               <MatchTable rows={rows} slug={slug} />
             </section>
-            <TeamMaps state={initial} team={slug} />
+            {tstats ? <TeamTournament s={tstats} /> : <TeamMaps state={initial} team={slug} />}
             <section>
               <h2>{tr("Season")}</h2>
               <div className="tablewrap">
