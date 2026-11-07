@@ -11,7 +11,7 @@ import SearchBar from "./SearchBar.jsx";
 import { localeOf } from "../lib/i18n.js";
 import { EVENT_NAMES } from "../lib/paths.js";
 import Pickem from "./Pickem.jsx";
-import { Groups, SeasonTable } from "./Fans.jsx";
+import { GroupBoard, Groups, SeasonTable, ShareCard } from "./Fans.jsx";
 
 function Top({ title, crumbs = [] }) {
   const tr = useT();
@@ -81,10 +81,10 @@ function visitorToken() {
   }
 }
 
-function PredictionsView({ matches, ranking, pickem, group }) {
+function PredictionsView({ matches, ranking, pickem, group, groups }) {
   const tr = useT();
   const [token, setToken] = useState("");
-  const [me, setMe] = useState({ name: "", picks: {} });
+  const [me, setMe] = useState({ name: "", picks: {}, scores: {} });
   const [name, setName] = useState("");
   const [err, setErr] = useState("");
   const [ok, setOk] = useState("");
@@ -98,14 +98,14 @@ function PredictionsView({ matches, ranking, pickem, group }) {
     setName((x) => x || accountName());
     if (t) load(t);
   }, [load]);
-  const pick = async (m, team) => {
+  const pick = async (m, team, score = "") => {
     setErr(""); setOk("");
     if (!me.name && name.trim().length < 2) { setErr(tr("Choose a name first.")); return; }
-    const res = await fetch("/api/predictions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token, name: me.name || name, event: m.event, id: m.id, pick: team }) });
+    const res = await fetch("/api/predictions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token, name: me.name || name, event: m.event, id: m.id, pick: team, score }) });
     const j = await res.json().catch(() => ({}));
     if (!res.ok) { setErr(tr.server(j.error || "")); return; }
     setOk(tr.server(j.message));
-    setMe((x) => ({ name: x.name || name.trim(), picks: { ...x.picks, [`${m.event}:${m.id}`]: team } }));
+    setMe((x) => ({ name: x.name || name.trim(), picks: { ...x.picks, [`${m.event}:${m.id}`]: team }, scores: { ...(x.scores || {}), [`${m.event}:${m.id}`]: score } }));
   };
   const fmt = useMemo(() => new Intl.DateTimeFormat(localeOf(tr.lang), { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }), [tr.lang]);
   return (
@@ -113,7 +113,7 @@ function PredictionsView({ matches, ranking, pickem, group }) {
       <Top title={tr("Predictions")} crumbs={[[tr("Predictions")]]} />
       <p className="note">{tr("Pick the winner of each match before it starts. A point for every right pick.")}</p>
       {!token && <p className="err">{tr("Your browser blocks what predictions need to be kept.")}</p>}
-      {me.name ? <p className="note">{tr("You play as {name}.", { name: me.name })}</p> : (
+      {me.name ? <p className="note">{tr("You play as {name}.", { name: me.name })} <ShareCard name={me.name} /></p> : (
         <label className="f predname">{tr("Your name in the ranking")}<input value={name} maxLength={20} onChange={(e) => setName(e.target.value)} /></label>
       )}
       {err && <p className="err" role="alert">{err}</p>}
@@ -136,6 +136,15 @@ function PredictionsView({ matches, ranking, pickem, group }) {
                   <div className="predm" key={m.event + m.id}>
                     <div className="predh"><b>{tr(EVENT_NAMES[m.event])}</b> · {m.round.map(([k, v]) => tr(k, v)).join(" · ")} · Bo{m.bo}{m.at ? ` · ${fmt.format(new Date(m.at))}` : ""}</div>
                     <div className="predvs">{side(m.a)}<span>vs</span>{side(m.b)}</div>
+                    {chosen && m.bo > 1 && (
+                      <div className="predscore" role="group" aria-label={tr("Exact score (bonus point)")}>
+                        <small>{tr("Exact score (bonus point)")} :</small>
+                        {Array.from({ length: Math.ceil(m.bo / 2) }, (_, k) => `${Math.ceil(m.bo / 2)}-${k}`).map((s) => {
+                          const on = ((me.scores || {})[`${m.event}:${m.id}`] || "") === s;
+                          return <button type="button" key={s} className={"btn small" + (on ? " pri" : "")} aria-pressed={on} onClick={() => pick(m, chosen, on ? "" : s)}>{chosen} {s.replace("-", "–")}</button>;
+                        })}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -150,9 +159,10 @@ function PredictionsView({ matches, ranking, pickem, group }) {
             </section>
           )}
           <Groups token={token} group={group} named={!!me.name} />
+          <GroupBoard list={groups} />
           <section>
             <h2>{tr("Season ranking")}</h2>
-            <p className="hint">{tr("1 point per right prediction, plus the points of Who qualifies?.")}</p>
+            <p className="hint">{tr("1 point per right prediction, 1 more for the exact score, plus the points of Who qualifies?.")}</p>
             <SeasonTable ranking={ranking} me={me.name} />
           </section>
         </aside>
@@ -160,4 +170,4 @@ function PredictionsView({ matches, ranking, pickem, group }) {
     </div>
   );
 }
-export const Predictions = ({ matches, ranking, pickem, group, lang }) => <LangProvider lang={lang}><PredictionsView matches={matches} ranking={ranking} pickem={pickem} group={group} /></LangProvider>;
+export const Predictions = ({ matches, ranking, pickem, group, groups, lang }) => <LangProvider lang={lang}><PredictionsView matches={matches} ranking={ranking} pickem={pickem} group={group} groups={groups} /></LangProvider>;

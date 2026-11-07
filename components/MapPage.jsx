@@ -59,6 +59,15 @@ function View({ card, event, events }) {
               )}
             </section>
           </div>
+          {(card.comps || []).length > 0 && (
+            <section>
+              <h2>{tr("Most played compositions")}</h2>
+              <table className="vlrtable statstable">
+                <thead><tr><th className="vlrp">{tr("Agents")}</th><th>{tr("Played")}</th><th>{tr("Won")}</th><th>%</th></tr></thead>
+                <tbody>{card.comps.map((c, i) => <tr key={i}><td className="vlrp">{c.agents.map((a) => a.charAt(0).toUpperCase() + a.slice(1)).join(", ")}</td><td>{c.played}</td><td>{c.won}</td><td>{Math.round((c.won / c.played) * 100)}%</td></tr>)}</tbody>
+              </table>
+            </section>
+          )}
           {card.closest && <p className="note">{tr("Closest map")} : <a href={`/match/${card.closest.event}/${card.closest.id}`}>{card.closest.ta} {card.closest.a}–{card.closest.b} {card.closest.tb}</a></p>}
           <p className="vlrcredit">{tr("Numbers from")} <a href="https://www.vlr.gg/" target="_blank" rel="noopener noreferrer">vlr.gg</a></p>
         </>

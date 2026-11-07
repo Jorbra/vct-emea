@@ -350,6 +350,17 @@ function TeamTournament({ s }) {
           <tbody>{s.byMap.map((m) => <tr key={m.map}><td>{m.map}</td><td>{m.played}</td><td>{m.won}</td><td>{Math.round((m.won / m.played) * 100)}%</td></tr>)}</tbody>
         </table>
       </div>
+      {(s.comps || []).length > 0 && (
+        <>
+          <h3>{tr("Compositions by map")}</h3>
+          <div className="tablewrap">
+            <table>
+              <thead><tr><th>{tr("Map")}</th><th>{tr("Agents")}</th><th>{tr("Played")}</th><th>{tr("Won")}</th></tr></thead>
+              <tbody>{s.comps.map((c, i) => <tr key={i}><td>{c.map}</td><td>{c.agents.map((a) => a.charAt(0).toUpperCase() + a.slice(1)).join(", ")}</td><td>{c.played}</td><td>{c.won}</td></tr>)}</tbody>
+            </table>
+          </div>
+        </>
+      )}
       {s.best.length > 0 && (
         <p className="note">{tr("Best players")} : {s.best.map((p, i) => <span key={p.slug}>{i ? " · " : ""}<a href={`/player/${p.slug}`}>{p.name}</a> ({tr("rating")} {Number(p.r).toFixed(2)}, ACS {p.acs})</span>)}</p>
       )}

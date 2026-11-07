@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { readFavorites, useFavorites } from "./favorites.js";
 import { readPlayers, usePlayers } from "./players.js";
 import { useT } from "./lang.jsx";
@@ -111,6 +112,16 @@ export function AlertsButton() {
 /** On every page: keeps the server up to date with the visitor's favorite teams. */
 export default function MatchAlerts() {
   const favKey = useFavorites().list.join() + "|" + usePlayers().list.join();
+  // one page view, nothing about the visitor; not for the editor's pages
+  const path = usePathname();
+  useEffect(() => {
+    if (!path || path.startsWith("/admin") || navigator.webdriver) return;
+    try {
+      const body = JSON.stringify({ path });
+      if (navigator.sendBeacon) navigator.sendBeacon("/api/hit", new Blob([body], { type: "application/json" }));
+      else fetch("/api/hit", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true });
+    } catch { /* not counted */ }
+  }, [path]);
   // the site as an application: its pages kept for when the network is gone
   useEffect(() => {
     if (window.isSecureContext && "serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => { /* no offline pages */ });

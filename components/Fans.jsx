@@ -172,3 +172,78 @@ export function InstallButton() {
     </span>
   );
 }
+
+/** The comments under a match: read by all, written with the name of the predictions. */
+export function Comments({ event, id }) {
+  const tr = useT();
+  const [list, setList] = useState(null);
+  const [text, setText] = useState("");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    let on = true;
+    fetch(`/api/comments?event=${event}&id=${id}`).then((r) => (r.ok ? r.json() : null)).then((j) => { if (on && j) setList(j.comments); }).catch(() => { /* offline */ });
+    return () => { on = false; };
+  }, [event, id]);
+  const send = async (e) => {
+    e.preventDefault();
+    setErr("");
+    setBusy(true);
+    try {
+      const j = await post("/api/comments", { token: fanToken(), event, id, body: text });
+      setList(j.comments);
+      setText("");
+    } catch (x) { setErr(tr.server(x.message)); } finally { setBusy(false); }
+  };
+  const fmt = (iso) => new Date(iso).toLocaleString(tr.lang === "fr" ? "fr-FR" : undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return (
+    <section className="comments">
+      <h3>{tr("Comments")} {list && list.length > 0 && <small>({list.length})</small>}</h3>
+      {list && list.length === 0 && <p className="hint">{tr("No comment yet.")}</p>}
+      {list && list.length > 0 && <ul>{list.map((c) => <li key={c.id}><b>{c.name}</b> <small>{fmt(c.at)}</small><p>{c.body}</p></li>)}</ul>}
+      <form onSubmit={send} className="commentform">
+        <textarea value={text} onChange={(e) => setText(e.target.value)} maxLength={280} rows={2} placeholder={tr("Your comment (280 characters at most)")} aria-label={tr("Comments")} />
+        <button type="submit" className="btn" disabled={busy || !text.trim()}>{tr("Post")}</button>
+      </form>
+      <p className="hint">{tr("Signed with your name from the predictions. Stay respectful: the editors remove what is not.")}</p>
+      {err && <p className="err" role="alert">{err}</p>}
+    </section>
+  );
+}
+
+/** "Share my card": a link whose preview is the visitor's season as a picture. */
+export function ShareCard({ name }) {
+  const tr = useT();
+  const [done, setDone] = useState(false);
+  if (!name) return null;
+  const url = `${typeof window !== "undefined" ? window.location.origin : ""}/p/${encodeURIComponent(name)}`;
+  const share = async () => {
+    try {
+      if (navigator.share) await navigator.share({ title: tr("My predictions"), url });
+      else { await navigator.clipboard.writeText(url); setDone(true); }
+    } catch { /* closed */ }
+  };
+  return (
+    <span className="sharecardbtn">
+      <button type="button" className="btn" onClick={share}>📤 {done ? tr("Link copied") : tr("Share my card")}</button>
+      <a className="btn small" href={`/api/card/${encodeURIComponent(name)}`} target="_blank" rel="noopener noreferrer">{tr("See the picture")}</a>
+    </span>
+  );
+}
+
+/** The groups between them: average points per member. */
+export function GroupBoard({ list }) {
+  const tr = useT();
+  if (!list || !list.length) return null;
+  return (
+    <section>
+      <h2>{tr("Best groups")}</h2>
+      <div className="tablewrap wide">
+        <table>
+          <thead><tr><th>#</th><th>{tr("Group")}</th><th>{tr("Members")}</th><th>{tr("Points per member")}</th></tr></thead>
+          <tbody>{list.map((g, i) => <tr key={g.code}><td>{i + 1}</td><td><a href={`/predictions?g=${g.code}`}>{g.name}</a></td><td>{g.members}</td><td><b>{g.points}</b></td></tr>)}</tbody>
+        </table>
+      </div>
+    </section>
+  );
+}

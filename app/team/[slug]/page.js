@@ -11,7 +11,7 @@ import { requestDue, requestFetch, teamOutdated, updateDue } from "../../../lib/
 import { orgOf, teamProfile } from "../../../lib/teams.js";
 import { sharedPreview, teamPreview } from "../../../lib/preview.js";
 import { workSoon } from "../../../lib/readsoon.js";
-import { readDetails, tournamentStats } from "../../../lib/tstats.js";
+import { extraStats, readDetails, tournamentStats } from "../../../lib/tstats.js";
 
 // Always read the database on request: results change while the events run.
 export const dynamic = "force-dynamic";
@@ -44,7 +44,8 @@ export default async function Page({ params, searchParams }) {
     ? { ...entry, results: linkResults(entry.results, dir), inactivePlayers: entry.inactivePlayers || [], formerPlayers: linkFormer(entry.formerPlayers, dir), formerStaff: linkFormer(entry.formerStaff, dir) }
     : null;
   const outside = p ? null : { name, tag: known ? known.tag : "", logo: known ? known.logo : "", pending: !entry };
-  const tstats = p ? tournamentStats(initial, readDetails(getDb())).teams[key] || null : null;
+  const entries = p ? readDetails(getDb()) : [];
+  const tstats = p && tournamentStats(initial, entries).teams[key] ? { ...tournamentStats(initial, entries).teams[key], comps: extraStats(initial, entries).teamComps[key] || [] } : null;
   return <TeamPage tstats={tstats} initial={p ? initial : null} slug={key} lang={lang} lp={lp} org={orgOf(teamInfo, key)} outside={outside} vlr={linkVlr(vlrEntry, dir)} updating={!entry || lpNow || vlrNow} />;
 }
 

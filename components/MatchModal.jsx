@@ -13,7 +13,7 @@ import { parseRoster } from "../lib/tournament.js";
 import { scoreLabel } from "../lib/scoretext.js";
 import VlrStats from "./VlrStats.jsx";
 import { Flag } from "./TeamCard.jsx";
-import { MotmVote } from "./Fans.jsx";
+import { Comments, MotmVote } from "./Fans.jsx";
 
 export { EVENT_NAMES };
 
@@ -218,6 +218,22 @@ function MatchModal({ e, m, state, onClose, page = false }) {
           <div className={"mmscore" + (live ? " lv" : "")}>{score}</div>
           {team(m.b, "b")}
         </div>
+        {live && (live.maps || []).length > 0 && (
+          <div className="mmlive">
+            <div className="mmlivemaps">{live.maps.map((x) => <span key={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>
+            {(live.feed || []).length > 0 && (
+              <ol className="mmfeed" aria-label={tr("Match feed")}>
+                {[...live.feed].reverse().map((f, i) => (
+                  <li key={i}>
+                    <small>{new Date(f.at).toLocaleTimeString(tr.lang === "fr" ? "fr-FR" : undefined, { hour: "2-digit", minute: "2-digit" })}</small>{" "}
+                    {f.kind === "start" ? tr("{map} starts", { map: f.map }) : tr("{team} wins {map} {a}–{b}: {ta} {sa}–{sb} {tb}", { team: name(f.a > f.b ? m.a : m.b), map: f.map, a: Math.max(f.a, f.b), b: Math.min(f.a, f.b), ta: name(m.a), tb: name(m.b), sa: f.sa, sb: f.sb })}
+                  </li>
+                ))}
+              </ol>
+            )}
+            <p className="hint">{tr("Scores from vlr.gg, read every few minutes.")}</p>
+          </div>
+        )}
         <Rosters a={m.a} b={m.b} />
         {ex.maps.length > 0 && (
           <table className="mmmaps">
@@ -254,6 +270,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
         {done && state && <MotmVote event={e.event} id={m.id} candidates={candidates} />}
         {state && m.a && m.b && m.a.name && m.b.name && <HeadToHead m={m} state={state} />}
         {cmp && state && m.a && m.b && m.a.name && m.b.name && <Compare m={m} state={state} />}
+        {state && m.a && m.b && m.a.name && m.b.name && <Comments event={e.event} id={m.id} />}
         {playing && (
           <div className="mmplayer">
             <iframe src={playing} title={title} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
@@ -268,6 +285,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
               : <a key={url} className="btn pri" href={url} target="_blank" rel="noopener noreferrer">{text}</a>;
           })}
           {state && m.a && m.b && m.a.name && m.b.name && <button type="button" className="btn" aria-pressed={cmp} onClick={() => setCmp(!cmp)}>{tr("Compare the teams")}</button>}
+          {done && <a className="btn" href={`/api/og/${e.event}/${m.id}`} target="_blank" rel="noopener noreferrer">🖼 {tr("Result picture")}</a>}
           {google && <a className="btn" href={google} target="_blank" rel="noopener noreferrer">{tr("Add to Google Calendar")}</a>}
           {google && icsUrl && <a className="btn" href={icsUrl} download={`match-${m.id}.ics`}>{tr("Add to my calendar (.ics)")}</a>}
           {page ? <CopyLink href={`/match/${e.event}/${m.id}`} /> : <a className="btn" href={`/match/${e.event}/${m.id}`}>{tr("Match page")}</a>}

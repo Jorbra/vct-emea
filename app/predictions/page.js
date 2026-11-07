@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { Predictions } from "../../components/CommunityPages";
 import { openForPrediction } from "../../lib/community.js";
-import { groupInfo, seasonRanking } from "../../lib/fans.js";
+import { groupInfo, groupRanking, seasonRanking } from "../../lib/fans.js";
 import { getDb, getState } from "../../lib/db.js";
 import { LANG_COOKIE, normLang } from "../../lib/i18n.js";
 import { allMatches } from "../../lib/matchlist.js";
@@ -19,5 +19,5 @@ export default async function Page({ searchParams }) {
   const matches = allMatches(state).filter((m) => openForPrediction(m, now)).sort((a, b) => (a.at || "9").localeCompare(b.at || "9")).slice(0, 60);
   const events = pickemEvents(state, now);
   const group = g ? { code: g.code, name: g.name, count: g.hashes.length, ranking: seasonRanking(db, state, { only: g.hashes, limit: 200, now }) } : null;
-  return <Predictions group={group} pickem={{ events, boards: pickemBoards(db, events) }} matches={matches} ranking={seasonRanking(db, state, { now })} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />;
+  return <Predictions groups={groupRanking(db, state, now)} group={group} pickem={{ events, boards: pickemBoards(db, events) }} matches={matches} ranking={seasonRanking(db, state, { now })} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />;
 }

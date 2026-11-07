@@ -365,6 +365,7 @@ export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent 
                 <span className="mcr">{label(m)}</span>
                 {line(m.a, recent ? sideScore(m, "a", m.sa) : m.live && m.score ? m.score.a : null, recent && m.win === "a", recent && m.win === "b")}
                 {line(m.b, recent ? sideScore(m, "b", m.sb) : m.live && m.score ? m.score.b : null, recent && m.win === "b", recent && m.win === "a")}
+                {m.live && m.score && (m.score.maps || []).length > 0 && <span className="mcmaps">{m.score.maps.map((x) => `${x.map} ${x.a}–${x.b}`).join(" · ")}</span>}
                 {m.live && m.stream && <a className="mcstream" href={m.stream} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>▶ {tr("Watch")}</a>}
               </div>
             );

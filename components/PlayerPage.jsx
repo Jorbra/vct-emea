@@ -16,6 +16,7 @@ import { localeOf } from "../lib/i18n.js";
 import { dayText, moneyText, periodText } from "../lib/format.js";
 import FollowStar from "./FollowStar.jsx";
 import { AlertsButton } from "./MatchAlerts.jsx";
+import Trend from "./Trend.jsx";
 
 /** A name, linked to its page on this site when it has one. */
 const Named = ({ href, title, children }) => (href ? <a href={href} title={title}>{children}</a> : <span title={title}>{children}</span>);
@@ -110,6 +111,7 @@ function Tournament({ t }) {
         <div><b>{t.hs != null ? `${t.hs}%` : "–"}</b><span>HS%</span></div>
         <div><b>{t.maps}</b><span>{tr("Maps")}</span></div>
       </div>
+      <Trend matches={t.matches} />
       {t.agents.length > 0 && <p className="note">{tr("Agents")} : {t.agents.map((a) => `${cap(a.name)} (${a.n})`).join(" · ")}</p>}
       <div className="tablewrap">
         <table>

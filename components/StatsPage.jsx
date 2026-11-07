@@ -118,6 +118,51 @@ function Maps({ maps, event }) {
   );
 }
 
+/** Each agent: maps picked, maps won, its best players. */
+function Agents({ list }) {
+  const tr = useT();
+  const total = list.reduce((n, a) => n + a.picks, 0);
+  return (
+    <div className="vlrscroll">
+      <table className="vlrtable statstable">
+        <thead><tr><th className="vlrp">{tr("Agent")}</th><th>{tr("Picked")}</th><th>{tr("Pick rate")}</th><th>{tr("Maps won")}</th><th>{tr("Best players")}</th></tr></thead>
+        <tbody>{list.map((a) => (
+          <tr key={a.agent}>
+            <td className="vlrp"><b>{a.name}</b></td>
+            <td>{a.picks}</td>
+            <td>{total ? Math.round((a.picks / (total / 5)) * 100) : 0}%</td>
+            <td>{a.pct}%</td>
+            <td className="vlrp">{a.best.map((p, i) => <span key={p.slug}>{i ? " · " : ""}<a href={`/player/${p.slug}`}>{p.name}</a> <small>{p.r != null ? p.r.toFixed(2) : "–"}</small></span>)}</td>
+          </tr>
+        ))}</tbody>
+      </table>
+      <p className="hint">{tr("Pick rate: share of the maps where a team played the agent. Best players: 2 maps on it at least, by rating.")}</p>
+    </div>
+  );
+}
+
+/** The tournament's records. */
+function Records({ r, event }) {
+  const tr = useT();
+  const link = (x, text) => <a href={`/match/${x.event}/${x.id}`}>{text}</a>;
+  const block = (title, list, show) => list.length > 0 && (
+    <section className="recordbox">
+      <h3>{title}</h3>
+      <ol>{list.map((x, i) => <li key={i}>{show(x)}</li>)}</ol>
+    </section>
+  );
+  return (
+    <div className="records">
+      {block(tr("Highest ACS on a map"), r.acs, (x) => <><a href={`/player/${x.slug}`}><b>{x.name}</b></a> {x.value} ACS · {link(x, x.map)} <small>{x.team}</small></>)}
+      {block(tr("Most kills on a map"), r.kills, (x) => <><a href={`/player/${x.slug}`}><b>{x.name}</b></a> {x.value} kills · {link(x, x.map)} <small>{x.team}</small></>)}
+      {block(tr("Longest maps"), r.long, (x) => link(x, <>{x.a} <b>{x.sa}–{x.sb}</b> {x.b} · {x.map} <small>({tr("{n} rounds", { n: x.rounds })})</small></>))}
+      {block(tr("Biggest wins on a map"), r.blowout, (x) => link(x, <><b>{x.winner}</b> {x.w}–{x.l} {x.loser} · {x.map}</>))}
+      {block(tr("Comebacks: won after losing the first map"), r.comeback, (x) => link(x, <><b>{x.winner}</b> {x.sa}–{x.sb} {x.loser}</>))}
+      {event && <p className="hint"><a href={`/recap/${event}`}>{tr("Recap")} ›</a></p>}
+    </div>
+  );
+}
+
 function View({ stats, event, events }) {
   const tr = useT();
   const [tab, setTab] = useState("players");
@@ -138,11 +183,13 @@ function View({ stats, event, events }) {
         <>
           <p className="note">{tr(EVENT_NAMES[event] || event)} · {tr("{n} maps played", { n: stats.maps.reduce((n, m) => n + m.played, 0) })} · {tr("Averages per map.")} <a href={`/recap/${event}`}>{tr("Recap")} ›</a></p>
           <div className="tabs sub" role="tablist" aria-label={tr("Stats")}>
-            {[["players", "Players"], ["teams", "Teams"], ["maps", "Maps"]].map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>{tr(l)}</button>)}
+            {[["players", "Players"], ["teams", "Teams"], ["maps", "Maps"], ["agents", "Agents"], ["records", "Records"]].map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>{tr(l)}</button>)}
           </div>
           {tab === "players" && <Players list={stats.players} />}
           {tab === "teams" && <Teams teams={stats.teams} />}
           {tab === "maps" && <Maps maps={stats.maps} event={event} />}
+          {tab === "agents" && <Agents list={stats.agents || []} />}
+          {tab === "records" && stats.records && <Records r={stats.records} event={event} />}
           <p className="vlrcredit">{tr("Numbers from")} <a href="https://www.vlr.gg/" target="_blank" rel="noopener noreferrer">vlr.gg</a></p>
         </>
       )}

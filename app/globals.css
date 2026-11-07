@@ -1190,6 +1190,48 @@ td.cmpw { color: var(--win, #6fcf6f); font-weight: 700; }
 .lftbar .tabs small { color: var(--muted); font-weight: 400; }
 .lftfind { flex: 0 1 280px; min-width: 0; height: 36px; box-sizing: border-box; padding: 0 10px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; font: 14px var(--font-body); }
 .vlrstats { margin-top: 14px; }
+.mcmaps { display: block; font-size: 11px; opacity: .8; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mmlive { margin: 8px 0 12px; }
+.mmlivemaps, .livemaps { display: flex; flex-wrap: wrap; gap: 6px; font-size: 13px; margin: 6px 0; }
+.mmlivemaps span, .livemaps span { padding: 2px 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); }
+.mmlivemaps .now, .livemaps .now { border-color: #ff5a5f; }
+.mmfeed { list-style: none; padding: 0; margin: 6px 0; display: grid; gap: 4px; font-size: 13px; }
+.mmfeed small { opacity: .7; font-variant-numeric: tabular-nums; }
+.multistream { display: grid; gap: 8px; grid-template-columns: 1fr; margin-bottom: 14px; }
+@media (min-width: 900px) { .multistream.n2, .multistream.n3, .multistream.n4 { grid-template-columns: 1fr 1fr; } }
+.multistream .liveplayer { position: relative; margin: 0; }
+.mslabel { position: absolute; left: 8px; top: 8px; background: rgba(0, 0, 0, .65); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 6px; pointer-events: none; }
+.predscore { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; }
+.sharecardbtn { display: inline-flex; flex-wrap: wrap; gap: 6px; margin-inline-start: 8px; vertical-align: middle; }
+.sharecard img { width: 100%; height: auto; border-radius: 10px; margin-top: 16px; }
+.comments { margin-top: 14px; }
+.comments h3 { font-size: 15px; margin: 0 0 6px; }
+.comments ul { list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 6px; max-height: 260px; overflow-y: auto; }
+.comments li { padding: 6px 8px; background: var(--bg); border-radius: 6px; font-size: 13px; }
+.comments li p { margin: 2px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.comments li small { opacity: .6; }
+.commentform { display: flex; gap: 6px; align-items: flex-end; }
+.commentform textarea { flex: 1; min-width: 0; padding: 8px; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; font: 14px var(--font-body); resize: vertical; }
+.trends { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 12px; margin: 10px 0; }
+.trend { margin: 0; padding: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.trend figcaption { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.trendtip { font-weight: 400; opacity: .85; }
+.trend svg { width: 100%; height: auto; display: block; overflow: visible; }
+.trendgrid { stroke: var(--line); stroke-width: 1; }
+.trendbase { stroke: var(--fg); stroke-opacity: .35; stroke-dasharray: 3 4; }
+.trendaxis { fill: var(--fg); opacity: .6; font-size: 11px; }
+.trendline { fill: none; stroke: #ff4655; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.trenddot { fill: var(--surface); stroke: #ff4655; stroke-width: 2; }
+.trenddot.w { fill: #ff4655; }
+.trendhit { fill: transparent; cursor: pointer; }
+.records { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 12px; }
+.recordbox { padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.recordbox h3 { margin: 0 0 8px; font-size: 15px; }
+.recordbox ol { margin: 0; padding-inline-start: 20px; display: grid; gap: 4px; font-size: 13px; }
+.visitbars { display: flex; align-items: flex-end; gap: 4px; height: 120px; margin: 10px 0; }
+.vbar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 2px; }
+.vbar i { width: 100%; min-height: 2px; background: #ff4655; border-radius: 4px 4px 0 0; }
+.vbar small { font-size: 10px; opacity: .6; }
 .homenext { display: grid; gap: 10px; margin: 0 0 18px; }
 .nextcard { display: grid; gap: 4px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-inline-start: 4px solid var(--accent, #ff4655); border-radius: 8px; color: inherit; text-decoration: none; }
 .nextlabel { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; opacity: .7; }

@@ -13,7 +13,11 @@ export default async function Page() {
   const state = getState(getDb());
   const now = Date.now();
   const streamOf = (m) => ((state.extra[m.event] || {})[m.id] || {}).stream || (state.info && state.info[m.event] && state.info[m.event].stream) || "";
-  const slim = (m) => ({ event: m.event, id: m.id, round: m.round, at: m.at, live: m.live, a: m.a, b: m.b, stream: streamOf(m), score: m.live ? (state.live[m.event] || {})[m.id] || null : null });
+  const slim = (m) => {
+    const s = m.live ? (state.live[m.event] || {})[m.id] || null : null;
+    // the page shows the maps, not the feed
+    return { event: m.event, id: m.id, round: m.round, at: m.at, live: m.live, a: m.a, b: m.b, stream: streamOf(m), score: s ? { a: s.a, b: s.b, maps: s.maps || [] } : null };
+  };
   const all = allMatches(state);
   const live = all.filter((m) => m.live).map(slim);
   const next = all.filter((m) => !m.live && m.sa == null && m.at && new Date(m.at).getTime() > now).sort((x, y) => x.at.localeCompare(y.at)).slice(0, 6).map(slim);

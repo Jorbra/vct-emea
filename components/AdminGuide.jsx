@@ -94,6 +94,21 @@ const HOW = [
     ],
   },
   {
+    title: "Direct, stats avancées, commentaires, Discord, visites",
+    points: [
+      "Direct : pendant un match, vlr.gg est relu toutes les quelques minutes (les plus anciens d'abord). Le score de chaque carte s'affiche sur la carte « En direct », sur la page Live et dans la fenêtre du match, avec un fil (« Lotus commence », « Barça gagne Lotus 13–9 : 1–0 »). Un score de cartes saisi à la main reste prioritaire.",
+      "Page Live : « Plusieurs streams à la fois » montre jusqu'à 4 streams côte à côte ; cocher « À l'écran » sur les matchs voulus.",
+      "Stats : onglets Agents (choix, victoires, meilleurs joueurs) et Records (plus gros ACS, plus de kills, cartes les plus longues, plus grosses victoires, remontées). Compositions par carte sur la fiche équipe et la fiche carte. Graphiques ACS et rating sur la fiche joueur.",
+      "Pronostics : un point bonus pour le score exact (Bo3 et Bo5). Classement des groupes (moyenne par membre, 2 membres au moins). « Partager ma carte » donne un lien dont l'aperçu est une image du parcours.",
+      "Commentaires sous chaque match, signés avec le nom des pronostics (280 caractères, un toutes les 20 secondes). Modération : section « Commentaires » de l'accueil de l'éditeur, bouton Supprimer.",
+      "Image de résultat : bouton « Image du résultat » dans la fenêtre d'un match terminé ; sur Discord, les résultats arrivent avec leur image quand il y en a 10 au plus à la fois.",
+      "Bot Discord (/score, /prochain, /classement) : créer une application sur discord.com/developers, copier sa « Public Key » dans la variable Vercel DISCORD_PUBLIC_KEY, mettre https://vct-emea.vercel.app/api/discord comme « Interactions Endpoint URL », puis lancer une fois sur le PC : DISCORD_APP_ID=… DISCORD_BOT_TOKEN=… node scripts/discord-commands.mjs. Inviter le bot avec le scope applications.commands.",
+      "Santé du site : bouton « Prévenir cet appareil » pour recevoir une notification si le cron ou Toornament s'arrête, ou si une partie a une erreur.",
+      "Visites : section « Pages vues » de l'éditeur, comptées par le site lui-même (sans cookie ni traqueur, robots exclus), gardées 90 jours.",
+      "Le Q2 suit Toornament : 512 places, tout en Bo3, et ses dates (11 au 15 novembre) viennent de Toornament.",
+    ],
+  },
+  {
     title: "Récaps, cartes, communauté, santé du site",
     points: [
       "Récap d'un qualifier : /recap/q1 (lien sur l'accueil et dans Stats). Qualifiés et leur parcours, meilleurs joueurs, plus gros matchs, cartes les plus serrées. Il se remplit pendant le tournoi.",

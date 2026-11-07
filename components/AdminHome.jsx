@@ -45,6 +45,8 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
     <div className="adhome">
       <p className="guidelink"><a className="btn" href="/admin/nouveautes">{tr("What's new and how it works")}</a></p>
       {initial.admin && initial.admin.health && <Health rows={initial.admin.health} />}
+      {initial.admin && initial.admin.visits && <Visits v={initial.admin.visits} />}
+      {initial.admin && initial.admin.comments && <CommentsMod list={initial.admin.comments} call={call} onDone={onDone} />}
       <section>
         <h2>{tr("To do")}</h2>
         {todo === 0 && <p className="note">{now == null ? " " : tr("Nothing waiting: no match is live or waiting for its score.")}</p>}
@@ -101,6 +103,78 @@ const HEALTH = {
   regular: ["Work started by visits", "Each visit can start a round."],
 };
 
+const keyBytes = (key) => Uint8Array.from(atob(key.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+
+/** This device told when the cron or Toornament stops, or a part fails. */
+function HealthDevice() {
+  const tr = useT();
+  const [msg, setMsg] = useState("");
+  const turnOn = async () => {
+    setMsg("");
+    try {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) throw new Error(tr("This browser cannot show alerts."));
+      if ((await Notification.requestPermission()) !== "granted") throw new Error(tr("Notifications are blocked for this site: allow them in the browser's site settings, then try again."));
+      await navigator.serviceWorker.register("/sw.js");
+      const reg = await navigator.serviceWorker.ready;
+      const { key } = await fetch("/api/push").then((r) => r.json());
+      const sub = (await reg.pushManager.getSubscription()) || (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) }));
+      const { endpoint, keys } = sub.toJSON();
+      const r = await fetch("/api/health", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ endpoint, keys }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(tr.server(j.error || "Network error"));
+      setMsg(tr.server(j.message));
+    } catch (e) { setMsg(e.message); }
+  };
+  return <p className="row"><button type="button" className="btn" onClick={turnOn}>🔔 {tr("Alert this device when something stops")}</button>{msg && <span className="hint" role="status"> {msg}</span>}</p>;
+}
+
+/** The site's own page views: per day, and the pages most seen this week. */
+function Visits({ v }) {
+  const tr = useT();
+  const max = Math.max(1, ...v.days.map((d) => d.n));
+  return (
+    <section>
+      <details className="einfo">
+        <summary><b>{tr("Page views")}</b> <small>{tr("{n} today", { n: v.today })} · {tr("{n} in 7 days", { n: v.week })}</small></summary>
+        <div className="visitbars" role="img" aria-label={tr("Page views of the last 14 days")}>
+          {v.days.map((d) => <div key={d.day} className="vbar" title={`${d.day} : ${d.n}`}><i style={{ height: `${Math.round((d.n / max) * 100)}%` }} /><small>{d.day.slice(8)}</small></div>)}
+        </div>
+        <div className="tablewrap"><table>
+          <thead><tr><th>{tr("Page")}</th><th>{tr("Views (7 days)")}</th></tr></thead>
+          <tbody>{v.pages.map((p) => <tr key={p.path}><td><a href={p.path}>{p.path}</a></td><td>{p.n}</td></tr>)}</tbody>
+        </table></div>
+        <p className="hint">{tr("Counted by the site itself, without cookies or outside tracker: one view per page opened, robots left out.")}</p>
+      </details>
+    </section>
+  );
+}
+
+/** The latest comments, and removing one. */
+function CommentsMod({ list, call, onDone }) {
+  const tr = useT();
+  const [gone, setGone] = useState([]);
+  const shown = list.filter((c) => !gone.includes(c.id));
+  const remove = async (id) => {
+    try {
+      const j = await call("/api/comments", { remove: id });
+      setGone((g) => [...g, id]);
+      onDone(tr.server(j.message));
+    } catch (e) { onDone(tr.server(e.message)); }
+  };
+  return (
+    <section>
+      <details className="einfo">
+        <summary><b>{tr("Comments")}</b> <small>({shown.length})</small></summary>
+        {shown.length === 0 ? <p className="note">{tr("No comment yet.")}</p> : (
+          <ul className="ahhist">{shown.map((c) => (
+            <li key={c.id}><b>{c.name}</b> <small>{new Date(c.at).toLocaleString()} · <a href={`/match/${c.event}/${c.mid}`}>{c.event} {c.mid}</a></small><br />{c.body} <button type="button" className="btn danger small" onClick={() => remove(c.id)}>{tr("Remove")}</button></li>
+          ))}</ul>
+        )}
+      </details>
+    </section>
+  );
+}
+
 /** What runs by itself: when it last worked, and its last problem. */
 function Health({ rows }) {
   const tr = useT();
@@ -121,6 +195,7 @@ function Health({ rows }) {
           ))}</tbody>
         </table></div>
         <p className="hint">{tr("⚠️: nothing has worked for longer than usual. A problem stays shown until the next one.")}</p>
+        <HealthDevice />
       </details>
     </section>
   );

@@ -3,7 +3,7 @@ import MapPage from "../../../components/MapPage";
 import { getDb, getState } from "../../../lib/db.js";
 import { LANG_COOKIE, normLang } from "../../../lib/i18n.js";
 import { workSoon } from "../../../lib/readsoon.js";
-import { eventsWithDetails, mapCard, readDetails } from "../../../lib/tstats.js";
+import { eventsWithDetails, extraStats, mapCard, readDetails } from "../../../lib/tstats.js";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +21,8 @@ export default async function Page({ params, searchParams }) {
   const events = eventsWithDetails(db);
   const asked = String((await searchParams).e || "");
   const event = events.includes(asked) ? asked : "";
-  const card = mapCard(getState(db), readDetails(db, event), name);
+  const entries = readDetails(db, event);
+  const card = mapCard(getState(db), entries, name);
+  if (card) card.comps = extraStats(getState(db), entries).mapComps[name.toLowerCase()] || [];
   return <MapPage card={card} event={event} events={events} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />;
 }

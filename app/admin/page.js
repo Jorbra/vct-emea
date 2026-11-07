@@ -14,6 +14,7 @@ import { listSeasons } from "../../lib/seasons.js";
 import { listNews, listVoters } from "../../lib/community.js";
 import { lastAction, listHistory } from "../../lib/undo.js";
 import { healthReport } from "../../lib/health.js";
+import { latestComments, visitReport } from "../../lib/social.js";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Editor · VCT EMEA" };
@@ -31,7 +32,7 @@ export default async function Page({ params }) {
   // Nothing from the database is sent to someone who is not signed in.
   const db = getDb();
   const state = me ? getState(db) : null;
-  const initial = me ? { ...state, admin: { health: healthReport(db), sync: readItems("tsync_meta"), accounts: countAccounts(db), roles: me.who ? [] : listRoles(db), rosterDiffs: rosterDiffs(state, readTeamInfo()), who: me.who, undo: lastAction(db), history: listHistory(db), editors: me.who ? [] : listEditors(db), seasons: listSeasons(db), news: listNews(db), voters: listVoters(db) } } : null;
+  const initial = me ? { ...state, admin: { health: healthReport(db), visits: visitReport(db), comments: latestComments(db), sync: readItems("tsync_meta"), accounts: countAccounts(db), roles: me.who ? [] : listRoles(db), rosterDiffs: rosterDiffs(state, readTeamInfo()), who: me.who, undo: lastAction(db), history: listHistory(db), editors: me.who ? [] : listEditors(db), seasons: listSeasons(db), news: listNews(db), voters: listVoters(db) } } : null;
   // signed in with an account that has no access: it is told so, rather than asked for a password
   const account = me ? "" : readAccountToken(db, (await cookies()).get(ACCOUNT_COOKIE)?.value, process.env.SESSION_SECRET);
   return <Admin initial={initial} isAdmin={!!me} denied={account} lang={lang} start={start} />;

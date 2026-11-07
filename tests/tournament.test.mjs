@@ -468,30 +468,30 @@ test("64-team bracket: byes, advancing, third place, changed results", () => {
 test("qualifier: teams, scores, stale results, reset", () => {
   const db = openDb(":memory:");
   const names = Array.from({ length: 64 }, (_, i) => `Team ${i + 1}`).join("\n");
-  assert.equal(setQualifierTeams(db, "q2", names).ok, true);
+  assert.equal(setQualifierTeams(db, "trq2", names).ok, true);
   assert.equal(setQualifierTeams(db, "zz", names).ok, false);
   let q = getState(db).qualifiers;
-  assert.equal(q.q2.slots[0].name, "Team 1");
-  assert.equal(q.q2.slots[0].tag, ""); // no tag is made up
-  assert.equal(q.q2.slots[0].roster, "");
+  assert.equal(q.trq2.slots[0].name, "Team 1");
+  assert.equal(q.trq2.slots[0].tag, ""); // no tag is made up
+  assert.equal(q.trq2.slots[0].roster, "");
   assert.equal(q.q1.slots[0], null);
-  assert.equal(saveQualifierScore(db, { event: "q2", id: "r32-1", sa: 1, sb: 0 }).ok, false); // teams not known yet
-  assert.equal(saveQualifierScore(db, { event: "q2", id: "r64-1", sa: 1, sb: 1 }).ok, false); // Bo1: not a result
-  assert.equal(saveQualifierScore(db, { event: "q2", id: "r64-1", sa: 1, sb: 0 }).ok, true);
-  assert.equal(saveQualifierScore(db, { event: "q2", id: "r64-2", sa: 0, sb: 1 }).ok, true);
-  assert.equal(saveQualifierScore(db, { event: "q2", id: "r32-1", sa: 1, sb: 0 }).ok, true); // Team 1 vs Team 4
+  assert.equal(saveQualifierScore(db, { event: "trq2", id: "r32-1", sa: 1, sb: 0 }).ok, false); // teams not known yet
+  assert.equal(saveQualifierScore(db, { event: "trq2", id: "r64-1", sa: 1, sb: 1 }).ok, false); // Bo1: not a result
+  assert.equal(saveQualifierScore(db, { event: "trq2", id: "r64-1", sa: 1, sb: 0 }).ok, true);
+  assert.equal(saveQualifierScore(db, { event: "trq2", id: "r64-2", sa: 0, sb: 1 }).ok, true);
+  assert.equal(saveQualifierScore(db, { event: "trq2", id: "r32-1", sa: 1, sb: 0 }).ok, true); // Team 1 vs Team 4
   // Flip the first match: the Round of 32 result no longer fits and is dropped.
-  assert.equal(saveQualifierScore(db, { event: "q2", id: "r64-1", sa: 0, sb: 1 }).ok, true);
-  q = getState(db).qualifiers.q2;
+  assert.equal(saveQualifierScore(db, { event: "trq2", id: "r64-1", sa: 0, sb: 1 }).ok, true);
+  q = getState(db).qualifiers.trq2;
   assert.equal(q.scores["r32-1"], undefined);
   assert.ok(q.scores["r64-2"]);
   // Changing the best-of drops results that are no longer valid scores.
-  assert.equal(setQualifierBo(db, "q2", { r64: 3 }).ok, true);
-  assert.equal(getState(db).qualifiers.q2.scores["r64-2"], undefined);
-  assert.equal(setQualifierBo(db, "q2", { r64: 7 }).ok, false);
-  assert.equal(saveQualifierScore(db, { event: "q2", id: "r64-2", sa: null, sb: null }).ok, true);
-  assert.equal(resetQualifier(db, "q2").ok, true);
-  assert.equal(getState(db).qualifiers.q2.slots[0], null);
+  assert.equal(setQualifierBo(db, "trq2", { r64: 3 }).ok, true);
+  assert.equal(getState(db).qualifiers.trq2.scores["r64-2"], undefined);
+  assert.equal(setQualifierBo(db, "trq2", { r64: 7 }).ok, false);
+  assert.equal(saveQualifierScore(db, { event: "trq2", id: "r64-2", sa: null, sb: null }).ok, true);
+  assert.equal(resetQualifier(db, "trq2").ok, true);
+  assert.equal(getState(db).qualifiers.trq2.slots[0], null);
 });
 
 test("GC EMEA team list: teams saved by slot, listed in the state, kept apart from the Qualifiers", async () => {
@@ -520,17 +520,17 @@ test("qualifier slot: set one slot, roster/staff kept, empty name empties it, va
   const { openDb, getQualifier } = await import("../lib/db.js");
   const { setQualifierSlot } = await import("../lib/qactions.js");
   const db = openDb(":memory:");
-  assert.equal(setQualifierSlot(db, { event: "q2", slot: 3, name: "Alpha", roster: "a|fr, b|de", staff: "c|fr|coach" }).ok, true);
-  let q = getQualifier(db, "q2");
+  assert.equal(setQualifierSlot(db, { event: "trq2", slot: 3, name: "Alpha", roster: "a|fr, b|de", staff: "c|fr|coach" }).ok, true);
+  let q = getQualifier(db, "trq2");
   assert.equal(q.slots[2].name, "Alpha");
   assert.equal(q.slots[2].roster, "a|fr, b|de");
   assert.equal(q.slots[2].staff, "c|fr|coach");
-  assert.equal(setQualifierSlot(db, { event: "q2", slot: 65, name: "X" }).ok, false);
-  assert.equal(setQualifierSlot(db, { event: "q2", slot: 0, name: "X" }).ok, false);
+  assert.equal(setQualifierSlot(db, { event: "trq2", slot: 65, name: "X" }).ok, false);
+  assert.equal(setQualifierSlot(db, { event: "trq2", slot: 0, name: "X" }).ok, false);
   assert.equal(setQualifierSlot(db, { event: "zz", slot: 1, name: "X" }).ok, false);
-  assert.equal(setQualifierSlot(db, { event: "q2", slot: 1, name: "x".repeat(41) }).ok, false);
-  assert.equal(setQualifierSlot(db, { event: "q2", slot: 3, name: "" }).ok, true);
-  q = getQualifier(db, "q2");
+  assert.equal(setQualifierSlot(db, { event: "trq2", slot: 1, name: "x".repeat(41) }).ok, false);
+  assert.equal(setQualifierSlot(db, { event: "trq2", slot: 3, name: "" }).ok, true);
+  q = getQualifier(db, "trq2");
   assert.equal(q.slots[2] || null, null);
 });
 
@@ -1177,7 +1177,7 @@ test("live matches and the flat match list of every event", async () => {
   assert.deepEqual(getState(db).live.kickoff, {});
   const st = getState(db);
   assert.equal(matchesOf("kickoff", eventData(st, "kickoff")).length, 30); // 11 upper + 10 mid + 9 lower
-  assert.equal(matchesOf("q2", eventData(st, "q2")).length, 64); // 63 + third place
+  assert.equal(matchesOf("q2", eventData(st, "q2")).length, 512); // 511 + third place
   assert.equal(matchesOf("q1", eventData(st, "q1")).length, 256); // 255 + third place
   assert.equal(matchesOf("tr", eventData(st, "tr")).length, 16);
   assert.equal(matchesOf("mena", eventData(st, "mena")).length, 3);
@@ -1285,10 +1285,10 @@ test("clearing a match removes its score, hand-picked teams, time, live flag and
   assert.equal(r.manual.sf1, undefined);
   assert.equal(r.scores.sf1, undefined);
   // a qualifier match: the score goes, its teams come from the list
-  assert.equal(setQualifierTeams(db, "q2", "A\nB").ok, true);
-  assert.equal(saveQualifierScore(db, { event: "q2", id: "r64-1", sa: 1, sb: 0 }).ok, true);
-  assert.equal(clearMatch(db, { event: "q2", id: "r64-1" }).ok, true);
-  const q = getQualifier(db, "q2");
+  assert.equal(setQualifierTeams(db, "trq2", "A\nB").ok, true);
+  assert.equal(saveQualifierScore(db, { event: "trq2", id: "r64-1", sa: 1, sb: 0 }).ok, true);
+  assert.equal(clearMatch(db, { event: "trq2", id: "r64-1" }).ok, true);
+  const q = getQualifier(db, "trq2");
   assert.equal(q.scores["r64-1"], undefined);
   assert.equal(q.slots[0].name, "A");
   // EU Playoffs: a match that was never drawn, and bad input
@@ -2063,7 +2063,7 @@ test("news and predictions", async () => {
   assert.equal(p(B, "Bob", "u1-1", "Karmine Corp").ok, true);
   assert.equal(p(A, "", "u1-1", "Karmine Corp").ok, true); // changes the pick, the name is known
   assert.equal(p(A, "", "u1-1", "Team Vitality").ok, true);
-  assert.deepEqual(myPredictions(db, A), { name: "Ana", picks: { "kickoff:u1-1": "Team Vitality" } });
+  assert.deepEqual(myPredictions(db, A), { name: "Ana", picks: { "kickoff:u1-1": "Team Vitality" }, scores: {} });
   assert.deepEqual(myPredictions(db, "nope"), { name: "", picks: {} });
   assert.ok(!JSON.stringify(db.prepare("SELECT * FROM voters").all()).includes(A)); // the token is not kept as is
   assert.deepEqual(predictionRanking(db, getState(db)), []); // no result yet
@@ -2331,7 +2331,7 @@ test("transfers, and where rosters differ from Liquipedia", async () => {
   db.close();
 });
 
-test("EU Qualifier 1 has 256 places, the other qualifiers keep 64", async () => {
+test("EU Qualifier 1 has 256 places, Qualifier 2 512, the others keep 64", async () => {
   const { setQualifierSlot } = await import("../lib/qactions.js");
   const { getQualifier } = await import("../lib/db.js");
   const { isMatchOf } = await import("../lib/schedule.js");
@@ -2342,15 +2342,15 @@ test("EU Qualifier 1 has 256 places, the other qualifiers keep 64", async () => 
   assert.equal(setQualifierTeams(db, "q2", names).ok, true);
   let st = getState(db);
   assert.equal(st.qualifiers.q1.slots.filter(Boolean).length, 256);
-  assert.equal(st.qualifiers.q2.slots.filter(Boolean).length, 64);
+  assert.equal(st.qualifiers.q2.slots.filter(Boolean).length, 300); // 512 places since Toornament
   assert.equal(setQualifierSlot(db, { event: "q1", slot: 256, name: "Last" }).ok, true);
   assert.equal(setQualifierSlot(db, { event: "q1", slot: 257, name: "X" }).ok, false);
-  assert.equal(setQualifierSlot(db, { event: "q2", slot: 65, name: "X" }).ok, false);
+  assert.equal(setQualifierSlot(db, { event: "q2", slot: 513, name: "X" }).ok, false);
   assert.equal(isMatchOf("q1", "r256-128"), true);
   assert.equal(isMatchOf("q1", "r256-129"), false);
-  assert.equal(isMatchOf("q2", "r256-1"), false);
+  assert.equal(isMatchOf("trq2", "r256-1"), false);
   assert.equal(setQualifierBo(db, "q1", { r256: 3, r128: 3, gf: 3 }).ok, true);
-  assert.equal(setQualifierBo(db, "q2", { r256: 3 }).ok, false);
+  assert.equal(setQualifierBo(db, "trq2", { r256: 3 }).ok, false);
   const b = (q) => buildBracket(q.slots, q.scores, q.bo);
   // the first match feeds the Round of 128, the Round of 64 is then the third round
   assert.equal(saveQualifierScore(db, { event: "q1", id: "r256-1", sa: 2, sb: 0 }).ok, true);

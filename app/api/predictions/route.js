@@ -17,7 +17,7 @@ export async function POST(req) {
   const ip = "pick:" + (req.headers.get("x-forwarded-for") || "local").split(",")[0].trim();
   // each failure counts toward the shared limit of 8 per 10 minutes, so that names cannot be tried over and over
   if (tooManyAttempts(ip)) return NextResponse.json({ error: "Too many attempts. Try again in a few minutes." }, { status: 429 });
-  const r = savePrediction(db, getState(db), { token: b.token, name: b.name, event: String(b.event || ""), id: String(b.id || ""), pick: b.pick });
+  const r = savePrediction(db, getState(db), { token: b.token, name: b.name, event: String(b.event || ""), id: String(b.id || ""), pick: b.pick, score: typeof b.score === "string" ? b.score : "" });
   if (!r.ok) recordFailure(ip);
   return r.ok ? NextResponse.json({ ok: true, message: r.message }) : NextResponse.json({ error: r.error }, { status: r.status });
 }
