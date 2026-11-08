@@ -304,3 +304,32 @@ export function GroupBoard({ list }) {
     </section>
   );
 }
+
+
+/** During a live series: who wins the next map? A point for each right one. */
+export function MapPick({ event, m, live }) {
+  const tr = useT();
+  const need = Math.ceil((m.bo || 1) / 2);
+  const map = (live.a || 0) + (live.b || 0) + 1;
+  const open = (m.bo || 1) > 1 && (live.a || 0) < need && (live.b || 0) < need;
+  const [pick, setPick] = useState("");
+  const [err, setErr] = useState("");
+  useEffect(() => {
+    if (!open) return;
+    post("/api/mappick", { token: fanToken(), event, id: m.id, map }).then((j) => setPick(j.pick || "")).catch(() => { /* offline */ });
+  }, [event, m.id, map, open]);
+  if (!open || !m.a || !m.b) return null;
+  const choose = async (team) => {
+    setErr("");
+    try { setPick((await post("/api/mappick", { token: fanToken(), event, id: m.id, map, pick: team })).pick); } catch (e) { setErr(tr.server(e.message)); }
+  };
+  return (
+    <section className="mappick">
+      <h3>{tr("Who wins map {n}?", { n: map })} <small>{tr("+1 point if right")}</small></h3>
+      <div className="mappickbtns">
+        {[m.a, m.b].map((t) => <button key={t.name} type="button" className={"btn" + (pick === t.name ? " pri" : "")} aria-pressed={pick === t.name} onClick={() => choose(t.name)}>{t.name}</button>)}
+      </div>
+      {err && <p className="err" role="alert">{err}</p>}
+    </section>
+  );
+}

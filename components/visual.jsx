@@ -126,6 +126,11 @@ export function ResultToast() {
       fresh.forEach((a) => known.current.add(a.key));
       if (!fresh.length) return;
       setShown((s) => [...s, ...fresh.slice(0, 3)].slice(-3));
+      // a favorite team won: a little confetti
+      let favs = [];
+      try { favs = JSON.parse(localStorage.getItem("vct-favorites") || "[]"); } catch { /* none */ }
+      const slug = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      if (fresh.some((a) => favs.includes(slug(a.sa > a.sb ? a.a : a.b)))) confetti();
       setTimeout(() => setShown((s) => s.filter((x) => !fresh.includes(x))), 7000);
     }).catch(() => { /* offline */ });
     load();
@@ -246,6 +251,36 @@ export function TeamThemePicker({ teams }) {
   );
 }
 
+
+/** A short burst of confetti from the top of the screen; nothing for those who asked for less motion. */
+export function confetti() {
+  if (typeof window === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = document.createElement("canvas");
+  c.className = "confetti";
+  c.width = window.innerWidth;
+  c.height = window.innerHeight;
+  document.body.appendChild(c);
+  const g = c.getContext("2d");
+  const style = getComputedStyle(document.documentElement);
+  const colors = [style.getPropertyValue("--lime").trim() || "#c9f03c", style.getPropertyValue("--team-2").trim() || "#ff4655", "#ffffff"];
+  const bits = Array.from({ length: 120 }, () => ({ x: Math.random() * c.width, y: -20 - Math.random() * 200, vx: (Math.random() - 0.5) * 3, vy: 2 + Math.random() * 3, r: Math.random() * 6.28, s: 5 + Math.random() * 5, col: colors[Math.floor(Math.random() * colors.length)] }));
+  const start = performance.now();
+  const tick = (t) => {
+    g.clearRect(0, 0, c.width, c.height);
+    for (const b of bits) { b.x += b.vx; b.y += b.vy; b.r += 0.1; g.save(); g.translate(b.x, b.y); g.rotate(b.r); g.fillStyle = b.col; g.fillRect(-b.s / 2, -b.s / 4, b.s, b.s / 2); g.restore(); }
+    if (t - start < 3200) requestAnimationFrame(tick); else c.remove();
+  };
+  requestAnimationFrame(tick);
+}
+
+/** A phone wallpaper in a team's colors. */
+export function WallpaperButton({ team, slug }) {
+  const tr = useT2();
+  const p = useTeamPalette(team && team.logo);
+  const hex = (rgb) => (rgb ? rgb.map((v) => v.toString(16).padStart(2, "0")).join("") : "");
+  const q = p && !p.mono ? `?c1=${hex(p.primary)}${p.secondary ? `&c2=${hex(p.secondary)}` : ""}` : "";
+  return <a className="btn" href={`/api/og/wallpaper/${slug}${q}`} target="_blank" rel="noopener noreferrer" download={`${slug}-fond-d-ecran.png`}>📱 {tr("Phone wallpaper")}</a>;
+}
 
 /** A small map of a big bracket: where the view is; a click moves it there. */
 export function MiniMap({ boxRef }) {

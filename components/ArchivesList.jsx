@@ -24,6 +24,7 @@ function View({ seasons }) {
               <span className="evtitle">{s.name}</span>
               <span className="evmeta">{new Intl.DateTimeFormat(localeOf(tr.lang), { dateStyle: "long" }).format(new Date(s.created))}</span>
               <span className="evgo">{tr("Open")} ›</span>
+              <span className="arcrecaps" onClick={(e) => e.stopPropagation()}>{["q1", "q2"].map((ev) => <a key={ev} href={`/recap/${ev}?saison=${s.slug}`} onClick={(e) => e.stopPropagation()}>{tr("Recap")} {ev.toUpperCase()}</a>)}</span>
             </a>
           ))}
         </div>

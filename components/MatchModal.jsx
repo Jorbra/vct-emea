@@ -13,7 +13,7 @@ import { parseRoster } from "../lib/tournament.js";
 import { scoreLabel } from "../lib/scoretext.js";
 import VlrStats from "./VlrStats.jsx";
 import { Flag } from "./TeamCard.jsx";
-import { Comments, MotmVote } from "./Fans.jsx";
+import { Comments, MapPick, MotmVote } from "./Fans.jsx";
 import { Score, Skeleton, useTeamColor } from "./visual.jsx";
 
 export { EVENT_NAMES };
@@ -275,6 +275,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
         ))}
         </div>
         <aside className="mmside">
+        {live && state && <MapPick event={e.event} m={m} live={live} />}
         {done && state && <MotmVote event={e.event} id={m.id} candidates={candidates} />}
         {state && m.a && m.b && m.a.name && m.b.name && <HeadToHead m={m} state={state} />}
         {cmp && state && m.a && m.b && m.a.name && m.b.name && <Compare m={m} state={state} />}

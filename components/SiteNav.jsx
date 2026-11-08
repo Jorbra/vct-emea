@@ -21,13 +21,15 @@ const ICON = {
   archives: "M4 5h16v4H4zM6 9v10h12V9M10 13h4",
   account: "M12 11a4 4 0 1 0 0-.01M5 20c1-4 4-6 7-6s6 2 7 6",
   about: "M12 4a8 8 0 1 0 .01 0M12 11v5M12 8h.01",
+  night: "M4 5h16v11H4zM8 20h8M12 16v4",
+  week: "M5 5h14v15H5zM5 9h14M9 13h2M13 13h2M9 16h2",
 };
 const Icon = ({ name }) => (
   <svg className="navicon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={ICON[name]} /></svg>
 );
 
 const LINKS = [
-  ["/", "Home", "home"], ["/live", "Live", "live"], ["/calendar", "Calendar", "calendar"], ["/predictions", "Predictions", "target"], ["/stats", "Stats", "stats"],
+  ["/", "Home", "home"], ["/live", "Live", "live"], ["/soiree", "Match night", "night"], ["/moi", "My week", "week"], ["/calendar", "Calendar", "calendar"], ["/predictions", "Predictions", "target"], ["/stats", "Stats", "stats"],
   ["/transfers", "Transfers", "transfers"], ["/lft", "LFT", "lft"], ["/compare", "Compare", "compare"], ["/news", "News", "news"], ["/archives", "Archives of past seasons", "archives"],
 ];
 

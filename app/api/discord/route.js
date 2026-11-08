@@ -2,6 +2,7 @@ import { NextResponse, after } from "next/server";
 import { getDb, getState } from "../../../lib/db.js";
 import { COMMANDS, answerButtons, answerCommand, autocomplete, findTeam, helpMessage, pronosticMessage, verifyDiscord, voterName } from "../../../lib/discordbot.js";
 import { compareTeams } from "../../../lib/playerstats.js";
+import { addReminder } from "../../../lib/more.js";
 import { answerQuestion, gameRanking, guildUsers, makeQuestion, noteGuildUser, questionMessage, setFanRole } from "../../../lib/botextra.js";
 import { botReady as tokenSet } from "../../../lib/botapi.js";
 import { allMatches } from "../../../lib/matchlist.js";
@@ -124,6 +125,14 @@ export async function POST(req) {
   ctx.guild = i.guild_id || "";
   const opt = (n) => { const o = (i.data.options || []).find((x) => x.name === n); return o ? String(o.value ?? "") : ""; };
 
+  if (name === "rappel") {
+    const [ev, mid] = opt("match").split(":");
+    const m = (await import("../../../lib/matchlist.js")).allMatches(ctx.state()).find((x) => x.event === ev && x.id === mid);
+    if (!m || !m.a || !m.b) return ephemeral({ content: L("Choisis un match dans la liste.", "Pick a match from the list.") });
+    const r = addReminder(db, user.id, m, now);
+    if (!r.ok) return ephemeral({ content: L(r.error === "20 reminders at most." ? "20 rappels au plus." : "Ce match n'a pas d'horaire à venir.", r.error) });
+    return ephemeral({ content: L(`⏰ C'est noté : un message privé 15 minutes avant **${m.a.name} vs ${m.b.name}** (<t:${Math.floor(new Date(m.at).getTime() / 1000)}:f>).`, `⏰ Done: a private message 15 minutes before **${m.a.name} vs ${m.b.name}** (<t:${Math.floor(new Date(m.at).getTime() / 1000)}:f>).`) + (tokenSet() ? "" : L("\n(Les messages privés partiront dès que le bot sera branché sur le site.)", "\n(Private messages start once the bot is plugged into the site.)")) });
+  }
   if (name === "devine") {
     const q = makeQuestion(ctx.state(), ctx.stats().players, settings.lang);
     return q ? NextResponse.json({ type: 4, data: questionMessage(q, settings.lang) }) : ephemeral({ content: L("Pas encore assez de matchs pour jouer.", "Not enough matches to play yet.") });

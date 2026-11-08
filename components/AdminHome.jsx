@@ -45,8 +45,11 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
   return (
     <div className="adhome">
       <p className="guidelink"><a className="btn" href="/admin/nouveautes">{tr("What's new and how it works")}</a></p>
+      {initial.admin && <QuickLive initial={initial} call={call} onDone={onDone} />}
+      {initial.admin && initial.admin.checklist && initial.admin.checklist.length > 0 && <Checklist list={initial.admin.checklist} />}
       {initial.admin && initial.admin.health && <Health rows={initial.admin.health} />}
       {initial.admin && <BotPanel />}
+      {initial.admin && initial.admin.steps && <Journal admin={initial.admin} call={call} onDone={onDone} />}
       {initial.admin && initial.admin.visits && <Visits v={initial.admin.visits} />}
       {initial.admin && initial.admin.comments && <CommentsMod list={initial.admin.comments} call={call} onDone={onDone} />}
       <section>
@@ -104,6 +107,98 @@ const HEALTH = {
   alerts: ["Alerts", "Last sending: sent / browsers."],
   regular: ["Work started by visits", "Each visit can start a round."],
 };
+
+/** On a phone during a match: the maps won so far with big buttons, and the result in one tap. */
+function QuickLive({ initial, call, onDone }) {
+  const tr = useT();
+  const live = allMatches(initial).filter((m) => m.live && m.a && m.b);
+  if (!live.length) return null;
+  const score = (m) => (initial.live[m.event] || {})[m.id] || { a: 0, b: 0 };
+  const set = async (m, a, b) => {
+    try { const j = await call("/api/mlive", { event: m.event, id: m.id, live: true, a: Math.max(0, a), b: Math.max(0, b) }); onDone(tr.server(j.message)); } catch (e) { onDone(tr.server(e.message)); }
+  };
+  return (
+    <section>
+      <h2>⚡ {tr("Quick live score")} <small>({live.length})</small></h2>
+      <div className="quicklive">
+        {live.map((m) => {
+          const s = score(m);
+          const need = Math.ceil((m.bo || 1) / 2);
+          return (
+            <div key={m.event + m.id} className="qlcard">
+              <small>{tr(EVENT_NAMES[m.event])} · Bo{m.bo}</small>
+              {[["a", m.a], ["b", m.b]].map(([side, t]) => (
+                <div key={side} className="qlrow">
+                  <span className="qlname">{t.name}</span>
+                  <button type="button" className="btn qlbtn" aria-label={tr("One map less")} onClick={() => set(m, side === "a" ? s.a - 1 : s.a, side === "b" ? s.b - 1 : s.b)}>−</button>
+                  <b className="qlscore">{side === "a" ? s.a : s.b}</b>
+                  <button type="button" className="btn qlbtn pri" aria-label={tr("One map more")} onClick={() => set(m, side === "a" ? s.a + 1 : s.a, side === "b" ? s.b + 1 : s.b)}>+1</button>
+                </div>
+              ))}
+              {(s.a >= need || s.b >= need) && <p className="hint">{tr("Series decided: enter the result in the event's matches.")}</p>}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/** What is missing before an event starts (or while it runs). */
+function Checklist({ list }) {
+  const tr = useT();
+  return (
+    <section>
+      <details className="einfo" open>
+        <summary><b>✅ {tr("Before the events")}</b> <small>{list.filter((e) => e.issues.length).length} {tr("to look at")}</small></summary>
+        {list.map((e) => (
+          <div key={e.event} className="checkev">
+            <h3 className="sub">{tr(e.name)} <small>{new Date(e.start).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small></h3>
+            {e.issues.length === 0 ? <p className="hint">✅ {tr("All set.")}</p> : (
+              <ul className="checklist">{e.issues.map((x) => <li key={x.kind}>⚠️ {tr(x.text)}{x.kind !== "stream" && x.kind !== "teams" ? ` : ${x.count}` : ""}{x.items.length > 0 && <small> · {x.items.join(", ")}{x.count > x.items.length ? " …" : ""}</small>}</li>)}</ul>
+            )}
+          </div>
+        ))}
+      </details>
+    </section>
+  );
+}
+
+/** The changes, by editor and by event, and going back to before one of them (with every change made after it). */
+function Journal({ admin, call, onDone }) {
+  const tr = useT();
+  const [who, setWho] = useState("");
+  const [q, setQ] = useState("");
+  const people = [...new Set(admin.history.map((h) => h.who || tr("Main account")))];
+  const shown = admin.history.filter((h) => (!who || (h.who || tr("Main account")) === who) && (!q || h.message.toLowerCase().includes(q.toLowerCase())));
+  const back = async (s, i) => {
+    if (!window.confirm(tr("Undo this change and the {n} made after it?", { n: i }))) return;
+    try { const j = await call("/api/undo", { step: s.step }); onDone(tr.server(j.message)); window.location.reload(); } catch (e) { onDone(tr.server(e.message)); }
+  };
+  const when = (iso) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return (
+    <section>
+      <details className="einfo">
+        <summary><b>🗂 {tr("Journal of changes")}</b></summary>
+        <div className="row" style={{ margin: "8px 0" }}>
+          <select value={who} onChange={(e) => setWho(e.target.value)} aria-label={tr("Editor")}><option value="">{tr("Everyone")}</option>{people.map((p) => <option key={p} value={p}>{p}</option>)}</select>
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("Event, team, word…")} aria-label={tr("Search")} />
+        </div>
+        <ul className="ahhist">{shown.slice(0, 80).map((h, i) => <li key={i}><time>{when(h.at)}</time><b>{h.who || tr("Main account")}</b><span>{h.message}</span></li>)}</ul>
+        {admin.steps.length > 0 && (
+          <>
+            <h3 className="sub">{tr("Go back to before a change")}</h3>
+            <ul className="ahhist">{admin.steps.map((s, i) => (
+              <li key={s.step}><time>{when(s.at)}</time><b>{s.who || tr("Main account")}</b><span>{s.label}</span>
+                <button type="button" className="btn small" onClick={() => back(s, i)}>{i === 0 ? tr("Undo") : tr("Undo back to here")}</button></li>
+            ))}</ul>
+            <p className="hint">{tr("Going back to a change also undoes every change made after it.")}</p>
+          </>
+        )}
+      </details>
+    </section>
+  );
+}
 
 const keyBytes = (key) => Uint8Array.from(atob(key.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
 

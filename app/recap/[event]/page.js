@@ -17,12 +17,21 @@ export async function generateMetadata({ params }) {
 }
 
 /** A qualifier's recap (/recap/q1). */
-export default async function Page({ params }) {
+export default async function Page({ params, searchParams }) {
   workSoon();
   const { event } = await params;
   if (!EVENT_NAMES[event]) notFound();
   const db = getDb();
-  const recap = recapOf(getState(db), readDetails(db, event), event);
+  // an archived season: its frozen results (vlr.gg's numbers are only kept for the current one)
+  const season = String((await searchParams).saison || "");
+  let recap;
+  if (season) {
+    const { getSeason } = await import("../../../lib/seasons.js");
+    const s = getSeason(db, season);
+    if (!s) notFound();
+    recap = recapOf(s.state, [], event);
+    if (recap) recap.season = s.name;
+  } else recap = recapOf(getState(db), readDetails(db, event), event);
   if (!recap) notFound();
   return <RecapPage recap={recap} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />;
 }

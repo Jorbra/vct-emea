@@ -36,7 +36,7 @@ function View({ r }) {
   return (
     <div className="wrap teampage recap">
       <div className="topbar">
-        <h1 className="brandh"><a className="homelink" href="/" title={tr("Home")}><EmeaMark /></a><span>{tr("Recap")} · {title}</span></h1>
+        <h1 className="brandh"><a className="homelink" href="/" title={tr("Home")}><EmeaMark /></a><span>{tr("Recap")} · {title}{r.season ? ` · ${r.season}` : ""}</span></h1>
         <SearchBar />
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>

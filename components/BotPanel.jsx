@@ -7,7 +7,7 @@ import { Skeleton } from "./visual.jsx";
 const ANNOUNCE = [["start", "Match starts"], ["result", "Results"], ["image", "Results with picture"], ["transfers", "Transfers (free agents, signings)"], ["news", "News"]];
 const TABS = [["settings", "Settings"], ["auto", "Automatic"], ["samples", "Examples"], ["announce", "Announcement"], ["pin", "Pinned message"], ["stats", "Statistics"], ["log", "Log"]];
 const KINDS = [["start", "Match start"], ["result", "Result"], ["reminder", "Reminder 15 min"], ["live", "Live score message"], ["poll", "Poll"], ["daily", "Evening summary"]];
-const AUTO = [["reminder", "Reminder 15 minutes before each match"], ["daily", "Evening summary at 10 pm (the day's results)"], ["weekly", "Prediction ranking every Monday at 10 am"], ["liveEdit", "One message per live match, updated as it goes"], ["polls", "A poll \"Who wins?\" before the final rounds"], ["fanRoles", "Fans' roles: /suivre gives the team's role, mentioned at its matches"]];
+const AUTO = [["reminder", "Reminder 15 minutes before each match"], ["daily", "Evening summary at 10 pm (the day's results)"], ["weekly", "Prediction ranking every Monday at 10 am"], ["liveEdit", "One message per live match, updated as it goes"], ["polls", "A poll \"Who wins?\" before the final rounds"], ["fanRoles", "Fans' roles: /suivre gives the team's role, mentioned at its matches"], ["recap", "The recap of a qualifier as soon as it ends"]];
 const when = (iso) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
 /** A Discord card as Discord draws it, roughly: for the pinned message's preview. */
