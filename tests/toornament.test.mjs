@@ -189,6 +189,10 @@ test("a hot event is read every minute, a cold one every few hours", () => {
   assert.equal(syncDue(meta(61000), now), true);
   const cold = { at: new Date(now - 3600000).toISOString(), first: "2026-12-01T18:00:00Z", lastAt: "2026-12-03T18:00:00Z" };
   assert.equal(syncDue(cold, now), false);
+  // the two days before: every 10 minutes
+  const soon = (ago) => ({ at: new Date(now - ago).toISOString(), first: "2026-11-10T12:00:00Z", lastAt: "2026-11-11T18:00:00Z" });
+  assert.equal(syncDue(soon(5 * 60000), now), false);
+  assert.equal(syncDue(soon(11 * 60000), now), true);
 });
 
 test("Discord: 128 lines make a few messages, none too long; a pasted flag list reports what it did not use", () => {
@@ -289,4 +293,24 @@ test("vlr.gg names written differently: found by the round, where a team plays o
   assert.deepEqual(V.findSiteMatch(items, "FRG", "AMNESIA", "r128"), { id: "r128-1", swap: false });
   assert.equal(V.findSiteMatch(items, "FRG", "Cavalry Esports"), null); // without the round, only exact names
   assert.equal(V.findSiteMatch(items, "Nobody", "Else", "r256"), null);
+});
+
+test("a bracket that is not full: the teams with a bye wait in round 2, the first round is rebuilt whole", async () => {
+  const { fillByes } = await import("../lib/toornament.js");
+  const side = (pid, name) => ({ pid, name, score: null, result: "", forfeit: false });
+  const none = side("", "");
+  const m = (round, n, a, b) => ({ round, n, at: round === 1 ? `2026-11-09T1${n}:00:00Z` : "", status: "pending", type: "single_elimination", a, b });
+  const rows = [
+    m(1, 1, side("b", "B"), side("c", "C")), m(1, 2, side("e", "E"), side("f", "F")),
+    m(2, 1, side("a", "A"), none), m(2, 2, none, side("d", "D")),
+    m(3, 1, none, none),
+  ];
+  const filled = fillByes(rows).filter((r) => r.round === 1);
+  assert.deepEqual(filled.map((r) => `${r.n}:${r.a.name || "-"}/${r.b.name || "-"}`), ["1:A/-", "2:B/C", "3:E/F", "4:D/-"]);
+  const db = openDb(":memory:");
+  const plan = planSync({ event: "meq1", rows, teams: null, site: site(db), last: {} });
+  assert.equal(plan.size, 8);
+  assert.deepEqual(plan.slots.map((s) => `${s.slot}:${s.name}`).sort(), ["1:A", "3:B", "4:C", "5:E", "6:F", "7:D"].sort());
+  // a full first round is left as it is
+  assert.equal(fillByes(rows.filter((r) => r.round !== 2)).length, 3);
 });
