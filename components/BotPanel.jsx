@@ -51,7 +51,7 @@ export default function BotPanel() {
               <span>{d.token ? "✅" : "⚠️"} {tr("Bot token on Vercel")} : {tr(d.token ? "set" : "missing")}</span>
             </div>
             <p className="hint">{tr("The bot posts by itself once its token is on Vercel (DISCORD_BOT_TOKEN) and a channel is chosen; until then the webhook keeps posting.")}</p>
-            {d.error && <p className="err">{d.error}</p>}
+            {d.error && <p className="err">{tr.server(d.error)}</p>}
             <div className="botgrid">
               {d.token && pick(tr("Server"), "guild", d.guilds, false)}
               {d.token && pick(tr("Announcements channel"), "channel", d.channels)}
