@@ -14,6 +14,7 @@ import { scoreLabel } from "../lib/scoretext.js";
 import VlrStats from "./VlrStats.jsx";
 import { Flag } from "./TeamCard.jsx";
 import { Comments, MotmVote } from "./Fans.jsx";
+import { Score, Skeleton, useTeamColor } from "./visual.jsx";
 
 export { EVENT_NAMES };
 
@@ -204,6 +205,8 @@ function MatchModal({ e, m, state, onClose, page = false }) {
     return <div className={"mmteam " + side + (won ? " w" : m.win ? " lo" : "")}>{href ? <a href={href}>{inner}</a> : inner}</div>;
   };
   const score = done ? scoreLabel(m, tr, ":") : live ? `${live.a} : ${live.b}` : "vs";
+  const colorA = useTeamColor(m.a && m.a.logo);
+  const colorB = useTeamColor(m.b && m.b.logo);
   const who = (player) => (state && knownPlayer(state, player) ? <a href={playerHref(player)}>{player}</a> : player);
   return (
     <Shell page={page} title={title} boxRef={ref} onClose={onClose}>
@@ -213,9 +216,9 @@ function MatchModal({ e, m, state, onClose, page = false }) {
           <span>{label}{m.bo ? ` · Bo${m.bo}` : ""}</span>
         </div>
         <div className="mmstate">{live ? <LiveBadge /> : done ? <span className="evstate done">{tr("Finished")}</span> : <span className="evstate">{tr("Upcoming")}</span>}{when && <span className="mmwhen">{when}</span>}</div>
-        <div className="mmvs">
+        <div className="mmvs" style={{ ...(colorA ? { "--ta": colorA } : {}), ...(colorB ? { "--tb": colorB } : {}) }}>
           {team(m.a, "a")}
-          <div className={"mmscore" + (live ? " lv" : "")}>{score}</div>
+          <Score className={"mmscore" + (live ? " lv" : "")} value={score} />
           {team(m.b, "b")}
         </div>
         {live && (live.maps || []).length > 0 && (
@@ -258,6 +261,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
         {ex.mvp && <p className="mmmvp"><b>MVP</b> {who(ex.mvp)}</p>}
         {!ex.mvp && done && autoMvp && <p className="mmmvp"><b>MVP</b> {who(autoMvp.name)} <small>{tr("best ACS: {acs}", { acs: autoMvp.acs })}</small></p>}
         {details && (details.all || []).length > 0 && <VlrStats details={details} m={m} />}
+        {ex.hasDetails && !details && <Skeleton lines={6} height={16} />}
         {!(details && (details.all || []).length) && !(ex.hasDetails && !details) && (ex.pstats || []).length > 0 && teamsOf(ex.pstats, m).map((g, i) => (
           <table className="mmstats" key={i}>
             <thead>

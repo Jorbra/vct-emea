@@ -23,6 +23,7 @@ import { AlertsButton } from "./MatchAlerts.jsx";
 import { TeamMaps } from "./EventStats.jsx";
 import { siteHref, teamHref, teamSlug } from "../lib/paths.js";
 import { formatMatchTime } from "../lib/schedule.js";
+import { useTeamColor } from "./visual.jsx";
 
 export default function TeamPage(props) {
   return (
@@ -331,6 +332,12 @@ function OutsideTeam({ lp, org = [], outside, vlr, updating }) {
 }
 
 /** The team's numbers in the tournaments, from vlr.gg's tables. */
+/** The team's header, tinted with the color of its logo. */
+function TeamHead({ team, children }) {
+  const color = useTeamColor(team && team.logo);
+  return <div className={"thead" + (color ? " tinted" : "")} style={color ? { "--team": color } : undefined}>{children}</div>;
+}
+
 function TeamTournament({ s }) {
   const tr = useT();
   const pct = s.maps ? Math.round((s.mapsWon / s.maps) * 100) : 0;
@@ -398,7 +405,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null })
         <p className="pathlinks">{tr("Run")} : {p.events.filter((e) => e.matches.length).map((e, n) => <span key={e.event}>{n ? " · " : ""}<a href={`/parcours/${e.event}/${slug}`}>{tr(EVENT_NAMES[e.event])}</a></span>)}</p>
       )}
 
-      <div className="thead">
+      <TeamHead team={t}>
         <Crest team={t} />
         <div>
           <div className="tname">{p.name}{t.tag ? <span className="ttag">{t.tag}</span> : null}<FavStar slug={slug} /></div>
@@ -406,7 +413,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null })
           <TeamLinks lp={lp} />
           <p><AlertsButton /> <TeamCalendar slug={slug} /></p>
         </div>
-      </div>
+      </TeamHead>
 
       <OrgNav org={org} />
       {updating && <p className="note lpwait" role="status">{tr("Updating this information…")}</p>}

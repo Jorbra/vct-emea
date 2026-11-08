@@ -148,6 +148,13 @@ function View({ p }) {
     p.sub ? tr("Sub") : "",
     p.join ? `${tr("Joined")} ${dayText(p.join, tr.lang)}` : "",
   ].filter(Boolean);
+  // the card's front: this season's numbers on the site, else vlr.gg's career ones
+  const src = p.tour || null;
+  const fix = (v, d = 0) => (v == null ? "–" : Number(v).toFixed(d));
+  const hero = src ? {
+    agent: src.agents && src.agents[0] ? src.agents[0].name.toUpperCase() : "",
+    nums: [["Rating", fix(src.r, 2)], ["ACS", fix(src.acs)], ["K/D", fix(src.kd, 2)], [tr("Maps"), src.maps]],
+  } : p.totals ? { agent: "", nums: [["ACS", p.totals.acs], ["K/D", p.totals.kd], ["Rating", p.totals.rating], [tr("Maps"), p.totals.maps]] } : null;
   return (
     <div className="wrap teampage">
       <div className="topbar">
@@ -157,12 +164,17 @@ function View({ p }) {
       </div>
       <SiteNav />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › {p.team ? <><a href={teamHref(p.team)}>{p.team}</a> › </> : null}<span>{p.name}</span></nav>
-      <div className="thead">
+      <div className={"thead" + (hero ? " pcard" : "")} data-agent={hero ? hero.agent : undefined}>
         {p.team ? (p.teamOnSite ? <Crest team={team} /> : <span className="thlogo"><LpImg f={p.teamLogo} /></span>) : null}
         <div>
           <div className="tname"><span className="pt"><Flag cc={p.cc} /><span>{p.name}</span><FollowStar slug={p.slug || teamSlug(p.name)} />{p.captain && <span className="tcapt" title={tr("Captain")}>C</span>}</span></div>
           {about.length > 0 && <div className="tsub">{about.map((x, i) => <Fragment key={i}>{i ? " · " : ""}{x}</Fragment>)}</div>}
           <p className="hint followhint">{tr("Follow this player to be alerted when they become a free agent or sign with a team.")} <AlertsButton /></p>
+          {hero && (
+            <div className="pcardnums">
+              {hero.nums.map(([label, value]) => <div key={label}><b>{value}</b><span>{label}</span></div>)}
+            </div>
+          )}
           <div className="tlinks"><a href={`/compare?a=${encodeURIComponent(p.name)}`}>{tr("Compare")}</a>{links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer">{l.type} ↗</a>)}</div>
         </div>
       </div>

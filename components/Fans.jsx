@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useT } from "./lang.jsx";
 import { EVENT_NAMES } from "../lib/paths.js";
+import { Skeleton } from "./visual.jsx";
 
 const TOKEN_KEY = "vct-predictions";
 /** The visitor's secret token, the same as the predictions', made once in the browser. */
@@ -47,6 +48,7 @@ export function MotmVote({ event, id, candidates }) {
     <section className="motm">
       <h3>{tr("Player of the match")} <small>{res ? tr("{n} votes", { n: res.total }) : ""}</small></h3>
       {!shown && <p className="hint">{tr("Vote for the player you liked most. You can change your vote during the week after the match.")}</p>}
+      {!res && <Skeleton lines={1} height={34} />}
       <div className="motmlist">
         {[...candidates].sort((a, b) => (shown ? count(b) - count(a) : 0)).map((p) => {
           const pct = res && res.total ? Math.round((count(p) / res.total) * 100) : 0;
@@ -199,6 +201,7 @@ export function Comments({ event, id }) {
   return (
     <section className="comments">
       <h3>{tr("Comments")} {list && list.length > 0 && <small>({list.length})</small>}</h3>
+      {list === null && <Skeleton lines={2} />}
       {list && list.length === 0 && <p className="hint">{tr("No comment yet.")}</p>}
       {list && list.length > 0 && <ul>{list.map((c) => <li key={c.id}><b>{c.name}</b> <small>{fmt(c.at)}</small><p>{c.body}</p></li>)}</ul>}
       <form onSubmit={send} className="commentform">

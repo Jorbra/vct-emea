@@ -21,6 +21,16 @@ export default function SiteNav() {
     window.addEventListener("vct-account", sync);
     return () => window.removeEventListener("vct-account", sync);
   }, []);
+  // the header above stays at the top while scrolling: the menu stays right under it
+  useEffect(() => {
+    const top = document.querySelector(".topbar");
+    if (!top || !window.ResizeObserver) return undefined;
+    const set = () => document.documentElement.style.setProperty("--topbar-h", `${top.offsetHeight}px`);
+    set();
+    const ro = new ResizeObserver(set);
+    ro.observe(top);
+    return () => ro.disconnect();
+  }, []);
   const on = (href) => (path === href || path.startsWith(`${href}/`) ? "page" : undefined);
   return (
     <nav className="sitenav" aria-label={tr("Navigation")}>

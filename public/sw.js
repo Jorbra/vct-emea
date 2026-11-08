@@ -1,5 +1,5 @@
 // The site as an application: pages and their files kept for when the network is gone, and the match alerts.
-const CACHE = "vct-v1";
+const CACHE = "vct-v2";
 const OFFLINE = `<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hors ligne · VCT EMEA</title>
 <body style="font-family:system-ui;background:#121212;color:#eee;display:grid;place-items:center;min-height:100vh;margin:0;text-align:center;padding:16px">
 <div><h1>Hors ligne</h1><p>Pas de réseau, et cette page n'a pas encore été ouverte sur cet appareil.</p><p><a style="color:#ff4655" href="/">Accueil</a></p></div></body></html>`;
@@ -15,6 +15,8 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin || url.pathname.startsWith("/api/") || url.pathname.startsWith("/admin")) return;
+  // on a computer running the site itself, files change under the same names: nothing is kept
+  if (["localhost", "127.0.0.1"].includes(self.location.hostname)) return;
   if (req.mode === "navigate") {
     event.respondWith(fetch(req).then((res) => {
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }

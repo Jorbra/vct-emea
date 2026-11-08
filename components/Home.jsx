@@ -196,7 +196,11 @@ function HomeView({ initial }) {
 
       <SiteNav />
 
-      <div className="hero">
+      <HomeNext initial={initial} />
+      <TodayPulse events={matchEvents} />
+      <HomeStrips events={matchEvents} state={initial} />
+
+      <div className="hero compact">
         <div>
           <div className="herokick">Champions Tour 2027</div>
           <div className="herotitle">{tr("Road to the EMEA Kickoff")}</div>
@@ -205,11 +209,8 @@ function HomeView({ initial }) {
         <div className="heroacts"><a className="btn pri" href={siteHref("kickoff")}>Kickoff ›</a><InstallButton /></div>
       </div>
 
-      <HomeNext initial={initial} />
-      <TodayPulse events={matchEvents} />
       <MyTeams initial={initial} />
       <LatestNews news={initial.news} />
-      <HomeStrips events={matchEvents} state={initial} />
 
       <section>
         <h2><a href={siteHref("kickoff")}>VCT 2027: EMEA Kickoff</a></h2>

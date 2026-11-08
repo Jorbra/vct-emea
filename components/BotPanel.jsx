@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useT } from "./lang.jsx";
+import { Skeleton } from "./visual.jsx";
 
 const ANNOUNCE = [["start", "Match starts"], ["result", "Results"], ["image", "Results with picture"], ["transfers", "Transfers (free agents, signings)"], ["news", "News"]];
 const TABS = [["settings", "Settings"], ["auto", "Automatic"], ["announce", "Announcement"], ["pin", "Pinned message"], ["stats", "Statistics"], ["log", "Log"]];
@@ -66,7 +67,7 @@ export default function BotPanel() {
     <section>
       <details className="einfo botpanel" onToggle={(e) => setOpen(e.currentTarget.open)}>
         <summary><b>🤖 {tr("Discord bot")}</b>{d && <small> · {d.usage.total} {tr("Uses (30 days)").toLowerCase()}</small>}</summary>
-        {!d || !s ? <p className="note">{tr("Loading…")}</p> : (
+        {!d || !s ? <Skeleton lines={5} /> : (
           <>
             <div className="botstate">
               {state(d.publicKey, tr("Public key on Vercel"), tr(d.publicKey ? "set" : "missing"))}

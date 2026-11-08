@@ -10,6 +10,7 @@ import { MAP_POOL, formatMatchTime, planRound } from "../lib/schedule.js";
 import { useOpenMatch } from "./openMatch.js";
 import { useFavorites } from "./favorites.js";
 import { teamHref, teamSlug } from "../lib/paths.js";
+import { Score, TeamTick } from "./visual.jsx";
 
 // The match times and live matches of the event shown, so any match box can show (or, in the editor, set) its own
 // without passing props down.
@@ -333,9 +334,10 @@ export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent 
   const go = (dir) => { const el = ref.current; if (el) el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: "smooth" }); };
   const line = (t, score, won = false, lost = false) => (
     <span className={"mcl" + (won ? " w" : lost ? " lo" : "")}>
+      <TeamTick team={t} />
       <Crest team={t} />
       {t && t.name ? <a className="tn" href={teamHref(t.name)} onClick={(e) => e.stopPropagation()}>{t.name}</a> : <span className="tn tbdn">{tr("TBD")}</span>}
-      {score != null && <span className="mcs">{score}</span>}
+      {score != null && <Score className="mcs" value={score} />}
     </span>
   );
   return (
