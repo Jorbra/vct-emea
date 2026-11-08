@@ -124,7 +124,7 @@ export function ResultToast() {
       if (known.current === null) { known.current = new Set(results.map((a) => a.key)); return; }
       const fresh = results.filter((a) => !known.current.has(a.key));
       fresh.forEach((a) => known.current.add(a.key));
-      if (!fresh.length) return;
+      if (!fresh.length || document.documentElement.dataset.nospoil === "1") return; // no spoilers: no result toast, no confetti
       setShown((s) => [...s, ...fresh.slice(0, 3)].slice(-3));
       // a favorite team won: a little confetti
       let favs = [];

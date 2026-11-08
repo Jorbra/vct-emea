@@ -88,7 +88,8 @@ function View({ initial }) {
   const allowed = REGIONS.find((r) => r[0] === region)[2];
   const isFav = (m) => [m.a, m.b].some((t) => t && t.name && fav.has(teamSlug(t.name)));
   const shown = all.filter((m) => (!allowed || allowed.includes(m.event)) && (!favOnly || isFav(m)));
-  const feed = `/api/calendar${allowed ? `?region=${region}` : ""}`;
+  const feedQuery = [allowed ? `region=${region}` : "", favOnly && fav.list.length ? `teams=${fav.list.slice(0, 30).map(encodeURIComponent).join(",")}` : ""].filter(Boolean).join("&");
+  const feed = `/api/calendar${feedQuery ? `?${feedQuery}` : ""}`;
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.host), []);
 
@@ -112,7 +113,7 @@ function View({ initial }) {
           const k = dayKey(new Date(month.getFullYear(), month.getMonth(), i + 1));
           const n = (byDay.get(k) || []).length;
           return n ? (
-            <a key={k} className={"calday has" + (k === today ? " today" : "")} href={`#d-${k}`}><b>{i + 1}</b><small>{n} {tr("Matches").toLowerCase()}</small></a>
+            <a key={k} className={"calday has h" + (n >= 9 ? 4 : n >= 5 ? 3 : n >= 3 ? 2 : 1) + (k === today ? " today" : "")} href={`#d-${k}`}><b>{i + 1}</b><small>{n} {tr("Matches").toLowerCase()}</small></a>
           ) : <span key={k} className={"calday" + (k === today ? " today" : "")}><b>{i + 1}</b></span>;
         })}
       </div>

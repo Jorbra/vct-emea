@@ -50,7 +50,9 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
       {initial.admin && initial.admin.health && <Health rows={initial.admin.health} />}
       {initial.admin && <BotPanel />}
       {initial.admin && initial.admin.steps && <Journal admin={initial.admin} call={call} onDone={onDone} />}
-      {initial.admin && initial.admin.visits && <Visits v={initial.admin.visits} />}
+      {initial.admin && <BannerEditor banner={initial.admin.banner} call={call} onDone={onDone} />}
+      {initial.admin && initial.admin.visits && <Visits v={initial.admin.visits} activity={initial.admin.activity} />}
+      {initial.admin && <MobilePreview />}
       {initial.admin && initial.admin.comments && <CommentsMod list={initial.admin.comments} call={call} onDone={onDone} />}
       <section>
         <h2>{tr("To do")}</h2>
@@ -226,9 +228,10 @@ function HealthDevice() {
 }
 
 /** The site's own page views: per day, and the pages most seen this week. */
-function Visits({ v }) {
+function Visits({ v, activity = [] }) {
   const tr = useT();
   const max = Math.max(1, ...v.days.map((d) => d.n));
+  const sum = (k) => activity.slice(7).reduce((s, d) => s + d[k], 0);
   return (
     <section>
       <details className="einfo">
@@ -240,7 +243,79 @@ function Visits({ v }) {
           <thead><tr><th>{tr("Page")}</th><th>{tr("Views (7 days)")}</th></tr></thead>
           <tbody>{v.pages.map((p) => <tr key={p.path}><td><a href={p.path}>{p.path}</a></td><td>{p.n}</td></tr>)}</tbody>
         </table></div>
+        {activity.length > 0 && (
+          <>
+            <h3 className="sub">{tr("What visitors did")}</h3>
+            <div className="pcardnums weeknums">
+              <div><b>{sum("votes")}</b><span>{tr("Player of the match votes")}</span></div>
+              <div><b>{sum("maps")}</b><span>{tr("Map predictions")}</span></div>
+              <div><b>{sum("quiz")}</b><span>{tr("Quizzes played")}</span></div>
+              <div><b>{sum("comments")}</b><span>{tr("Comments")}</span></div>
+            </div>
+            <div className="tablewrap"><table>
+              <thead><tr><th>{tr("Day")}</th><th>{tr("Votes")}</th><th>{tr("Maps")}</th><th>{tr("Quiz")}</th><th>{tr("Comments")}</th></tr></thead>
+              <tbody>{activity.slice().reverse().filter((d) => d.votes + d.maps + d.quiz + d.comments > 0).slice(0, 14).map((d) => <tr key={d.day}><td>{d.day}</td><td>{d.votes}</td><td>{d.maps}</td><td>{d.quiz}</td><td>{d.comments}</td></tr>)}</tbody>
+            </table></div>
+            <p className="hint">{tr("Totals of the last 7 days; the table shows the last 14 days with something done.")}</p>
+          </>
+        )}
         <p className="hint">{tr("Counted by the site itself, without cookies or outside tracker: one view per page opened, robots left out.")}</p>
+      </details>
+    </section>
+  );
+}
+
+/** The banner at the top of every page, now or between two dates. */
+function BannerEditor({ banner, call, onDone }) {
+  const tr = useT();
+  const local = (iso) => { if (!iso) return ""; const d = new Date(iso); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
+  const [f, setF] = useState({ text: (banner && banner.text) || "", url: (banner && banner.url) || "", from: local(banner && banner.from), to: local(banner && banner.to), tone: (banner && banner.tone) || "info" });
+  const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+  const save = async (clear) => {
+    const body = clear ? { text: "" } : { ...f, from: f.from ? new Date(f.from).toISOString() : "", to: f.to ? new Date(f.to).toISOString() : "" };
+    try { const j = await call("/api/banner", body); onDone(tr.server(j.message)); if (clear) setF({ ...f, text: "" }); } catch (e) { onDone(tr.server(e.message)); }
+  };
+  const now = Date.now();
+  const state = !banner || !banner.text ? "" : banner.from && new Date(banner.from).getTime() > now ? tr("Scheduled") : banner.to && new Date(banner.to).getTime() <= now ? tr("Over") : tr("Shown now");
+  return (
+    <section>
+      <details className="einfo">
+        <summary><b>📣 {tr("Site banner")}</b> {state && <small>{state}</small>}</summary>
+        <div className="bannerform">
+          <label className="f">{tr("Text")}<input value={f.text} onChange={set("text")} maxLength={200} placeholder={tr("The playoffs start tonight at 6 pm!")} /></label>
+          <label className="f">{tr("Link (optional)")}<input value={f.url} onChange={set("url")} placeholder="/soiree" /></label>
+          <label className="f">{tr("From")}<input type="datetime-local" value={f.from} onChange={set("from")} /></label>
+          <label className="f">{tr("Until")}<input type="datetime-local" value={f.to} onChange={set("to")} /></label>
+          <label className="f">{tr("Color")}<select value={f.tone} onChange={set("tone")}><option value="info">{tr("Blue (information)")}</option><option value="live">{tr("Red (live)")}</option><option value="warn">{tr("Green (important)")}</option></select></label>
+        </div>
+        {f.text && <div className={`sitebanner ${f.tone}`} style={{ margin: "8px 0", borderRadius: 5 }}>{f.text}{f.url ? " ›" : ""}</div>}
+        <p className="row"><button type="button" className="btn pri" onClick={() => save(false)}>{f.from ? tr("Schedule the banner") : tr("Show the banner")}</button> {banner && banner.text && <button type="button" className="btn" onClick={() => save(true)}>{tr("Remove the banner")}</button>}</p>
+        <p className="hint">{tr("Empty dates: shown at once, until removed. A visitor who closes it sees it again only when the text changes.")}</p>
+      </details>
+    </section>
+  );
+}
+
+const PREVIEW_PAGES = [["/", "Home"], ["/live", "Live"], ["/soiree", "Match night"], ["/calendar", "Calendar"], ["/predictions", "Predictions"], ["/quiz", "Quiz of the week"], ["/puissance", "Power ranking"], ["/stats", "Stats"]];
+
+/** A page of the site as a phone shows it, to check it before or after a change. */
+function MobilePreview() {
+  const tr = useT();
+  const [open, setOpen] = useState(false);
+  const [path, setPath] = useState("/");
+  const [custom, setCustom] = useState("");
+  const [n, setN] = useState(0);
+  const src = (custom.startsWith("/") ? custom : path) + (n ? `${(custom.startsWith("/") ? custom : path).includes("?") ? "&" : "?"}r=${n}` : "");
+  return (
+    <section>
+      <details className="einfo" onToggle={(e) => setOpen(e.currentTarget.open)}>
+        <summary><b>📱 {tr("Phone preview")}</b></summary>
+        <div className="row" style={{ margin: "8px 0" }}>
+          <select value={path} onChange={(e) => { setPath(e.target.value); setCustom(""); }} aria-label={tr("Page")}>{PREVIEW_PAGES.map(([p, l]) => <option key={p} value={p}>{tr(l)}</option>)}</select>
+          <input value={custom} onChange={(e) => setCustom(e.target.value)} placeholder="/team/fnatic" aria-label={tr("Other page")} />
+          <button type="button" className="btn" onClick={() => setN(n + 1)}>🔄 {tr("Reload")}</button>
+        </div>
+        {open && <div className="phoneframe"><iframe title={tr("Phone preview")} src={src} width="375" height="720" /></div>}
       </details>
     </section>
   );

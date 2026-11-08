@@ -19,6 +19,7 @@ import { readTeamInfo } from "../../../lib/teamfetch.js";
 import { siteTeams } from "../../../lib/teams.js";
 import { detailsOf, extraStats, mapCard, readDetails, tournamentStats } from "../../../lib/tstats.js";
 import { EVENTS } from "../../../lib/bracket.js";
+import { powerRanking } from "../../../lib/round6.js";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -42,6 +43,7 @@ function context(db, lang, now) {
     h2h: (a, b) => compareTeams(state(), a, b),
     teamInfo: (slug) => readTeamInfo()[slug] || null,
     ranking: () => seasonRanking(db, state(), { limit: 10, now }),
+    power: once("power", () => powerRanking(state(), now)),
     guild: "",
     recap: (ev) => (EVENTS.includes(ev) ? recapOf(state(), readDetails(db, ev), ev) : null),
     eventHref: (ev) => siteHref(ev),

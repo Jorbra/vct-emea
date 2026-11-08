@@ -104,6 +104,24 @@ function CompareView({ a, b, qa, qb }) {
           </table>
         </div>
       )}
+      {a && b && a.season && b.season && (
+        <div className="cmpbars" aria-hidden="true">
+          <div className="cmpnames"><b>{a.name}</b><b>{b.name}</b></div>
+          {[["Rating", "r", 2], ["ACS", "acs", 0], ["K/D", "kd", 2], ["KAST", "kast", 0, "%"], ["ADR", "adr", 0], ["HS%", "hs", 0, "%"]].map(([label, k, d, unit = ""]) => {
+            const va = a.season[k];
+            const vb = b.season[k];
+            if (va == null || vb == null) return null;
+            const top = Math.max(va, vb) || 1;
+            return (
+              <div className="cmpbar" key={k}>
+                <span className={"cba" + (va > vb ? " w" : "")}><i style={{ width: `${Math.round((va / top) * 100)}%` }} /><em>{Number(va).toFixed(d)}{unit}</em></span>
+                <small>{label}</small>
+                <span className={"cbb" + (vb > va ? " w" : "")}><i style={{ width: `${Math.round((vb / top) * 100)}%` }} /><em>{Number(vb).toFixed(d)}{unit}</em></span>
+              </div>
+            );
+          })}
+        </div>
+      )}
       {a && b && (a.season || b.season) && (
         <div className="tablewrap wide">
           <h2>{tr("This season on the site")}</h2>

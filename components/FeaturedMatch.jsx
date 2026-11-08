@@ -61,7 +61,7 @@ export default function FeaturedMatch({ events }) {
       <div className="fmvs">
         {side(m.a, "a", ca)}
         <div className="fmscore">
-          <Score className="fmnum" value={center} />
+          <Score className={"fmnum" + (kind === "next" ? "" : " spoil")} value={center} />
           {kind === "next" && left > 0 && <span className="fmcount">{countdownText(left, tr.lang)}</span>}
           {kind === "next" && m.at && <span className="fmwhen">{formatMatchTime(m.at, tr.lang, true)}</span>}
         </div>

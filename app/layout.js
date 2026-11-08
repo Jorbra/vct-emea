@@ -9,6 +9,9 @@ import AccountSync from "../components/AccountSync";
 import MobileTabs from "../components/MobileTabs";
 import { LangProvider } from "../components/lang.jsx";
 import { ResultToast, TeamTheme } from "../components/visual.jsx";
+import { SPOILER_SCRIPT, SiteBanner } from "../components/Round6Bits.jsx";
+import { getDb } from "../lib/db.js";
+import { activeBanner } from "../lib/round6.js";
 
 export async function generateMetadata() {
   // the site's own address, so that links shared on Discord or X can show its picture
@@ -35,9 +38,12 @@ export default async function RootLayout({ children }) {
   const jar = await cookies();
   const lang = normLang(jar.get(LANG_COOKIE)?.value);
   const theme = normTheme(jar.get(THEME_COOKIE)?.value);
+  let banner = null;
+  try { banner = activeBanner(getDb()); } catch { /* no database yet: no banner */ }
   return (
-    <html lang={lang} dir={isRtl(lang) ? "rtl" : "ltr"} data-theme={theme}>
+    <html lang={lang} dir={isRtl(lang) ? "rtl" : "ltr"} data-theme={theme} suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: SPOILER_SCRIPT }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
@@ -47,6 +53,7 @@ export default async function RootLayout({ children }) {
       </head>
       <body>
         <a className="skip" href="#content">{makeT(lang)("Go to the content")}</a>
+        {banner && <LangProvider lang={lang}><SiteBanner banner={banner} /></LangProvider>}
         <div id="content" tabIndex={-1}>{children}</div>
         <EditorAccess lang={lang} isAdmin={await isAdmin()} />
         <MatchAlerts />

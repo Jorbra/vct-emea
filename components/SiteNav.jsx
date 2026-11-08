@@ -6,6 +6,7 @@ import { accountName } from "./account.js";
 import { useT } from "./lang.jsx";
 import { useLiveCount } from "./visual.jsx";
 import { EmeaMark } from "./Brand.jsx";
+import { SpoilerSwitch } from "./Round6Bits.jsx";
 
 // small line icons, drawn on a 24-pixel grid
 const ICON = {
@@ -23,13 +24,15 @@ const ICON = {
   about: "M12 4a8 8 0 1 0 .01 0M12 11v5M12 8h.01",
   night: "M4 5h16v11H4zM8 20h8M12 16v4",
   week: "M5 5h14v15H5zM5 9h14M9 13h2M13 13h2M9 16h2",
+  power: "M4 20h16M7 20v-6M12 20V8M17 20v-10M5 9l5-4 4 3 6-4",
+  quiz: "M12 4a8 8 0 1 0 .01 0M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01",
 };
 const Icon = ({ name }) => (
   <svg className="navicon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={ICON[name]} /></svg>
 );
 
 const LINKS = [
-  ["/", "Home", "home"], ["/live", "Live", "live"], ["/soiree", "Match night", "night"], ["/moi", "My week", "week"], ["/calendar", "Calendar", "calendar"], ["/predictions", "Predictions", "target"], ["/stats", "Stats", "stats"],
+  ["/", "Home", "home"], ["/live", "Live", "live"], ["/soiree", "Match night", "night"], ["/moi", "My week", "week"], ["/calendar", "Calendar", "calendar"], ["/predictions", "Predictions", "target"], ["/quiz", "Quiz of the week", "quiz"], ["/puissance", "Power ranking", "power"], ["/stats", "Stats", "stats"],
   ["/transfers", "Transfers", "transfers"], ["/lft", "LFT", "lft"], ["/compare", "Compare", "compare"], ["/news", "News", "news"], ["/archives", "Archives of past seasons", "archives"],
 ];
 
@@ -70,6 +73,7 @@ export default function SiteNav() {
       ))}
       <a className="navacct" href="/compte" aria-current={on("/compte")}><Icon name="account" /><span>{who || tr("My account")}</span></a>
       <a className="navabout" href="/about" aria-current={on("/about")}><Icon name="about" /><span>{tr("About")}</span></a>
+      <SpoilerSwitch />
     </nav>
   );
 }

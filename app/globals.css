@@ -1794,3 +1794,72 @@ h2 { letter-spacing: .03em; }
 .checklist small { color: var(--muted); }
 .arcrecaps { display: flex; gap: 10px; flex-wrap: wrap; font-size: 13px; }
 .confetti { position: fixed; inset: 0; z-index: 99; pointer-events: none; }
+
+/* ---- round 6: power ranking, quiz, no spoilers, banner, compare bars, calendar heat */
+.powerlist { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 4px; }
+.powerlist li { display: grid; grid-template-columns: 30px 28px minmax(0, 1fr) auto 44px 46px minmax(60px, 140px) 44px; align-items: center; gap: 10px; padding: 7px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 5px; }
+.powerlist li.fav { border-color: var(--lime); }
+.powerlist .prank { font-family: var(--font-display); font-size: 20px; font-weight: 800; text-align: center; }
+.powerlist li:nth-child(-n+3) .prank { color: var(--lime); }
+.powerlist .pname { color: var(--fg); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.powerlist .pform { display: flex; gap: 3px; }
+.powerlist .pform i { width: 8px; height: 8px; border-radius: 50%; background: var(--zone-out); }
+.powerlist .pform i.w { background: var(--zone-adv); }
+.powerlist .prec, .powerlist .pmove { font-size: 13px; color: var(--muted); text-align: end; }
+.powerlist .pmove.up { color: var(--zone-adv); }
+.powerlist .pmove.down { color: var(--zone-out); }
+.powerlist .pbar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.powerlist .pbar b { display: block; height: 100%; background: var(--link); }
+.powerlist .prate { font-family: var(--font-display); font-weight: 700; font-size: 17px; text-align: end; }
+@media (max-width: 640px) { .powerlist li { grid-template-columns: 26px 24px minmax(0, 1fr) 40px 40px; } .powerlist .pform, .powerlist .pbar, .powerlist .prec { display: none; } }
+
+.quizlist { padding-inline-start: 22px; display: grid; gap: 14px; margin: 14px 0; }
+.quizlist p { margin: 0 0 6px; font-weight: 600; }
+.quizopts { display: flex; flex-wrap: wrap; gap: 6px; }
+.quizopts .btn.on { border-color: var(--lime); color: var(--lime); }
+.quizopts .btn.ok { background: var(--win-bg); border-color: var(--zone-adv); color: var(--fg); opacity: 1; }
+.quizopts .btn.ko { background: var(--loss-bg); border-color: var(--zone-out); color: var(--fg); opacity: 1; }
+.quizscore b { font-family: var(--font-display); font-size: 34px; color: var(--lime); }
+.quizrank { list-style: none; padding: 0; display: grid; gap: 4px; }
+.quizrank li span { display: inline-block; width: 28px; }
+
+.sitenav .navspoil { white-space: nowrap; display: flex; align-items: center; gap: 8px; background: none; border: 0; color: var(--muted); font: inherit; cursor: pointer; padding: 6px 8px; border-radius: 5px; }
+.sitenav .navspoil:hover { color: var(--fg); }
+.sitenav .navspoil.on { color: var(--lime); }
+html[data-nospoil] :is(.sc:not(.vs), .tscore, .mcs, .mcchip, .mmscore, .livescore, .lsscore, .ntscore, .qlscore, .weeklist a, .mmmaps .mms, .spoil):not(.shown) { filter: blur(6px); cursor: pointer; user-select: none; }
+html[data-nospoil] :is(.mline .w, .srow .stn.w, .mrowa .mt.w, .scht.w, .mcl.w .tn) { font-weight: inherit; }
+html[data-nospoil] .mcl.w { border-left: 0; padding-left: 0; margin-left: 0; }
+html[data-nospoil] .mcl.lo { opacity: 1; }
+html[data-nospoil] :is(.tn.lo, .mline .lo) { opacity: 1; }
+html[data-nospoil] .rtoasts { display: none; }
+
+.sitebanner { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 44px 8px 16px; position: relative; background: var(--link); color: #0b1424; font-weight: 600; font-size: 14px; text-align: center; }
+.sitebanner.live { background: #ff4655; color: #fff; }
+.sitebanner.warn { background: var(--lime); color: var(--lime-ink); }
+.sitebanner a { color: inherit; text-decoration: underline; }
+.sitebanner .sbclose { position: absolute; inset-inline-end: 10px; top: 50%; transform: translateY(-50%); background: none; border: 0; color: inherit; font-size: 20px; cursor: pointer; line-height: 1; }
+.sitebanner .livedot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: sbpulse 1.4s infinite; }
+@keyframes sbpulse { 50% { opacity: .3; } }
+
+.cmpbars { display: grid; gap: 8px; margin: 16px 0; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.cmpbars .cmpnames { display: flex; justify-content: space-between; font-family: var(--font-display); font-size: 20px; }
+.cmpbar { display: grid; grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); align-items: center; gap: 10px; }
+.cmpbar small { text-align: center; color: var(--muted); }
+.cmpbar span { position: relative; height: 20px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.cmpbar span i { position: absolute; top: 0; bottom: 0; background: color-mix(in srgb, var(--muted) 55%, transparent); }
+.cmpbar .cba i { inset-inline-end: 0; }
+.cmpbar .cbb i { inset-inline-start: 0; }
+.cmpbar .cba.w i { background: #ff4655; }
+.cmpbar .cbb.w i { background: var(--link); }
+.cmpbar em { position: relative; font-style: normal; font-size: 12px; font-weight: 700; padding: 0 6px; line-height: 20px; display: block; }
+.cmpbar .cba em { text-align: start; }
+.cmpbar .cbb em { text-align: end; }
+
+.calday.has.h1 { background: color-mix(in srgb, var(--link) 10%, var(--surface)); }
+.calday.has.h2 { background: color-mix(in srgb, var(--link) 22%, var(--surface)); }
+.calday.has.h3 { background: color-mix(in srgb, var(--link) 38%, var(--surface)); }
+.calday.has.h4 { background: color-mix(in srgb, var(--link) 55%, var(--surface)); }
+.bannerform { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin: 8px 0; }
+.bannerform label:first-child { grid-column: 1 / -1; }
+.phoneframe { display: flex; justify-content: center; padding: 14px; background: var(--surface-2, var(--surface)); border-radius: 8px; }
+.phoneframe iframe { width: 375px; max-width: 100%; height: 720px; border: 10px solid #000; border-radius: 28px; background: var(--bg); }
