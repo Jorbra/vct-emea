@@ -1667,3 +1667,5 @@ h2 { letter-spacing: .03em; }
 .mcl.lo .tn { opacity: .55; }
 .teamtick { background: transparent; }
 @media (max-width: 1099px) { .sitenav .navbrand { display: none; } }
+/* room between the left menu and the page */
+@media (min-width: 1100px) { body:has(.sitenav) { padding-inline-start: calc(220px + 32px); padding-inline-end: 32px; } }
