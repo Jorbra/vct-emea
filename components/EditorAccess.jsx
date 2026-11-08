@@ -25,7 +25,7 @@ export default function EditorAccess({ lang, isAdmin }) {
   if (inEditor || !isAdmin) return null;
   const tr = makeT(lang);
   return (
-    <a className="btn edfab touchonly pri" href="/admin"
+    <a className="btn edfab pri" href="/admin" title={tr("Open the editor (E key)")}
       onClick={(e) => { e.preventDefault(); window.location.assign(adminHrefForPath(window.location.pathname)); }}>
       {tr("Edit")}
     </a>

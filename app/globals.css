@@ -1669,3 +1669,6 @@ h2 { letter-spacing: .03em; }
 @media (max-width: 1099px) { .sitenav .navbrand { display: none; } }
 /* room between the left menu and the page */
 @media (min-width: 1100px) { body:has(.sitenav) { padding-inline-start: calc(220px + 32px); padding-inline-end: 32px; } }
+/* the editor's button, for those who have access: on every screen; above the phone's tab bar */
+.edfab { display: inline-flex; align-items: center; position: fixed; right: 16px; bottom: 16px; z-index: 45; box-shadow: 0 4px 14px rgba(0, 0, 0, .4); text-decoration: none; }
+@media (max-width: 759px) { .edfab { bottom: calc(74px + env(safe-area-inset-bottom)); right: 12px; } }
