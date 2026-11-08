@@ -22,6 +22,7 @@ import { TIME_EVENTS } from "../lib/schedule.js";
 import { MatchStrip } from "./matchTime.jsx";
 import { MatchModalProvider } from "./MatchModal.jsx";
 import HomeNext from "./HomeNext.jsx";
+import FeaturedMatch from "./FeaturedMatch.jsx";
 import { InstallButton } from "./Fans.jsx";
 
 const sameDay = (iso, now) => { const a = new Date(iso); const b = new Date(now); return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
@@ -201,8 +202,13 @@ function HomeView({ initial }) {
 
       <SiteNav />
 
-      <HomeNext initial={initial} />
-      <TodayPulse events={matchEvents} />
+      <div className="homehead">
+        <FeaturedMatch events={matchEvents} />
+        <div className="homeside">
+          <HomeNext initial={initial} />
+          <TodayPulse events={matchEvents} />
+        </div>
+      </div>
       <HomeStrips events={matchEvents} state={initial} />
 
       <div className="hero compact">

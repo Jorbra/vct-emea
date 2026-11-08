@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useT } from "./lang.jsx";
+import { useLiveCount } from "./visual.jsx";
 
 const MORE = [["/stats", "Stats"], ["/transfers", "Transfers"], ["/lft", "LFT"], ["/compare", "Compare"], ["/news", "News"], ["/archives", "Archives of past seasons"], ["/compte", "My account"], ["/about", "About"]];
 
@@ -10,15 +11,8 @@ const MORE = [["/stats", "Stats"], ["/transfers", "Transfers"], ["/lft", "LFT"],
 export default function MobileTabs() {
   const tr = useT();
   const path = usePathname() || "/";
-  const [live, setLive] = useState(0);
+  const live = useLiveCount();
   const [more, setMore] = useState(false);
-  useEffect(() => {
-    let on = true;
-    const load = () => fetch("/api/now").then((r) => (r.ok ? r.json() : null)).then((j) => { if (on && j) setLive(j.items.filter((a) => a.kind === "live").length); }).catch(() => { /* offline */ });
-    load();
-    const t = setInterval(load, 60000);
-    return () => { on = false; clearInterval(t); };
-  }, []);
   useEffect(() => setMore(false), [path]);
   if (path.startsWith("/admin") || path.startsWith("/overlay")) return null;
   const is = (href) => (href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`));

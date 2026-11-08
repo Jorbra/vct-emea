@@ -258,6 +258,8 @@ function MatchModal({ e, m, state, onClose, page = false }) {
             </tbody>
           </table>
         )}
+        <div className="mmcols">
+        <div className="mmmain">
         {ex.mvp && <p className="mmmvp"><b>MVP</b> {who(ex.mvp)}</p>}
         {!ex.mvp && done && autoMvp && <p className="mmmvp"><b>MVP</b> {who(autoMvp.name)} <small>{tr("best ACS: {acs}", { acs: autoMvp.acs })}</small></p>}
         {details && (details.all || []).length > 0 && <VlrStats details={details} m={m} />}
@@ -271,10 +273,14 @@ function MatchModal({ e, m, state, onClose, page = false }) {
             <tbody>{g.list.map((p) => <tr key={p.name}><td>{who(p.name)}</td><td>{p.k}</td><td>{p.d}</td><td>{p.a}</td><td><b>{p.acs}</b></td></tr>)}</tbody>
           </table>
         ))}
+        </div>
+        <aside className="mmside">
         {done && state && <MotmVote event={e.event} id={m.id} candidates={candidates} />}
         {state && m.a && m.b && m.a.name && m.b.name && <HeadToHead m={m} state={state} />}
         {cmp && state && m.a && m.b && m.a.name && m.b.name && <Compare m={m} state={state} />}
         {state && m.a && m.b && m.a.name && m.b.name && <Comments event={e.event} id={m.id} />}
+        </aside>
+        </div>
         {playing && (
           <div className="mmplayer">
             <iframe src={playing} title={title} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />

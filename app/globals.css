@@ -1563,3 +1563,101 @@ h3, .evtitle, .tname, .nexttitle, .recapteam h3, .pickem h3, .motm h3, .comments
 
 /* 6. the bracket: the rest fades while a team is hovered */
 .qbracket.finding .qbox:not(.lit) { opacity: .35; transition: opacity .15s; }
+
+/* ===== redesign: the arena ===== */
+/* palette: deeper blue-black, lime for numbers and actions, red for live */
+:root, :root[data-theme="dark"] {
+  --bg: #0c0e13; --surface: #151821; --surface-2: #1d212c; --line: #262b38; --muted: #8b8f99; --live: #ff4655;
+}
+:root[data-theme="light"] { --live: #d6303a; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --live: #d6303a; } }
+body { background: var(--bg); }
+
+/* Valorant-like cut corners on the leading pieces */
+.cut, .btn.pri, .evcard, .nextcard, .featured, .thead.teamhero, .thead.pcard, .recapteam {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+.btn { border-radius: 4px; }
+.btn.pri { font-family: var(--font-display); font-size: 15px; letter-spacing: .04em; text-transform: uppercase; padding: 7px 16px; }
+.livebadge { background: var(--live); }
+.mcard.live, .featured.live { border-color: var(--live); }
+
+/* the menu: a column on the left on wide screens */
+.navicon { flex: none; opacity: .85; }
+.navbrand, .navlive { display: none; }
+@media (min-width: 760px) and (max-width: 1099px) {
+  .sitenav a { display: inline-flex; align-items: center; gap: 6px; }
+  .sitenav .navicon { width: 15px; height: 15px; }
+}
+@media (min-width: 1100px) {
+  body:has(.sitenav) { padding-inline-start: 220px; }
+  .sitenav {
+    position: fixed !important; inset-block: 0; inset-inline-start: 0; top: 0 !important; width: 220px; box-sizing: border-box;
+    flex-direction: column; gap: 2px; margin: 0; padding: 14px 10px; overflow-y: auto; border: 0; border-inline-end: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 70%, var(--bg)); z-index: 40;
+  }
+  .sitenav a { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 0; border-radius: 8px; color: var(--muted); font-size: 14px; }
+  .sitenav a:hover { color: var(--fg); background: var(--surface-2); border: 0; }
+  .sitenav a[aria-current="page"] { color: var(--fg); background: var(--surface-2); box-shadow: inset 3px 0 0 var(--lime); }
+  .sitenav .navbrand { display: flex; gap: 8px; align-items: center; padding: 6px 12px 16px; font: 800 22px var(--font-display); letter-spacing: .03em; color: var(--fg); background: none !important; box-shadow: none !important; }
+  .sitenav .navx { color: var(--lime); font-size: 22px; }
+  .sitenav .navlive { display: inline-grid; place-items: center; margin-inline-start: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--live); color: #fff; font: 700 11px var(--font-body); }
+  .sitenav .navacct { margin-inline-start: 0; margin-top: auto; color: var(--link); }
+  .topbar .homelink { display: none; }
+  .topbar { top: 0; }
+}
+
+/* home: the match of the moment, the countdown beside it */
+.homehead { display: grid; gap: 14px; margin-bottom: 20px; }
+@media (min-width: 980px) { .homehead { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); align-items: start; } }
+.homeside { display: grid; gap: 12px; }
+.homeside .homenext { margin: 0; }
+.homeside .homenext, .homeside .pulse { grid-template-columns: 1fr !important; }
+.featured { position: relative; display: grid; gap: 14px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--line); }
+.featured.live { box-shadow: inset 0 0 0 1px var(--live); }
+.fmtop { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; align-items: center; }
+.fmkind { font: 700 12px var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--lime); }
+.fmwhere { font-size: 13px; color: var(--muted); }
+.fmvs { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; }
+.fmteam { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.fmteam.b { flex-direction: row-reverse; text-align: end; }
+.fmteam .crest { width: 64px; height: 64px; border-radius: 14px; font-size: 22px; flex: none; box-shadow: 0 0 0 2px var(--tc, transparent); }
+.fmname { font: 800 clamp(20px, 2.6vw, 30px)/1.05 var(--font-display); letter-spacing: .02em; overflow: hidden; text-overflow: ellipsis; }
+.fmteam.lo .fmname { color: var(--muted); }
+.fmteam.w .fmname { color: var(--fg); }
+.fmscore { display: grid; justify-items: center; gap: 2px; }
+.fmnum { font: 800 clamp(40px, 6vw, 64px)/1 var(--font-display); letter-spacing: .03em; color: var(--lime); font-variant-numeric: tabular-nums; }
+:root[data-theme="light"] .fmnum { color: #4d6b00; }
+.fmcount { font: 700 18px var(--font-display); color: var(--fg); font-variant-numeric: tabular-nums; }
+.fmwhen { font-size: 12px; color: var(--muted); }
+.fmmaps { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.fmmaps .mcchip { font-size: 13px; padding: 3px 10px; }
+.fmacts { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+@media (max-width: 560px) {
+  .fmteam, .fmteam.b { flex-direction: column; text-align: center; }
+  .fmteam .crest { width: 48px; height: 48px; }
+}
+
+/* match page: a big duel, the talk on the side */
+.mmpage { width: min(1180px, 100%); }
+.mmpage .mmvs { padding: 18px 0; }
+.mmpage .mmscore { font-size: clamp(44px, 6vw, 64px); color: var(--lime); }
+.mmpage .mmteam .crest { width: 64px; height: 64px; font-size: 22px; border-radius: 14px; }
+.mmpage .mmteam .tn { font: 800 clamp(20px, 2.4vw, 28px) var(--font-display); }
+.mmside { display: grid; gap: 4px; align-content: start; }
+@media (min-width: 1000px) {
+  .mmpage .mmcols { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 20px; align-items: start; }
+  .mmpage .mmside { position: sticky; top: calc(var(--topbar-h, 64px) + 12px); padding: 12px 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
+}
+
+/* sections and cards: a little more air and contrast */
+.mcard, .livecard, .pickem, .recordbox, .trend, .einfo, .tablewrap { border-color: var(--line); }
+h2 { letter-spacing: .03em; }
+@media (min-width: 1100px) { .home .topbar .brandh { visibility: hidden; } .sitenav a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } }
+@media (max-width: 560px) {
+  .fmvs { gap: 6px; }
+  .fmname { font-size: 16px; white-space: normal; overflow-wrap: anywhere; overflow: visible; max-width: 100%; }
+  .fmnum { font-size: 34px; }
+  .fmcount { font-size: 14px; }
+  .fmwhen { display: none; }
+}

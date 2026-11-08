@@ -82,3 +82,16 @@ export function Skeleton({ lines = 3, height = 14 }) {
     </div>
   );
 }
+
+/** How many matches are live now, read every minute (shared by the menu and the phone's bar). */
+export function useLiveCount() {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    let on = true;
+    const load = () => fetch("/api/now").then((r) => (r.ok ? r.json() : null)).then((j) => { if (on && j) setN(j.items.filter((a) => a.kind === "live").length); }).catch(() => { /* offline */ });
+    load();
+    const t = setInterval(load, 60000);
+    return () => { on = false; clearInterval(t); };
+  }, []);
+  return n;
+}
