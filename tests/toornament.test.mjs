@@ -29,7 +29,10 @@ const fresh = () => { for (const k of Object.keys(store)) delete store[k]; retur
 test("an empty qualifier takes Toornament's teams, size and times; no bracket yet changes nothing", () => {
   const db = fresh();
   assert.equal(planSync({ event: "meq1", rows: [], teams: null, site: site(db) }), null);
-  assert.equal(planSync({ event: "meq1", rows: [row(1, 1), row(1, 2)], teams: null, site: site(db) }), null);
+  // a bracket not drawn yet: its times only, no team
+  const timesOnly = planSync({ event: "meq1", rows: [row(1, 1), row(1, 2)], teams: null, site: site(db) });
+  assert.deepEqual([timesOnly.slots.length, timesOnly.times.length], [0, 2]);
+  assert.equal(planSync({ event: "meq1", rows: [row(1, 1, "", "", { at: "" }), row(1, 2, "", "", { at: "" })], teams: null, site: site(db) }), null);
   round(db, start(), teams());
   const q = getQualifier(db, "meq1");
   assert.equal(q.slots.length, 8);
