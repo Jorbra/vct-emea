@@ -1661,3 +1661,9 @@ h2 { letter-spacing: .03em; }
   .fmcount { font-size: 14px; }
   .fmwhen { display: none; }
 }
+/* one bar per team: its color when known, nothing otherwise; the winner by its score and name */
+.mcl.w { border-left: 0; padding-left: 0; margin-left: 0; }
+.mcl.w .tn { color: var(--fg); font-weight: 700; }
+.mcl.lo .tn { opacity: .55; }
+.teamtick { background: transparent; }
+@media (max-width: 1099px) { .sitenav .navbrand { display: none; } }
