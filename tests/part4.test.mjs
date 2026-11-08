@@ -13,6 +13,7 @@ import { liveUpdate } from "../lib/vlive.js";
 import { extraStats } from "../lib/tstats.js";
 import { addComment, countVisit, countedPath, healthProblems, listComments, removeComment, saveHealthSub, sendHealthAlerts, visitReport } from "../lib/social.js";
 import { answerCommand, verifyDiscord } from "../lib/discordbot.js";
+import { botCtx, cmd } from "./botctx.mjs";
 
 const T1 = "c".repeat(40);
 const T2 = "d".repeat(40);
@@ -127,7 +128,9 @@ test("Discord: signature and the commands' answers", () => {
   const later = new Date(Date.now() + 86400000).toISOString();
   setMatchTime(db, { event: "meq1", id: "r64-2", at: later });
   const s = getState(db);
-  assert.match(answerCommand("score", [], s), /Team 1 1–0 Team 2|\*\*Team 1\*\* 1–0 Team 2/);
-  assert.match(answerCommand("prochain", [{ name: "equipe", value: "team 3" }], s), /Team 3/);
-  assert.match(answerCommand("classement", [], s, { ranking: [{ name: "Fan", points: 3, good: 3, total: 4 }] }), /Fan/);
+  const ctx = botCtx(s);
+  const text = (r) => JSON.stringify(r);
+  assert.match(text(answerCommand("score", cmd("score"), ctx)), /Team 1/);
+  assert.match(text(answerCommand("prochain", cmd("prochain", { equipe: "team 3" }), ctx)), /Team 3/);
+  assert.match(text(answerCommand("classement", cmd("classement"), { ...ctx, ranking: () => [{ name: "Fan", points: 3, good: 3, total: 4 }] })), /Fan/);
 });

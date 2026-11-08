@@ -1190,6 +1190,15 @@ td.cmpw { color: var(--win, #6fcf6f); font-weight: 700; }
 .lftbar .tabs small { color: var(--muted); font-weight: 400; }
 .lftfind { flex: 0 1 280px; min-width: 0; height: 36px; box-sizing: border-box; padding: 0 10px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; font: 14px var(--font-body); }
 .vlrstats { margin-top: 14px; }
+.discordlink { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-inline-start: 6px; }
+.discordlink code { padding: 1px 6px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; }
+.botpanel .botgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 10px 16px; margin: 10px 0; }
+.botpanel select { height: 36px; padding: 0 8px; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; font: 14px var(--font-body); width: 100%; }
+.botpanel fieldset { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.botpanel legend { font-weight: 700; font-size: 13px; padding: 0 4px; }
+.botpanel label.chk { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; }
+.botpanel .botstate { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; margin: 6px 0; }
+.botpanel .botstats { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; }
 .mcmaps { display: block; font-size: 11px; opacity: .8; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mmlive { margin: 8px 0 12px; }
 .mmlivemaps, .livemaps { display: flex; flex-wrap: wrap; gap: 6px; font-size: 13px; margin: 6px 0; }

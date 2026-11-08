@@ -9,5 +9,13 @@ export async function POST(req) {
   const b = await readBody(req);
   if (!b) return badRequest();
   const db = getDb();
-  return reply(b.remove ? removeNews(db, { id: b.remove }) : saveNews(db, { id: b.id, title: b.title, body: b.body, who: me.who }));
+  if (b.remove) return reply(removeNews(db, { id: b.remove }));
+  const r = saveNews(db, { id: b.id, title: b.title, body: b.body, who: me.who });
+  // a new article (not an edit) goes to Discord too, when the editor wants it
+  if (r.ok && !b.id) {
+    const { listNews } = await import("../../../lib/community.js");
+    const { botNews } = await import("../../../lib/botnotify.js");
+    await botNews(db, listNews(db, 1)[0]).catch((e) => console.log(`[bot] news: ${e.message}`));
+  }
+  return reply(r);
 }

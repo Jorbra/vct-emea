@@ -1,11 +1,58 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { getDb, getState } from "../../../lib/db.js";
-import { answerCommand, verifyDiscord } from "../../../lib/discordbot.js";
+import { COMMANDS, answerCommand, autocomplete, pronosticMessage, verifyDiscord, voterName } from "../../../lib/discordbot.js";
+import { botReady, editOriginal } from "../../../lib/botapi.js";
+import { botSettings, countUse, discordVoter, followsOf, toggleFollow, useLinkCode } from "../../../lib/botstore.js";
+import { openForPrediction, savePredictionFor } from "../../../lib/community.js";
 import { seasonRanking } from "../../../lib/fans.js";
+import { readFreeAgents } from "../../../lib/lft.js";
+import { readItems } from "../../../lib/lpstore.js";
+import { siteHref, teamSlug } from "../../../lib/paths.js";
+import { sitePlayers } from "../../../lib/playerstats.js";
+import { recapOf } from "../../../lib/recap.js";
+import { readTeamInfo } from "../../../lib/teamfetch.js";
+import { siteTeams } from "../../../lib/teams.js";
+import { detailsOf, readDetails, tournamentStats } from "../../../lib/tstats.js";
+import { EVENTS } from "../../../lib/bracket.js";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
-// Discord's calls for the bot's slash commands (its "Interactions Endpoint URL"). Needs DISCORD_PUBLIC_KEY.
+const EMEA_REGION = /europe|emea|turkey|türkiye|middle east|mena|cis|africa/i;
+const ephemeral = (data) => NextResponse.json({ type: 4, data: { flags: 64, allowed_mentions: { parse: [] }, ...data } });
+
+/** What the commands read, each part only when asked. */
+function context(db, lang, now) {
+  const memo = {};
+  const once = (k, f) => () => (k in memo ? memo[k] : (memo[k] = f()));
+  const state = once("state", () => getState(db));
+  const host = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  return {
+    lang, now, site: host ? `https://${host}` : "https://vct-emea.vercel.app", state,
+    teams: once("teams", () => siteTeams(state())),
+    players: once("players", () => sitePlayers(state())),
+    stats: (ev = "") => tournamentStats(state(), readDetails(db, ev)),
+    teamInfo: (slug) => readTeamInfo()[slug] || null,
+    ranking: () => seasonRanking(db, state(), { limit: 10, now }),
+    recap: (ev) => (EVENTS.includes(ev) ? recapOf(state(), readDetails(db, ev), ev) : null),
+    eventHref: (ev) => siteHref(ev),
+    isOpen: (m) => openForPrediction(m, now),
+    mvp: (event, id) => {
+      const d = detailsOf(db, event, id);
+      const best = ((d && d.all) || []).filter((r) => r.acs != null).sort((a, b) => b.acs - a.acs)[0];
+      return best ? `${best.name} (${best.acs} ACS)` : "";
+    },
+    lft: () => {
+      const ours = new Set(siteTeams(state()).map((t) => teamSlug(t.name)));
+      const info = readTeamInfo();
+      return readFreeAgents(readItems("lft"), (team) => ours.has(teamSlug(team)) || EMEA_REGION.test((info[teamSlug(team)] && info[teamSlug(team)].region) || "")).list;
+    },
+  };
+}
+
+const picksOf = (db, hash) => Object.fromEntries(db.prepare("SELECT event, id, pick FROM predictions WHERE hash = ?").all(hash).map((r) => [`${r.event}:${r.id}`, r.pick]));
+
+// Discord's calls for the bot (its "Interactions Endpoint URL"). Needs DISCORD_PUBLIC_KEY.
 export async function POST(req) {
   const body = await req.text();
   if (!verifyDiscord(process.env.DISCORD_PUBLIC_KEY, req.headers.get("x-signature-ed25519"), req.headers.get("x-signature-timestamp"), body)) {
@@ -14,11 +61,73 @@ export async function POST(req) {
   let i;
   try { i = JSON.parse(body); } catch { return new NextResponse("Bad request", { status: 400 }); }
   if (i.type === 1) return NextResponse.json({ type: 1 }); // Discord checking the address
-  if (i.type !== 2 || !i.data) return NextResponse.json({ type: 4, data: { content: "?" } });
   const db = getDb();
-  const state = getState(db);
+  const now = Date.now();
+  const settings = botSettings(db);
+  const L = (fr, en) => (settings.lang === "en" ? en : fr);
+  const ctx = context(db, settings.lang, now);
+  const user = (i.member && i.member.user) || i.user || {};
+
+  // suggestions while typing
+  if (i.type === 4) return NextResponse.json({ type: 8, data: { choices: autocomplete(i, ctx) } });
+
+  // a prediction button
+  if (i.type === 3) {
+    const [kind, event, id, side] = String((i.data && i.data.custom_id) || "").split("|");
+    if (kind !== "p") return ephemeral({ content: "?" });
+    const hash = discordVoter(db, user.id, process.env.SESSION_SECRET);
+    const state = ctx.state();
+    const m = state && (await import("../../../lib/matchlist.js")).allMatches(state).find((x) => x.event === event && x.id === id);
+    if (!m || !m.a || !m.b) return ephemeral({ content: L("Match inconnu.", "Unknown match.") });
+    const pick = side === "a" ? m.a.name : m.b.name;
+    let r = savePredictionFor(db, state, { hash, name: voterName("", user), event, id, pick }, now);
+    for (let k = 0; !r.ok && r.status === 409 && /taken/.test(r.error) && k < 5; k++) {
+      r = savePredictionFor(db, state, { hash, name: `${voterName("", user).slice(0, 15)} ${Math.floor(Math.random() * 9000) + 1000}`, event, id, pick }, now);
+    }
+    if (!r.ok) return ephemeral({ content: L(r.status === 409 ? "Les pronostics de ce match sont fermés." : "Ce pronostic n'a pas pu être enregistré.", r.status === 409 ? "This match is closed for predictions." : "This prediction could not be saved.") });
+    countUse(db, "pronostic-clic", user.id, now);
+    return NextResponse.json({ type: 7, data: pronosticMessage(ctx, picksOf(db, hash)) });
+  }
+
+  if (i.type !== 2 || !i.data) return ephemeral({ content: "?" });
   const name = i.data.name;
-  const host = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  const content = answerCommand(name, i.data.options, state, { ranking: name === "classement" ? seasonRanking(db, state, { limit: 10 }) : [], site: host ? `https://${host}` : "" });
-  return NextResponse.json({ type: 4, data: { content, allowed_mentions: { parse: [] } } });
+  if (settings.disabled.includes(name)) return ephemeral({ content: L("Cette commande est désactivée sur ce serveur.", "This command is turned off here.") });
+  countUse(db, name, user.id, now);
+  const opt = (n) => { const o = (i.data.options || []).find((x) => x.name === n); return o ? String(o.value ?? "") : ""; };
+
+  if (name === "lier") {
+    const who = useLinkCode(db, user.id, opt("code"), now);
+    return ephemeral({ content: who ? L(`✅ C'est fait : tes pronostics Discord comptent maintenant pour **${who}**.`, `✅ Done: your Discord predictions now count for **${who}**.`) : L("Code inconnu ou trop vieux. Prends-en un nouveau sur la page Pronostics du site (il dure 15 minutes).", "Unknown or expired code. Get a new one on the site's Predictions page (it lasts 15 minutes).") });
+  }
+  if (name === "suivre") {
+    if (!opt("equipe")) {
+      const list = followsOf(db, user.id);
+      return ephemeral({ content: list.length ? L(`Tu suis : ${list.map((f) => `**${f.name}**`).join(", ")}. Refais \`/suivre\` avec une équipe pour l'enlever.`, `You follow: ${list.map((f) => `**${f.name}**`).join(", ")}. Run \`/suivre\` with a team to remove it.`) : L("Tu ne suis aucune équipe. Essaie `/suivre equipe:Fnatic`.", "You follow no team. Try `/suivre equipe:Fnatic`.") });
+    }
+    const { findTeam } = await import("../../../lib/discordbot.js");
+    const t = findTeam(ctx.teams(), opt("equipe"));
+    if (!t) return ephemeral({ content: L("Équipe inconnue.", "Unknown team.") });
+    const on = toggleFollow(db, user.id, teamSlug(t.name), t.name, now);
+    if (on === null) return ephemeral({ content: L("20 équipes au plus.", "20 teams at most.") });
+    const note = botReady() ? "" : L("\n(Les messages privés seront envoyés dès que le bot sera branché sur le site.)", "\n(Private messages start once the bot is plugged into the site.)");
+    return ephemeral({ content: (on ? L(`🔔 Tu recevras en message privé le début et le résultat des matchs de **${t.name}**. Garde tes messages privés ouverts pour ce serveur.`, `🔔 You'll get **${t.name}**'s match starts and results in private messages. Keep private messages open for this server.`) : L(`🔕 Tu ne suis plus **${t.name}**.`, `🔕 You no longer follow **${t.name}**.`)) + note });
+  }
+  if (name === "pronostic") {
+    const hash = discordVoter(db, user.id, process.env.SESSION_SECRET);
+    const given = opt("nom");
+    if (given && !db.prepare("SELECT 1 FROM voters WHERE hash = ?").get(hash)) {
+      const n = voterName(given, user);
+      if (db.prepare("SELECT 1 FROM voters WHERE name = ?").get(n)) return ephemeral({ content: L(`Le nom **${n}** est déjà pris. Si c'est le tien sur le site, utilise \`/lier\` avec le code de la page Pronostics.`, `**${n}** is taken. If it's yours on the site, use \`/lier\` with the code from the Predictions page.`) });
+      db.prepare("INSERT INTO voters (hash, name, created) VALUES (?, ?, ?)").run(hash, n, new Date(now).toISOString());
+    }
+    return NextResponse.json({ type: 4, data: pronosticMessage(ctx, picksOf(db, hash)) });
+  }
+  if (!COMMANDS.some((c) => c.name === name)) return ephemeral({ content: "?" });
+  // the others read more: "thinking…" now, the answer right after
+  after(async () => {
+    let payload;
+    try { payload = answerCommand(name, i, ctx); } catch (e) { console.log(`[bot] ${name}: ${e.message}`); payload = { content: L("Oups, une erreur. Réessaie dans un instant.", "Oops, an error. Try again in a moment.") }; }
+    try { await editOriginal(i.application_id, i.token, payload); } catch (e) { console.log(`[bot] reply: ${e.message}`); }
+  });
+  return NextResponse.json({ type: 5 });
 }

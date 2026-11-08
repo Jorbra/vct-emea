@@ -211,6 +211,26 @@ export function Comments({ event, id }) {
   );
 }
 
+/** "Play from Discord": a code for the bot's /lier, so that Discord's predictions count for this name. */
+export function DiscordLink({ token }) {
+  const tr = useT();
+  const [code, setCode] = useState("");
+  const [err, setErr] = useState("");
+  if (!token) return null;
+  const get = async () => {
+    setErr("");
+    try { setCode((await post("/api/predictions/link", { token })).code); } catch (e) { setErr(tr.server(e.message)); }
+  };
+  return (
+    <span className="discordlink">
+      {!code ? <button type="button" className="btn small" onClick={get}>🤖 {tr("Play from Discord")}</button> : (
+        <span className="hint" role="status">{tr("On Discord, type")} <code>/lier code:{code}</code> {tr("(valid 15 minutes).")}</span>
+      )}
+      {err && <span className="err"> {err}</span>}
+    </span>
+  );
+}
+
 /** "Share my card": a link whose preview is the visitor's season as a picture. */
 export function ShareCard({ name }) {
   const tr = useT();

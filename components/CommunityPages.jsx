@@ -11,7 +11,7 @@ import SearchBar from "./SearchBar.jsx";
 import { localeOf } from "../lib/i18n.js";
 import { EVENT_NAMES } from "../lib/paths.js";
 import Pickem from "./Pickem.jsx";
-import { GroupBoard, Groups, SeasonTable, ShareCard } from "./Fans.jsx";
+import { DiscordLink, GroupBoard, Groups, SeasonTable, ShareCard } from "./Fans.jsx";
 
 function Top({ title, crumbs = [] }) {
   const tr = useT();
@@ -113,7 +113,7 @@ function PredictionsView({ matches, ranking, pickem, group, groups }) {
       <Top title={tr("Predictions")} crumbs={[[tr("Predictions")]]} />
       <p className="note">{tr("Pick the winner of each match before it starts. A point for every right pick.")}</p>
       {!token && <p className="err">{tr("Your browser blocks what predictions need to be kept.")}</p>}
-      {me.name ? <p className="note">{tr("You play as {name}.", { name: me.name })} <ShareCard name={me.name} /></p> : (
+      {me.name ? <p className="note">{tr("You play as {name}.", { name: me.name })} <ShareCard name={me.name} /> <DiscordLink token={token} /></p> : (
         <label className="f predname">{tr("Your name in the ranking")}<input value={name} maxLength={20} onChange={(e) => setName(e.target.value)} /></label>
       )}
       {err && <p className="err" role="alert">{err}</p>}

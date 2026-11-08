@@ -94,6 +94,16 @@ const HOW = [
     ],
   },
   {
+    title: "Bot Discord",
+    points: [
+      "Commandes : /score, /prochain, /classement, /equipe, /joueur, /bracket (avec l'image du tableau), /match (carte par carte, MVP), /live (avec les streams), /top (ACS, rating, K/D…), /lft, /suivre (messages privés), /pronostic (boutons), /lier. Les noms d'équipe, de joueur et de tournoi se complètent en tapant.",
+      "Pronostics depuis Discord : chaque personne joue sous son nom Discord ; pour jouer sous son nom du site, bouton « Jouer depuis Discord » sur la page Pronostics, puis /lier avec le code (15 minutes).",
+      "Tableau de bord : section « Bot Discord » de l'accueil de l'éditeur. Salon des annonces, quoi publier (débuts, résultats, images, transferts, actualités), tournois, rôle à mentionner (jamais, tours finaux, tous les matchs), salon du message épinglé (matchs du jour en direct), langue FR/EN, commandes activées, statistiques, message test, et « Enregistrer les commandes » après une mise à jour.",
+      "Pour que le bot écrive lui-même (annonces, épinglé, messages privés, listes de salons) : variable Vercel DISCORD_BOT_TOKEN (onglet Bot › Réinitialiser le token), puis redéployer. Sans elle, les commandes marchent et le webhook continue les annonces.",
+      "Droits du bot sur le serveur : voir les salons, envoyer des messages, intégrer des liens, gérer les messages (pour épingler), mentionner le rôle choisi.",
+    ],
+  },
+  {
     title: "Direct, stats avancées, commentaires, Discord, visites",
     points: [
       "Direct : pendant un match, vlr.gg est relu toutes les quelques minutes (les plus anciens d'abord). Le score de chaque carte s'affiche sur la carte « En direct », sur la page Live et dans la fenêtre du match, avec un fil (« Lotus commence », « Barça gagne Lotus 13–9 : 1–0 »). Un score de cartes saisi à la main reste prioritaire.",

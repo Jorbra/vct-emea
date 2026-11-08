@@ -8,6 +8,7 @@ import { EVENT_NAMES } from "../lib/paths.js";
 import { editorAgenda, eventData, matchesOf } from "../lib/matchlist.js";
 import { formatMatchTime, TIME_EVENTS } from "../lib/schedule.js";
 import { eventStatus, formatDates } from "../lib/status.js";
+import BotPanel from "./BotPanel.jsx";
 
 const GROUPS = [
   ["Europe", ["q1", "q2", "playoffs"]],
@@ -45,6 +46,7 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
     <div className="adhome">
       <p className="guidelink"><a className="btn" href="/admin/nouveautes">{tr("What's new and how it works")}</a></p>
       {initial.admin && initial.admin.health && <Health rows={initial.admin.health} />}
+      {initial.admin && <BotPanel />}
       {initial.admin && initial.admin.visits && <Visits v={initial.admin.visits} />}
       {initial.admin && initial.admin.comments && <CommentsMod list={initial.admin.comments} call={call} onDone={onDone} />}
       <section>
