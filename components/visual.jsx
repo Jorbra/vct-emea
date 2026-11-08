@@ -2,6 +2,8 @@
 // Small pieces of the site's look: a team's color read from its logo, a score that pulses when it changes, loading skeletons.
 import { useEffect, useRef, useState } from "react";
 import { useT as useT2 } from "./lang.jsx";
+import { knownPalette, loadPalette, readableLogo, themeColors } from "./teamcolors.js";
+import { pushAccount } from "./account.js";
 
 const colors = new Map(); // logo address → color, for the whole visit
 
@@ -45,19 +47,24 @@ function readColor(src) {
   });
 }
 
-/** A team's color from its logo, once known (only the site's own logos can be read). */
+/** A team's color from its logo, once known (the site's own logos and Toornament's). */
 export function useTeamColor(logo) {
-  const src = logo && logo.startsWith("/") ? logo : "";
-  const [color, setColor] = useState(src ? colors.get(src) || "" : "");
-  useEffect(() => {
-    if (!src) { setColor(""); return undefined; }
-    if (colors.has(src)) { setColor(colors.get(src)); return undefined; }
-    let on = true;
-    readColor(src).then((c) => { colors.set(src, c); if (on) setColor(c); });
-    return () => { on = false; };
-  }, [src]);
-  return color;
+  const p = useTeamPalette(logo);
+  return p ? `rgb(${p.primary.join(", ")})` : "";
 }
+
+/** A team's palette from its logo: { primary, secondary } or null. */
+export function useTeamPalette(logo) {
+  const [p, setP] = useState(() => knownPalette(logo) || null);
+  useEffect(() => {
+    let on = true;
+    if (!readableLogo(logo)) { setP(null); return undefined; }
+    loadPalette(logo).then((x) => { if (on) setP(x); });
+    return () => { on = false; };
+  }, [logo]);
+  return p;
+}
+void readColor; void colors;
 
 /** A thin bar in the team's color, beside its name on a match card. */
 export function TeamTick({ team }) {
@@ -142,30 +149,52 @@ export function ResultToast() {
   );
 }
 
-const THEME_KEY = "vct-team-theme";
-const readTheme = () => { try { return JSON.parse(localStorage.getItem(THEME_KEY) || "null"); } catch { return null; } };
+export const THEME_KEY = "vct-team-theme";
+export const readTheme = () => { try { const t = JSON.parse(localStorage.getItem(THEME_KEY) || "null"); return t && t.name ? t : null; } catch { return null; } };
 
-/** The site in the colors of the visitor's team, when chosen on its page. */
+/** Chooses (or leaves, with null) the team whose colors the site wears; kept on this device and in the account. */
+export function setTeamTheme(team) {
+  const value = team ? { name: team.name, logo: team.logo || "" } : null;
+  try { if (value) localStorage.setItem(THEME_KEY, JSON.stringify(value)); else localStorage.removeItem(THEME_KEY); } catch { /* not remembered */ }
+  pushAccount({ prefs: { teamTheme: value } });
+  window.dispatchEvent(new Event("vct-team-theme"));
+}
+
+/** The site in the colors of the visitor's team: accent, bands, a stripe at the top; readable in dark and light mode. */
 export function TeamTheme() {
   const [team, setTeam] = useState(null);
+  const [dark, setDark] = useState(true);
   useEffect(() => {
     const sync = () => setTeam(readTheme());
     sync();
     window.addEventListener("vct-team-theme", sync);
-    return () => window.removeEventListener("vct-team-theme", sync);
+    window.addEventListener("storage", sync);
+    // light or dark: the switch writes data-theme, else the device decides
+    const mode = () => {
+      const t = document.documentElement.dataset.theme;
+      setDark(t ? t !== "light" : !window.matchMedia("(prefers-color-scheme: light)").matches);
+    };
+    mode();
+    const mo = new MutationObserver(mode);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    const mq = window.matchMedia("(prefers-color-scheme: light)");
+    mq.addEventListener("change", mode);
+    return () => { window.removeEventListener("vct-team-theme", sync); window.removeEventListener("storage", sync); mo.disconnect(); mq.removeEventListener("change", mode); };
   }, []);
-  const color = useTeamColor(team && team.logo);
+  const palette = useTeamPalette(team && team.logo);
   useEffect(() => {
-    const root = document.documentElement.style;
-    if (!color) { root.removeProperty("--lime"); root.removeProperty("--lime-ink"); return; }
-    const [r, g, b] = (color.match(/\d+/g) || [0, 0, 0]).map(Number);
-    // too dark a color is lifted a little, so that it stays seen on the dark background
-    const lift = (v) => Math.min(255, Math.round(v + (255 - v) * 0.25));
-    const c = (r + g + b) / 3 < 90 ? `rgb(${lift(r)}, ${lift(g)}, ${lift(b)})` : color;
-    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    root.setProperty("--lime", c);
-    root.setProperty("--lime-ink", lum > 0.55 ? "#111" : "#fff");
-  }, [color]);
+    const root = document.documentElement;
+    const vars = ["--lime", "--lime-ink", "--band", "--band-fg", "--team-2", "--team-raw"];
+    const c = team ? themeColors(palette, dark) : null;
+    if (!c) { vars.forEach((v) => root.style.removeProperty(v)); delete root.dataset.teamtheme; return; }
+    root.style.setProperty("--lime", c.accent);
+    root.style.setProperty("--lime-ink", c.accentInk);
+    root.style.setProperty("--band", c.band);
+    root.style.setProperty("--band-fg", c.bandInk);
+    root.style.setProperty("--team-2", c.second);
+    root.style.setProperty("--team-raw", c.raw);
+    root.dataset.teamtheme = team.name;
+  }, [team, palette, dark]);
   return null;
 }
 
@@ -173,17 +202,50 @@ export function TeamTheme() {
 export function TeamThemeButton({ team }) {
   const tr = useT2();
   const [on, setOn] = useState(false);
-  useEffect(() => { const t = readTheme(); setOn(!!t && t.name === team.name); }, [team.name]);
-  if (!team || !team.logo || !team.logo.startsWith("/")) return null;
-  const toggle = () => {
-    try {
-      if (on) localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, JSON.stringify({ name: team.name, logo: team.logo }));
-    } catch { /* not remembered */ }
-    setOn(!on);
-    window.dispatchEvent(new Event("vct-team-theme"));
-  };
-  return <button type="button" className="btn" aria-pressed={on} onClick={toggle}>🎨 {on ? tr("Back to the site's colors") : tr("Site in this team's colors")}</button>;
+  useEffect(() => {
+    const sync = () => { const t = readTheme(); setOn(!!t && t.name === team.name); };
+    sync();
+    window.addEventListener("vct-team-theme", sync);
+    return () => window.removeEventListener("vct-team-theme", sync);
+  }, [team.name]);
+  if (!team || !readableLogo(team.logo)) return null;
+  return <button type="button" className="btn" aria-pressed={on} onClick={() => setTeamTheme(on ? null : team)}>🎨 {on ? tr("Back to the site's colors") : tr("Site in this team's colors")}</button>;
 }
+
+/** A team to choose in the picker: its crest in its own colors. */
+function ThemeChoice({ team, on, onPick }) {
+  const p = useTeamPalette(team.logo);
+  const c = themeColors(p, true);
+  return (
+    <button type="button" className={"themechoice" + (on ? " on" : "")} aria-pressed={on} onClick={() => onPick(team)} disabled={!c} title={c ? undefined : "—"}>
+      <span className="themeswatch" style={c ? { background: `linear-gradient(90deg, ${c.accent} 0 60%, ${c.second} 60%)` } : undefined} />
+      <span className="themename">{team.name}</span>
+    </button>
+  );
+}
+
+/** Choosing the site's colors among the visitor's teams (or any listed), with the site's own as the first choice. */
+export function TeamThemePicker({ teams }) {
+  const tr = useT2();
+  const [cur, setCur] = useState(null);
+  useEffect(() => {
+    const sync = () => setCur(readTheme());
+    sync();
+    window.addEventListener("vct-team-theme", sync);
+    return () => window.removeEventListener("vct-team-theme", sync);
+  }, []);
+  const list = teams.filter((t) => readableLogo(t.logo));
+  return (
+    <div className="themepicker">
+      <button type="button" className={"themechoice" + (!cur ? " on" : "")} aria-pressed={!cur} onClick={() => setTeamTheme(null)}>
+        <span className="themeswatch site" /><span className="themename">{tr("The site's colors")}</span>
+      </button>
+      {list.map((t) => <ThemeChoice key={t.name} team={t} on={!!cur && cur.name === t.name} onPick={setTeamTheme} />)}
+      {!list.length && <p className="hint">{tr("Add favorite teams (★) to choose their colors here.")}</p>}
+    </div>
+  );
+}
+
 
 /** A small map of a big bracket: where the view is; a click moves it there. */
 export function MiniMap({ boxRef }) {

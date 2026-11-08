@@ -24,6 +24,7 @@ import { MatchModalProvider } from "./MatchModal.jsx";
 import HomeNext from "./HomeNext.jsx";
 import FeaturedMatch from "./FeaturedMatch.jsx";
 import { InstallButton } from "./Fans.jsx";
+import { TeamThemePicker } from "./visual.jsx";
 
 const sameDay = (iso, now) => { const a = new Date(iso); const b = new Date(now); return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
 
@@ -150,6 +151,10 @@ function MyTeams({ initial }) {
       <div className="torg">
         {mine.map((t) => <a key={t.name} href={teamHref(t.name)}><Crest team={t} />{t.name}</a>)}
       </div>
+      <details className="themebox">
+        <summary>🎨 {tr("Site colors")}</summary>
+        <TeamThemePicker teams={mine} />
+      </details>
     </section>
   );
 }

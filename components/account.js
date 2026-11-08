@@ -26,9 +26,11 @@ export function applyAccount(account) {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(account.favorites || []));
     if (typeof account.prefs?.countdown === "boolean") localStorage.setItem(COUNTDOWN_KEY, account.prefs.countdown ? "1" : "0");
     if (Array.isArray(account.prefs?.players)) localStorage.setItem("vct-players", JSON.stringify(account.prefs.players));
+    if (account.prefs && "teamTheme" in account.prefs) { if (account.prefs.teamTheme) localStorage.setItem("vct-team-theme", JSON.stringify(account.prefs.teamTheme)); else localStorage.removeItem("vct-team-theme"); }
   });
   window.dispatchEvent(new Event("vct-favorites"));
   window.dispatchEvent(new Event("vct-players"));
+  window.dispatchEvent(new Event("vct-team-theme"));
   window.dispatchEvent(new Event("vct-account"));
 }
 

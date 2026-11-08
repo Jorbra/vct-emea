@@ -134,3 +134,24 @@ test("Discord: signature and the commands' answers", () => {
   assert.match(text(answerCommand("prochain", cmd("prochain", { equipe: "team 3" }), ctx)), /Team 3/);
   assert.match(text(answerCommand("classement", cmd("classement"), { ...ctx, ranking: () => [{ name: "Fan", points: 3, good: 3, total: 4 }] })), /Fan/);
 });
+
+test("team theme: the logo's two colors, readable in dark and light mode", async () => {
+  const { paletteOf, themeColors, readableLogo } = await import("../components/teamcolors.js");
+  // a logo with mostly red, some blue and white
+  const px = [];
+  const add = (rgb, n) => { for (let i = 0; i < n; i++) px.push(...rgb, 255); };
+  add([200, 20, 40], 300); add([20, 60, 160], 150); add([255, 255, 255], 200); add([0, 0, 0], 100);
+  const p = paletteOf(Uint8ClampedArray.from(px));
+  assert.deepEqual([p.primary, p.secondary], [[200, 20, 40], [20, 60, 160]]);
+  const dark = themeColors(p, true);
+  const light = themeColors(p, false);
+  assert.match(dark.accent, /^hsl\(35\d|^hsl\(\d+, \d+%, 62%\)$/);
+  assert.match(light.accent, /, 36%\)$/);
+  assert.equal(paletteOf(Uint8ClampedArray.from([128, 128, 128, 255, 128, 128, 128, 255])), null);
+  const mono = paletteOf(Uint8ClampedArray.from(Array.from({ length: 40 }, (_, i) => (i % 2 ? [255, 255, 255, 255] : [0, 0, 0, 255])).flat()));
+  assert.equal(mono.mono, true);
+  assert.equal(themeColors(mono, true).accent, "#ecece8");
+  assert.equal(readableLogo("https://play.toornament.com/media/file/123456789/logo_medium"), "/api/tlogo?id=123456789");
+  assert.equal(readableLogo("https://example.com/x.png"), "");
+  assert.equal(readableLogo("/api/logos/BAR.png"), "/api/logos/BAR.png");
+});

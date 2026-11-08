@@ -1742,3 +1742,18 @@ h2 { letter-spacing: .03em; }
 .predm { background: var(--surface); border: 1px solid var(--line); }
 .predteam.on { border-color: var(--lime); box-shadow: inset 0 0 0 1px var(--lime); }
 .crumbs { font-size: 13px; color: var(--muted); }
+
+/* ===== the team theme ===== */
+:root[data-teamtheme] body::before { content: ""; position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 95; background: linear-gradient(90deg, var(--lime) 0 65%, var(--team-2, var(--lime)) 65%); pointer-events: none; }
+:root[data-teamtheme] .sitenav a[aria-current="page"] { box-shadow: inset 3px 0 0 var(--lime); }
+:root[data-teamtheme] .hero { background: var(--band); color: var(--band-fg); }
+:root[data-teamtheme] .featured { border-color: color-mix(in srgb, var(--lime) 45%, var(--line)); }
+:root[data-teamtheme] h2::after { content: ""; display: inline-block; width: 22px; height: 3px; border-radius: 2px; background: var(--lime); align-self: center; }
+.themebox { margin-top: 10px; }
+.themebox summary { cursor: pointer; font-weight: 600; color: var(--muted); }
+.themepicker { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.themechoice { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; color: var(--fg); font: 600 13px var(--font-body); cursor: pointer; }
+.themechoice.on { border-color: var(--lime); box-shadow: 0 0 0 1px var(--lime) inset; }
+.themechoice:disabled { opacity: .45; cursor: not-allowed; }
+.themeswatch { width: 22px; height: 22px; border-radius: 50%; background: var(--surface-2); flex: none; }
+.themeswatch.site { background: linear-gradient(90deg, #c9f03c 0 60%, #ff4655 60%); }

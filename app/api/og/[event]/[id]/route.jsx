@@ -16,15 +16,15 @@ function logoOf(db, team) {
   return `data:image/${m[2].toLowerCase() === "png" ? "png" : "jpeg"};base64,${Buffer.from(row.data).toString("base64")}`;
 }
 
-function Side({ team, logo }) {
+function Side({ team, logo, lost = false }) {
   const name = (team && team.name) || "TBD";
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 420 }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 360, flexShrink: 0 }}>
       {logo
         // eslint-disable-next-line @next/next/no-img-element
         ? <img src={logo} width={190} height={190} style={{ objectFit: "contain" }} alt="" />
         : <div style={{ display: "flex", width: 190, height: 190, alignItems: "center", justifyContent: "center", borderRadius: 28, background: "#2a2a2a", color: "#e8e8e6", fontSize: 72, fontWeight: 700 }}>{(team && team.tag ? team.tag : name).slice(0, 3).toUpperCase()}</div>}
-      <div style={{ display: "flex", marginTop: 28, fontSize: name.length > 18 ? 38 : 48, fontWeight: 700, color: "#ffffff", textAlign: "center", justifyContent: "center" }}>{name}</div>
+      <div style={{ display: "flex", marginTop: 28, maxWidth: 360, fontSize: name.length > 16 ? 32 : name.length > 11 ? 40 : 48, fontWeight: 700, color: lost ? "#6f6f6b" : "#ffffff", textAlign: "center", justifyContent: "center", lineHeight: 1.1 }}>{name}</div>
     </div>
   );
 }
@@ -50,13 +50,14 @@ export async function GET(_req, { params }) {
           <span>VCT EMEA</span>
           <span style={{ color: live ? "#ff5a5f" : "#a0a09c" }}>{live ? "LIVE" : done ? "FINAL" : m.bo ? `Bo${m.bo}` : ""}</span>
         </div>
-        <div style={{ display: "flex", flex: 1, alignItems: "center", justifyContent: "space-between" }}>
-          <Side team={m.a} logo={logoOf(db, m.a)} />
+        <div style={{ display: "flex", flex: 1, alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+          <Side team={m.a} logo={logoOf(db, m.a)} lost={done && m.win === "b"} />
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div style={{ display: "flex", fontSize: 104, fontWeight: 800, color: done || live ? "#c9f03c" : "#6f6f6b" }}>{middle}</div>
+            <div style={{ display: "flex", fontSize: middle.length > 6 ? 58 : 104, fontWeight: 800, color: done || live ? "#c9f03c" : "#6f6f6b", textAlign: "center" }}>{middle}</div>
+            {done && m.note && m.note.kind !== "raw" && <div style={{ display: "flex", fontSize: 28, color: "#e9e9e6", marginTop: 8 }}>{`Vainqueur : ${(m.win === "a" ? m.a : m.b).name}`}</div>}
             {maps.length > 0 && <div style={{ display: "flex", gap: 10, marginTop: 10 }}>{maps.map((x, i) => <div key={i} style={{ display: "flex", fontSize: 24, color: "#e9e9e6", background: "#1d212c", borderRadius: 999, padding: "4px 14px" }}>{`${x.map || ""} ${x.a}–${x.b}`.trim()}</div>)}</div>}
           </div>
-          <Side team={m.b} logo={logoOf(db, m.b)} />
+          <Side team={m.b} logo={logoOf(db, m.b)} lost={done && m.win === "a"} />
         </div>
         <div style={{ display: "flex", justifyContent: "center", color: "#a0a09c", fontSize: 30 }}>{[EVENT_NAMES[event], round].filter(Boolean).join(" · ")}</div>
       </div>

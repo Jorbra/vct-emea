@@ -149,6 +149,7 @@ function Inside({ name, onOut }) {
           <li>{tr("your favorite teams")}</li>
           <li>{tr("your predictions")}</li>
           <li>{tr("your language, theme and countdown choice")}</li>
+          <li>{tr("your team colors for the site")}</li>
         </ul>
         <p className="hint">{tr("Match alerts are turned on device by device, since each one asks for its own permission. They follow your favorite teams.")}</p>
         <div className="row">
