@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo, useRef, useState } from "react";
+import { memo, useMemo, useRef, useState, useEffect } from "react";
 import { THIRD, buildBracket, matchId, podium, roundsFor } from "../lib/bracket.js";
 import { Crest } from "./Crest.jsx";
 import TeamCard from "./TeamCard.jsx";
@@ -13,6 +13,7 @@ import { useFavorites } from "./favorites.js";
 import { formatMatchTime } from "../lib/schedule.js";
 import { teamSlug } from "../lib/paths.js";
 import { useMatchTimes } from "./matchTime.jsx";
+import { MiniMap } from "./visual.jsx";
 
 const CELL = 56; // px per first-round match; every later round doubles it
 
@@ -63,6 +64,15 @@ export function BigBracket({ event, slots, scores, bo, notes = {} }) {
   const [hover, setHover] = useState(0);
   const [found, setFound] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [full, setFull] = useState(false);
+  useEffect(() => {
+    if (!full) return undefined;
+    const onKey = (e) => { if (e.key === "Escape") setFull(false); };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [full]);
   const canOpen = !!(open && event);
   const followed = hover || found;
   const litOf = (m) => (!followed ? "" : m.a === followed ? "a" : m.b === followed ? "b" : "");
@@ -149,6 +159,13 @@ export function BigBracket({ event, slots, scores, bo, notes = {} }) {
         ))}
       </ul>
     )}
+    <div className={"qstage" + (full ? " full" : "")} style={{ "--z": zoom }}>
+    <div className="qtools" role="toolbar" aria-label={tr("Bracket")}>
+      <button type="button" className="btn small" onClick={() => setZoom((z) => Math.max(0.4, Math.round((z - 0.15) * 100) / 100))} aria-label={tr("Zoom out")}>−</button>
+      <span className="qzoom">{Math.round(zoom * 100)}%</span>
+      <button type="button" className="btn small" onClick={() => setZoom((z) => Math.min(1.6, Math.round((z + 0.15) * 100) / 100))} aria-label={tr("Zoom in")}>+</button>
+      <button type="button" className="btn small" aria-pressed={full} onClick={() => setFull(!full)}>{full ? `✕ ${tr("Close")}` : `⤢ ${tr("Full screen")}`}</button>
+    </div>
     <div ref={box} className={"qbracket" + (dragging ? " dragging" : "") + (found || hover ? " finding" : "")} tabIndex={0} aria-label={tr("Bracket")}
       onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onPointerLeave={() => { up(); setHover(0); }}
       onClick={(e) => { if (moved.current) { moved.current = false; return; } openFrom(e.target); }}
@@ -172,6 +189,8 @@ export function BigBracket({ event, slots, scores, bo, notes = {} }) {
           )}
         </div>
       ))}
+    </div>
+    <MiniMap boxRef={box} />
     </div>
     </>
   );

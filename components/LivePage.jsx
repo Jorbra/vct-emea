@@ -70,7 +70,25 @@ function View({ live, next }) {
               ))}
             </div>
           ) : src ? (
-            <div className="liveplayer"><iframe src={src} title={tr("Live")} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /></div>
+            <div className="liveroom">
+              <div className="liveplayer"><iframe src={src} title={tr("Live")} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /></div>
+              <aside className="liveside">
+                <span className="livebadge">{tr("LIVE")}</span>
+                <div className="lsteams">
+                  <span><Crest team={current.a} />{(current.a && current.a.name) || tr("TBD")}</span>
+                  <b className="lsscore">{current.score ? `${current.score.a} : ${current.score.b}` : "vs"}</b>
+                  <span><Crest team={current.b} />{(current.b && current.b.name) || tr("TBD")}</span>
+                </div>
+                <div className="lsmeta">{tr(EVENT_NAMES[current.event])} · {label(current)}{current.bo ? ` · Bo${current.bo}` : ""}</div>
+                {current.score && (current.score.maps || []).length > 0 && <div className="livemaps">{current.score.maps.map((x) => <span key={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>}
+                {current.score && (current.score.feed || []).length > 0 && (
+                  <ol className="lsfeed">{[...current.score.feed].reverse().map((f, i) => (
+                    <li key={i}><small>{new Date(f.at).toLocaleTimeString(tr.lang === "fr" ? "fr-FR" : undefined, { hour: "2-digit", minute: "2-digit" })}</small> {f.kind === "start" ? tr("{map} starts", { map: f.map }) : `${f.map} : ${(f.a > f.b ? current.a : current.b || {}).name || ""} ${Math.max(f.a, f.b)}–${Math.min(f.a, f.b)}`}</li>
+                  ))}</ol>
+                )}
+                <a className="btn" href={`/match/${current.event}/${current.id}`}>{tr("Match page")}</a>
+              </aside>
+            </div>
           ) : withStream.length === 0 ? <p className="note">{tr("No stream link is known for these matches yet.")}</p> : null}
           <h2>{tr("Live now")} <small>({live.length})</small></h2>
           <div className="livegrid">{live.map((m) => card(m, current && `${m.event}:${m.id}` === `${current.event}:${current.id}`))}</div>

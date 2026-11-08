@@ -72,6 +72,40 @@ const BADGE = {
   many: (b, tr) => [`📈 ${b.n}`, tr("{n} predictions made", { n: b.n })],
 };
 
+/** The top three on a podium, rising when the page opens. */
+export function Podium({ ranking }) {
+  const tr = useT();
+  if (ranking.length < 3) return null;
+  const [first, second, third] = ranking;
+  const step = (r, place, cls) => (
+    <div className={"pdstep " + cls}>
+      <b className="pdname">{r.name}</b>
+      <span className="pdpts">{r.points} pts</span>
+      <div className="pdblock"><span>{place}</span></div>
+    </div>
+  );
+  return <div className="podium" aria-label={tr("Podium")}>{step(second, 2, "p2")}{step(first, 1, "p1")}{step(third, 3, "p3")}</div>;
+}
+
+/** Every badge there is, how many have it, and the visitor's own lit up. */
+export function BadgeShowcase({ ranking, me }) {
+  const tr = useT();
+  const kinds = [["streak", "🔥", "Right picks in a row"], ["champion", "👑", "Found an event's winner"], ["perfect", "🎯", "Every qualified team found"], ["many", "📈", "50 predictions made"]];
+  const mine = (ranking.find((r) => r.name === me) || { badges: [] }).badges.map((b) => b.kind);
+  const count = (k) => ranking.filter((r) => r.badges.some((b) => b.kind === k)).length;
+  return (
+    <div className="badgecase">
+      {kinds.map(([k, icon, label]) => (
+        <div key={k} className={"bcase" + (mine.includes(k) ? " on" : "")} title={tr(label)}>
+          <span className="bicon" aria-hidden="true">{icon}</span>
+          <span className="blabel">{tr(label)}</span>
+          <small>{tr("{n} players", { n: count(k) })}</small>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /** The season's ranking: predictions and "Who qualifies?" together, with the badges. */
 export function SeasonTable({ ranking, me }) {
   const tr = useT();

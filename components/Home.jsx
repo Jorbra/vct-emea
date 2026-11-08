@@ -202,6 +202,7 @@ function HomeView({ initial }) {
 
       <SiteNav />
 
+      {matchEvents.some((e) => e.items.some((m) => e.live[m.id] && m.sa == null)) && <div className="livesweep" aria-hidden="true" />}
       <div className="homehead">
         <FeaturedMatch events={matchEvents} />
         <div className="homeside">

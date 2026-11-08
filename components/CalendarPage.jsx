@@ -33,11 +33,23 @@ function Agenda({ days }) {
   const open = useOpenMatch();
   const fmtDay = new Intl.DateTimeFormat(localeOf(tr.lang), { weekday: "long", day: "numeric", month: "long" });
   const fmtHour = new Intl.DateTimeFormat(localeOf(tr.lang), { hour: "2-digit", minute: "2-digit" });
+  const [openDays, setOpenDays] = useState({});
+  const today = dayKey(new Date());
+  const fmtChip = new Intl.DateTimeFormat(localeOf(tr.lang), { weekday: "short", day: "numeric" });
   if (!days.length) return <p className="note">{tr("No match this month.")}</p>;
-  return days.map(([k, list]) => (
+  return (
+    <>
+    <nav className="daystrip" aria-label={tr("Days")}>
+      {days.map(([k, list]) => (
+        <a key={k} href={`#d-${k}`} className={"daychip" + (k === today ? " today" : "") + (list.some((m) => m.sa == null && m.live) ? " live" : "")}>
+          <b>{fmtChip.format(new Date(list[0].at))}</b><small>{tr("{n} matches", { n: list.length })}</small>
+        </a>
+      ))}
+    </nav>
+    {days.map(([k, list]) => (
     <div className="schd" key={k} id={`d-${k}`}>
-      <h3 className="schday">{fmtDay.format(new Date(list[0].at))}</h3>
-      {list.map((m) => {
+      <h3 className="schday">{fmtDay.format(new Date(list[0].at))} <small>{tr("{n} matches", { n: list.length })}</small></h3>
+      {list.slice(0, openDays[k] || list.length <= 16 ? list.length : 12).map((m) => {
         const done = m.sa != null && m.sb != null;
         return (
           <div key={m.event + m.id} className={"schm mclick" + (done ? " done" : "")} role="button" tabIndex={0} onClick={() => open(m.event, m.id)}
@@ -52,8 +64,11 @@ function Agenda({ days }) {
           </div>
         );
       })}
+      {list.length > 16 && !openDays[k] && <button type="button" className="btn small daymore" onClick={() => setOpenDays((o) => ({ ...o, [k]: true }))}>{tr("Show the {n} other matches", { n: list.length - 12 })}</button>}
     </div>
-  ));
+    ))}
+    </>
+  );
 }
 
 function View({ initial }) {

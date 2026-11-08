@@ -10,6 +10,27 @@ import { badRequest, currentEditor, readBody, reply, unauthorised } from "../../
 
 export const dynamic = "force-dynamic";
 
+/** An example of what the bot posts, made with a real match: { content?, embeds?, poll? }. */
+async function sampleOf(db, kind, lang) {
+  const { allMatches } = await import("../../../lib/matchlist.js");
+  const { alertText, announcements } = await import("../../../lib/discord.js");
+  const { dailyEmbed } = await import("../../../lib/botnotify.js");
+  const { liveEmbed, pollPayload } = await import("../../../lib/botextra.js");
+  const state = getState(db);
+  const all = allMatches(state).filter((m) => m.a && m.b && m.a.name && m.b.name);
+  const done = all.filter((m) => m.sa != null).sort((x, y) => (y.at || "").localeCompare(x.at || ""))[0];
+  const next = all.filter((m) => m.sa == null).sort((x, y) => (x.at || "9").localeCompare(y.at || "9"))[0] || done;
+  const base = (m) => ({ teams: [], url: `/match/${m.event}/${m.id}`, event: m.event, a: m.a.name, b: m.b.name, bo: m.bo });
+  if (kind === "start" && next) return { content: alertText({ ...base(next), kind: "live" }, lang) };
+  if (kind === "result" && done) return { content: alertText({ ...base(done), kind: "result", sa: done.sa, sb: done.sb, note: done.note || null }, lang) };
+  if (kind === "reminder" && next) return { content: `⏰ ${lang === "en" ? "In 15 min" : "Dans 15 min"} : **${next.a.name}** vs **${next.b.name}** · ${next.event}` };
+  if (kind === "daily") { const e = dailyEmbed(state, lang, done && done.at ? new Date(done.at).getTime() : Date.now()); return e ? { embeds: [e] } : null; }
+  if (kind === "live" && (next || done)) { const m = next || done; return { embeds: [liveEmbed(m, { a: 1, b: 0, maps: [{ map: "Lotus", a: 13, b: 9, done: true }, { map: "Bind", a: 7, b: 5 }] }, lang)] }; }
+  if (kind === "poll" && next) { const at = new Date(Date.now() + 2 * 3600000).toISOString(); return pollPayload({ ...next, at }, lang); }
+  void announcements;
+  return null;
+}
+
 /** Editors only. GET: the bot's settings, its use, and the servers, channels and roles to pick from. */
 export async function GET(req) {
   if (!(await currentEditor())) return unauthorised();
@@ -45,6 +66,21 @@ export async function POST(req) {
   if (b.action === "test") {
     const r = await botTest(db);
     return r.ok ? NextResponse.json(r) : NextResponse.json({ error: r.error }, { status: r.status });
+  }
+  if (b.action === "sample" || b.action === "testkind") {
+    const s = (await import("../../../lib/botstore.js")).botSettings(db);
+    const sample = await sampleOf(db, String(b.kind || "start"), s.lang);
+    if (!sample) return NextResponse.json({ error: "No match to make this example with yet." }, { status: 404 });
+    if (b.action === "sample") return NextResponse.json({ ok: true, sample });
+    if (!botReady() || !s.channel) return NextResponse.json({ error: "Choose a channel first." }, { status: 400 });
+    try {
+      const payload = sample.poll ? { poll: sample.poll } : { content: sample.content ? `[TEST] ${sample.content}` : "[TEST]", embeds: sample.embeds || [], allowed_mentions: { parse: [] } };
+      await postMessage(s.channel, payload);
+      logBot(db, "test", String(b.kind));
+      return NextResponse.json({ ok: true, message: "Test message sent." });
+    } catch (e) {
+      return NextResponse.json({ error: `Discord: ${e.message}` }, { status: 502 });
+    }
   }
   if (b.action === "unschedule") return reply(cancelScheduled(db, b.id));
   if (b.action === "announce") {

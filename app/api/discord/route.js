@@ -2,6 +2,8 @@ import { NextResponse, after } from "next/server";
 import { getDb, getState } from "../../../lib/db.js";
 import { COMMANDS, answerButtons, answerCommand, autocomplete, findTeam, helpMessage, pronosticMessage, verifyDiscord, voterName } from "../../../lib/discordbot.js";
 import { compareTeams } from "../../../lib/playerstats.js";
+import { answerQuestion, gameRanking, guildUsers, makeQuestion, noteGuildUser, questionMessage, setFanRole } from "../../../lib/botextra.js";
+import { botReady as tokenSet } from "../../../lib/botapi.js";
 import { allMatches } from "../../../lib/matchlist.js";
 import { botReady, editOriginal } from "../../../lib/botapi.js";
 import { botSettings, countUse, discordVoter, followsOf, toggleFollow, useLinkCode } from "../../../lib/botstore.js";
@@ -39,6 +41,7 @@ function context(db, lang, now) {
     h2h: (a, b) => compareTeams(state(), a, b),
     teamInfo: (slug) => readTeamInfo()[slug] || null,
     ranking: () => seasonRanking(db, state(), { limit: 10, now }),
+    guild: "",
     recap: (ev) => (EVENTS.includes(ev) ? recapOf(state(), readDetails(db, ev), ev) : null),
     eventHref: (ev) => siteHref(ev),
     isOpen: (m) => openForPrediction(m, now),
@@ -85,12 +88,18 @@ export async function POST(req) {
       if (!t) return ephemeral({ content: L("Équipe inconnue.", "Unknown team.") });
       const on = toggleFollow(db, user.id, teamSlug(t.name), t.name, now);
       countUse(db, "suivre-bouton", user.id, now);
+      if (on !== null && settings.auto.fanRoles && tokenSet() && i.guild_id) after(() => setFanRole(db, i.guild_id, user.id, t.name, on).catch((e) => console.log(`[bot] role: ${e.message}`)));
       return ephemeral({ content: on === null ? L("20 équipes au plus.", "20 teams at most.") : on ? L(`🔔 Tu suis **${t.name}** : début et résultat de ses matchs en message privé.`, `🔔 You follow **${t.name}**: its match starts and results in private messages.`) : L(`🔕 Tu ne suis plus **${t.name}**.`, `🔕 You no longer follow **${t.name}**.`) });
     }
     // refresh a live answer in place
     if (kind === "r") {
       const fake = { ...i, data: { name: event, options: id ? [{ name: "equipe", value: id }] : [] } };
       return NextResponse.json({ type: 7, data: answerButtons(event, fake, answerCommand(event, fake, ctx), ctx.site, settings.lang) });
+    }
+    // the guessing game's answer
+    if (kind === "q") {
+      countUse(db, "devine-reponse", user.id, now);
+      return NextResponse.json({ type: 7, data: answerQuestion(db, user.id, user.global_name || user.username || "?", i.message || {}, Number(event), Number(id), settings.lang, now) });
     }
     if (kind !== "p") return ephemeral({ content: "?" });
     const hash = discordVoter(db, user.id, process.env.SESSION_SECRET);
@@ -111,8 +120,23 @@ export async function POST(req) {
   const name = i.data.name;
   if (settings.disabled.includes(name)) return ephemeral({ content: L("Cette commande est désactivée sur ce serveur.", "This command is turned off here.") });
   countUse(db, name, user.id, now);
+  noteGuildUser(db, i.guild_id, user.id, now);
+  ctx.guild = i.guild_id || "";
   const opt = (n) => { const o = (i.data.options || []).find((x) => x.name === n); return o ? String(o.value ?? "") : ""; };
 
+  if (name === "devine") {
+    const q = makeQuestion(ctx.state(), ctx.stats().players, settings.lang);
+    return q ? NextResponse.json({ type: 4, data: questionMessage(q, settings.lang) }) : ephemeral({ content: L("Pas encore assez de matchs pour jouer.", "Not enough matches to play yet.") });
+  }
+  if (name === "classementjeu") {
+    const rows = gameRanking(db).map((r, k) => `${["🥇", "🥈", "🥉"][k] || `${k + 1}.`} **${r.name}** · ${r.points} pts (${r.played} ${L("questions", "questions")})`);
+    return NextResponse.json({ type: 4, data: { embeds: [{ title: L("Classement du mini-jeu", "Guessing game ranking"), description: rows.join("\n") || L("Personne n'a encore joué : `/devine`.", "Nobody played yet: `/devine`."), color: 0xc9f03c }], allowed_mentions: { parse: [] } } });
+  }
+  if (name === "classement" && opt("portee") === "serveur" && i.guild_id) {
+    const hashes = guildUsers(db, i.guild_id).map((u) => discordVoter(db, u, process.env.SESSION_SECRET));
+    const rows = seasonRanking(db, ctx.state(), { limit: 10, now, only: hashes }).map((r, k) => `${["🥇", "🥈", "🥉"][k] || `${k + 1}.`} **${r.name}** · ${r.points} pts (${r.good}/${r.total})`);
+    return NextResponse.json({ type: 4, data: { embeds: [{ title: L("Pronostics · classement de ce serveur", "Predictions · this server's ranking"), description: rows.join("\n") || L("Personne de ce serveur n'a encore pronostiqué : `/pronostic`.", "Nobody here has predicted yet: `/pronostic`."), color: 0xff4655 }], allowed_mentions: { parse: [] } } });
+  }
   if (name === "aide") return NextResponse.json({ type: 4, data: helpMessage(settings.lang, settings.disabled) });
   if (name === "mesprono") {
     const hash = discordVoter(db, user.id, process.env.SESSION_SECRET);
@@ -145,6 +169,8 @@ export async function POST(req) {
     if (!t) return ephemeral({ content: L("Équipe inconnue.", "Unknown team.") });
     const on = toggleFollow(db, user.id, teamSlug(t.name), t.name, now);
     if (on === null) return ephemeral({ content: L("20 équipes au plus.", "20 teams at most.") });
+    // the team's fans' role, when the editor turned it on
+    if (settings.auto.fanRoles && tokenSet() && i.guild_id) after(() => setFanRole(db, i.guild_id, user.id, t.name, on).catch((e) => console.log(`[bot] role: ${e.message}`)));
     const note = botReady() ? "" : L("\n(Les messages privés seront envoyés dès que le bot sera branché sur le site.)", "\n(Private messages start once the bot is plugged into the site.)");
     return ephemeral({ content: (on ? L(`🔔 Tu recevras en message privé le début et le résultat des matchs de **${t.name}**. Garde tes messages privés ouverts pour ce serveur.`, `🔔 You'll get **${t.name}**'s match starts and results in private messages. Keep private messages open for this server.`) : L(`🔕 Tu ne suis plus **${t.name}**.`, `🔕 You no longer follow **${t.name}**.`)) + note });
   }

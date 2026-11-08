@@ -5,8 +5,9 @@ import { useT } from "./lang.jsx";
 import { Skeleton } from "./visual.jsx";
 
 const ANNOUNCE = [["start", "Match starts"], ["result", "Results"], ["image", "Results with picture"], ["transfers", "Transfers (free agents, signings)"], ["news", "News"]];
-const TABS = [["settings", "Settings"], ["auto", "Automatic"], ["announce", "Announcement"], ["pin", "Pinned message"], ["stats", "Statistics"], ["log", "Log"]];
-const AUTO = [["reminder", "Reminder 15 minutes before each match"], ["daily", "Evening summary at 10 pm (the day's results)"], ["weekly", "Prediction ranking every Monday at 10 am"]];
+const TABS = [["settings", "Settings"], ["auto", "Automatic"], ["samples", "Examples"], ["announce", "Announcement"], ["pin", "Pinned message"], ["stats", "Statistics"], ["log", "Log"]];
+const KINDS = [["start", "Match start"], ["result", "Result"], ["reminder", "Reminder 15 min"], ["live", "Live score message"], ["poll", "Poll"], ["daily", "Evening summary"]];
+const AUTO = [["reminder", "Reminder 15 minutes before each match"], ["daily", "Evening summary at 10 pm (the day's results)"], ["weekly", "Prediction ranking every Monday at 10 am"], ["liveEdit", "One message per live match, updated as it goes"], ["polls", "A poll \"Who wins?\" before the final rounds"], ["fanRoles", "Fans' roles: /suivre gives the team's role, mentioned at its matches"]];
 const when = (iso) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
 /** A Discord card as Discord draws it, roughly: for the pinned message's preview. */
@@ -31,6 +32,14 @@ export default function BotPanel() {
   const [busy, setBusy] = useState(false);
   const [ann, setAnn] = useState({ title: "", text: "", embed: true, mention: false, channel: "", at: "" });
   const [open, setOpen] = useState(false);
+  const [kind, setKind] = useState("start");
+  const [sample, setSample] = useState(null);
+  useEffect(() => {
+    if (tab !== "samples") return;
+    setSample(null);
+    fetch("/api/bot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "sample", kind }) })
+      .then((r) => r.json()).then((j) => setSample(j.sample || { error: j.error })).catch(() => setSample({ error: "Network error" }));
+  }, [tab, kind]);
   const load = useCallback((guild = "") => {
     fetch(`/api/bot${guild ? `?guild=${guild}` : ""}`).then((r) => (r.ok ? r.json() : null)).then((j) => {
       if (!j) return;
@@ -131,6 +140,26 @@ export default function BotPanel() {
                 </div>
                 <p className="hint">{tr("Reminders and the role follow the role setting of the Settings tab.")}</p>
                 <button type="button" className="btn pri" disabled={busy} onClick={() => call({ action: "save", ...s })}>{tr("Save the bot's settings")}</button>
+              </>
+            )}
+
+            {tab === "samples" && (
+              <>
+                <div className="tabs sub" role="tablist" aria-label={tr("Examples")}>
+                  {KINDS.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => setKind(k)}>{tr(l)}</button>)}
+                </div>
+                {!sample ? <Skeleton lines={3} /> : sample.error ? <p className="note">{tr.server(sample.error)}</p> : (
+                  <div className="dpreview">
+                    <div className="dmsg"><b>VCT EMEA</b> <span className="dbot">BOT</span></div>
+                    {sample.content && <p className="dtext">{sample.content.replace(/\*\*/g, "")}</p>}
+                    {(sample.embeds || []).map((e, i) => <EmbedPreview key={i} e={e} />)}
+                    {sample.poll && (
+                      <div className="dembed"><b className="dtitle">📊 {sample.poll.question.text}</b>{sample.poll.answers.map((a, i) => <div key={i} className="dpoll">{a.poll_media.text}</div>)}<small>{tr("{n} hours", { n: sample.poll.duration })}</small></div>
+                    )}
+                  </div>
+                )}
+                <p className="row" style={{ marginTop: 10 }}><button type="button" className="btn pri" disabled={busy || !d.token || !s.channel || !sample || !!sample.error} onClick={() => call({ action: "testkind", kind })}>{tr("Send this example as a test")}</button></p>
+                <p className="hint">{tr("Made with a real match of the site. The test is posted in the announcements channel, marked [TEST].")}</p>
               </>
             )}
 

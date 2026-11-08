@@ -11,7 +11,7 @@ import SearchBar from "./SearchBar.jsx";
 import { localeOf } from "../lib/i18n.js";
 import { EVENT_NAMES } from "../lib/paths.js";
 import Pickem from "./Pickem.jsx";
-import { DiscordLink, GroupBoard, Groups, SeasonTable, ShareCard } from "./Fans.jsx";
+import { BadgeShowcase, DiscordLink, GroupBoard, Groups, Podium, SeasonTable, ShareCard } from "./Fans.jsx";
 
 function Top({ title, crumbs = [] }) {
   const tr = useT();
@@ -163,6 +163,8 @@ function PredictionsView({ matches, ranking, pickem, group, groups }) {
           <section>
             <h2>{tr("Season ranking")}</h2>
             <p className="hint">{tr("1 point per right prediction, 1 more for the exact score, plus the points of Who qualifies?.")}</p>
+            <Podium ranking={ranking} />
+            <BadgeShowcase ranking={ranking} me={me.name} />
             <SeasonTable ranking={ranking} me={me.name} />
           </section>
         </aside>

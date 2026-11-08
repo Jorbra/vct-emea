@@ -160,3 +160,30 @@ test("automatic posts, buttons, scheduled announcements, log", async () => {
   logBot(db, "test", "bad line", false);
   assert.deepEqual(botLog(db).map((l) => [l.text, l.ok]), [["bad line", false], ["ok line", true]]);
 });
+
+test("round 4: live message, polls, guessing game, server users, fans' roles", async () => {
+  const x = await import("../lib/botextra.js");
+  const db = played();
+  const state = getState(db);
+  const m = state.qualifiers.meq1 && (await import("../lib/matchlist.js")).allMatches(state).find((y) => y.event === "meq1" && y.id === "r64-1");
+  const e = x.liveEmbed({ ...m, sa: null, sb: null }, { a: 1, b: 0, maps: [{ map: "Lotus", a: 13, b: 9, done: true }, { map: "Bind", a: 4, b: 2 }] }, "fr");
+  assert.match(e.title, /^🔴 Team 1 1–0 Team 2/);
+  assert.match(e.description, /▶ Bind \*\*4–2\*\*/);
+  const big = { ...m, id: "sf-1", sa: null, sb: null, live: false, at: new Date(Date.now() + 2 * 3600000).toISOString() };
+  const p = x.pollPayload(big, "fr");
+  assert.deepEqual([p.poll.answers.length, p.poll.duration], [2, 2]);
+  const players = Array.from({ length: 6 }, (_, k) => ({ slug: `p${k}`, name: `P${k}`, team: `Team ${k % 5}`, maps: 5, r: 1.1, acs: 200 + k, kd: 1.2, agents: [{ name: "jett", n: 3 }] }));
+  for (let seed = 0; seed < 3; seed++) {
+    const q = x.makeQuestion(state, players, "fr", seed);
+    assert.ok(q && q.choices.length >= 2 && q.answer >= 0 && q.answer < q.choices.length, `seed ${seed}`);
+    const msg = x.questionMessage(q, "fr");
+    const out = x.answerQuestion(db, "u1", "Fan", msg, q.answer, q.answer, "fr");
+    assert.match(out.embeds[0].description, /Bonne réponse/);
+  }
+  assert.deepEqual(x.gameRanking(db).map((r) => [r.name, r.points, r.played]), [["Fan", 3, 3]]);
+  x.noteGuildUser(db, "g1", "u1");
+  x.noteGuildUser(db, "g1", "u1");
+  assert.deepEqual(x.guildUsers(db, "g1"), ["u1"]);
+  db.prepare("INSERT INTO kv (key, value) VALUES ('bot_roles', ?)").run(JSON.stringify({ g1: { "team-1": "555" } }));
+  assert.deepEqual(x.fanRolesFor(db, "g1", ["team-1", "team-2"]), ["555"]);
+});

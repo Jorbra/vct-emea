@@ -16,7 +16,7 @@ export default async function Page() {
   const slim = (m) => {
     const s = m.live ? (state.live[m.event] || {})[m.id] || null : null;
     // the page shows the maps, not the feed
-    return { event: m.event, id: m.id, round: m.round, at: m.at, live: m.live, a: m.a, b: m.b, stream: streamOf(m), score: s ? { a: s.a, b: s.b, maps: s.maps || [] } : null };
+    return { event: m.event, id: m.id, round: m.round, at: m.at, live: m.live, a: m.a, b: m.b, bo: m.bo, stream: streamOf(m), score: s ? { a: s.a, b: s.b, maps: s.maps || [], feed: (s.feed || []).slice(-8) } : null };
   };
   const all = allMatches(state);
   const live = all.filter((m) => m.live).map(slim);

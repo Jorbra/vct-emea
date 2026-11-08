@@ -23,7 +23,7 @@ import { AlertsButton } from "./MatchAlerts.jsx";
 import { TeamMaps } from "./EventStats.jsx";
 import { siteHref, teamHref, teamSlug } from "../lib/paths.js";
 import { formatMatchTime } from "../lib/schedule.js";
-import { useTeamColor } from "./visual.jsx";
+import { TeamThemeButton, useTeamColor } from "./visual.jsx";
 
 export default function TeamPage(props) {
   return (
@@ -434,7 +434,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null })
           <div className="tname">{p.name}{t.tag ? <span className="ttag">{t.tag}</span> : null}<FavStar slug={slug} /></div>
           <div className="tsub">{tr("{w} wins, {l} losses", tot)} · {tr("{n} events", { n: p.events.length })}</div>
           <TeamLinks lp={lp} />
-          <p><AlertsButton /> <TeamCalendar slug={slug} /></p>
+          <p><AlertsButton /> <TeamCalendar slug={slug} /> <TeamThemeButton team={t} /></p>
         </div>
       </TeamHead>
 

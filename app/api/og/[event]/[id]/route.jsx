@@ -40,17 +40,22 @@ export async function GET(_req, { params }) {
   const done = m.sa != null && m.sb != null;
   const live = !done && state.live && state.live[event] && state.live[event][id];
   const middle = done ? scoreLabel(m, (x) => (x === "Forfeit" ? "FORFAIT" : x === "Win" ? "VICTOIRE" : x), ":") : live ? `${live.a ?? 0} : ${live.b ?? 0}` : "VS";
+  const ex = (state.extra && state.extra[event] && state.extra[event][id]) || {};
+  const maps = (live && live.maps ? live.maps : ex.maps || []).filter((x) => x.a != null && x.b != null).slice(0, 5);
   const round = m.round.map(([k, v]) => String(k).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ""))).join(" · ");
   return new ImageResponse(
     (
-      <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", background: "#121212", padding: 56, fontFamily: "sans-serif" }}>
+      <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", background: "#0c0e13", padding: 56, fontFamily: "sans-serif", borderTop: `10px solid ${live ? "#ff4655" : "#c9f03c"}` }}>
         <div style={{ display: "flex", justifyContent: "space-between", color: "#c8f03c", fontSize: 34, fontWeight: 700 }}>
           <span>VCT EMEA</span>
           <span style={{ color: live ? "#ff5a5f" : "#a0a09c" }}>{live ? "LIVE" : done ? "FINAL" : m.bo ? `Bo${m.bo}` : ""}</span>
         </div>
         <div style={{ display: "flex", flex: 1, alignItems: "center", justifyContent: "space-between" }}>
           <Side team={m.a} logo={logoOf(db, m.a)} />
-          <div style={{ display: "flex", fontSize: 92, fontWeight: 800, color: done || live ? "#ffffff" : "#6f6f6b" }}>{middle}</div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <div style={{ display: "flex", fontSize: 104, fontWeight: 800, color: done || live ? "#c9f03c" : "#6f6f6b" }}>{middle}</div>
+            {maps.length > 0 && <div style={{ display: "flex", gap: 10, marginTop: 10 }}>{maps.map((x, i) => <div key={i} style={{ display: "flex", fontSize: 24, color: "#e9e9e6", background: "#1d212c", borderRadius: 999, padding: "4px 14px" }}>{`${x.map || ""} ${x.a}–${x.b}`.trim()}</div>)}</div>}
+          </div>
           <Side team={m.b} logo={logoOf(db, m.b)} />
         </div>
         <div style={{ display: "flex", justifyContent: "center", color: "#a0a09c", fontSize: 30 }}>{[EVENT_NAMES[event], round].filter(Boolean).join(" · ")}</div>
