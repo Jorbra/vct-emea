@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { getDb } from "../../../lib/db.js";
 import { APP_ID, botGuilds, botReady, discord, guildChannels, guildRoles, postMessage, registerCommands } from "../../../lib/botapi.js";
-import { botSettings, botUsage, saveBotSettings } from "../../../lib/botstore.js";
+import { botLog, botSettings, botUsage, cancelScheduled, logBot, saveBotSettings, scheduleAnnouncement, scheduledList } from "../../../lib/botstore.js";
 import { botTest, pinnedEmbed, updatePinned } from "../../../lib/botnotify.js";
 import { getState } from "../../../lib/db.js";
 import { COMMANDS } from "../../../lib/discordbot.js";
 import { EVENT_NAMES } from "../../../lib/paths.js";
-import { badRequest, currentEditor, readBody, unauthorised } from "../../../lib/session.js";
+import { badRequest, currentEditor, readBody, reply, unauthorised } from "../../../lib/session.js";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,7 @@ export async function GET(req) {
   const guild = new URL(req.url).searchParams.get("guild") || settings.guild;
   const out = {
     settings, usage: botUsage(db), commands: COMMANDS.map((c) => ({ name: c.name, description: c.description })), events: EVENT_NAMES,
-    pinPreview: pinnedEmbed(getState(db), settings.lang), registered: null,
+    pinPreview: pinnedEmbed(getState(db), settings.lang), registered: null, log: botLog(db), scheduled: scheduledList(db),
     token: botReady(), publicKey: /^[0-9a-f]{64}$/i.test(process.env.DISCORD_PUBLIC_KEY || ""), guilds: [], channels: [], roles: [], error: "",
   };
   if (out.token) {
@@ -46,6 +46,7 @@ export async function POST(req) {
     const r = await botTest(db);
     return r.ok ? NextResponse.json(r) : NextResponse.json({ error: r.error }, { status: r.status });
   }
+  if (b.action === "unschedule") return reply(cancelScheduled(db, b.id));
   if (b.action === "announce") {
     const s = (await import("../../../lib/botstore.js")).botSettings(db);
     const text = String(b.text || "").trim().slice(0, 1900);
@@ -54,7 +55,13 @@ export async function POST(req) {
     if (!channel) return NextResponse.json({ error: "Choose a channel first." }, { status: 400 });
     if (!text) return NextResponse.json({ error: "Write something first." }, { status: 400 });
     const mention = b.mention && s.role ? `<@&${s.role}> ` : "";
+    const payload = b.embed ? { content: mention || undefined, embeds: [{ description: text, color: 0xff4655, title: String(b.title || "").slice(0, 200) || undefined }], allowed_mentions: { parse: [], roles: mention ? [s.role] : [] } } : { content: mention + text, allowed_mentions: { parse: [], roles: mention ? [s.role] : [] } };
+    if (b.at) {
+      const me = await currentEditor();
+      return reply(scheduleAnnouncement(db, { at: b.at, channel, payload, label: (String(b.title || "") || text).slice(0, 120), who: me.who || "main" }));
+    }
     try {
+      logBot(db, "annonce", (String(b.title || "") || text).slice(0, 120));
       await postMessage(channel, b.embed ? { content: mention || undefined, embeds: [{ description: text, color: 0xff4655, title: String(b.title || "").slice(0, 200) || undefined }], allowed_mentions: { parse: [], roles: mention ? [s.role] : [] } } : { content: mention + text, allowed_mentions: { parse: [], roles: mention ? [s.role] : [] } });
       return NextResponse.json({ ok: true, message: "Announcement sent." });
     } catch (e) {

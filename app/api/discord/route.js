@@ -1,6 +1,6 @@
 import { NextResponse, after } from "next/server";
 import { getDb, getState } from "../../../lib/db.js";
-import { COMMANDS, answerCommand, autocomplete, helpMessage, pronosticMessage, verifyDiscord, voterName } from "../../../lib/discordbot.js";
+import { COMMANDS, answerButtons, answerCommand, autocomplete, findTeam, helpMessage, pronosticMessage, verifyDiscord, voterName } from "../../../lib/discordbot.js";
 import { compareTeams } from "../../../lib/playerstats.js";
 import { allMatches } from "../../../lib/matchlist.js";
 import { botReady, editOriginal } from "../../../lib/botapi.js";
@@ -79,6 +79,19 @@ export async function POST(req) {
   // a prediction button
   if (i.type === 3) {
     const [kind, event, id, side] = String((i.data && i.data.custom_id) || "").split("|");
+    // follow a team from an answer's button
+    if (kind === "f") {
+      const t = findTeam(ctx.teams(), event);
+      if (!t) return ephemeral({ content: L("Équipe inconnue.", "Unknown team.") });
+      const on = toggleFollow(db, user.id, teamSlug(t.name), t.name, now);
+      countUse(db, "suivre-bouton", user.id, now);
+      return ephemeral({ content: on === null ? L("20 équipes au plus.", "20 teams at most.") : on ? L(`🔔 Tu suis **${t.name}** : début et résultat de ses matchs en message privé.`, `🔔 You follow **${t.name}**: its match starts and results in private messages.`) : L(`🔕 Tu ne suis plus **${t.name}**.`, `🔕 You no longer follow **${t.name}**.`) });
+    }
+    // refresh a live answer in place
+    if (kind === "r") {
+      const fake = { ...i, data: { name: event, options: id ? [{ name: "equipe", value: id }] : [] } };
+      return NextResponse.json({ type: 7, data: answerButtons(event, fake, answerCommand(event, fake, ctx), ctx.site, settings.lang) });
+    }
     if (kind !== "p") return ephemeral({ content: "?" });
     const hash = discordVoter(db, user.id, process.env.SESSION_SECRET);
     const state = ctx.state();
@@ -149,7 +162,7 @@ export async function POST(req) {
   // the others read more: "thinking…" now, the answer right after
   after(async () => {
     let payload;
-    try { payload = answerCommand(name, i, ctx); } catch (e) { console.log(`[bot] ${name}: ${e.message}`); payload = { content: L("Oups, une erreur. Réessaie dans un instant.", "Oops, an error. Try again in a moment.") }; }
+    try { payload = answerButtons(name, i, answerCommand(name, i, ctx), ctx.site, settings.lang); } catch (e) { console.log(`[bot] ${name}: ${e.message}`); payload = { content: L("Oups, une erreur. Réessaie dans un instant.", "Oops, an error. Try again in a moment.") }; }
     try { await editOriginal(i.application_id, i.token, payload); } catch (e) { console.log(`[bot] reply: ${e.message}`); }
   });
   return NextResponse.json({ type: 5 });

@@ -4,7 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useT } from "./lang.jsx";
 
 const ANNOUNCE = [["start", "Match starts"], ["result", "Results"], ["image", "Results with picture"], ["transfers", "Transfers (free agents, signings)"], ["news", "News"]];
-const TABS = [["settings", "Settings"], ["announce", "Announcement"], ["pin", "Pinned message"], ["stats", "Statistics"]];
+const TABS = [["settings", "Settings"], ["auto", "Automatic"], ["announce", "Announcement"], ["pin", "Pinned message"], ["stats", "Statistics"], ["log", "Log"]];
+const AUTO = [["reminder", "Reminder 15 minutes before each match"], ["daily", "Evening summary at 10 pm (the day's results)"], ["weekly", "Prediction ranking every Monday at 10 am"]];
+const when = (iso) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
 /** A Discord card as Discord draws it, roughly: for the pinned message's preview. */
 function EmbedPreview({ e }) {
@@ -26,7 +28,7 @@ export default function BotPanel() {
   const [tab, setTab] = useState("settings");
   const [msg, setMsg] = useState({ ok: true, text: "" });
   const [busy, setBusy] = useState(false);
-  const [ann, setAnn] = useState({ title: "", text: "", embed: true, mention: false, channel: "" });
+  const [ann, setAnn] = useState({ title: "", text: "", embed: true, mention: false, channel: "", at: "" });
   const [open, setOpen] = useState(false);
   const load = useCallback((guild = "") => {
     fetch(`/api/bot${guild ? `?guild=${guild}` : ""}`).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -112,8 +114,35 @@ export default function BotPanel() {
               </>
             )}
 
+            {tab === "auto" && (
+              <>
+                <fieldset><legend>{tr("Automatic")}</legend>
+                  {AUTO.map(([k, l]) => <label key={k} className="chk"><input type="checkbox" checked={!!s.auto[k]} onChange={(e) => set("auto", { ...s.auto, [k]: e.target.checked })} /> {tr(l)}</label>)}
+                </fieldset>
+                <div className="botgrid">
+                  <label className="f">{tr("A thread for each match that starts")}
+                    <select value={s.threads} onChange={(e) => set("threads", e.target.value)}>
+                      <option value="none">{tr("Never")}</option><option value="final">{tr("Final rounds only")}</option><option value="all">{tr("Every match")}</option>
+                    </select>
+                  </label>
+                  {d.token && pick(tr("Results channel (else the announcements one)"), "resultChannel", d.channels)}
+                  {d.token && pick(tr("Transfers channel (else the announcements one)"), "transferChannel", d.channels)}
+                </div>
+                <p className="hint">{tr("Reminders and the role follow the role setting of the Settings tab.")}</p>
+                <button type="button" className="btn pri" disabled={busy} onClick={() => call({ action: "save", ...s })}>{tr("Save the bot's settings")}</button>
+              </>
+            )}
+
+            {tab === "log" && (
+              d.log.length === 0 ? <p className="note">{tr("Nothing in the log yet.")}</p> : (
+                <div className="tablewrap"><table>
+                  <tbody>{d.log.map((x, k) => <tr key={k} className={x.ok ? "" : "late"}><td><small>{when(x.at)}</small></td><td>{x.ok ? "✅" : "⚠️"} {x.kind}</td><td>{x.text}</td></tr>)}</tbody>
+                </table></div>
+              )
+            )}
+
             {tab === "announce" && (
-              <form className="acctform" onSubmit={(e) => { e.preventDefault(); call({ action: "announce", ...ann, channel: s._annChannel || "" }, () => setAnn((a) => ({ ...a, title: "", text: "" }))); }}>
+              <form className="acctform" onSubmit={(e) => { e.preventDefault(); call({ action: "announce", ...ann, at: ann.at ? new Date(ann.at).toISOString() : "", channel: s._annChannel || "" }, () => { setAnn((a) => ({ ...a, title: "", text: "", at: "" })); load(s.guild); }); }}>
                 <h3 className="sub">{tr("Write an announcement")}</h3>
                 {d.token && pick(tr("Channel"), "_annChannel", d.channels)}
                 {ann.embed && <label className="f">{tr("Title (optional)")}<input value={ann.title} maxLength={200} onChange={(e) => setAnn({ ...ann, title: e.target.value })} /></label>}
@@ -122,7 +151,20 @@ export default function BotPanel() {
                   <label className="chk"><input type="checkbox" checked={ann.embed} onChange={(e) => setAnn({ ...ann, embed: e.target.checked })} /> {tr("As a card (embed)")}</label>
                   <label className="chk"><input type="checkbox" checked={ann.mention} disabled={!s.role} onChange={(e) => setAnn({ ...ann, mention: e.target.checked })} /> {tr("Mention the role")}</label>
                 </div>
-                <button type="submit" className="btn pri" disabled={busy || !d.token || !ann.text.trim()}>{tr("Send the announcement")}</button>
+                <label className="f">{tr("Send at (optional)")}<input type="datetime-local" value={ann.at} onChange={(e) => setAnn({ ...ann, at: e.target.value })} /></label>
+                {ann.text.trim() && (
+                  <>
+                    <h3 className="sub">{tr("Preview")}</h3>
+                    {ann.embed ? <EmbedPreview e={{ title: ann.title, description: ann.text }} /> : <div className="dembed plain"><p>{ann.mention ? "@rôle " : ""}{ann.text}</p></div>}
+                  </>
+                )}
+                <button type="submit" className="btn pri" disabled={busy || !d.token || !ann.text.trim()}>{ann.at ? tr("Schedule the announcement") : tr("Send the announcement")}</button>
+                {d.scheduled.length > 0 && (
+                  <>
+                    <h3 className="sub">{tr("Scheduled")} ({d.scheduled.length})</h3>
+                    <ul className="ahhist">{d.scheduled.map((x) => <li key={x.id}><b>{when(x.at)}</b> · {x.label} <small>#{(d.channels.find((c) => c.id === x.channel) || {}).name || x.channel}</small> <button type="button" className="btn small danger" onClick={() => call({ action: "unschedule", id: x.id }, () => load(s.guild))}>{tr("Cancel")}</button></li>)}</ul>
+                  </>
+                )}
                 <p className="hint">{tr("Announcements channel (default)")} : {(d.channels.find((c) => c.id === s.channel) || {}).name ? `#${d.channels.find((c) => c.id === s.channel).name}` : "–"}</p>
               </form>
             )}

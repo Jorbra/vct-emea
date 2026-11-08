@@ -1198,6 +1198,8 @@ td.cmpw { color: var(--win, #6fcf6f); font-weight: 700; }
 .dembed p { margin: 2px 0 8px; white-space: pre-line; }
 .dembed .dfield b { color: #fff; }
 .dembed small { opacity: .7; }
+.dembed.plain { border-left-color: transparent; }
+.botpanel input[type="datetime-local"] { height: 36px; padding: 0 8px; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; font: 14px var(--font-body); }
 .hbars { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
 .hbars li { display: grid; grid-template-columns: minmax(90px, 140px) 1fr auto; gap: 8px; align-items: center; font-size: 13px; }
 .hbars li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

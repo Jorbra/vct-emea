@@ -128,3 +128,35 @@ test("more commands: map, compare, head to head, agent, records, recap, schedule
   assert.deepEqual(autocomplete(cmd("carte", { nom: "lo" }, { focused: "nom" }), ctx).map((c) => c.value), ["Lotus"]);
   assert.ok(autocomplete(cmd("compare", { joueur1: "team" }, { focused: "joueur1" }), ctx).length >= 0);
 });
+
+test("automatic posts, buttons, scheduled announcements, log", async () => {
+  const { answerButtons } = await import("../lib/discordbot.js");
+  const { dailyEmbed, dueReminders, threadStarts } = await import("../lib/botnotify.js");
+  const { botLog, cancelScheduled, logBot, scheduleAnnouncement, scheduledList, sendOnce, takeDueScheduled } = await import("../lib/botstore.js");
+  const db = played();
+  setMatchTime(db, { event: "meq1", id: "r64-3", at: new Date(Date.now() + 15 * 60000).toISOString() });
+  const state = getState(db);
+  assert.deepEqual(dueReminders(state).map((m) => m.id), ["r64-3"]);
+  assert.equal(sendOnce(db, "rem:x"), true);
+  assert.equal(sendOnce(db, "rem:x"), false);
+  setMatchTime(db, { event: "meq1", id: "r64-1", at: new Date().toISOString() });
+  assert.match(JSON.stringify(dailyEmbed(getState(db), "fr")), /Résumé du jour · 1 match/);
+  const a = (id) => ({ kind: "live", event: "q1", url: `/match/q1/${id}`, key: id });
+  assert.deepEqual(threadStarts([a("r64-1"), a("sf-1")], { threads: "final", events: {} }).map((x) => x.key), ["sf-1"]);
+  assert.equal(threadStarts([a("r64-1")], { threads: "none", events: {} }).length, 0);
+  // buttons
+  const withB = answerButtons("score", cmd("score", { equipe: "Team 1" }), { embeds: [{ url: "https://site.test/x" }] }, "https://site.test", "fr");
+  assert.deepEqual(withB.components[0].components.map((b) => b.custom_id || b.url), ["https://site.test/x", "f|Team 1", "r|score|Team 1"]);
+  // scheduled
+  assert.equal(scheduleAnnouncement(db, { at: new Date(Date.now() - 3600000).toISOString(), channel: "1", payload: {}, label: "x" }).ok, false);
+  assert.equal(scheduleAnnouncement(db, { at: new Date(Date.now() + 60000).toISOString(), channel: "123456", payload: { content: "hi" }, label: "Hi" }).ok, true);
+  assert.equal(scheduledList(db).length, 1);
+  assert.equal(takeDueScheduled(db).length, 0);
+  const due = takeDueScheduled(db, Date.now() + 120000);
+  assert.deepEqual(due.map((x) => x.payload.content), ["hi"]);
+  assert.equal(takeDueScheduled(db, Date.now() + 120000).length, 0); // once
+  assert.equal(cancelScheduled(db, 999).ok, false);
+  logBot(db, "test", "ok line");
+  logBot(db, "test", "bad line", false);
+  assert.deepEqual(botLog(db).map((l) => [l.text, l.ok]), [["bad line", false], ["ok line", true]]);
+});
