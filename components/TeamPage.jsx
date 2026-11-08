@@ -332,10 +332,26 @@ function OutsideTeam({ lp, org = [], outside, vlr, updating }) {
 }
 
 /** The team's numbers in the tournaments, from vlr.gg's tables. */
-/** The team's header, tinted with the color of its logo. */
-function TeamHead({ team, children }) {
+/** The team's header: a banner in the color of its logo, the logo over it, its key numbers and recent form. */
+function TeamHead({ team, children, stats = [], form = [] }) {
+  const tr = useT();
   const color = useTeamColor(team && team.logo);
-  return <div className={"thead" + (color ? " tinted" : "")} style={color ? { "--team": color } : undefined}>{children}</div>;
+  return (
+    <div className={"thead teamhero" + (color ? " tinted" : "")} style={color ? { "--team": color } : undefined}>
+      <div className="thband" aria-hidden="true" />
+      <div className="thbody">
+        {children}
+        {(stats.length > 0 || form.length > 0) && (
+          <div className="thnums">
+            {stats.map(([label, value]) => <div key={label}><b>{value}</b><span>{label}</span></div>)}
+            {form.length > 0 && (
+              <div><span className="thform">{form.map((f, i) => <i key={i} className={f.won ? "w" : "l"} title={f.label}>{f.won ? tr("W") : tr("L")}</i>)}</span><span>{tr("Form")}</span></div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function TeamTournament({ s }) {
@@ -392,6 +408,13 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null })
   const rows = events.flatMap((e) => e.items.map((m) => ({ ...m, event: e.event, at: e.times[m.id] || "", live: !!e.live[m.id] && m.sa == null })))
     .filter((m) => m.at || (m.sa != null && m.sb != null))
     .sort((x, y) => (y.at || "").localeCompare(x.at || ""));
+  // the header's numbers and the last five results, oldest first
+  const mine = (m) => (m.a && m.a.name === t.name ? "a" : "b");
+  const form = rows.filter((m) => m.win).slice(0, 5).reverse().map((m) => ({ won: m.win === mine(m), label: `${m.a ? m.a.name : "?"} ${m.sa}–${m.sb} ${m.b ? m.b.name : "?"}` }));
+  const headStats = [
+    [tr("Wins"), `${rows.filter((m) => m.win && m.win === mine(m)).length}–${rows.filter((m) => m.win && m.win !== mine(m)).length}`],
+    ...(tstats ? [[tr("Maps"), `${tstats.mapsWon}–${tstats.maps - tstats.mapsWon}`], ...(tstats.best[0] ? [[tr("Best player"), tstats.best[0].name]] : [])] : []),
+  ];
   const tot = p.events.reduce((o, e) => ({ w: o.w + e.w, l: o.l + e.l }), { w: 0, l: 0 });
   return (
     <div className="wrap teampage">
@@ -405,7 +428,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null })
         <p className="pathlinks">{tr("Run")} : {p.events.filter((e) => e.matches.length).map((e, n) => <span key={e.event}>{n ? " · " : ""}<a href={`/parcours/${e.event}/${slug}`}>{tr(EVENT_NAMES[e.event])}</a></span>)}</p>
       )}
 
-      <TeamHead team={t}>
+      <TeamHead team={t} stats={headStats} form={form}>
         <Crest team={t} />
         <div>
           <div className="tname">{p.name}{t.tag ? <span className="ttag">{t.tag}</span> : null}<FavStar slug={slug} /></div>

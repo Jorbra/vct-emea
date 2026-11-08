@@ -299,7 +299,7 @@ export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent 
   }, []);
   const label = (m) => m.round.map(([k, v]) => tr(k, v)).join(" · ");
   const open = useOpenMatch();
-  const all = events.flatMap((e) => e.items.map((m) => ({ ...m, event: e.event, href: e.href, stream: (e.extra && e.extra[m.id] && e.extra[m.id].stream) || e.stream || "", at: e.times[m.id] || "", live: !!e.live[m.id] && m.sa == null, score: e.live[m.id] || null })));
+  const all = events.flatMap((e) => e.items.map((m) => ({ ...m, event: e.event, href: e.href, ex: (e.extra && e.extra[m.id]) || null, stream: (e.extra && e.extra[m.id] && e.extra[m.id].stream) || e.stream || "", at: e.times[m.id] || "", live: !!e.live[m.id] && m.sa == null, score: e.live[m.id] || null })));
   const live = all.filter((m) => m.live);
   // still shown for 6 hours after its time while no result is in (late start, or just not marked live)
   const next = now == null ? [] : all.filter((m) => !m.live && m.at && m.sa == null && new Date(m.at).getTime() > now - 6 * 3600e3)
@@ -367,7 +367,13 @@ export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent 
                 <span className="mcr">{label(m)}</span>
                 {line(m.a, recent ? sideScore(m, "a", m.sa) : m.live && m.score ? m.score.a : null, recent && m.win === "a", recent && m.win === "b")}
                 {line(m.b, recent ? sideScore(m, "b", m.sb) : m.live && m.score ? m.score.b : null, recent && m.win === "b", recent && m.win === "a")}
-                {m.live && m.score && (m.score.maps || []).length > 0 && <span className="mcmaps">{m.score.maps.map((x) => `${x.map} ${x.a}–${x.b}`).join(" · ")}</span>}
+                {(() => {
+                  // the maps: as they go when live, as played once over
+                  const maps = m.live && m.score ? m.score.maps || [] : recent ? (m.ex && m.ex.maps) || [] : [];
+                  const shown = maps.filter((x) => x.a != null && x.b != null);
+                  return shown.length > 0 && <span className="mcchips">{shown.map((x, k) => <span key={k} className={"mcchip" + (x.done === false || (m.live && k === shown.length - 1 && !x.done) ? " now" : x.a > x.b ? " wa" : " wb")}>{x.map ? `${x.map} ` : ""}{x.a}–{x.b}</span>)}</span>;
+                })()}
+                {recent && m.ex && m.ex.mvp && <span className="mcmvp">MVP <b>{m.ex.mvp}</b></span>}
                 {m.live && m.stream && <a className="mcstream" href={m.stream} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>▶ {tr("Watch")}</a>}
               </div>
             );

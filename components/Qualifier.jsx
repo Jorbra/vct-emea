@@ -149,7 +149,7 @@ export function BigBracket({ event, slots, scores, bo, notes = {} }) {
         ))}
       </ul>
     )}
-    <div ref={box} className={"qbracket" + (dragging ? " dragging" : "") + (found ? " finding" : "")} tabIndex={0} aria-label={tr("Bracket")}
+    <div ref={box} className={"qbracket" + (dragging ? " dragging" : "") + (found || hover ? " finding" : "")} tabIndex={0} aria-label={tr("Bracket")}
       onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onPointerLeave={() => { up(); setHover(0); }}
       onClick={(e) => { if (moved.current) { moved.current = false; return; } openFrom(e.target); }}
       onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target.closest("[data-open]")) { e.preventDefault(); openFrom(e.target); } }}>

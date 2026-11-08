@@ -25,14 +25,24 @@ export default function HomeNext({ initial }) {
   if (!next && !recaps.length) return null;
   const left = next && now != null ? new Date(next.at).getTime() - now : 0;
   const day = next ? new Intl.DateTimeFormat(localeOf(tr.lang), { weekday: "long", day: "numeric", month: "long" }).format(new Date(next.at)) : "";
+  const parts = left > 0 ? [[Math.floor(left / 86400000), tr("days")], [Math.floor((left % 86400000) / 3600000), tr("hours")], [Math.floor((left % 3600000) / 60000), "min"], [Math.floor((left % 60000) / 1000), "s"]] : [];
+  const q = next && initial.qualifiers[next.event];
+  const info = next && initial.info && initial.info[next.event];
+  const size = q ? q.slots.filter(Boolean).length || q.slots.length : 0;
+  const bo = q && q.bo ? Math.max(...Object.values(q.bo).filter(Number.isFinite), 1) : 0;
+  const fmtDay = (s) => (s && /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Intl.DateTimeFormat(localeOf(tr.lang), { day: "numeric", month: "short" }).format(new Date(`${s}T12:00:00`)) : "");
+  const meta = next ? [size ? tr("{n} teams", { n: size }) : "", bo > 1 ? `Bo${bo}` : "", info && info.start ? `${fmtDay(info.start)}${info.end ? ` → ${fmtDay(info.end)}` : ""}` : ""].filter(Boolean).join(" · ") : "";
   return (
     <section className="homenext">
       {next && left > 0 && (
         <a className="nextcard" href={siteHref(next.event)}>
           <span className="nextlabel">{tr("Next event")}</span>
           <span className="nexttitle">{tr(EVENT_NAMES[next.event] || next.event)}</span>
-          <span className="nextcount" aria-live="off">{next.exact ? countdownText(left, tr.lang) : tr("starts on {day}", { day })}</span>
-          {next.exact && <span className="nextwhen">{formatMatchTime(next.at, tr.lang, true)}</span>}
+          {meta && <span className="nextmeta">{meta}</span>}
+          <span className="nextclock" aria-label={next.exact ? countdownText(left, tr.lang) : tr("starts on {day}", { day })}>
+            {parts.map(([v, l]) => <span key={l} className="nextunit"><b>{String(v).padStart(2, "0")}</b><small>{l}</small></span>)}
+          </span>
+          <span className="nextwhen">{next.exact ? formatMatchTime(next.at, tr.lang, true) : tr("starts on {day}", { day })}</span>
           {next.matches.some((m) => m.a || m.b) && (
             <span className="nextmatches">
               {next.matches.map((m) => (

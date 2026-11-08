@@ -164,10 +164,13 @@ function HomeView({ initial }) {
   })), [initial]);
   useAutoRefresh();
 
+  const REGION = { q1: "eu", q2: "eu", playoffs: "eu", trq1: "tr", trq2: "tr", tr: "tr", meq1: "mena", meq2: "mena", naq1: "mena", naq2: "mena", mena: "mena", kickoff: "emea", gc: "gc" };
   const card = (key, title, meta, outLabel) => {
     const e = ev[key];
+    const ms = (matchEvents.find((x) => x.event === key) || { items: [] }).items.filter((m) => m.a && m.b);
+    const played = ms.filter((m) => m.sa != null).length;
     return (
-      <a key={key} className={"evcard " + e.state} href={siteHref(key)}>
+      <a key={key} className={"evcard " + e.state + " rg-" + (REGION[key] || "emea")} href={siteHref(key)}>
         <span className="evtop">
           <span className={"evstate " + e.state}>{tr(e.state === "done" ? "Finished" : e.state === "live" ? "Live" : "Upcoming")}</span>
           <span className="evcount">{e.of ? `${e.teams}/${e.of}` : e.teams} {tr("teams")}</span>
@@ -181,6 +184,8 @@ function HomeView({ initial }) {
             {e.out.map((t, i) => <span key={i} className="evteam"><Crest team={t} /><span>{t.name}</span></span>)}
           </span>
         )}
+        {ms.length > 0 && <span className="evprog" role="img" aria-label={tr("{p} of {n} matches played", { p: played, n: ms.length })}><i style={{ width: `${Math.round((played / ms.length) * 100)}%` }} /></span>}
+        {ms.length > 0 && <span className="evprogt">{tr("{p} of {n} matches played", { p: played, n: ms.length })}</span>}
         <span className="evgo">{tr("Open")} ›</span>
       </a>
     );
