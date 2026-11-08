@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useT } from "./lang.jsx";
 import { LiveBadge } from "./matchTime.jsx";
 import { EVENT_NAMES } from "../lib/paths.js";
-import { editorAgenda, eventData, matchesOf } from "../lib/matchlist.js";
+import { allMatches, editorAgenda, eventData, matchesOf } from "../lib/matchlist.js";
 import { formatMatchTime, TIME_EVENTS } from "../lib/schedule.js";
 import { eventStatus, formatDates } from "../lib/status.js";
 import BotPanel from "./BotPanel.jsx";
