@@ -101,6 +101,8 @@ const HOW = [
       "Tableau de bord : section « Bot Discord » de l'accueil de l'éditeur. Salon des annonces, quoi publier (débuts, résultats, images, transferts, actualités), tournois, rôle à mentionner (jamais, tours finaux, tous les matchs), salon du message épinglé (matchs du jour en direct), langue FR/EN, commandes activées, statistiques, message test, et « Enregistrer les commandes » après une mise à jour.",
       "Pour que le bot écrive lui-même (annonces, épinglé, messages privés, listes de salons) : variable Vercel DISCORD_BOT_TOKEN (onglet Bot › Réinitialiser le token), puis redéployer. Sans elle, les commandes marchent et le webhook continue les annonces.",
       "Droits du bot sur le serveur : voir les salons, envoyer des messages, intégrer des liens, gérer les messages (pour épingler), mentionner le rôle choisi.",
+      "Autres commandes : /carte, /compare (deux joueurs), /h2h (deux équipes), /agent, /records, /recap, /calendrier (aujourd'hui, demain, 7 jours), /mesprono (sa place et ses derniers pronostics), /aide.",
+      "Tableau de bord en onglets : Réglages ; Annonce (écrire un message que le bot publie, en texte ou en carte, avec ou sans le rôle) ; Message épinglé (aperçu, mise à jour immédiate) ; Statistiques (par jour, par commande, équipes les plus suivies). En haut, l'état : clé, token, commandes à jour ou à enregistrer.",
     ],
   },
   {

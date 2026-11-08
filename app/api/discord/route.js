@@ -1,6 +1,8 @@
 import { NextResponse, after } from "next/server";
 import { getDb, getState } from "../../../lib/db.js";
-import { COMMANDS, answerCommand, autocomplete, pronosticMessage, verifyDiscord, voterName } from "../../../lib/discordbot.js";
+import { COMMANDS, answerCommand, autocomplete, helpMessage, pronosticMessage, verifyDiscord, voterName } from "../../../lib/discordbot.js";
+import { compareTeams } from "../../../lib/playerstats.js";
+import { allMatches } from "../../../lib/matchlist.js";
 import { botReady, editOriginal } from "../../../lib/botapi.js";
 import { botSettings, countUse, discordVoter, followsOf, toggleFollow, useLinkCode } from "../../../lib/botstore.js";
 import { openForPrediction, savePredictionFor } from "../../../lib/community.js";
@@ -12,7 +14,7 @@ import { sitePlayers } from "../../../lib/playerstats.js";
 import { recapOf } from "../../../lib/recap.js";
 import { readTeamInfo } from "../../../lib/teamfetch.js";
 import { siteTeams } from "../../../lib/teams.js";
-import { detailsOf, readDetails, tournamentStats } from "../../../lib/tstats.js";
+import { detailsOf, extraStats, mapCard, readDetails, tournamentStats } from "../../../lib/tstats.js";
 import { EVENTS } from "../../../lib/bracket.js";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +34,9 @@ function context(db, lang, now) {
     teams: once("teams", () => siteTeams(state())),
     players: once("players", () => sitePlayers(state())),
     stats: (ev = "") => tournamentStats(state(), readDetails(db, ev)),
+    extra: (ev = "") => extraStats(state(), readDetails(db, ev)),
+    mapCard: (name, ev = "") => mapCard(state(), readDetails(db, ev), name),
+    h2h: (a, b) => compareTeams(state(), a, b),
     teamInfo: (slug) => readTeamInfo()[slug] || null,
     ranking: () => seasonRanking(db, state(), { limit: 10, now }),
     recap: (ev) => (EVENTS.includes(ev) ? recapOf(state(), readDetails(db, ev), ev) : null),
@@ -95,6 +100,24 @@ export async function POST(req) {
   countUse(db, name, user.id, now);
   const opt = (n) => { const o = (i.data.options || []).find((x) => x.name === n); return o ? String(o.value ?? "") : ""; };
 
+  if (name === "aide") return NextResponse.json({ type: 4, data: helpMessage(settings.lang, settings.disabled) });
+  if (name === "mesprono") {
+    const hash = discordVoter(db, user.id, process.env.SESSION_SECRET);
+    const me = db.prepare("SELECT name FROM voters WHERE hash = ?").get(hash);
+    if (!me) return ephemeral({ content: L("Tu n'as pas encore pronostiqué. Essaie `/pronostic`, ou `/lier` si tu joues déjà sur le site.", "You haven't predicted yet. Try `/pronostic`, or `/lier` if you already play on the site.") });
+    const all = seasonRanking(db, ctx.state(), { limit: 100000, now, withHash: true });
+    const k = all.findIndex((r) => r.hash === hash);
+    const r = all[k];
+    const byId = new Map(allMatches(ctx.state()).map((m) => [`${m.event}:${m.id}`, m]));
+    const recent = db.prepare("SELECT event, id, pick FROM predictions WHERE hash = ? ORDER BY rowid DESC LIMIT 8").all(hash).map((p) => {
+      const m = byId.get(`${p.event}:${p.id}`);
+      if (!m || !m.a || !m.b) return null;
+      const res = !m.win ? "⏳" : (m.win === "a" ? m.a.name : m.b.name) === p.pick ? "✅" : "❌";
+      return `${res} ${m.a.name} vs ${m.b.name} → **${p.pick}**`;
+    }).filter(Boolean);
+    return ephemeral({ embeds: [{ title: `${me.name}${r ? ` · #${k + 1} / ${all.length}` : ""}`, color: 0xff4655, url: `${ctx.site}/p/${encodeURIComponent(me.name)}`,
+      description: [r ? L(`**${r.points}** points · ${r.good}/${r.total} bons · série max ${r.streak}`, `**${r.points}** points · ${r.good}/${r.total} right · best streak ${r.streak}`) : L("Pas encore de résultat.", "No result yet."), "", ...recent].join("\n") }] });
+  }
   if (name === "lier") {
     const who = useLinkCode(db, user.id, opt("code"), now);
     return ephemeral({ content: who ? L(`✅ C'est fait : tes pronostics Discord comptent maintenant pour **${who}**.`, `✅ Done: your Discord predictions now count for **${who}**.`) : L("Code inconnu ou trop vieux. Prends-en un nouveau sur la page Pronostics du site (il dure 15 minutes).", "Unknown or expired code. Get a new one on the site's Predictions page (it lasts 15 minutes).") });

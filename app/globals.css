@@ -1190,6 +1190,18 @@ td.cmpw { color: var(--win, #6fcf6f); font-weight: 700; }
 .lftbar .tabs small { color: var(--muted); font-weight: 400; }
 .lftfind { flex: 0 1 280px; min-width: 0; height: 36px; box-sizing: border-box; padding: 0 10px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; font: 14px var(--font-body); }
 .vlrstats { margin-top: 14px; }
+.botpanel .bstate { display: inline-flex; gap: 4px; align-items: center; padding: 2px 10px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); }
+.botpanel .bstate.bad { border-color: #ff6b6b; }
+.botpanel textarea { width: 100%; box-sizing: border-box; padding: 8px; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; font: 14px var(--font-body); resize: vertical; }
+.dembed { max-width: 520px; padding: 10px 14px; background: #2b2d31; color: #dbdee1; border-left: 4px solid #ff4655; border-radius: 4px; font-size: 13px; }
+.dembed .dtitle { display: block; color: #fff; margin-bottom: 6px; }
+.dembed p { margin: 2px 0 8px; white-space: pre-line; }
+.dembed .dfield b { color: #fff; }
+.dembed small { opacity: .7; }
+.hbars { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+.hbars li { display: grid; grid-template-columns: minmax(90px, 140px) 1fr auto; gap: 8px; align-items: center; font-size: 13px; }
+.hbars li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hbars li i { height: 10px; min-width: 2px; background: #ff4655; border-radius: 0 4px 4px 0; }
 .discordlink { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-inline-start: 6px; }
 .discordlink code { padding: 1px 6px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; }
 .botpanel .botgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 10px 16px; margin: 10px 0; }

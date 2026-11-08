@@ -24,9 +24,9 @@ test("the commands Discord is given: names, options, autocomplete", () => {
   const names = COMMANDS.map((c) => c.name);
   for (const n of ["score", "prochain", "classement", "equipe", "joueur", "bracket", "match", "live", "top", "lft", "suivre", "pronostic", "lier"]) assert.ok(names.includes(n), n);
   for (const c of COMMANDS) {
-    assert.match(c.name, /^[a-z]{1,32}$/);
+    assert.match(c.name, /^[a-z0-9_-]{1,32}$/);
     assert.ok(c.description.length <= 100, c.name);
-    for (const o of c.options || []) assert.ok(o.description.length <= 100 && /^[a-z]{1,32}$/.test(o.name), `${c.name}.${o.name}`);
+    for (const o of c.options || []) assert.ok(o.description.length <= 100 && /^[a-z0-9_-]{1,32}$/.test(o.name), `${c.name}.${o.name}`);
   }
   const db = played();
   const ctx = botCtx(getState(db));
@@ -106,4 +106,25 @@ test("what the bot posts: chosen kinds and events, the role on final rounds, pic
   const db = played();
   const e = pinnedEmbed(getState(db), "fr");
   assert.match(JSON.stringify(e), /À venir aujourd'hui|Résultats du jour|Pas de match/);
+});
+
+test("more commands: map, compare, head to head, agent, records, recap, schedule, help", async () => {
+  const { helpMessage } = await import("../lib/discordbot.js");
+  const { compareTeams } = await import("../lib/playerstats.js");
+  const db = played();
+  const state = getState(db);
+  const card = { map: "Lotus", played: 4, diff: 5, overtime: 1, attack: 52, teams: [{ name: "Team 1", played: 2, won: 2 }], players: [{ name: "Alpha", r: 1.4, acs: 270 }] };
+  const extra = { agents: [{ agent: "jett", name: "Jett", picks: 10, wins: 6, pct: 60, best: [{ name: "Alpha", r: 1.3 }] }], records: { acs: [{ name: "Alpha", value: 400, map: "Lotus" }], kills: [], long: [], blowout: [], comeback: [] } };
+  const ctx = botCtx(state, { mapCard: () => card, extra: () => extra, h2h: (a, b) => compareTeams(state, a, b) });
+  const text = (r) => JSON.stringify(r);
+  assert.match(text(answerCommand("carte", cmd("carte", { nom: "lotus" }), ctx)), /Attaque \*\*52%\*\*/);
+  assert.match(text(answerCommand("compare", cmd("compare", { joueur1: "alpha", joueur2: "beta" }), ctx)), /Alpha vs Beta/);
+  assert.match(text(answerCommand("h2h", cmd("h2h", { equipe1: "Team 1", equipe2: "Team 2" }), ctx)), /Team 1 1 – 0 Team 2/);
+  assert.match(text(answerCommand("agent", cmd("agent", { nom: "Jett" }), ctx)), /60%/);
+  assert.match(text(answerCommand("records", cmd("records"), ctx)), /Alpha\*\* 400/);
+  assert.match(text(answerCommand("recap", cmd("recap", { tournoi: "q1" }), ctx)), /Pas de récap/);
+  assert.match(text(answerCommand("calendrier", cmd("calendrier", { jour: "week" }), ctx)), /7 prochains jours/);
+  assert.equal(helpMessage("fr", ["top"]).embeds[0].description.includes("/top"), false);
+  assert.deepEqual(autocomplete(cmd("carte", { nom: "lo" }, { focused: "nom" }), ctx).map((c) => c.value), ["Lotus"]);
+  assert.ok(autocomplete(cmd("compare", { joueur1: "team" }, { focused: "joueur1" }), ctx).length >= 0);
 });
