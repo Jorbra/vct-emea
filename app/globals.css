@@ -1672,3 +1672,4 @@ h2 { letter-spacing: .03em; }
 /* the editor's button, for those who have access: on every screen; above the phone's tab bar */
 .edfab { display: inline-flex; align-items: center; position: fixed; right: 16px; bottom: 16px; z-index: 45; box-shadow: 0 4px 14px rgba(0, 0, 0, .4); text-decoration: none; }
 @media (max-width: 759px) { .edfab { bottom: calc(74px + env(safe-area-inset-bottom)); right: 12px; } }
+.sitenav .navbrand .emeamark { width: 32px; height: 32px; }

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { accountName } from "./account.js";
 import { useT } from "./lang.jsx";
 import { useLiveCount } from "./visual.jsx";
+import { EmeaMark } from "./Brand.jsx";
 
 // small line icons, drawn on a 24-pixel grid
 const ICON = {
@@ -58,7 +59,7 @@ export default function SiteNav() {
   const on = (href) => (href === "/" ? (path === "/" ? "page" : undefined) : path === href || path.startsWith(`${href}/`) ? "page" : undefined);
   return (
     <nav className="sitenav" aria-label={tr("Navigation")}>
-      <a className="navbrand" href="/" aria-label="VCT EMEA"><span className="navx" aria-hidden="true">✕</span><span>VCT EMEA</span></a>
+      <a className="navbrand" href="/" aria-label="VCT EMEA"><EmeaMark /><span>VCT EMEA</span></a>
       {LINKS.map(([href, label, icon]) => (
         <a key={href} href={href} aria-current={on(href)} className={href === "/" ? "navhomelink" : undefined}>
           <Icon name={icon} /><span>{tr(label)}</span>
