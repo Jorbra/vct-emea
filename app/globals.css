@@ -1863,3 +1863,37 @@ html[data-nospoil] .rtoasts { display: none; }
 .bannerform label:first-child { grid-column: 1 / -1; }
 .phoneframe { display: flex; justify-content: center; padding: 14px; background: var(--surface-2, var(--surface)); border-radius: 8px; }
 .phoneframe iframe { width: 375px; max-width: 100%; height: 720px; border: 10px solid #000; border-radius: 28px; background: var(--bg); }
+
+/* ---- the daily games */
+.ghub { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin: 12px 0 18px; }
+.gstreakbox, .gcard { display: grid; gap: 3px; align-content: start; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; color: var(--fg); font: inherit; text-align: start; text-decoration: none; cursor: pointer; }
+.gstreakbox { cursor: default; }
+.gstreakbox b { font: 800 30px var(--font-display); color: var(--lime); }
+.gstreakbox span, .gcard small { font-size: 12px; color: var(--muted); }
+.gcard .gicon { font-size: 22px; }
+.gcard b { font-family: var(--font-display); font-size: 18px; }
+.gcard.on, .gcard:hover { border-color: var(--lime); }
+.gpanel { padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.gguess { display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; }
+.gguess input { flex: 1; min-width: 180px; }
+.gtable td, .gtable th { text-align: center; white-space: nowrap; }
+.gtable .gc { font-weight: 600; }
+.gtable .gc.ok { background: var(--win-bg); }
+.gtable .gc.near { background: color-mix(in srgb, #e3b341 30%, transparent); }
+.gtable .gc.no { background: color-mix(in srgb, var(--line) 50%, transparent); color: var(--muted); }
+.gtable .gc i { font-style: normal; margin-inline-start: 4px; font-size: 11px; }
+.gend { font: 700 20px var(--font-display); margin: 12px 0 6px; }
+.gend.ok { color: var(--lime); }
+.gend.ko { color: var(--danger); }
+.gstreak b { font: 800 34px var(--font-display); color: var(--lime); }
+.gduel p { font-weight: 600; margin: 4px 0 8px; }
+.gduelbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.gside { display: grid; gap: 2px; padding: 16px 10px; text-align: center; }
+.gside b { font: 700 20px var(--font-display); }
+.gside small { color: var(--muted); }
+.gdone { list-style: none; padding: 0; display: grid; gap: 4px; font-size: 14px; }
+.gdone b.w { color: var(--lime); }
+.glogo { display: flex; justify-content: center; padding: 18px; background: #fff; border-radius: 8px; margin: 10px 0; overflow: hidden; }
+.glogo img { width: 180px; height: 180px; object-fit: contain; transition: filter .5s; user-select: none; pointer-events: none; }
+.gtries { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.gtries li { padding: 4px 10px; border: 1px solid var(--line); border-radius: 5px; font-size: 14px; }
