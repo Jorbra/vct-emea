@@ -23,6 +23,7 @@ import { MatchStrip } from "./matchTime.jsx";
 import { MatchModalProvider } from "./MatchModal.jsx";
 import HomeNext from "./HomeNext.jsx";
 import FeaturedMatch from "./FeaturedMatch.jsx";
+import Stories from "./Stories.jsx";
 import { InstallButton } from "./Fans.jsx";
 import { TeamThemePicker } from "./visual.jsx";
 
@@ -208,6 +209,7 @@ function HomeView({ initial }) {
       <SiteNav />
 
       {matchEvents.some((e) => e.items.some((m) => e.live[m.id] && m.sa == null)) && <div className="livesweep" aria-hidden="true" />}
+      <Stories events={matchEvents} />
       <div className="homehead">
         <FeaturedMatch events={matchEvents} />
         <div className="homeside">

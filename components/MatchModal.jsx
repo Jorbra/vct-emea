@@ -205,6 +205,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
     return <div className={"mmteam " + side + (won ? " w" : m.win ? " lo" : "")}>{href ? <a href={href}>{inner}</a> : inner}</div>;
   };
   const score = done ? scoreLabel(m, tr, ":") : live ? `${live.a} : ${live.b}` : "vs";
+  const frieze = (ex.maps.some((x) => x.a != null) ? ex.maps : ((details && details.maps) || [])).filter((x) => x.a != null && x.b != null);
   const colorA = useTeamColor(m.a && m.a.logo);
   const colorB = useTeamColor(m.b && m.b.logo);
   const who = (player) => (state && knownPlayer(state, player) ? <a href={playerHref(player)}>{player}</a> : player);
@@ -221,6 +222,15 @@ function MatchModal({ e, m, state, onClose, page = false }) {
           <Score className={"mmscore" + (live ? " lv" : "")} value={score} />
           {team(m.b, "b")}
         </div>
+        {page && frieze.length > 0 && (
+          <div className="mfrieze" style={{ ...(colorA ? { "--ta": colorA } : {}), ...(colorB ? { "--tb": colorB } : {}) }} aria-label={tr("Maps")}>
+            {frieze.map((x, i) => (
+              <span key={i} className={"mfmap spoil " + (x.a > x.b ? "wa" : x.b > x.a ? "wb" : "")}>
+                <small>{tr("Map #{n}", { n: i + 1 })}</small><b>{x.map || "?"}</b><em>{x.a}–{x.b}</em>
+              </span>
+            ))}
+          </div>
+        )}
         {live && (live.maps || []).length > 0 && (
           <div className="mmlive">
             <div className="mmlivemaps">{live.maps.map((x) => <span key={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>

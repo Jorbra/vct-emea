@@ -34,13 +34,29 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
     return [e, { ready: list.length, played: list.filter((m) => m.sa != null).length }];
   })), [initial]);
 
-  const row = (m, badge) => (
-    <button type="button" key={m.event + m.id} className="ahrow" onClick={() => onOpen(m.event, true)}>
-      <span className="ahwhen">{badge || (m.at ? formatMatchTime(m.at, tr.lang, true) : "–")}</span>
-      <span className="ahteams">{(m.a && m.a.name) || tr("TBD")} vs {(m.b && m.b.name) || tr("TBD")}</span>
-      <span className="ahwhere">{tr(EVENT_NAMES[m.event])} · {m.round.map(([k, v]) => tr(k, v)).join(" · ")}</span>
-    </button>
-  );
+  const [claims, setClaims] = useState((initial.admin && initial.admin.claims) || {});
+  const me = (initial.admin && initial.admin.me) || "";
+  const claim = async (m, on) => {
+    const key = `${m.event}:${m.id}`;
+    try { await call("/api/claim", { event: m.event, id: m.id, on }); setClaims((c) => { const n = { ...c }; if (on) n[key] = me; else delete n[key]; return n; }); } catch (e) { onDone(tr.server(e.message)); }
+  };
+  const row = (m, badge) => {
+    const key = `${m.event}:${m.id}`;
+    const who = claims[key];
+    const mine = who !== undefined && who === me;
+    return (
+      <div key={m.event + m.id} className="ahrowwrap">
+        <button type="button" className="ahrow" onClick={() => onOpen(m.event, true)}>
+          <span className="ahwhen">{badge || (m.at ? formatMatchTime(m.at, tr.lang, true) : "–")}</span>
+          <span className="ahteams">{(m.a && m.a.name) || tr("TBD")} vs {(m.b && m.b.name) || tr("TBD")}</span>
+          <span className="ahwhere">{tr(EVENT_NAMES[m.event])} · {m.round.map(([k, v]) => tr(k, v)).join(" · ")}</span>
+        </button>
+        {initial.admin && (who === undefined
+          ? <button type="button" className="btn small claimbtn" onClick={() => claim(m, true)}>✋ {tr("I'm on it")}</button>
+          : <button type="button" className={"btn small claimbtn" + (mine ? " mine" : "")} onClick={() => mine && claim(m, false)} title={mine ? tr("Let it go") : ""}>👤 {who || tr("Main account")}{mine ? " ×" : ""}</button>)}
+      </div>
+    );
+  };
   const todo = agenda.live.length + agenda.late.length;
   return (
     <div className="adhome">
@@ -52,6 +68,7 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
       {initial.admin && initial.admin.steps && <Journal admin={initial.admin} call={call} onDone={onDone} />}
       {initial.admin && <BannerEditor banner={initial.admin.banner} call={call} onDone={onDone} />}
       {initial.admin && initial.admin.visits && <Visits v={initial.admin.visits} activity={initial.admin.activity} />}
+      {initial.admin && <Exports />}
       {initial.admin && <MobilePreview />}
       {initial.admin && initial.admin.comments && <CommentsMod list={initial.admin.comments} call={call} onDone={onDone} />}
       <section>
@@ -260,6 +277,23 @@ function Visits({ v, activity = [] }) {
           </>
         )}
         <p className="hint">{tr("Counted by the site itself, without cookies or outside tracker: one view per page opened, robots left out.")}</p>
+      </details>
+    </section>
+  );
+}
+
+/** The results and the predictions' ranking as spreadsheets. */
+function Exports() {
+  const tr = useT();
+  return (
+    <section>
+      <details className="einfo">
+        <summary><b>📤 {tr("Exports (CSV)")}</b></summary>
+        <p className="row" style={{ margin: "8px 0" }}>
+          <a className="btn" href="/api/export?kind=results" download>{tr("All the results")}</a>
+          <a className="btn" href="/api/export?kind=ranking" download>{tr("The predictions' ranking")}</a>
+        </p>
+        <p className="hint">{tr("Opens in Excel, LibreOffice or Google Sheets (columns separated by semicolons).")}</p>
       </details>
     </section>
   );
@@ -526,7 +560,7 @@ function RosterDiffs({ list, call, onDone }) {
   );
 }
 
-function NewsEditor({ news, call, onDone }) {
+function NewsEditor({ news, call, onDone, drafts = [] }) {
   const tr = useT();
   const [edit, setEdit] = useState(null);
   const [title, setTitle] = useState("");
@@ -545,6 +579,13 @@ function NewsEditor({ news, call, onDone }) {
   return (
     <section>
       <h2>{tr("News")}</h2>
+      {drafts.length > 0 && (
+        <div className="drafts">
+          <h3 className="sub">📝 {tr("Drafts ready")}</h3>
+          <ul className="ahhist">{drafts.map((d) => <li key={d.event}><b>{d.title}</b><button type="button" className="btn small" onClick={() => { setEdit(null); setTitle(d.title); setBody(d.body); }}>{tr("Use this draft")}</button></li>)}</ul>
+          <p className="hint">{tr("Written from a finished event: read it over, change it, then publish.")}</p>
+        </div>
+      )}
       {news.length > 0 && (
         <ul className="ahhist">
           {news.map((n) => (
@@ -666,7 +707,7 @@ function Manage({ admin, call, onDone }) {
       <SyncStatus list={admin.sync || {}} />
       <FlagImport call={call} onDone={onDone} />
       {!admin.who && <VisitorAccounts count={admin.accounts || 0} roles={admin.roles || []} call={call} onDone={onDone} />}
-      <NewsEditor news={admin.news || []} call={call} onDone={onDone} />
+      <NewsEditor news={admin.news || []} drafts={admin.drafts || []} call={call} onDone={onDone} />
       <Voters voters={admin.voters || []} call={call} onDone={onDone} />
       <Seasons seasons={admin.seasons || []} call={call} onDone={onDone} />
       <section>

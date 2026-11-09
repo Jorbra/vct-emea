@@ -1,6 +1,11 @@
 import { notFound } from "next/navigation";
 import { getDb, getState } from "../../../lib/db.js";
+import { cookies } from "next/headers";
 import { voterCard } from "../../../lib/fans.js";
+import { AchievementsBlock } from "../../../components/Round7Pages";
+import { achievements } from "../../../lib/round7.js";
+import { fantasyData } from "../../../lib/gamedata.js";
+import { LANG_COOKIE, normLang } from "../../../lib/i18n.js";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +29,8 @@ export default async function Page({ params }) {
     <div className="wrap sharecard">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={`/api/card/${encodeURIComponent(c.name)}`} alt={`${c.name} : ${c.points} points`} width={1200} height={630} />
-      <p><a className="btn pri" href="/predictions">Jouer aux pronostics ›</a></p>
+      <AchievementsBlock list={achievements(db, getState(db), (db.prepare("SELECT hash FROM voters WHERE name = ?").get(c.name) || {}).hash || "", (await fantasyData()).points)} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />
+      <p className="row"><a className="btn pri" href="/predictions">Jouer aux pronostics ›</a> <a className="btn" href="/jeux">Jeux du jour ›</a> <a className="btn" href="/fantasy">Fantasy ›</a></p>
     </div>
   );
 }

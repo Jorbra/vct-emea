@@ -25,6 +25,8 @@ const ICON = {
   night: "M4 5h16v11H4zM8 20h8M12 16v4",
   week: "M5 5h14v15H5zM5 9h14M9 13h2M13 13h2M9 16h2",
   games: "M6 9h12a3 3 0 0 1 3 3v3a3 3 0 0 1-5.2 2L14 15h-4l-1.8 2A3 3 0 0 1 3 15v-3a3 3 0 0 1 3-3zM8 11v3M6.5 12.5h3M15 12h.01M17 14h.01",
+  fantasy: "M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z",
+  flag: "M5 21V4M5 4h11l-2 4 2 4H5",
   power: "M4 20h16M7 20v-6M12 20V8M17 20v-10M5 9l5-4 4 3 6-4",
   quiz: "M12 4a8 8 0 1 0 .01 0M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01",
 };
@@ -33,8 +35,8 @@ const Icon = ({ name }) => (
 );
 
 const LINKS = [
-  ["/", "Home", "home"], ["/live", "Live", "live"], ["/soiree", "Match night", "night"], ["/moi", "My week", "week"], ["/calendar", "Calendar", "calendar"], ["/predictions", "Predictions", "target"], ["/jeux", "Games of the day", "games"], ["/quiz", "Quiz of the week", "quiz"], ["/puissance", "Power ranking", "power"], ["/stats", "Stats", "stats"],
-  ["/transfers", "Transfers", "transfers"], ["/lft", "LFT", "lft"], ["/compare", "Compare", "compare"], ["/news", "News", "news"], ["/archives", "Archives of past seasons", "archives"],
+  ["/", "Home", "home"], ["/live", "Live", "live"], ["/soiree", "Match night", "night"], ["/moi", "My week", "week"], ["/calendar", "Calendar", "calendar"], ["/predictions", "Predictions", "target"], ["/jeux", "Games of the day", "games"], ["/fantasy", "Fantasy", "fantasy"], ["/quiz", "Quiz of the week", "quiz"], ["/puissance", "Power ranking", "power"], ["/stats", "Stats", "stats"],
+  ["/transfers", "Transfers", "transfers"], ["/lft", "LFT", "lft"], ["/compare", "Compare", "compare"], ["/pays", "Countries", "flag"], ["/news", "News", "news"], ["/archives", "Archives of past seasons", "archives"],
 ];
 
 /**

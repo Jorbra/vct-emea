@@ -166,6 +166,35 @@ export async function POST(req) {
     return ephemeral({ embeds: [{ title: `${me.name}${r ? ` · #${k + 1} / ${all.length}` : ""}`, color: 0xff4655, url: `${ctx.site}/p/${encodeURIComponent(me.name)}`,
       description: [r ? L(`**${r.points}** points · ${r.good}/${r.total} bons · série max ${r.streak}`, `**${r.points}** points · ${r.good}/${r.total} right · best streak ${r.streak}`) : L("Pas encore de résultat.", "No result yet."), "", ...recent].join("\n") }] });
   }
+  if (name === "profil") {
+    const hash = discordVoter(db, user.id, process.env.SESSION_SECRET);
+    const me = db.prepare("SELECT name FROM voters WHERE hash = ?").get(hash);
+    if (!me) return ephemeral({ content: L("Pas encore de carte : pronostique avec `/pronostic`, ou `/lier` si tu joues déjà sur le site.", "No card yet: predict with `/pronostic`, or `/lier` if you already play on the site.") });
+    const { achievements } = await import("../../../lib/round7.js");
+    const { fantasyData } = await import("../../../lib/gamedata.js");
+    const got = achievements(db, ctx.state(), hash, (await fantasyData()).points).filter((a) => a.got);
+    return NextResponse.json({ type: 4, data: { embeds: [{ title: me.name, url: `${ctx.site}/p/${encodeURIComponent(me.name)}`, color: 0xc9f03c, description: got.length ? `🏅 ${got.map((a) => a.name).join(" · ")}` : L("Pas encore de succès : joue aux jeux du jour, au quiz et à la fantasy.", "No achievement yet: play the daily games, the quiz and the fantasy."), image: { url: `${ctx.site}/api/card/${encodeURIComponent(me.name)}?v=${Math.floor(now / 600000)}` } }] } });
+  }
+  if (name === "fantasy") {
+    const hash = discordVoter(db, user.id, process.env.SESSION_SECRET);
+    const { fantasyRanking, fantasyOfHash, teamPoints, weekStart } = await import("../../../lib/round7.js");
+    const { fantasyData } = await import("../../../lib/gamedata.js");
+    const { pool, points } = await fantasyData();
+    const team = fantasyOfHash(db, hash);
+    if (!Object.keys(team.slots).length) return ephemeral({ content: L(`Pas encore d'équipe fantasy : compose-la sur ${ctx.site}/fantasy (avec \`/lier\` pour jouer sous ton nom du site).`, `No fantasy team yet: build it at ${ctx.site}/fantasy (use \`/lier\` to play under your site name).`) });
+    const bySlug = new Map(pool.map((p) => [p.slug, p]));
+    const all = fantasyRanking(db, points, { limit: 100000, withHash: true });
+    const k = all.findIndex((r) => r.hash === hash);
+    const lines = Object.entries(team.slots).map(([role, s]) => `**${(bySlug.get(s.slug) || { name: s.slug }).name}** (${role}) · ${teamPoints({ slots: { x: s }, past: [] }, points)} pts`);
+    return ephemeral({ embeds: [{ title: L("Ton équipe fantasy", "Your fantasy team"), url: `${ctx.site}/fantasy`, color: 0xc9f03c, description: lines.join("\n"), fields: [{ name: L("Cette semaine", "This week"), value: `${teamPoints(team, points, weekStart(now))} pts`, inline: true }, { name: L("Saison", "Season"), value: `${teamPoints(team, points)} pts${k >= 0 ? ` · #${k + 1}/${all.length}` : ""}`, inline: true }] }] });
+  }
+  if (name === "rappelprono") {
+    const { kvGet, kvSet } = await import("../../../lib/round6.js");
+    const list = kvGet(db, "bot_prono_dm", []);
+    const on = !list.includes(user.id);
+    kvSet(db, "bot_prono_dm", on ? [...list, user.id].slice(-5000) : list.filter((u) => u !== user.id));
+    return ephemeral({ content: on ? L("🔔 C'est noté : je t'enverrai un message privé quand des matchs arrivent dans les 3 heures et que tu ne les as pas pronostiqués. Refais `/rappelprono` pour arrêter.", "🔔 Noted: I'll DM you when matches start within 3 hours and you haven't predicted them. Run `/rappelprono` again to stop.") : L("🔕 Rappels de pronostic arrêtés.", "🔕 Prediction reminders stopped.") });
+  }
   if (name === "lier") {
     const who = useLinkCode(db, user.id, opt("code"), now);
     return ephemeral({ content: who ? L(`✅ C'est fait : tes pronostics Discord comptent maintenant pour **${who}**.`, `✅ Done: your Discord predictions now count for **${who}**.`) : L("Code inconnu ou trop vieux. Prends-en un nouveau sur la page Pronostics du site (il dure 15 minutes).", "Unknown or expired code. Get a new one on the site's Predictions page (it lasts 15 minutes).") });
