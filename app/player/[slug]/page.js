@@ -55,6 +55,12 @@ function load(slug, update = false) {
     realName: person.realName || (lp ? lp.name : ""),
     teamLogo: t ? t.logo : (dir.teams[person.teamSlug] || {}).logo || "", teamTag: t ? t.tag : "", teamOnSite: !!t,
     tour: playerTournament(tournamentStats(state, readDetails(getDb())), key),
+    // the spread of each number among the players of the site's events, for the radar
+    ranges: (() => {
+      const pool = tournamentStats(state, readDetails(getDb())).players.filter((x) => x.maps >= 4);
+      const span = (k) => { const v = pool.map((x) => x[k]).filter((x) => x != null); return v.length >= 5 ? [Math.min(...v), Math.max(...v)] : null; };
+      return Object.fromEntries(["r", "acs", "kd", "kast", "adr", "hs"].map((k) => [k, span(k)]));
+    })(),
     lp, lpState: lp ? "ready" : entry ? "none" : "pending", vlr: linkVlr(vlrEntry, dir), updating: !!entry && (lpNow || vlrNow),
   };
 }

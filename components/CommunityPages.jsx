@@ -11,6 +11,7 @@ import SearchBar from "./SearchBar.jsx";
 import { localeOf } from "../lib/i18n.js";
 import { EVENT_NAMES } from "../lib/paths.js";
 import Pickem from "./Pickem.jsx";
+import { SwipePicks } from "./Round8Bits.jsx";
 import { BadgeShowcase, DiscordLink, GroupBoard, Groups, Podium, SeasonTable, ShareCard } from "./Fans.jsx";
 
 function Top({ title, crumbs = [] }) {
@@ -121,6 +122,7 @@ function PredictionsView({ matches, ranking, pickem, group, groups }) {
       <div className="cols">
         <main>
           {pickem && <Pickem events={pickem.events} boards={pickem.boards} token={token} name={me.name || name.trim()} />}
+          {matches.length > 0 && token && <div className="swipeonly"><SwipePicks matches={matches} picks={me.picks} onPick={(m, team) => pick(m, team)} /></div>}
           <section>
             <h2>{tr("Open matches")}</h2>
             {matches.length === 0 && <p className="note">{tr("No match to predict for now.")}</p>}

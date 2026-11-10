@@ -28,6 +28,7 @@ import { eventData, matchesOf } from "../lib/matchlist.js";
 import EventStats from "./EventStats.jsx";
 import { knownPlayer } from "../lib/playerstats.js";
 import { MatchModalProvider } from "./MatchModal.jsx";
+import { BracketTools } from "./Round8Bits.jsx";
 
 // Türkiye stages, like the EU ones: the Qualifier Playoffs (event "tr") and the two open qualifiers before it
 const TR_STAGES = [
@@ -466,6 +467,7 @@ function TournamentView({ initial, start, archive }) {
         <button className="linkbtn" onClick={() => setTab("swiss")}>{tr("Swiss Stage")}</button>{L(" tab.", ".")}
       </p>
       <h3 className="sub" style={{ marginTop: 24 }}>{tr("Single Elimination")}</h3>
+      <BracketTools />
       <BracketGroup g="A" byMatch={byMatch} name={name} />
       <BracketGroup g="B" byMatch={byMatch} name={name} />
     </section>

@@ -24,6 +24,7 @@ import { MatchModalProvider } from "./MatchModal.jsx";
 import HomeNext from "./HomeNext.jsx";
 import FeaturedMatch from "./FeaturedMatch.jsx";
 import Stories from "./Stories.jsx";
+import { HomeCustomize, HomePoll } from "./Round8Bits.jsx";
 import { InstallButton } from "./Fans.jsx";
 import { TeamThemePicker } from "./visual.jsx";
 
@@ -210,16 +211,18 @@ function HomeView({ initial }) {
 
       {matchEvents.some((e) => e.items.some((m) => e.live[m.id] && m.sa == null)) && <div className="livesweep" aria-hidden="true" />}
       <Stories events={matchEvents} />
-      <div className="homehead">
+      <HomeCustomize />
+      <div className="homehead" data-block="live">
         <FeaturedMatch events={matchEvents} />
         <div className="homeside">
           <HomeNext initial={initial} />
           <TodayPulse events={matchEvents} />
         </div>
       </div>
-      <HomeStrips events={matchEvents} state={initial} />
+      <div data-block="strips"><HomeStrips events={matchEvents} state={initial} /></div>
+      <div data-block="poll"><HomePoll /></div>
 
-      <div className="hero compact">
+      <div className="hero compact" data-block="hero">
         <div>
           <div className="herokick">Champions Tour 2027</div>
           <div className="herotitle">{tr("Road to the EMEA Kickoff")}</div>
@@ -228,10 +231,10 @@ function HomeView({ initial }) {
         <div className="heroacts"><a className="btn pri" href={siteHref("kickoff")}>Kickoff ›</a><InstallButton /></div>
       </div>
 
-      <MyTeams initial={initial} />
-      <LatestNews news={initial.news} />
+      <div data-block="myteams"><MyTeams initial={initial} /></div>
+      <div data-block="news"><LatestNews news={initial.news} /></div>
 
-      <section>
+      <section data-block="kickoff">
         <h2><a href={siteHref("kickoff")}>VCT 2027: EMEA Kickoff</a></h2>
         <div className="kickgrid">
           {kick.map((t, i) => (
@@ -244,7 +247,7 @@ function HomeView({ initial }) {
         </div>
       </section>
 
-      <section>
+      <section data-block="events">
         <h2>VCT EMEA</h2>
         <div className="evgroup">
           <h3>Europe</h3>
@@ -280,9 +283,9 @@ function HomeView({ initial }) {
         </div>
       </section>
 
-      <RoadToKickoff status={ev} />
+      <div data-block="road"><RoadToKickoff status={ev} /></div>
 
-      <section>
+      <section data-block="gc">
         <h2>VCT Game Changers EMEA</h2>
         <div className="evgrid">
           {card("gc", "Game Changers EMEA", "", "")}

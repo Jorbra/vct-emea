@@ -20,6 +20,8 @@ import { siteTeams } from "../../../lib/teams.js";
 import { detailsOf, extraStats, mapCard, readDetails, tournamentStats } from "../../../lib/tstats.js";
 import { EVENTS } from "../../../lib/bracket.js";
 import { powerRanking } from "../../../lib/round6.js";
+import { communityTiers, teamChances, tierTeams } from "../../../lib/round8.js";
+import { ratings as r8ratings } from "../../../lib/r8data.js";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -44,6 +46,8 @@ function context(db, lang, now) {
     teamInfo: (slug) => readTeamInfo()[slug] || null,
     ranking: () => seasonRanking(db, state(), { limit: 10, now }),
     power: once("power", () => powerRanking(state(), now)),
+    chances: (name) => { const { rating } = r8ratings(); return teamChances(state(), rating, name); },
+    tiers: () => { const t = tierTeams(state()); return { teams: t, ...communityTiers(db, t) }; },
     guild: "",
     recap: (ev) => (EVENTS.includes(ev) ? recapOf(state(), readDetails(db, ev), ev) : null),
     eventHref: (ev) => siteHref(ev),
@@ -103,6 +107,14 @@ export async function POST(req) {
     if (kind === "q") {
       countUse(db, "devine-reponse", user.id, now);
       return NextResponse.json({ type: 7, data: answerQuestion(db, user.id, user.global_name || user.username || "?", i.message || {}, Number(event), Number(id), settings.lang, now) });
+    }
+    // a vote in a site poll relayed here: sp|<poll>|<answer>
+    if (kind === "sp") {
+      const { votePoll } = await import("../../../lib/round8.js");
+      const r = votePoll(db, { id: Number(event), voter: `d:${user.id}`, choice: Number(id) }, now);
+      if (!r.ok) return ephemeral({ content: r.error === "This poll is closed." ? L("Ce sondage est fermé.", "This poll is closed.") : L("Vote impossible.", "Vote refused.") });
+      const p = r.poll;
+      return ephemeral({ content: L(`🗳️ Vote enregistré : **${p.options[Number(id)]}**\n`, `🗳️ Vote saved: **${p.options[Number(id)]}**\n`) + p.options.map((o, k) => `${o} · ${p.total ? Math.round((p.counts[k] / p.total) * 100) : 0}%`).join("\n") });
     }
     if (kind !== "p") return ephemeral({ content: "?" });
     const hash = discordVoter(db, user.id, process.env.SESSION_SECRET);

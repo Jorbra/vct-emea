@@ -24,6 +24,7 @@ import { TeamMaps } from "./EventStats.jsx";
 import { siteHref, teamHref, teamSlug } from "../lib/paths.js";
 import { formatMatchTime } from "../lib/schedule.js";
 import { TeamThemeButton, WallpaperButton, useTeamColor } from "./visual.jsx";
+import { TeamTimeline } from "./Round8Bits.jsx";
 
 export default function TeamPage(props) {
   return (
@@ -333,7 +334,7 @@ function OutsideTeam({ lp, org = [], outside, vlr, updating }) {
 
 /** The team's numbers in the tournaments, from vlr.gg's tables. */
 /** The team's header: a banner in the color of its logo, the logo over it, its key numbers and recent form. */
-function TeamHead({ team, children, stats = [], form = [] }) {
+function TeamHead({ team, children, stats = [], form = [], timeline = null }) {
   const tr = useT();
   const color = useTeamColor(team && team.logo);
   return (
@@ -349,6 +350,7 @@ function TeamHead({ team, children, stats = [], form = [] }) {
             )}
           </div>
         )}
+        {timeline}
       </div>
     </div>
   );
@@ -428,7 +430,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null })
         <p className="pathlinks">{tr("Run")} : {p.events.filter((e) => e.matches.length).map((e, n) => <span key={e.event}>{n ? " · " : ""}<a href={`/parcours/${e.event}/${slug}`}>{tr(EVENT_NAMES[e.event])}</a></span>)}</p>
       )}
 
-      <TeamHead team={t} stats={headStats} form={form}>
+      <TeamHead team={t} stats={headStats} form={form} timeline={<TeamTimeline rows={rows} name={t.name} />}>
         <Crest team={t} />
         <div>
           <div className="tname">{p.name}{t.tag ? <span className="ttag">{t.tag}</span> : null}<FavStar slug={slug} /></div>

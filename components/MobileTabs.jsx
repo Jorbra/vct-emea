@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useT } from "./lang.jsx";
 import { useLiveCount } from "./visual.jsx";
 
-const MORE = [["/soiree", "Match night"], ["/moi", "My week"], ["/jeux", "Games of the day"], ["/fantasy", "Fantasy"], ["/quiz", "Quiz of the week"], ["/puissance", "Power ranking"], ["/stats", "Stats"], ["/transfers", "Transfers"], ["/lft", "LFT"], ["/compare", "Compare"], ["/pays", "Countries"], ["/news", "News"], ["/archives", "Archives of past seasons"], ["/compte", "My account"], ["/about", "About"]];
+const MORE = [["/soiree", "Match night"], ["/moi", "My week"], ["/jeux", "Games of the day"], ["/fantasy", "Fantasy"], ["/tierlist", "Tier list"], ["/simulateur", "Qualification simulator"], ["/rivalites", "Rivalries"], ["/palmares", "Hall of fame"], ["/quiz", "Quiz of the week"], ["/puissance", "Power ranking"], ["/stats", "Stats"], ["/transfers", "Transfers"], ["/lft", "LFT"], ["/compare", "Compare"], ["/pays", "Countries"], ["/news", "News"], ["/archives", "Archives of past seasons"], ["/compte", "My account"], ["/about", "About"]];
 
 /** On phones: the main pages in a bar at the bottom of the screen, the live count in red, the rest under "More". */
 export default function MobileTabs() {

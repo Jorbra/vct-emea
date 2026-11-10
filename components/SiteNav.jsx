@@ -7,6 +7,7 @@ import { useT } from "./lang.jsx";
 import { useLiveCount } from "./visual.jsx";
 import { EmeaMark } from "./Brand.jsx";
 import { SpoilerSwitch } from "./Round6Bits.jsx";
+import { NotificationBell } from "./Round8Bits.jsx";
 
 // small line icons, drawn on a 24-pixel grid
 const ICON = {
@@ -27,6 +28,10 @@ const ICON = {
   games: "M6 9h12a3 3 0 0 1 3 3v3a3 3 0 0 1-5.2 2L14 15h-4l-1.8 2A3 3 0 0 1 3 15v-3a3 3 0 0 1 3-3zM8 11v3M6.5 12.5h3M15 12h.01M17 14h.01",
   fantasy: "M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z",
   flag: "M5 21V4M5 4h11l-2 4 2 4H5",
+  tier: "M4 5h4v4H4zM4 11h4v4H4zM4 17h4v3H4zM11 7h9M11 13h7M11 18h5",
+  sim: "M4 19l5-6 4 3 7-9M16 7h4v4",
+  rival: "M7 4l10 16M17 4L7 20M4 9h4M16 15h4",
+  trophy: "M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8",
   power: "M4 20h16M7 20v-6M12 20V8M17 20v-10M5 9l5-4 4 3 6-4",
   quiz: "M12 4a8 8 0 1 0 .01 0M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01",
 };
@@ -34,10 +39,14 @@ const Icon = ({ name }) => (
   <svg className="navicon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={ICON[name]} /></svg>
 );
 
-const LINKS = [
-  ["/", "Home", "home"], ["/live", "Live", "live"], ["/soiree", "Match night", "night"], ["/moi", "My week", "week"], ["/calendar", "Calendar", "calendar"], ["/predictions", "Predictions", "target"], ["/jeux", "Games of the day", "games"], ["/fantasy", "Fantasy", "fantasy"], ["/quiz", "Quiz of the week", "quiz"], ["/puissance", "Power ranking", "power"], ["/stats", "Stats", "stats"],
-  ["/transfers", "Transfers", "transfers"], ["/lft", "LFT", "lft"], ["/compare", "Compare", "compare"], ["/pays", "Countries", "flag"], ["/news", "News", "news"], ["/archives", "Archives of past seasons", "archives"],
+// the links by section; the sections' names show in the column on wide screens
+const GROUPS = [
+  ["Follow", [["/", "Home", "home"], ["/live", "Live", "live"], ["/soiree", "Match night", "night"], ["/moi", "My week", "week"], ["/calendar", "Calendar", "calendar"]]],
+  ["Play", [["/predictions", "Predictions", "target"], ["/jeux", "Games of the day", "games"], ["/fantasy", "Fantasy", "fantasy"], ["/quiz", "Quiz of the week", "quiz"], ["/tierlist", "Tier list", "tier"], ["/simulateur", "Qualification simulator", "sim"]]],
+  ["Stats", [["/puissance", "Power ranking", "power"], ["/stats", "Stats", "stats"], ["/rivalites", "Rivalries", "rival"], ["/compare", "Compare", "compare"], ["/pays", "Countries", "flag"]]],
+  ["More", [["/transfers", "Transfers", "transfers"], ["/lft", "LFT", "lft"], ["/news", "News", "news"], ["/palmares", "Hall of fame", "trophy"], ["/archives", "Archives of past seasons", "archives"]]],
 ];
+const LINKS = GROUPS.flatMap(([, list]) => list);
 
 /**
  * The site's links: on a wide screen a column on the left with the brand and the live count, under the header elsewhere;
@@ -68,14 +77,19 @@ export default function SiteNav() {
   return (
     <nav className="sitenav" aria-label={tr("Navigation")}>
       <a className="navbrand" href="/" aria-label="VCT EMEA"><EmeaMark /><span>VCT EMEA</span></a>
-      {LINKS.map(([href, label, icon]) => (
-        <a key={href} href={href} aria-current={on(href)} className={href === "/" ? "navhomelink" : undefined}>
-          <Icon name={icon} /><span>{tr(label)}</span>
-          {href === "/live" && live > 0 && <b className="navlive" aria-label={tr("{n} live", { n: live })}>{live}</b>}
-        </a>
-      ))}
+      <button type="button" className="navcmd" onClick={() => window.dispatchEvent(new Event("vct-palette"))} title="Ctrl+K"><svg className="navicon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M11 4a7 7 0 1 0 .01 0M20 20l-4-4" /></svg><span>{tr("Go to…")}</span><kbd>Ctrl K</kbd></button>
+      {GROUPS.map(([group, list]) => [
+        <span key={group} className="navgroup">{tr(group)}</span>,
+        ...list.map(([href, label, icon]) => (
+          <a key={href} href={href} aria-current={on(href)} className={href === "/" ? "navhomelink" : undefined}>
+            <Icon name={icon} /><span>{tr(label)}</span>
+            {href === "/live" && live > 0 && <b className="navlive" aria-label={tr("{n} live", { n: live })}>{live}</b>}
+          </a>
+        )),
+      ])}
       <a className="navacct" href="/compte" aria-current={on("/compte")}><Icon name="account" /><span>{who || tr("My account")}</span></a>
       <a className="navabout" href="/about" aria-current={on("/about")}><Icon name="about" /><span>{tr("About")}</span></a>
+      <NotificationBell />
       <SpoilerSwitch />
     </nav>
   );

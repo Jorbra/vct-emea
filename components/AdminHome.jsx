@@ -62,6 +62,7 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
     <div className="adhome">
       <p className="guidelink"><a className="btn" href="/admin/nouveautes">{tr("What's new and how it works")}</a></p>
       {initial.admin && <QuickLive initial={initial} call={call} onDone={onDone} />}
+      {initial.admin && initial.admin.dayBoard && <DayBoard list={initial.admin.dayBoard} onOpen={onOpen} />}
       {initial.admin && initial.admin.checklist && initial.admin.checklist.length > 0 && <Checklist list={initial.admin.checklist} />}
       {initial.admin && initial.admin.health && <Health rows={initial.admin.health} />}
       {initial.admin && <BotPanel />}
@@ -69,6 +70,8 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
       {initial.admin && <BannerEditor banner={initial.admin.banner} call={call} onDone={onDone} />}
       {initial.admin && initial.admin.visits && <Visits v={initial.admin.visits} activity={initial.admin.activity} />}
       {initial.admin && <Exports />}
+      {initial.admin && initial.admin.polls && <PollsEditor polls={initial.admin.polls} call={call} onDone={onDone} />}
+      {initial.admin && initial.admin.schedScores && <ScheduledScores list={initial.admin.schedScores} initial={initial} call={call} onDone={onDone} />}
       {initial.admin && <MobilePreview />}
       {initial.admin && initial.admin.comments && <CommentsMod list={initial.admin.comments} call={call} onDone={onDone} />}
       <section>
@@ -277,6 +280,88 @@ function Visits({ v, activity = [] }) {
           </>
         )}
         <p className="hint">{tr("Counted by the site itself, without cookies or outside tracker: one view per page opened, robots left out.")}</p>
+      </details>
+    </section>
+  );
+}
+
+/** Today's matches at a glance: who is on each, what is still missing. */
+function DayBoard({ list, onOpen }) {
+  const tr = useT();
+  if (!list.length) return null;
+  const MISS = { score: tr("score"), maps: tr("maps"), mvp: "MVP" };
+  const todo = list.filter((m) => m.missing.length).length;
+  return (
+    <section>
+      <h2>📋 {tr("Today")} <small>{list.length} {tr("Matches").toLowerCase()} · {todo ? tr("{n} to complete", { n: todo }) : "✅"}</small></h2>
+      <div className="tablewrap"><table className="dayboard">
+        <thead><tr><th>{tr("Time")}</th><th>{tr("Match")}</th><th>{tr("Editor")}</th><th>{tr("Missing")}</th></tr></thead>
+        <tbody>{list.map((m) => (
+          <tr key={m.event + m.id} className={m.missing.length ? "todo" : ""}>
+            <td>{new Date(m.at).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}</td>
+            <td><button type="button" className="linkbtn" onClick={() => onOpen(m.event, true)}>{m.a} vs {m.b}</button>{m.live ? " 🔴" : m.done ? " ✅" : ""}</td>
+            <td>{m.who === undefined ? "–" : m.who || tr("Main account")}</td>
+            <td>{m.missing.length ? m.missing.map((x) => MISS[x]).join(", ") : "–"}</td>
+          </tr>
+        ))}</tbody>
+      </table></div>
+    </section>
+  );
+}
+
+/** The site's polls: write one (and relay it on Discord), close one, see the votes. */
+function PollsEditor({ polls, call, onDone }) {
+  const tr = useT();
+  const [q, setQ] = useState("");
+  const [opts, setOpts] = useState("");
+  const [closes, setCloses] = useState("");
+  const [discord, setDiscord] = useState(true);
+  const send = async (body) => { try { const j = await call("/api/polls", body); onDone(tr.server(j.message)); window.location.reload(); } catch (e) { onDone(tr.server(e.message)); } };
+  return (
+    <section>
+      <details className="einfo">
+        <summary><b>📊 {tr("Polls")}</b> <small>{polls.filter((p) => p.open).length} {tr("open")}</small></summary>
+        <div className="bannerform">
+          <label className="f">{tr("Question")}<input value={q} onChange={(e) => setQ(e.target.value)} maxLength={140} placeholder={tr("Who wins the Kickoff?")} /></label>
+          <label className="f">{tr("Answers (one per line, 6 at most)")}<textarea rows={4} value={opts} onChange={(e) => setOpts(e.target.value)} /></label>
+          <label className="f">{tr("Closes (optional)")}<input type="datetime-local" value={closes} onChange={(e) => setCloses(e.target.value)} /></label>
+          <label className="f check"><input type="checkbox" checked={discord} onChange={(e) => setDiscord(e.target.checked)} /> {tr("Also post it on Discord")}</label>
+        </div>
+        <p className="row"><button type="button" className="btn pri" onClick={() => send({ question: q, options: opts, closes: closes ? new Date(closes).toISOString() : "", discord })}>{tr("Publish the poll")}</button></p>
+        {polls.length > 0 && (
+          <ul className="ahhist">{polls.map((p) => (
+            <li key={p.id}><b>{p.question}</b><span>{p.options.map((o, i) => `${o} ${p.counts[i]}`).join(" · ")} · {p.total} {tr("votes")}</span>
+              {p.open ? <button type="button" className="btn small" onClick={() => send({ close: p.id })}>{tr("Close")}</button> : <small>{tr("closed")}</small>}</li>
+          ))}</ul>
+        )}
+      </details>
+    </section>
+  );
+}
+
+/** A result entered by itself at a set time (a match shown later on VOD, for example). */
+function ScheduledScores({ list, initial, call, onDone }) {
+  const tr = useT();
+  const open = allMatches(initial).filter((m) => m.a && m.b && m.a.name && m.b.name && m.sa == null).sort((x, y) => (x.at || "9").localeCompare(y.at || "9")).slice(0, 80);
+  const [key, setKey] = useState("");
+  const [sa, setSa] = useState("");
+  const [sb, setSb] = useState("");
+  const [at, setAt] = useState("");
+  const name = (k) => { const m = allMatches(initial).find((x) => `${x.event}:${x.id}` === k); return m && m.a && m.b ? `${m.a.name} vs ${m.b.name}` : k; };
+  const send = async (body) => { try { const j = await call("/api/schedscore", body); onDone(tr.server(j.message)); window.location.reload(); } catch (e) { onDone(tr.server(e.message)); } };
+  const [event, id] = key.split(":");
+  return (
+    <section>
+      <details className="einfo">
+        <summary><b>⏱️ {tr("Scheduled scores")}</b> <small>{list.length}</small></summary>
+        <div className="bannerform">
+          <label className="f">{tr("Match")}<select value={key} onChange={(e) => setKey(e.target.value)}><option value="">–</option>{open.map((m) => <option key={m.event + m.id} value={`${m.event}:${m.id}`}>{m.a.name} vs {m.b.name} · {tr(EVENT_NAMES[m.event])}</option>)}</select></label>
+          <label className="f">{tr("Score")}<span className="row"><input type="number" min="0" max="5" value={sa} onChange={(e) => setSa(e.target.value)} style={{ width: 60 }} /> – <input type="number" min="0" max="5" value={sb} onChange={(e) => setSb(e.target.value)} style={{ width: 60 }} /></span></label>
+          <label className="f">{tr("Published at")}<input type="datetime-local" value={at} onChange={(e) => setAt(e.target.value)} /></label>
+        </div>
+        <p className="row"><button type="button" className="btn pri" disabled={!key || sa === "" || sb === "" || !at} onClick={() => send({ event, id, sa: Number(sa), sb: Number(sb), at: new Date(at).toISOString() })}>{tr("Schedule the score")}</button></p>
+        {list.length > 0 && <ul className="ahhist">{list.map((s) => <li key={s.event + s.id}><time>{new Date(s.at).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time><b>{name(`${s.event}:${s.id}`)}</b><span>{s.sa}–{s.sb}</span><button type="button" className="btn small" onClick={() => send({ cancel: true, event: s.event, id: s.id })}>{tr("Remove")}</button></li>)}</ul>}
+        <p className="hint">{tr("The score goes on the site by itself at that time (checked every minute or so), with the alerts, as if entered by you.")}</p>
       </details>
     </section>
   );

@@ -10,6 +10,7 @@ import MobileTabs from "../components/MobileTabs";
 import { LangProvider } from "../components/lang.jsx";
 import { ResultToast, TeamTheme } from "../components/visual.jsx";
 import { SPOILER_SCRIPT, SiteBanner } from "../components/Round6Bits.jsx";
+import { CommandPalette } from "../components/Round8Bits.jsx";
 import { getDb } from "../lib/db.js";
 import { activeBanner } from "../lib/round6.js";
 
@@ -57,7 +58,7 @@ export default async function RootLayout({ children }) {
         <div id="content" tabIndex={-1}>{children}</div>
         <EditorAccess lang={lang} isAdmin={await isAdmin()} />
         <MatchAlerts />
-        <LangProvider lang={lang}><MobileTabs /><ResultToast /><TeamTheme /></LangProvider>
+        <LangProvider lang={lang}><MobileTabs /><ResultToast /><TeamTheme /><CommandPalette /></LangProvider>
         <AccountSync />
       </body>
     </html>
