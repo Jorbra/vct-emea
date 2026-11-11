@@ -8,6 +8,7 @@ import { useLiveCount } from "./visual.jsx";
 import { EmeaMark } from "./Brand.jsx";
 import { SpoilerSwitch } from "./Round6Bits.jsx";
 import { NotificationBell } from "./Round8Bits.jsx";
+import { NavFold, PinnedTeams } from "./Round11.jsx";
 
 // small line icons, drawn on a 24-pixel grid
 const ICON = {
@@ -44,7 +45,7 @@ const GROUPS = [
   ["Follow", [["/", "Home", "home"], ["/live", "Live", "live"], ["/soiree", "Match night", "night"], ["/moi", "My week", "week"], ["/calendar", "Calendar", "calendar"]]],
   ["Play", [["/predictions", "Predictions", "target"], ["/jeux", "Games of the day", "games"], ["/fantasy", "Fantasy", "fantasy"], ["/quiz", "Quiz of the week", "quiz"], ["/tierlist", "Tier list", "tier"], ["/simulateur", "Qualification simulator", "sim"]]],
   ["Stats", [["/puissance", "Power ranking", "power"], ["/stats", "Stats", "stats"], ["/rivalites", "Rivalries", "rival"], ["/compare", "Compare", "compare"], ["/equipes", "Compare teams", "compare"], ["/pays", "Countries", "flag"]]],
-  ["More", [["/transfers", "Transfers", "transfers"], ["/lft", "LFT", "lft"], ["/news", "News", "news"], ["/palmares", "Hall of fame", "trophy"], ["/format", "How the events work", "about"], ["/archives", "Archives of past seasons", "archives"]]],
+  ["More", [["/transfers", "Transfers", "transfers"], ["/lft", "LFT", "lft"], ["/news", "News", "news"], ["/saison", "The season's feed", "news"], ["/palmares", "Hall of fame", "trophy"], ["/format", "How the events work", "about"], ["/archives", "Archives of past seasons", "archives"]]],
 ];
 const LINKS = GROUPS.flatMap(([, list]) => list);
 
@@ -77,6 +78,8 @@ export default function SiteNav() {
   return (
     <nav className="sitenav" aria-label={tr("Navigation")}>
       <a className="navbrand" href="/" aria-label="VCT EMEA"><EmeaMark /><span>VCT EMEA</span></a>
+      <NavFold />
+      <PinnedTeams />
       <button type="button" className="navcmd" onClick={() => window.dispatchEvent(new Event("vct-palette"))} title="Ctrl+K"><svg className="navicon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M11 4a7 7 0 1 0 .01 0M20 20l-4-4" /></svg><span>{tr("Go to…")}</span><kbd>Ctrl K</kbd></button>
       {GROUPS.map(([group, list]) => [
         <span key={group} className="navgroup">{tr(group)}</span>,

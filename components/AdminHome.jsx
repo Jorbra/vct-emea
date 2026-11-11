@@ -11,6 +11,7 @@ import { eventStatus, formatDates } from "../lib/status.js";
 import BotPanel from "./BotPanel.jsx";
 import { BulkScores, MissingLogos } from "./Round9.jsx";
 import { ControlRoom } from "./Round10.jsx";
+import { ActivityFeed, EditorKpis, EditorSearch } from "./Round11.jsx";
 import { missingLogos, openMatches } from "../lib/r9pure.js";
 
 const GROUPS = [
@@ -64,7 +65,10 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
   return (
     <div className="adhome">
       <p className="guidelink"><a className="btn" href="/admin/nouveautes">{tr("What's new and how it works")}</a></p>
+      {initial.admin && <EditorKpis initial={initial} />}
+      {initial.admin && <EditorSearch initial={initial} onOpen={onOpen} />}
       {initial.admin && <ControlRoom initial={initial} call={call} onDone={onDone} />}
+      {initial.admin && <ActivityFeed />}
       {initial.admin && <QuickLive initial={initial} call={call} onDone={onDone} />}
       {initial.admin && initial.admin.dayBoard && <DayBoard list={initial.admin.dayBoard} onOpen={onOpen} />}
       {initial.admin && initial.admin.checklist && initial.admin.checklist.length > 0 && <Checklist list={initial.admin.checklist} />}

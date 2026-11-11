@@ -12,9 +12,10 @@ import { deviceToken } from "./account.js";
 import { EVENT_NAMES, teamSlug } from "../lib/paths.js";
 import { ShareCard } from "./Fans.jsx";
 import { AccuracyChart } from "./Round10.jsx";
+import { MySpace } from "./Round11.jsx";
 
 /** The visitor's week: their predictions and what they earned, their teams' results. Read in the browser: nothing about them is on the page. */
-function Week({ matches }) {
+function Week({ matches, upcoming = [], open = [] }) {
   const tr = useT();
   const fav = useFavorites();
   const [me, setMe] = useState(null);
@@ -44,6 +45,7 @@ function Week({ matches }) {
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
       <SiteNav />
+      <MySpace upcoming={upcoming} open={open} />
       <p className="note">{tr("The last 7 days, for you: your predictions and your teams.")}</p>
       {!mine ? null : (
         <>
@@ -81,6 +83,6 @@ function Week({ matches }) {
   );
 }
 
-export default function WeekPage({ lang, matches }) {
-  return <LangProvider lang={lang}><Week matches={matches} /></LangProvider>;
+export default function WeekPage({ lang, matches, upcoming, open }) {
+  return <LangProvider lang={lang}><Week matches={matches} upcoming={upcoming} open={open} /></LangProvider>;
 }

@@ -13,6 +13,7 @@ import { EVENT_NAMES } from "../lib/paths.js";
 import Pickem from "./Pickem.jsx";
 import { SwipePicks } from "./Round8Bits.jsx";
 import { MvpPicks, StyleEditor } from "./Round9.jsx";
+import { PartTabs } from "./Round10.jsx";
 import { BadgeShowcase, DiscordLink, GroupBoard, Groups, Podium, SeasonTable, ShareCard } from "./Fans.jsx";
 
 function Top({ title, crumbs = [] }) {
@@ -110,8 +111,9 @@ function PredictionsView({ matches, ranking, pickem, group, groups }) {
     setMe((x) => ({ name: x.name || name.trim(), picks: { ...x.picks, [`${m.event}:${m.id}`]: team }, scores: { ...(x.scores || {}), [`${m.event}:${m.id}`]: score } }));
   };
   const fmt = useMemo(() => new Intl.DateTimeFormat(localeOf(tr.lang), { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }), [tr.lang]);
+  const [hub, setHub] = useState(group ? "ranking" : "open");
   return (
-    <div className="wrap">
+    <div className="wrap predhub" data-tab={hub}>
       <Top title={tr("Predictions")} crumbs={[[tr("Predictions")]]} />
       <p className="note">{tr("Pick the winner of each match before it starts. A point for every right pick.")}</p>
       {!token && <p className="err">{tr("Your browser blocks what predictions need to be kept.")}</p>}
@@ -121,12 +123,13 @@ function PredictionsView({ matches, ranking, pickem, group, groups }) {
       )}
       {err && <p className="err" role="alert">{err}</p>}
       {ok && <p className="okmsg" role="status">{ok}</p>}
+      <PartTabs value={hub} onChange={setHub} label={tr("Predictions")} items={[["open", `${tr("To predict")} (${matches.filter((m) => !me.picks[`${m.event}:${m.id}`]).length})`], ["qualify", tr("Who qualifies?")], ["mvp", "MVP"], ["ranking", tr("Rankings")], ["groups", tr("Groups")]]} />
       <div className="cols">
         <main>
-          {pickem && <Pickem events={pickem.events} boards={pickem.boards} token={token} name={me.name || name.trim()} />}
-          <MvpPicks name={me.name} />
-          {matches.length > 0 && token && <div className="swipeonly"><SwipePicks matches={matches} picks={me.picks} onPick={(m, team) => pick(m, team)} /></div>}
-          <section>
+          {pickem && <div data-part="qualify"><Pickem events={pickem.events} boards={pickem.boards} token={token} name={me.name || name.trim()} /></div>}
+          <div data-part="mvp"><MvpPicks name={me.name} /></div>
+          {matches.length > 0 && token && <div className="swipeonly" data-part="open"><SwipePicks matches={matches} picks={me.picks} onPick={(m, team) => pick(m, team)} /></div>}
+          <section data-part="open">
             <h2>{tr("Open matches")}</h2>
             {matches.length === 0 && <p className="note">{tr("No match to predict for now.")}</p>}
             <div className="predlist">
@@ -158,14 +161,14 @@ function PredictionsView({ matches, ranking, pickem, group, groups }) {
         </main>
         <aside>
           {group && (
-            <section>
+            <section data-part="ranking groups">
               <h2>{tr("Ranking")} · {group.name}</h2>
               <SeasonTable ranking={group.ranking} me={me.name} />
             </section>
           )}
-          <Groups token={token} group={group} named={!!me.name} />
-          <GroupBoard list={groups} />
-          <section>
+          <div data-part="groups"><Groups token={token} group={group} named={!!me.name} />
+          <GroupBoard list={groups} /></div>
+          <section data-part="ranking">
             <h2>{tr("Season ranking")}</h2>
             <p className="hint">{tr("1 point per right prediction, 1 more for the exact score, plus the points of Who qualifies?.")}</p>
             <Podium ranking={ranking} />

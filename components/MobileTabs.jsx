@@ -8,7 +8,7 @@ import { useLiveCount } from "./visual.jsx";
 const MORE = [
   ["/soiree", "Match night", "📺"], ["/moi", "My week", "🗓️"], ["/jeux", "Games of the day", "🎮"], ["/fantasy", "Fantasy", "⭐"], ["/quiz", "Quiz of the week", "❓"],
   ["/tierlist", "Tier list", "🔠"], ["/simulateur", "Qualification simulator", "🎲"], ["/puissance", "Power ranking", "⚡"], ["/stats", "Stats", "📊"], ["/rivalites", "Rivalries", "⚔️"],
-  ["/palmares", "Hall of fame", "🏆"], ["/equipes", "Compare teams", "⚖️"], ["/compare", "Compare", "👥"], ["/pays", "Countries", "🌍"], ["/transfers", "Transfers", "🔁"],
+  ["/saison", "The season's feed", "🗞️"], ["/palmares", "Hall of fame", "🏆"], ["/equipes", "Compare teams", "⚖️"], ["/compare", "Compare", "👥"], ["/pays", "Countries", "🌍"], ["/transfers", "Transfers", "🔁"],
   ["/lft", "LFT", "🔎"], ["/news", "News", "📰"], ["/format", "How the events work", "📘"], ["/archives", "Archives of past seasons", "🗄️"], ["/compte", "My account", "⚙️"], ["/about", "About", "ℹ️"],
 ];
 

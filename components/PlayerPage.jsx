@@ -19,6 +19,7 @@ import { AlertsButton } from "./MatchAlerts.jsx";
 import Trend from "./Trend.jsx";
 import { PlayerRadar } from "./Round8Bits.jsx";
 import { CareerTimeline } from "./Round10.jsx";
+import { PlayerHero } from "./Round11.jsx";
 
 /** A name, linked to its page on this site when it has one. */
 const Named = ({ href, title, children }) => (href ? <a href={href} title={title}>{children}</a> : <span title={title}>{children}</span>);
@@ -180,6 +181,7 @@ function View({ p }) {
           <div className="tlinks"><a href={`/compare?a=${encodeURIComponent(p.name)}`}>{tr("Compare")}</a>{links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer">{l.type} ↗</a>)}</div>
         </div>
       </div>
+      <PlayerHero p={p} />
       {p.tour && p.ranges && <PlayerRadar stats={p.tour} ranges={p.ranges} />}
       {p.lp && <CareerTimeline history={p.lp.history} />}
       {p.lpState === "pending" && <p className="note lpwait" role="status">{tr("Looking for this information…")}</p>}

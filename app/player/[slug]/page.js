@@ -10,6 +10,7 @@ import { LANG_COOKIE, normLang } from "../../../lib/i18n.js";
 import { lpData } from "../../../lib/lpdata.js";
 import { teamSlug } from "../../../lib/paths.js";
 import { outsiderProfile, playerProfile } from "../../../lib/playerstats.js";
+import { similarPlayers } from "../../../lib/round11.js";
 import { sharedPreview } from "../../../lib/preview.js";
 import { requestDue, requestFetch, updateDue } from "../../../lib/teamfetch.js";
 import { siteTeams } from "../../../lib/teams.js";
@@ -55,6 +56,8 @@ function load(slug, update = false) {
     realName: person.realName || (lp ? lp.name : ""),
     teamLogo: t ? t.logo : (dir.teams[person.teamSlug] || {}).logo || "", teamTag: t ? t.tag : "", teamOnSite: !!t,
     tour: playerTournament(tournamentStats(state, readDetails(getDb())), key),
+    // the players with the closest numbers
+    similar: similarPlayers(tournamentStats(state, readDetails(getDb())).players, key),
     // the spread of each number among the players of the site's events, for the radar
     ranges: (() => {
       const pool = tournamentStats(state, readDetails(getDb())).players.filter((x) => x.maps >= 4);

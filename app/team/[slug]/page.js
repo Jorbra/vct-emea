@@ -46,7 +46,9 @@ export default async function Page({ params, searchParams }) {
   const outside = p ? null : { name, tag: known ? known.tag : "", logo: known ? known.logo : "", pending: !entry };
   const entries = p ? readDetails(getDb()) : [];
   const tstats = p && tournamentStats(initial, entries).teams[key] ? { ...tournamentStats(initial, entries).teams[key], comps: extraStats(initial, entries).teamComps[key] || [] } : null;
-  return <TeamPage tstats={tstats} initial={p ? initial : null} slug={key} lang={lang} lp={lp} org={orgOf(teamInfo, key)} outside={outside} vlr={linkVlr(vlrEntry, dir)} updating={!entry || lpNow || vlrNow} />;
+  // each of its players' numbers, for the roster cards
+  const rosterStats = p ? tournamentStats(initial, entries).players.filter((x) => x.team && x.team.toLowerCase() === p.name.toLowerCase()).map(({ slug, name, r, acs, kd, maps, agents }) => ({ slug, name, r, acs, kd, maps, agent: agents[0] ? agents[0].name : "" })) : [];
+  return <TeamPage rosterStats={rosterStats} tstats={tstats} initial={p ? initial : null} slug={key} lang={lang} lp={lp} org={orgOf(teamInfo, key)} outside={outside} vlr={linkVlr(vlrEntry, dir)} updating={!entry || lpNow || vlrNow} />;
 }
 
 export async function generateMetadata({ params }) {

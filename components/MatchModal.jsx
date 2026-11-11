@@ -16,6 +16,7 @@ import { Flag } from "./TeamCard.jsx";
 import { Comments, MapPick, MotmVote } from "./Fans.jsx";
 import { Score, Skeleton, useTeamColor } from "./visual.jsx";
 import { PartTabs } from "./Round10.jsx";
+import { MatchPreview } from "./Round11.jsx";
 
 export { EVENT_NAMES };
 
@@ -250,6 +251,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
           </div>
         )}
         {page && <PartTabs value={tab} onChange={setTab} label={tr("Match")} items={[["summary", tr("Summary")], ["maps", tr("Maps")], ["stats", tr("Stats")], ["pronos", tr("Predictions")], ["comments", tr("Comments")]]} />}
+        {!done && !live && m.a && m.b && m.a.name && m.b.name && <div data-part="summary"><MatchPreview event={e.event} id={m.id} a={m.a.name} b={m.b.name} /></div>}
         <div data-part="summary"><Rosters a={m.a} b={m.b} /></div>
         {ex.maps.length > 0 && (
           <table className="mmmaps" data-part="maps summary">

@@ -102,6 +102,7 @@ export default function SearchBar() {
   };
   const onKey = (e) => {
     if (e.key === "Escape") { setOpen(false); e.currentTarget.blur(); return; }
+    if (e.key === "Enter" && (!flat.length || e.ctrlKey) && q.trim().length >= 2) { e.preventDefault(); window.location.assign(`/recherche?q=${encodeURIComponent(q.trim())}`); return; }
     if (!flat.length) return;
     if (e.key === "ArrowDown") { e.preventDefault(); setOpen(true); setCur((c) => (c + 1) % flat.length); }
     else if (e.key === "ArrowUp") { e.preventDefault(); setOpen(true); setCur((c) => (c - 1 + flat.length) % flat.length); }

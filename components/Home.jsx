@@ -27,6 +27,7 @@ import Stories from "./Stories.jsx";
 import { HomeCustomize, HomePoll } from "./Round8Bits.jsx";
 import { QualifiedStrip } from "./Round9.jsx";
 import { TodayCarousel } from "./Round10.jsx";
+import { HomeBento } from "./Round11.jsx";
 import { qualifiedTeams } from "../lib/r9pure.js";
 import { InstallButton } from "./Fans.jsx";
 import { TeamThemePicker } from "./visual.jsx";
@@ -223,6 +224,7 @@ function HomeView({ initial }) {
           <TodayPulse events={matchEvents} />
         </div>
       </div>
+      <div data-block="bento"><HomeBento initial={initial} /></div>
       <div data-block="strips"><HomeStrips events={matchEvents} state={initial} /></div>
       <div data-block="poll"><HomePoll /></div>
       <div data-block="qualified"><QualifiedStrip list={qualifiedTeams(initial)} /></div>

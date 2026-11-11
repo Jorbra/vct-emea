@@ -26,6 +26,7 @@ import { formatMatchTime } from "../lib/schedule.js";
 import { TeamThemeButton, WallpaperButton, useTeamColor } from "./visual.jsx";
 import { TeamTimeline } from "./Round8Bits.jsx";
 import { PartTabs } from "./Round10.jsx";
+import { RosterCards } from "./Round11.jsx";
 
 export default function TeamPage(props) {
   return (
@@ -395,7 +396,7 @@ function TeamTournament({ s }) {
   );
 }
 
-function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null }) {
+function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null, rosterStats = [] }) {
   const [part, setPart] = useState("overview");
   const tr = useT();
   useAutoRefresh();
@@ -451,6 +452,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null })
           <main>
             <div data-part="overview matches"><MatchStrip events={events} Crest={Crest} />
             <MatchStrip events={events} Crest={Crest} recent /></div>
+            <div data-part="players overview"><RosterCards list={rosterStats} /></div>
             <div data-part="overview players"><LpPeople lp={lp} /></div>
             <section data-part="matches">
               <h2>{tr("Matches")}</h2>

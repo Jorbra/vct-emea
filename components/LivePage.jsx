@@ -13,6 +13,7 @@ import { embedUrl } from "../lib/media.js";
 import { EVENT_NAMES } from "../lib/paths.js";
 import { formatMatchTime } from "../lib/schedule.js";
 import { TvMode } from "./Round9.jsx";
+import { EmptyState } from "./Round11.jsx";
 
 function View({ live, next }) {
   const tr = useT();
@@ -56,7 +57,7 @@ function View({ live, next }) {
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
       <SiteNav />
-      {live.length === 0 ? <p className="note">{tr("No match is being played right now.")}</p> : (
+      {live.length === 0 ? <EmptyState text={tr("No match is being played right now.")} /> : (
         <>
           {playable.length > 1 && (
             <div className="toggles"><label className="sw"><input type="checkbox" checked={multi} onChange={(e) => setMulti(e.target.checked)} /> {tr("Several streams at once (up to 4)")}</label></div>

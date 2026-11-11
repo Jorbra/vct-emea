@@ -224,7 +224,7 @@ export function BracketTools() {
 
 // ---- R1. the home page, arranged by the visitor
 
-export const HOME_BLOCKS = [["today", "Today (phones)"], ["live", "Featured match and next matches"], ["strips", "Today's matches"], ["poll", "Poll"], ["qualified", "Qualified teams"], ["hero", "Road to the Kickoff"], ["myteams", "My teams"], ["news", "News"], ["kickoff", "Kickoff teams"], ["events", "Events"], ["road", "Road to the Kickoff (steps)"], ["gc", "Game Changers"]];
+export const HOME_BLOCKS = [["today", "Today (phones)"], ["live", "Featured match and next matches"], ["bento", "At a glance"], ["strips", "Today's matches"], ["poll", "Poll"], ["qualified", "Qualified teams"], ["hero", "Road to the Kickoff"], ["myteams", "My teams"], ["news", "News"], ["kickoff", "Kickoff teams"], ["events", "Events"], ["road", "Road to the Kickoff (steps)"], ["gc", "Game Changers"]];
 const HOME_KEY = "vct-home-layout";
 
 export function HomeCustomize() {
@@ -270,7 +270,7 @@ export function PlayerRadar({ stats, ranges }) {
   const size = 220;
   const c = size / 2;
   const R = 80;
-  const pt = (i, v) => { const a = (Math.PI * 2 * i) / axes.length - Math.PI / 2; return [c + Math.cos(a) * R * v, c + Math.sin(a) * R * v]; };
+  const pt = (i, v) => { const a = (Math.PI * 2 * i) / axes.length - Math.PI / 2; return [Math.round((c + Math.cos(a) * R * v) * 100) / 100, Math.round((c + Math.sin(a) * R * v) * 100) / 100]; };
   const norm = (k) => { const [lo, hi] = ranges[k]; return Math.max(0.05, Math.min(1, (stats[k] - lo) / Math.max(0.0001, hi - lo))); };
   const poly = axes.map(([k], i) => pt(i, norm(k)).join(",")).join(" ");
   return (

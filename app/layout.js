@@ -9,10 +9,11 @@ import AccountSync from "../components/AccountSync";
 import MobileTabs from "../components/MobileTabs";
 import { LangProvider } from "../components/lang.jsx";
 import { ResultToast, TeamTheme } from "../components/visual.jsx";
-import { SPOILER_SCRIPT, SiteBanner } from "../components/Round6Bits.jsx";
+import { SiteBanner } from "../components/Round6Bits.jsx";
+import { HEAD_SCRIPT } from "../lib/headscripts.js";
 import { CommandPalette } from "../components/Round8Bits.jsx";
-import { ACCENT_SCRIPT, SiteFooter } from "../components/Round9.jsx";
-import { DENSITY_SCRIPT } from "../components/Round10.jsx";
+import { SiteFooter } from "../components/Round9.jsx";
+import { LiveTeamBanner, Welcome } from "../components/Round11.jsx";
 import { getDb } from "../lib/db.js";
 import { activeBanner } from "../lib/round6.js";
 
@@ -42,11 +43,13 @@ export default async function RootLayout({ children }) {
   const lang = normLang(jar.get(LANG_COOKIE)?.value);
   const theme = normTheme(jar.get(THEME_COOKIE)?.value);
   let banner = null;
+  let welcomeTeams = [];
+  try { const { getState } = await import("../lib/db.js"); welcomeTeams = (getState(getDb()).kickoff.teams || []).filter((t) => t && t.name).map((t) => ({ name: t.name, logo: t.logo || "", tag: t.tag || "" })); } catch { /* none */ }
   try { banner = activeBanner(getDb()); } catch { /* no database yet: no banner */ }
   return (
     <html lang={lang} dir={isRtl(lang) ? "rtl" : "ltr"} data-theme={theme} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: SPOILER_SCRIPT + ACCENT_SCRIPT + DENSITY_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: HEAD_SCRIPT }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
@@ -57,6 +60,7 @@ export default async function RootLayout({ children }) {
       <body>
         <a className="skip" href="#content">{makeT(lang)("Go to the content")}</a>
         {banner && <LangProvider lang={lang}><SiteBanner banner={banner} /></LangProvider>}
+        <LangProvider lang={lang}><LiveTeamBanner /><Welcome teams={welcomeTeams} /></LangProvider>
         <div id="content" tabIndex={-1}>{children}</div>
         <LangProvider lang={lang}><SiteFooter /></LangProvider>
         <EditorAccess lang={lang} isAdmin={await isAdmin()} />
