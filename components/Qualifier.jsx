@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useMemo, useRef, useState, useEffect } from "react";
-import { THIRD, buildBracket, matchId, podium, roundsFor } from "../lib/bracket.js";
+import { THIRD, buildBracket, matchId, podium, qualifiedOf, roundsFor } from "../lib/bracket.js";
 import { Crest } from "./Crest.jsx";
 import TeamCard from "./TeamCard.jsx";
 import { useT } from "./lang.jsx";
@@ -209,7 +209,9 @@ export default function Qualifier({ event, data, onGo, next = "playoffs", qualif
   const nameOf = (slot) => (slot && slots[slot - 1] ? slot : null);
   const by = (round) => bracket.matches.filter((m) => m.round === round);
   const losers = (round) => by(round).map((m) => nameOf(m.loser));
-  const [first, second, third, fourth] = podium(bracket).map(nameOf);
+  // the places that go on are known before the final (the semifinalists when 4 go on, the finalists when 2 do)
+  const top = qualifiedOf(bracket, Math.max(1, Math.min(4, qualify)));
+  const [first, second, third, fourth] = podium(bracket).map((p, i) => nameOf(i < top.length && top[i] ? top[i] : p));
   // Places are decided by the round a team went out in; inside a group the bracket order is kept.
   const rows = [
     { place: "1", ids: [first], cls: "p1", kick: qualify >= 1 },
