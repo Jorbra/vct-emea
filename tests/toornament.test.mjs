@@ -318,7 +318,7 @@ test("a bracket that is not full: the teams with a bye wait in round 2, the firs
   assert.equal(fillByes(rows.filter((r) => r.round !== 2)).length, 3);
 });
 
-test("a live match Toornament removes is no longer live; a result already on the site is not set live again", () => {
+test("a live match Toornament removes is no longer live; a result already on the site is not set live again", async () => {
   const db = fresh();
   round(db, start(), teams());
   const rows = start();
@@ -330,6 +330,11 @@ test("a live match Toornament removes is no longer live; a result already on the
   round(db, rows, teams());
   assert.ok(getMatchLive(db).meq1["third-1"]);
   // Toornament removes it: off the site's live matches
+  round(db, rows.filter((x) => x !== third), teams());
+  assert.equal((getMatchLive(db).meq1 || {})["third-1"], undefined);
+  // even when the last round forgot it was live (removed before this rule): a match Toornament does not list is not live
+  const { setMatchLive } = await import("../lib/db.js");
+  setMatchLive(db, { event: "meq1", id: "third-1", live: true, a: 0, b: 0 });
   round(db, rows.filter((x) => x !== third), teams());
   assert.equal((getMatchLive(db).meq1 || {})["third-1"], undefined);
   // the final is running on Toornament but already has a result on the site (from vlr.gg): not live
