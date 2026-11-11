@@ -20,7 +20,7 @@ import Trend from "./Trend.jsx";
 import { PlayerRadar } from "./Round8Bits.jsx";
 import { CareerTimeline } from "./Round10.jsx";
 import { PlayerHero } from "./Round11.jsx";
-import { AgentIcon, AgentList } from "./Assets.jsx";
+import { AgentIcon, AgentList, agentInfo } from "./Assets.jsx";
 
 /** A name, linked to its page on this site when it has one. */
 const Named = ({ href, title, children }) => (href ? <a href={href} title={title}>{children}</a> : <span title={title}>{children}</span>);
@@ -159,8 +159,11 @@ function View({ p }) {
     agent: src.agents && src.agents[0] ? src.agents[0].name.toUpperCase() : "",
     nums: [["Rating", fix(src.r, 2)], ["ACS", fix(src.acs)], ["K/D", fix(src.kd, 2)], [tr("Maps"), src.maps]],
   } : p.totals ? { agent: "", nums: [["ACS", p.totals.acs], ["K/D", p.totals.kd], ["Rating", p.totals.rating], [tr("Maps"), p.totals.maps]] } : null;
+  // the main agent's portrait behind the card and its colour for the numbers
+  const ag = hero && hero.agent ? agentInfo(hero.agent) : null;
+  const agentStyle = ag ? { "--agc": ag.color, ...(ag.portrait ? { "--agimg": `url(${ag.portrait})` } : {}) } : undefined;
   return (
-    <div className="wrap teampage">
+    <div className="wrap teampage playerpage" style={agentStyle}>
       <div className="topbar">
         <h1 className="brandh"><a className="homelink" href="/" title={tr("Home")}><EmeaMark /></a><span>{p.name}</span></h1>
         <SearchBar />
@@ -168,7 +171,7 @@ function View({ p }) {
       </div>
       <SiteNav />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › {p.team ? <><a href={teamHref(p.team)}>{p.team}</a> › </> : null}<span>{p.name}</span></nav>
-      <div className={"thead" + (hero ? " pcard" : "")} data-agent={hero ? hero.agent : undefined}>
+      <div className={"thead" + (hero ? " pcard" : "") + (ag ? " withagent" : "")} data-agent={hero ? (ag ? ag.name : hero.agent) : undefined}>
         {p.team ? (p.teamOnSite ? <Crest team={team} /> : <span className="thlogo"><LpImg f={p.teamLogo} /></span>) : null}
         <div>
           <div className="tname"><span className="pt"><Flag cc={p.cc} /><span>{p.name}</span><FollowStar slug={p.slug || teamSlug(p.name)} />{p.captain && <span className="tcapt" title={tr("Captain")}>C</span>}</span></div>
