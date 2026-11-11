@@ -5,6 +5,7 @@ import { useT } from "./lang.jsx";
 import { Crest } from "./Crest.jsx";
 import { Flag } from "./TeamCard.jsx";
 import { playerHref } from "../lib/playerstats.js";
+import { AgentList } from "./Assets.jsx";
 
 const COLS = [["r", "R", "Rating 2.0"], ["acs", "ACS", "Average Combat Score"], ["k", "K", "Kills"], ["d", "D", "Deaths"], ["a", "A", "Assists"], ["pm", "+/–", "Kills – Deaths"], ["kast", "KAST", "Kill, Assist, Trade, Survive %"], ["adr", "ADR", "Average Damage per Round"], ["hs", "HS%", "Headshot %"], ["fk", "FK", "First Kills"], ["fd", "FD", "First Deaths"], ["fpm", "+/–", "First Kills – First Deaths"]];
 const PCT = ["kast", "hs"];
@@ -29,7 +30,7 @@ function TeamTable({ team, rows }) {
                 <tr key={p.name}>
                   <td className="vlrp">
                     <span className="vlrname">{p.cc && <Flag cc={p.cc} />}{href ? <a href={href}>{p.name}</a> : p.name}</span>
-                    {p.agents && p.agents.length > 0 && <span className="vlragents">{p.agents.map(cap).join(", ")}</span>}
+                    {p.agents && p.agents.length > 0 && <span className="vlragents"><AgentList list={p.agents} size={20} /></span>}
                   </td>
                   {COLS.map(([k]) => <td key={k} className={SIGNED.includes(k) && p[k] ? (p[k] > 0 ? "vlrpos" : "vlrneg") : k === "acs" ? "strong" : ""}>{show(k, p[k])}</td>)}
                 </tr>

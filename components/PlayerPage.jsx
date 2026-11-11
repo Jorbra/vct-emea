@@ -20,6 +20,7 @@ import Trend from "./Trend.jsx";
 import { PlayerRadar } from "./Round8Bits.jsx";
 import { CareerTimeline } from "./Round10.jsx";
 import { PlayerHero } from "./Round11.jsx";
+import { AgentIcon, AgentList } from "./Assets.jsx";
 
 /** A name, linked to its page on this site when it has one. */
 const Named = ({ href, title, children }) => (href ? <a href={href} title={title}>{children}</a> : <span title={title}>{children}</span>);
@@ -115,7 +116,7 @@ function Tournament({ t }) {
         <div><b>{t.maps}</b><span>{tr("Maps")}</span></div>
       </div>
       <Trend matches={t.matches} />
-      {t.agents.length > 0 && <p className="note">{tr("Agents")} : {t.agents.map((a) => `${cap(a.name)} (${a.n})`).join(" · ")}</p>}
+      {t.agents.length > 0 && <p className="note agline">{tr("Agents")} : {t.agents.map((a) => <span key={a.name}><AgentIcon name={a.name} size={24} /> {a.n}</span>)}</p>}
       <div className="tablewrap">
         <table>
           <thead><tr><th>{tr("Match")}</th><th>{tr("Score")}</th><th>R</th><th>ACS</th><th>K/D/A</th><th>{tr("Agents")}</th></tr></thead>
@@ -124,7 +125,7 @@ function Tournament({ t }) {
               <tr key={m.event + m.id} className={m.won ? "w" : "l"}>
                 <td><a href={`/match/${m.event}/${m.id}`}>{tr("vs {team}", { team: m.opponent })}</a> <small className="muted">{m.round.map(([k, v]) => tr(k, v)).join(" · ")}</small></td>
                 <td>{m.score[0] ?? "–"} – {m.score[1] ?? "–"}</td>
-                <td>{fix(m.r)}</td><td><b>{m.acs ?? "–"}</b></td><td>{m.k}/{m.d}/{m.a}</td><td>{m.agents.map(cap).join(", ")}</td>
+                <td>{fix(m.r)}</td><td><b>{m.acs ?? "–"}</b></td><td>{m.k}/{m.d}/{m.a}</td><td><AgentList list={m.agents} size={20} /></td>
               </tr>
             ))}
           </tbody>

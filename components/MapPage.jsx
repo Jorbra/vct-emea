@@ -7,6 +7,7 @@ import SearchBar from "./SearchBar.jsx";
 import SiteNav from "./SiteNav.jsx";
 import { Flag } from "./TeamCard.jsx";
 import { EVENT_NAMES, teamHref } from "../lib/paths.js";
+import { AgentList, mapSplash } from "./Assets.jsx";
 
 function View({ card, event, events }) {
   const tr = useT();
@@ -20,6 +21,7 @@ function View({ card, event, events }) {
       </div>
       <SiteNav />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › <a href="/stats">{tr("Stats")}</a> › {card ? card.map : tr("Map")}</nav>
+      {card && mapSplash(card.map) && <div className="maphero" style={{ backgroundImage: `url(${mapSplash(card.map)})` }}><b>{card.map}</b></div>}
       <div className="tabs sub" role="tablist" aria-label={tr("Event")}>
         <a role="tab" className="tablink" aria-selected={!event} href={base}>{tr("All events")}</a>
         {events.map((e) => <a key={e} role="tab" className="tablink" aria-selected={e === event} href={`${base}?e=${e}`}>{tr(EVENT_NAMES[e] || e)}</a>)}
@@ -64,7 +66,7 @@ function View({ card, event, events }) {
               <h2>{tr("Most played compositions")}</h2>
               <table className="vlrtable statstable">
                 <thead><tr><th className="vlrp">{tr("Agents")}</th><th>{tr("Played")}</th><th>{tr("Won")}</th><th>%</th></tr></thead>
-                <tbody>{card.comps.map((c, i) => <tr key={i}><td className="vlrp">{c.agents.map((a) => a.charAt(0).toUpperCase() + a.slice(1)).join(", ")}</td><td>{c.played}</td><td>{c.won}</td><td>{Math.round((c.won / c.played) * 100)}%</td></tr>)}</tbody>
+                <tbody>{card.comps.map((c, i) => <tr key={i}><td className="vlrp"><AgentList list={c.agents} size={24} /></td><td>{c.played}</td><td>{c.won}</td><td>{Math.round((c.won / c.played) * 100)}%</td></tr>)}</tbody>
               </table>
             </section>
           )}

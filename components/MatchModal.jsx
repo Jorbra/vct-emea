@@ -17,6 +17,7 @@ import { Comments, MapPick, MotmVote } from "./Fans.jsx";
 import { Score, Skeleton, useTeamColor } from "./visual.jsx";
 import { PartTabs } from "./Round10.jsx";
 import { MatchPreview } from "./Round11.jsx";
+import { mapList } from "./Assets.jsx";
 
 export { EVENT_NAMES };
 
@@ -228,7 +229,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
         {page && frieze.length > 0 && (
           <div className="mfrieze" style={{ ...(colorA ? { "--ta": colorA } : {}), ...(colorB ? { "--tb": colorB } : {}) }} aria-label={tr("Maps")}>
             {frieze.map((x, i) => (
-              <span key={i} data-map={x.map} className={"mfmap spoil " + (x.a > x.b ? "wa" : x.b > x.a ? "wb" : "")}>
+              <span key={i} data-map={x.map} className={"mfmap spoil " + (x.a > x.b ? "wa" : x.b > x.a ? "wb" : "")} style={mapList(x.map) ? { "--mapimg": `url(${mapList(x.map)})` } : undefined}>
                 <small>{tr("Map #{n}", { n: i + 1 })}</small><b>{x.map || "?"}</b><em>{x.a}–{x.b}</em>
               </span>
             ))}

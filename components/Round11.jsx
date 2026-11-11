@@ -7,6 +7,7 @@ import { fanToken } from "./Fans.jsx";
 import { useFavorites } from "./favorites.js";
 import { EVENT_NAMES, teamSlug } from "../lib/paths.js";
 import { allMatches } from "../lib/matchlist.js";
+import { AgentIcon, AgentList } from "./Assets.jsx";
 
 const safe = (f, d) => { try { return f(); } catch { return d; } };
 const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
@@ -233,13 +234,13 @@ export function PlayerHero({ p }) {
             <svg viewBox="0 0 100 100" width="120" height="120" role="img" aria-label={tr("Agents played")}>
               {arcs.length === 1 ? <circle cx="50" cy="50" r="40" fill="none" stroke={COLORS[0]} strokeWidth="14" /> : arcs.map(({ i, start, end }) => <path key={i} d={arc(start, end - 0.004)} fill="none" stroke={COLORS[i]} strokeWidth="14" />)}
             </svg>
-            <figcaption>{agents.map((a, i) => <span key={a.name}><i style={{ background: COLORS[i] }} />{a.name.charAt(0).toUpperCase() + a.name.slice(1)} · {a.n}</span>)}</figcaption>
+            <figcaption>{agents.map((a, i) => <span key={a.name}><i style={{ background: COLORS[i] }} /><AgentIcon name={a.name} size={22} /> {a.name.charAt(0).toUpperCase() + a.name.slice(1)} · {a.n}</span>)}</figcaption>
           </figure>
         )}
         {recent.length > 0 && (
           <div className="phrecent">
             <h3 className="sub">{tr("Last matches")}</h3>
-            {recent.map((g) => <a key={g.event + g.id} href={`/match/${g.event}/${g.id}`} className={"phm " + (g.won ? "w" : "l")}><span>{g.won ? tr("W") : tr("L")}</span><span>vs {g.opponent}</span><b>{g.r != null ? g.r.toFixed(2) : "–"}</b><small>{g.acs ?? "–"} ACS</small></a>)}
+            {recent.map((g) => <a key={g.event + g.id} href={`/match/${g.event}/${g.id}`} className={"phm " + (g.won ? "w" : "l")}><span>{g.won ? tr("W") : tr("L")}</span><span>vs {g.opponent}</span><b>{g.r != null ? g.r.toFixed(2) : "–"}</b><small>{g.acs ?? "–"} ACS</small>{g.agents && g.agents[0] ? <AgentList list={g.agents.slice(0, 1)} size={18} /> : null}</a>)}
           </div>
         )}
       </div>
@@ -265,7 +266,7 @@ export function RosterCards({ list }) {
         <a key={p.slug} href={`/player/${p.slug}`} className="rcard">
           <span className="rcav" aria-hidden="true">{p.name.charAt(0).toUpperCase()}</span>
           <b>{p.name}</b>
-          <small>{p.agent ? p.agent.charAt(0).toUpperCase() + p.agent.slice(1) : ""}</small>
+          {p.agent ? <AgentIcon name={p.agent} size={26} label /> : null}
           <div className="rcnums"><span><b>{p.r != null ? p.r.toFixed(2) : "–"}</b>R</span><span><b>{p.acs ?? "–"}</b>ACS</span><span><b>{p.kd != null ? Number(p.kd).toFixed(2) : "–"}</b>K/D</span></div>
         </a>
       ))}</div>

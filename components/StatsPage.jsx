@@ -9,6 +9,7 @@ import SiteNav from "./SiteNav.jsx";
 import { Flag } from "./TeamCard.jsx";
 import { EVENT_NAMES, teamSlug } from "../lib/paths.js";
 import { AgentMapTable, FormList } from "./Round10.jsx";
+import { AgentIcon, AgentList, MapThumb } from "./Assets.jsx";
 
 const PCOLS = [["maps", "Maps"], ["r", "R"], ["acs", "ACS"], ["kd", "K/D"], ["kast", "KAST"], ["adr", "ADR"], ["hs", "HS%"], ["k", "K"], ["d", "D"], ["a", "A"], ["fk", "FK"], ["fd", "FD"]];
 const PCT = ["kast", "hs"];
@@ -70,7 +71,7 @@ function Players({ list }) {
                 <td>{i + 1}</td>
                 <td className="vlrp">
                   <span className="vlrname">{p.cc && <Flag cc={p.cc} />}<a href={`/player/${p.slug}`}>{p.name}</a></span>
-                  <span className="vlragents">{p.team ? <a href={`/team/${teamSlug(p.team)}`}>{p.team}</a> : null}{p.agents.length ? ` · ${p.agents.slice(0, 3).map((a) => cap(a.name)).join(", ")}` : ""}</span>
+                  <span className="vlragents">{p.team ? <a href={`/team/${teamSlug(p.team)}`}>{p.team}</a> : null}{p.agents.length ? <> · <AgentList list={p.agents.slice(0, 3).map((a) => a.name)} size={18} /></> : null}</span>
                 </td>
                 {PCOLS.map(([k]) => <td key={k} className={k === sort ? "strong" : ""}>{fmt(k, p[k])}</td>)}
               </tr>
@@ -122,7 +123,7 @@ function Maps({ maps, event }) {
         <tbody>
           {maps.map((m) => (
             <tr key={m.map}>
-              <td className="vlrp"><a href={`/map/${encodeURIComponent(m.map.toLowerCase())}${event ? `?e=${event}` : ""}`}><b>{m.map}</b></a></td>
+              <td className="vlrp"><a href={`/map/${encodeURIComponent(m.map.toLowerCase())}${event ? `?e=${event}` : ""}`}><MapThumb map={m.map} /></a></td>
               <td>{m.played}</td>
               <td>{total ? Math.round((m.played / total) * 100) : 0}%</td>
               <td>{m.attack != null ? `${m.attack}%` : "–"}</td>
@@ -147,7 +148,7 @@ function Agents({ list }) {
         <thead><tr><th className="vlrp">{tr("Agent")}</th><th>{tr("Picked")}</th><th>{tr("Pick rate")}</th><th>{tr("Maps won")}</th><th>{tr("Best players")}</th></tr></thead>
         <tbody>{list.map((a) => (
           <tr key={a.agent}>
-            <td className="vlrp"><b>{a.name}</b></td>
+            <td className="vlrp"><AgentIcon name={a.name} size={30} label /></td>
             <td>{a.picks}</td>
             <td>{total ? Math.round((a.picks / (total / 5)) * 100) : 0}%</td>
             <td>{a.pct}%</td>
