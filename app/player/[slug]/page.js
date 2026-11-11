@@ -11,6 +11,7 @@ import { lpData } from "../../../lib/lpdata.js";
 import { teamSlug } from "../../../lib/paths.js";
 import { outsiderProfile, playerProfile } from "../../../lib/playerstats.js";
 import { similarPlayers } from "../../../lib/round11.js";
+import { ratingByMap } from "../../../lib/round13.js";
 import { sharedPreview } from "../../../lib/preview.js";
 import { requestDue, requestFetch, updateDue } from "../../../lib/teamfetch.js";
 import { siteTeams } from "../../../lib/teams.js";
@@ -55,7 +56,7 @@ function load(slug, update = false) {
     ...person, onSite: !!site, cc: person.cc || (lp && lp.nationality[0] ? lp.nationality[0].cc : ""),
     realName: person.realName || (lp ? lp.name : ""),
     teamLogo: t ? t.logo : (dir.teams[person.teamSlug] || {}).logo || "", teamTag: t ? t.tag : "", teamOnSite: !!t,
-    tour: playerTournament(tournamentStats(state, readDetails(getDb())), key),
+    tour: (() => { const t = playerTournament(tournamentStats(state, readDetails(getDb())), key); return t ? { ...t, byMap: ratingByMap(readDetails(getDb()), key) } : t; })(),
     // the players with the closest numbers
     similar: similarPlayers(tournamentStats(state, readDetails(getDb())).players, key),
     // the spread of each number among the players of the site's events, for the radar

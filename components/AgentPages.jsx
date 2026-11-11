@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
 import { ThemeSwitch } from "./theme.jsx";
 import { EmeaMark } from "./Brand.jsx";
@@ -7,6 +8,7 @@ import SearchBar from "./SearchBar.jsx";
 import SiteNav from "./SiteNav.jsx";
 import { AgentIcon, MapThumb } from "./Assets.jsx";
 import { EmptyState, SectionHead } from "./Round11.jsx";
+import { AgentDuel } from "./Round13.jsx";
 
 function Top({ title }) {
   const tr = useT();
@@ -79,18 +81,28 @@ export const AgentPage = (p) => <LangProvider lang={p.lang}><Agent {...p} /></La
 
 function Agents({ list }) {
   const tr = useT();
+  // a role to show only its agents
+  const [role, setRole] = useState("");
+  const roles = [...new Set(list.map((x) => x.role).filter(Boolean))];
+  const shown = role ? list.filter((x) => x.role === role) : list;
   return (
     <div className="wrap teampage">
       <Top title={tr("Agents")} />
-      <p className="note">{tr("The agents played on the site's events, most picked first.")}</p>
+      <p className="note">{tr("The agents played on the site's events, most picked first.")} <a className="btn" href="/agent/duel">⚔️ {tr("Compare two agents")}</a></p>
       {list.length === 0 ? <EmptyState text={tr("Not played on the site's events yet.")} /> : (
-        <div className="aggrid">{list.map((a) => (
+        <>
+        <div className="chips rolechips" role="group" aria-label={tr("Role")}>
+          <button type="button" className={role ? "" : "on"} aria-pressed={!role} onClick={() => setRole("")}>{tr("All")}</button>
+          {roles.map((r) => <button key={r} type="button" className={role === r ? "on" : ""} aria-pressed={role === r} onClick={() => setRole(r)}>{tr(r)}</button>)}
+        </div>
+        <div className="aggrid">{shown.map((a) => (
           <a key={a.key} href={`/agent/${a.key}`} className="agcard" style={{ "--agc": a.color || "var(--lime)", ...(a.portrait ? { "--agimg": `url(${a.portrait})` } : {}) }}>
             <b>{a.name}</b>
             <small>{a.role ? tr(ROLE[a.role] || a.role) : ""}</small>
-            <span>{a.share}% · {a.pct}% {tr("won")}</span>
+            <span>{a.share}% {tr("of the teams")} · {a.pct}% {tr("won")}</span>
           </a>
         ))}</div>
+        </>
       )}
     </div>
   );
@@ -117,3 +129,17 @@ function Maps({ list }) {
   );
 }
 export const MapsPage = (p) => <LangProvider lang={p.lang}><Maps {...p} /></LangProvider>;
+
+// ---- two agents side by side
+
+function Duel({ duel, all }) {
+  const tr = useT();
+  return (
+    <div className="wrap teampage">
+      <Top title={tr("Agent duel")} />
+      <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › <a href="/agent">{tr("Agents")}</a> › <span>{tr("Agent duel")}</span></nav>
+      <AgentDuel duel={duel} all={all} />
+    </div>
+  );
+}
+export const AgentDuelPage = (p) => <LangProvider lang={p.lang}><Duel {...p} /></LangProvider>;

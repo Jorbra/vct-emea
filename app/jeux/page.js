@@ -6,7 +6,7 @@ import { gameData } from "../../lib/gamedata.js";
 import { LANG_COOKIE, normLang } from "../../lib/i18n.js";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Jeux du jour · VCT EMEA", description: "Joueur mystère, plus ou moins, logo mystère : trois jeux Valorant EMEA, nouveaux chaque jour." };
+export const metadata = { title: "Jeux du jour · VCT EMEA", description: "Joueur mystère, plus ou moins, logo mystère, agent mystère : quatre jeux Valorant EMEA, nouveaux chaque jour." };
 
 /** The daily games: what can be guessed (names only), the day's best and how many played. */
 export default async function Page() {
@@ -17,7 +17,7 @@ export default async function Page() {
   return (
     <GamesPage
       day={day} available={available}
-      players={data.players.map((p) => p.name).sort((a, b) => a.localeCompare(b))} teams={data.teams}
+      players={data.players.map((p) => p.name).sort((a, b) => a.localeCompare(b))} teams={data.teams} agents={data.agents}
       rankings={Object.fromEntries(available.map((g) => [g, dailyRanking(db, g, day)]))} counts={dailyPlayers(db, day)}
       lang={normLang((await cookies()).get(LANG_COOKIE)?.value)}
     />

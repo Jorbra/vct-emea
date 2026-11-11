@@ -17,7 +17,8 @@ import { Comments, MapPick, MotmVote } from "./Fans.jsx";
 import { Score, Skeleton, useTeamColor } from "./visual.jsx";
 import { PartTabs } from "./Round10.jsx";
 import { MatchPreview } from "./Round11.jsx";
-import { mapList } from "./Assets.jsx";
+import { MatchComps, Veto } from "./Round13.jsx";
+import { mapList, mapSplash } from "./Assets.jsx";
 
 export { EVENT_NAMES };
 
@@ -221,7 +222,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
           <span>{label}{m.bo ? ` · Bo${m.bo}` : ""}</span>
         </div>
         <div className="mmstate">{live ? <LiveBadge /> : done ? <span className="evstate done">{tr("Finished")}</span> : <span className="evstate">{tr("Upcoming")}</span>}{when && <span className="mmwhen">{when}</span>}</div>
-        <div className="mmvs" style={{ ...(colorA ? { "--ta": colorA } : {}), ...(colorB ? { "--tb": colorB } : {}) }}>
+        <div className={"mmvs" + (page && frieze.length && mapSplash(frieze[frieze.length - 1].map) ? " withmap" : "")} style={{ ...(colorA ? { "--ta": colorA } : {}), ...(colorB ? { "--tb": colorB } : {}), ...(page && frieze.length && mapSplash(frieze[frieze.length - 1].map) ? { "--mapbg": `url(${mapSplash(frieze[frieze.length - 1].map)})` } : {}) }}>
           {team(m.a, "a")}
           <Score className={"mmscore" + (live ? " lv" : "")} value={score} />
           {team(m.b, "b")}
@@ -235,6 +236,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
             ))}
           </div>
         )}
+        {page && details && <div data-part="summary maps" className="spoil"><Veto list={details.veto} /><MatchComps details={details} a={name(m.a)} b={name(m.b)} /></div>}
         {live && (live.maps || []).length > 0 && (
           <div className="mmlive">
             <div className="mmlivemaps">{live.maps.map((x) => <span key={x.map} data-map={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>

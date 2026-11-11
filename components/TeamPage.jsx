@@ -27,7 +27,7 @@ import { TeamThemeButton, WallpaperButton, useTeamColor } from "./visual.jsx";
 import { TeamTimeline } from "./Round8Bits.jsx";
 import { PartTabs } from "./Round10.jsx";
 import { RosterCards } from "./Round11.jsx";
-import { AgentList, MapThumb } from "./Assets.jsx";
+import { TeamCompCards } from "./Round13.jsx";
 
 export default function TeamPage(props) {
   return (
@@ -381,12 +381,7 @@ function TeamTournament({ s }) {
       {(s.comps || []).length > 0 && (
         <>
           <h3>{tr("Compositions by map")}</h3>
-          <div className="tablewrap">
-            <table>
-              <thead><tr><th>{tr("Map")}</th><th>{tr("Agents")}</th><th>{tr("Played")}</th><th>{tr("Won")}</th></tr></thead>
-              <tbody>{s.comps.map((c, i) => <tr key={i}><td><MapThumb map={c.map} /></td><td><AgentList list={c.agents} size={24} /></td><td>{c.played}</td><td>{c.won}</td></tr>)}</tbody>
-            </table>
-          </div>
+          <TeamCompCards comps={s.comps} />
         </>
       )}
       {s.best.length > 0 && (

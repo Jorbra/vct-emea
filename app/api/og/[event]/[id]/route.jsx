@@ -4,6 +4,7 @@ import { getDb, getState } from "../../../../../lib/db.js";
 import { eventData, matchesOf } from "../../../../../lib/matchlist.js";
 import { EVENT_NAMES } from "../../../../../lib/paths.js";
 import { TIME_EVENTS } from "../../../../../lib/schedule.js";
+import ASSETS from "../../../../../lib/valorant-assets.json";
 
 export const dynamic = "force-dynamic";
 
@@ -42,10 +43,17 @@ export async function GET(_req, { params }) {
   const middle = done ? scoreLabel(m, (x) => (x === "Forfeit" ? "FORFAIT" : x === "Win" ? "VICTOIRE" : x), ":") : live ? `${live.a ?? 0} : ${live.b ?? 0}` : "VS";
   const ex = (state.extra && state.extra[event] && state.extra[event][id]) || {};
   const maps = (live && live.maps ? live.maps : ex.maps || []).filter((x) => x.a != null && x.b != null).slice(0, 5);
+  // the last map played behind the picture
+  const lastMap = maps.length ? String(maps[maps.length - 1].map || "").toLowerCase() : "";
+  const mapKey = Object.keys(ASSETS.maps).find((k) => k.toLowerCase() === lastMap);
+  const splash = mapKey ? ASSETS.maps[mapKey].splash : "";
   const round = m.round.map(([k, v]) => String(k).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ""))).join(" · ");
   return new ImageResponse(
     (
-      <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", background: "#0c0e13", padding: 56, fontFamily: "sans-serif", borderTop: `10px solid ${live ? "#ff4655" : "#c9f03c"}` }}>
+      <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", background: "#0c0e13", padding: 56, fontFamily: "sans-serif", borderTop: `10px solid ${live ? "#ff4655" : "#c9f03c"}`, position: "relative" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {splash ? <img src={splash} width={1200} height={675} style={{ position: "absolute", left: 0, top: -30, opacity: 0.3 }} alt="" /> : null}
+        {splash ? <div style={{ display: "flex", position: "absolute", left: 0, top: 0, width: "100%", height: "100%", background: "linear-gradient(180deg, rgba(12,14,19,0.6), rgba(12,14,19,0.92))" }} /> : null}
         <div style={{ display: "flex", justifyContent: "space-between", color: "#c8f03c", fontSize: 34, fontWeight: 700 }}>
           <span>VCT EMEA</span>
           <span style={{ color: live ? "#ff5a5f" : "#a0a09c" }}>{live ? "LIVE" : done ? "FINAL" : m.bo ? `Bo${m.bo}` : ""}</span>

@@ -195,12 +195,37 @@ function MysteryLogo({ teams, day, onEnd }) {
   );
 }
 
+// ---- mystery agent
+
+function MysteryAgent({ agents, day, onEnd }) {
+  const tr = useT();
+  const { g, error, busy, play } = useGame("agent", onEnd);
+  if (!g) return error ? <p className="note">{error}</p> : <p className="note">…</p>;
+  return (
+    <>
+      <p className="note">{tr("Which agent is this? 5 guesses, the picture widens after each one.")}</p>
+      <div className={"gagent" + (g.done ? " done" : "")}><img src={`/api/jeux/agent?d=${day}`} alt={tr("Mystery agent")} style={{ transform: `scale(${g.zoom})`, transformOrigin: g.at }} draggable={false} /></div>
+      {g.role && !g.done && <p className="hint">💡 {tr("Role")} : <b>{tr(g.role)}</b></p>}
+      {!g.done && <Guess id="gagents" list={agents} onPick={play} busy={busy} placeholder={tr("An agent's name")} />}
+      {error && <p className="err" role="alert">{error}</p>}
+      {g.guesses.length > 0 && <ul className="gtries">{g.guesses.map((x) => <li key={x.name} className={x.ok ? "ok" : "ko"}>{x.ok ? "✅" : "❌"} {x.name}</li>)}</ul>}
+      {!g.done && <p className="hint">{tr("{n} guesses left", { n: 5 - g.guesses.length })}</p>}
+      {g.done && (
+        <>
+          <p className={"gend " + (g.won ? "ok" : "ko")}>{g.won ? tr("Found in {n}!", { n: g.guesses.length }) : tr("Missed. It was:")} <a href={`/agent/${g.reveal.key}`}>{g.reveal.name}</a></p>
+          <Share game="agent" g={g} day={day} />
+        </>
+      )}
+    </>
+  );
+}
+
 // ---- the page
 
-const NAMES = { joueur: "Mystery player", duel: "Higher or lower", logo: "Mystery logo" };
-const ICONS = { joueur: "🕵️", duel: "⚖️", logo: "🛡️" };
+const NAMES = { joueur: "Mystery player", duel: "Higher or lower", logo: "Mystery logo", agent: "Mystery agent" };
+const ICONS = { joueur: "🕵️", duel: "⚖️", logo: "🛡️", agent: "🦸" };
 
-function Games({ day, available, players, teams, rankings, counts }) {
+function Games({ day, available, players, teams, agents = [], rankings, counts }) {
   const tr = useT();
   const [me, setMe] = useState(null);
   const [open, setOpen] = useState(available[0] || "");
@@ -215,7 +240,7 @@ function Games({ day, available, players, teams, rankings, counts }) {
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
       <SiteNav />
-      <p className="note">{tr("Three new games every day at midnight, the same for everyone. Play each one once, share your result, and keep your streak going.")}</p>
+      <p className="note">{tr("Four new games every day at midnight, the same for everyone. Play each one once, share your result, and keep your streak going.")}</p>
       <div className="ghub">
         <div className="gstreakbox"><b>🔥 {me ? me.streak : "–"}</b><span>{tr("days in a row")}</span></div>
         {available.map((k) => (
@@ -234,6 +259,7 @@ function Games({ day, available, players, teams, rankings, counts }) {
           {open === "joueur" && <MysteryPlayer players={players} day={day} onEnd={refresh} />}
           {open === "duel" && <HigherLower day={day} onEnd={refresh} />}
           {open === "logo" && <MysteryLogo teams={teams} day={day} onEnd={refresh} />}
+          {open === "agent" && <MysteryAgent agents={agents} day={day} onEnd={refresh} />}
           <h3 className="sub">{tr("Today's best")}</h3>
           {(rankings[open] || []).length === 0 ? <p className="hint">{tr("Nobody yet. Your name in the predictions puts you here.")}</p> : (
             <ol className="quizrank">{rankings[open].map((r, i) => <li key={r.name}><span>{["🥇", "🥈", "🥉"][i] || `${i + 1}.`}</span> {r.name} <b>{open === "duel" ? `${r.score}/10` : `${r.score} pts`}</b></li>)}</ol>

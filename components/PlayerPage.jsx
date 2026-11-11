@@ -20,6 +20,7 @@ import Trend from "./Trend.jsx";
 import { PlayerRadar } from "./Round8Bits.jsx";
 import { CareerTimeline } from "./Round10.jsx";
 import { PlayerHero } from "./Round11.jsx";
+import { RatingByMap } from "./Round13.jsx";
 import { AgentIcon, AgentList, agentInfo } from "./Assets.jsx";
 
 /** A name, linked to its page on this site when it has one. */
@@ -116,6 +117,7 @@ function Tournament({ t }) {
         <div><b>{t.maps}</b><span>{tr("Maps")}</span></div>
       </div>
       <Trend matches={t.matches} />
+      <RatingByMap list={t.byMap} />
       {t.agents.length > 0 && <p className="note agline">{tr("Agents")} : {t.agents.map((a) => <span key={a.name}><AgentIcon name={a.name} size={24} /> {a.n}</span>)}</p>}
       <div className="tablewrap">
         <table>

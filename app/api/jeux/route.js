@@ -19,7 +19,7 @@ export async function POST(req) {
   if (b.move == null) return json(readGame(db, data.puzzles, { token: b.token, game: String(b.game || "") }));
   const ip = "jeux:" + (req.headers.get("x-forwarded-for") || "local").split(",")[0].trim();
   if (tooManyAttempts(ip)) return NextResponse.json({ error: "Too many attempts. Try again in a few minutes." }, { status: 429 });
-  const r = playMove(db, data.puzzles, { players: data.players, teams: data.teams }, { token: b.token, game: String(b.game || ""), move: String(b.move).slice(0, 60) });
+  const r = playMove(db, data.puzzles, { players: data.players, teams: data.teams, agents: data.agents }, { token: b.token, game: String(b.game || ""), move: String(b.move).slice(0, 60) });
   if (!r.ok && r.status !== 400) recordFailure(ip);
   return json(r);
 }

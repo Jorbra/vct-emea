@@ -23,6 +23,7 @@ import { MatchStrip } from "./matchTime.jsx";
 import { MatchModalProvider } from "./MatchModal.jsx";
 import HomeNext from "./HomeNext.jsx";
 import FeaturedMatch from "./FeaturedMatch.jsx";
+import { Spotlight, ThemeSuggest } from "./Round13.jsx";
 import Stories from "./Stories.jsx";
 import { HomeCustomize, HomePoll } from "./Round8Bits.jsx";
 import { QualifiedStrip } from "./Round9.jsx";
@@ -154,6 +155,7 @@ function MyTeams({ initial }) {
     <section>
       <h2>★ {tr("My teams")}</h2>
       <p><AlertsButton /></p>
+      <ThemeSuggest teams={mine} />
       <div className="torg">
         {mine.map((t) => <a key={t.name} href={teamHref(t.name)}><Crest team={t} />{t.name}</a>)}
       </div>
@@ -165,7 +167,7 @@ function MyTeams({ initial }) {
   );
 }
 
-function HomeView({ initial }) {
+function HomeView({ initial, spot = [] }) {
   const tr = useT();
   const ev = useMemo(() => eventStatus(initial), [initial]);
   const info = initial.info || {};
@@ -225,6 +227,7 @@ function HomeView({ initial }) {
         </div>
       </div>
       <div data-block="bento"><HomeBento initial={initial} /></div>
+      <div data-block="spotlight"><Spotlight list={spot} /></div>
       <div data-block="strips"><HomeStrips events={matchEvents} state={initial} /></div>
       <div data-block="poll"><HomePoll /></div>
       <div data-block="qualified"><QualifiedStrip list={qualifiedTeams(initial)} /></div>
