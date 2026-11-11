@@ -26,6 +26,7 @@ import FeaturedMatch from "./FeaturedMatch.jsx";
 import Stories from "./Stories.jsx";
 import { HomeCustomize, HomePoll } from "./Round8Bits.jsx";
 import { QualifiedStrip } from "./Round9.jsx";
+import { TodayCarousel } from "./Round10.jsx";
 import { qualifiedTeams } from "../lib/r9pure.js";
 import { InstallButton } from "./Fans.jsx";
 import { TeamThemePicker } from "./visual.jsx";
@@ -214,6 +215,7 @@ function HomeView({ initial }) {
       {matchEvents.some((e) => e.items.some((m) => e.live[m.id] && m.sa == null)) && <div className="livesweep" aria-hidden="true" />}
       <Stories events={matchEvents} />
       <HomeCustomize />
+      <div data-block="today" className="mobonly"><TodayCarousel events={matchEvents} /></div>
       <div className="homehead" data-block="live">
         <FeaturedMatch events={matchEvents} />
         <div className="homeside">

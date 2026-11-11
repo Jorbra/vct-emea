@@ -25,6 +25,7 @@ import { siteHref, teamHref, teamSlug } from "../lib/paths.js";
 import { formatMatchTime } from "../lib/schedule.js";
 import { TeamThemeButton, WallpaperButton, useTeamColor } from "./visual.jsx";
 import { TeamTimeline } from "./Round8Bits.jsx";
+import { PartTabs } from "./Round10.jsx";
 
 export default function TeamPage(props) {
   return (
@@ -320,9 +321,9 @@ function OutsideTeam({ lp, org = [], outside, vlr, updating }) {
         <div className={lp ? "cols" : undefined}>
           <main>
             <LpPeople lp={lp} />
-            <LpPast lp={lp} />
+            <div data-part="history"><LpPast lp={lp} />
             <VlrResults vlr={vlr} />
-            <LpAchievements lp={lp} />
+            <LpAchievements lp={lp} /></div>
             <VlrCredit vlr={vlr} />
           </main>
           {lp && <aside><LpFacts lp={lp} /></aside>}
@@ -395,6 +396,7 @@ function TeamTournament({ s }) {
 }
 
 function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null }) {
+  const [part, setPart] = useState("overview");
   const tr = useT();
   useAutoRefresh();
   const p = useMemo(() => teamProfile(initial, slug), [initial, slug]);
@@ -419,7 +421,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null })
   ];
   const tot = p.events.reduce((o, e) => ({ w: o.w + e.w, l: o.l + e.l }), { w: 0, l: 0 });
   return (
-    <div className="wrap teampage">
+    <div className="wrap teampage tabbed" data-tab={part}>
       <div className="topbar">
         <h1 className="brandh"><a className="homelink" href="/" title={tr("Home")}><EmeaMark /></a><span>{p.name}</span></h1>
         <SearchBar /><div className="prefs"><ThemeSwitch /><LangSwitch /></div>
@@ -441,20 +443,21 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null })
       </TeamHead>
 
       <OrgNav org={org} />
+      <PartTabs value={part} onChange={setPart} label={tr("Team")} items={[["overview", tr("Overview")], ["matches", tr("Matches")], ["players", tr("Players")], ["stats", tr("Stats")], ["history", tr("History")]]} />
       {updating && <p className="note lpwait" role="status">{tr("Updating this information…")}</p>}
 
       <MatchModalProvider state={initial} events={events}>
         <div className="cols">
           <main>
-            <MatchStrip events={events} Crest={Crest} />
-            <MatchStrip events={events} Crest={Crest} recent />
-            <LpPeople lp={lp} />
-            <section>
+            <div data-part="overview matches"><MatchStrip events={events} Crest={Crest} />
+            <MatchStrip events={events} Crest={Crest} recent /></div>
+            <div data-part="overview players"><LpPeople lp={lp} /></div>
+            <section data-part="matches">
               <h2>{tr("Matches")}</h2>
               <MatchTable rows={rows} slug={slug} />
             </section>
-            {tstats ? <TeamTournament s={tstats} /> : <TeamMaps state={initial} team={slug} />}
-            <section>
+            <div data-part="stats">{tstats ? <TeamTournament s={tstats} /> : <TeamMaps state={initial} team={slug} />}</div>
+            <section data-part="overview history">
               <h2>{tr("Season")}</h2>
               <div className="tablewrap">
                 <table>
@@ -477,7 +480,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null })
             <LpAchievements lp={lp} />
             <VlrCredit vlr={vlr} />
           </main>
-          <aside>
+          <aside data-part="overview players">
             <LpFacts lp={lp} />
             {/* the roster typed for this site's events; without one, the Liquipedia roster above says it all */}
             {(t.roster || t.staff || !lp) && (

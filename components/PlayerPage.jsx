@@ -18,6 +18,7 @@ import FollowStar from "./FollowStar.jsx";
 import { AlertsButton } from "./MatchAlerts.jsx";
 import Trend from "./Trend.jsx";
 import { PlayerRadar } from "./Round8Bits.jsx";
+import { CareerTimeline } from "./Round10.jsx";
 
 /** A name, linked to its page on this site when it has one. */
 const Named = ({ href, title, children }) => (href ? <a href={href} title={title}>{children}</a> : <span title={title}>{children}</span>);
@@ -180,6 +181,7 @@ function View({ p }) {
         </div>
       </div>
       {p.tour && p.ranges && <PlayerRadar stats={p.tour} ranges={p.ranges} />}
+      {p.lp && <CareerTimeline history={p.lp.history} />}
       {p.lpState === "pending" && <p className="note lpwait" role="status">{tr("Looking for this information…")}</p>}
       {p.updating && <p className="note lpwait" role="status">{tr("Updating this information…")}</p>}
       {p.lpState === "none" && !p.onSite && !p.teamOnSite && !p.vlr && !p.updating && !p.lines.length && <p className="note">{tr("No information found for now.")}</p>}

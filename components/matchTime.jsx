@@ -371,7 +371,7 @@ export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent 
                   // the maps: as they go when live, as played once over
                   const maps = m.live && m.score ? m.score.maps || [] : recent ? (m.ex && m.ex.maps) || [] : [];
                   const shown = maps.filter((x) => x.a != null && x.b != null);
-                  return shown.length > 0 && <span className="mcchips">{shown.map((x, k) => <span key={k} className={"mcchip" + (x.done === false || (m.live && k === shown.length - 1 && !x.done) ? " now" : x.a > x.b ? " wa" : " wb")}>{x.map ? `${x.map} ` : ""}{x.a}–{x.b}</span>)}</span>;
+                  return shown.length > 0 && <span className="mcchips">{shown.map((x, k) => <span key={k} data-map={x.map || undefined} className={"mcchip" + (x.done === false || (m.live && k === shown.length - 1 && !x.done) ? " now" : x.a > x.b ? " wa" : " wb")}>{x.map ? `${x.map} ` : ""}{x.a}–{x.b}</span>)}</span>;
                 })()}
                 {recent && m.ex && m.ex.mvp && <span className="mcmvp">MVP <b>{m.ex.mvp}</b></span>}
                 {m.live && m.stream && <a className="mcstream" href={m.stream} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>▶ {tr("Watch")}</a>}

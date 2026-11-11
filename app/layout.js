@@ -12,6 +12,7 @@ import { ResultToast, TeamTheme } from "../components/visual.jsx";
 import { SPOILER_SCRIPT, SiteBanner } from "../components/Round6Bits.jsx";
 import { CommandPalette } from "../components/Round8Bits.jsx";
 import { ACCENT_SCRIPT, SiteFooter } from "../components/Round9.jsx";
+import { DENSITY_SCRIPT } from "../components/Round10.jsx";
 import { getDb } from "../lib/db.js";
 import { activeBanner } from "../lib/round6.js";
 
@@ -45,7 +46,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang={lang} dir={isRtl(lang) ? "rtl" : "ltr"} data-theme={theme} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: SPOILER_SCRIPT + ACCENT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: SPOILER_SCRIPT + ACCENT_SCRIPT + DENSITY_SCRIPT }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link

@@ -2,6 +2,7 @@
 
 import { memo, useMemo, useRef, useState, useEffect } from "react";
 import { THIRD, buildBracket, matchId, podium, qualifiedOf, roundsFor } from "../lib/bracket.js";
+import { RoundList } from "./Round10.jsx";
 import { Crest } from "./Crest.jsx";
 import TeamCard from "./TeamCard.jsx";
 import { useT } from "./lang.jsx";
@@ -159,6 +160,7 @@ export function BigBracket({ event, slots, scores, bo, notes = {} }) {
         ))}
       </ul>
     )}
+    <div className="mobonly"><RoundList bracket={bracket} rounds={rounds} slots={slots} roundName={(r) => r.name} /></div>
     <div className={"qstage" + (full ? " full" : "")} style={{ "--z": zoom }}>
     <div className="qtools" role="toolbar" aria-label={tr("Bracket")}>
       <button type="button" className="btn small" onClick={() => setZoom((z) => Math.max(0.4, Math.round((z - 0.15) * 100) / 100))} aria-label={tr("Zoom out")}>−</button>

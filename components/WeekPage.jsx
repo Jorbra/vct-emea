@@ -11,6 +11,7 @@ import { useFavorites } from "./favorites.js";
 import { deviceToken } from "./account.js";
 import { EVENT_NAMES, teamSlug } from "../lib/paths.js";
 import { ShareCard } from "./Fans.jsx";
+import { AccuracyChart } from "./Round10.jsx";
 
 /** The visitor's week: their predictions and what they earned, their teams' results. Read in the browser: nothing about them is on the page. */
 function Week({ matches }) {
@@ -52,6 +53,7 @@ function Week({ matches }) {
             <div><b>{won}/{teams.length}</b><span>{tr("Your teams' wins")}</span></div>
           </div>
           {me.name && <p><ShareCard name={me.name} /></p>}
+          <AccuracyChart />
           <section>
             <h2>{tr("Your predictions")}</h2>
             {mine.rows.length === 0 ? <p className="note">{tr("No prediction on a finished match this week.")} <a href="/predictions">{tr("Predictions")} ›</a></p> : (

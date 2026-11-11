@@ -8,6 +8,7 @@ import SearchBar from "./SearchBar.jsx";
 import SiteNav from "./SiteNav.jsx";
 import { Flag } from "./TeamCard.jsx";
 import { EVENT_NAMES, teamSlug } from "../lib/paths.js";
+import { AgentMapTable, FormList } from "./Round10.jsx";
 
 const PCOLS = [["maps", "Maps"], ["r", "R"], ["acs", "ACS"], ["kd", "K/D"], ["kast", "KAST"], ["adr", "ADR"], ["hs", "HS%"], ["k", "K"], ["d", "D"], ["a", "A"], ["fk", "FK"], ["fd", "FD"]];
 const PCT = ["kast", "hs"];
@@ -201,12 +202,14 @@ function View({ stats, event, events }) {
         <>
           <p className="note">{tr(EVENT_NAMES[event] || event)} · {tr("{n} maps played", { n: stats.maps.reduce((n, m) => n + m.played, 0) })} · {tr("Averages per map.")} <a href={`/recap/${event}`}>{tr("Recap")} ›</a></p>
           <div className="tabs sub" role="tablist" aria-label={tr("Stats")}>
-            {[["players", "Players"], ["teams", "Teams"], ["maps", "Maps"], ["agents", "Agents"], ["records", "Records"]].map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>{tr(l)}</button>)}
+            {[["players", "Players"], ["form", "Players in form"], ["teams", "Teams"], ["maps", "Maps"], ["agents", "Agents"], ["agentmaps", "Agents by map"], ["records", "Records"]].map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>{tr(l)}</button>)}
           </div>
           {tab === "players" && <Players list={stats.players} />}
           {tab === "teams" && <Teams teams={stats.teams} />}
           {tab === "maps" && <Maps maps={stats.maps} event={event} />}
           {tab === "agents" && <Agents list={stats.agents || []} />}
+          {tab === "agentmaps" && <AgentMapTable data={stats.agentMaps} />}
+          {tab === "form" && <FormList list={stats.form} />}
           {tab === "records" && stats.records && <Records r={stats.records} event={event} />}
           <p className="vlrcredit">{tr("Numbers from")} <a href="https://www.vlr.gg/" target="_blank" rel="noopener noreferrer">vlr.gg</a></p>
         </>

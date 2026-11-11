@@ -15,6 +15,7 @@ import VlrStats from "./VlrStats.jsx";
 import { Flag } from "./TeamCard.jsx";
 import { Comments, MapPick, MotmVote } from "./Fans.jsx";
 import { Score, Skeleton, useTeamColor } from "./visual.jsx";
+import { PartTabs } from "./Round10.jsx";
 
 export { EVENT_NAMES };
 
@@ -99,8 +100,8 @@ export function teamsOf(pstats, m) {
 }
 
 /** The window over the page, or the same content as a page of its own. */
-function Shell({ page, title, boxRef, onClose, children }) {
-  if (page) return <div className="mm mmpage" ref={boxRef} tabIndex={-1}>{children}</div>;
+function Shell({ page, title, boxRef, onClose, children, tab }) {
+  if (page) return <div className="mm mmpage" ref={boxRef} tabIndex={-1} data-tab={tab}>{children}</div>;
   return (
     <div className="mmback" onClick={onClose}>
       <div className="mm" role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} ref={boxRef} onClick={(ev) => ev.stopPropagation()}>{children}</div>
@@ -187,6 +188,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
     return () => URL.revokeObjectURL(u);
   }, [calItem && calItem.at, title, origin]); // eslint-disable-line react-hooks/exhaustive-deps
   const [playing, setPlaying] = useState("");
+  const [tab, setTab] = useState("summary");
   const [cmp, setCmp] = useState(false);
   // Escape closes, focus moves into the dialog and back on close
   useEffect(() => {
@@ -210,7 +212,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
   const colorB = useTeamColor(m.b && m.b.logo);
   const who = (player) => (state && knownPlayer(state, player) ? <a href={playerHref(player)}>{player}</a> : player);
   return (
-    <Shell page={page} title={title} boxRef={ref} onClose={onClose}>
+    <Shell page={page} title={title} boxRef={ref} onClose={onClose} tab={page ? tab : undefined}>
         {!page && <button type="button" className="mmclose" aria-label={tr("Close")} onClick={onClose}>×</button>}
         <div className="mmhead">
           <a href={e.href}>{tr(EVENT_NAMES[e.event] || "")}</a>
@@ -225,7 +227,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
         {page && frieze.length > 0 && (
           <div className="mfrieze" style={{ ...(colorA ? { "--ta": colorA } : {}), ...(colorB ? { "--tb": colorB } : {}) }} aria-label={tr("Maps")}>
             {frieze.map((x, i) => (
-              <span key={i} className={"mfmap spoil " + (x.a > x.b ? "wa" : x.b > x.a ? "wb" : "")}>
+              <span key={i} data-map={x.map} className={"mfmap spoil " + (x.a > x.b ? "wa" : x.b > x.a ? "wb" : "")}>
                 <small>{tr("Map #{n}", { n: i + 1 })}</small><b>{x.map || "?"}</b><em>{x.a}–{x.b}</em>
               </span>
             ))}
@@ -233,7 +235,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
         )}
         {live && (live.maps || []).length > 0 && (
           <div className="mmlive">
-            <div className="mmlivemaps">{live.maps.map((x) => <span key={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>
+            <div className="mmlivemaps">{live.maps.map((x) => <span key={x.map} data-map={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>
             {(live.feed || []).length > 0 && (
               <ol className="mmfeed" aria-label={tr("Match feed")}>
                 {[...live.feed].reverse().map((f, i) => (
@@ -247,9 +249,10 @@ function MatchModal({ e, m, state, onClose, page = false }) {
             <p className="hint">{tr("Scores from vlr.gg, read every few minutes.")}</p>
           </div>
         )}
-        <Rosters a={m.a} b={m.b} />
+        {page && <PartTabs value={tab} onChange={setTab} label={tr("Match")} items={[["summary", tr("Summary")], ["maps", tr("Maps")], ["stats", tr("Stats")], ["pronos", tr("Predictions")], ["comments", tr("Comments")]]} />}
+        <div data-part="summary"><Rosters a={m.a} b={m.b} /></div>
         {ex.maps.length > 0 && (
-          <table className="mmmaps">
+          <table className="mmmaps" data-part="maps summary">
             <tbody>
               {ex.maps.map((x, i) => {
                 const wa = x.a != null && x.b != null && x.a > x.b;
@@ -270,12 +273,12 @@ function MatchModal({ e, m, state, onClose, page = false }) {
         )}
         <div className="mmcols">
         <div className="mmmain">
-        {ex.mvp && <p className="mmmvp"><b>MVP</b> {who(ex.mvp)}</p>}
-        {!ex.mvp && done && autoMvp && <p className="mmmvp"><b>MVP</b> {who(autoMvp.name)} <small>{tr("best ACS: {acs}", { acs: autoMvp.acs })}</small></p>}
-        {details && (details.all || []).length > 0 && <VlrStats details={details} m={m} />}
+        {ex.mvp && <p className="mmmvp" data-part="summary stats"><b>MVP</b> {who(ex.mvp)}</p>}
+        {!ex.mvp && done && autoMvp && <p className="mmmvp" data-part="summary stats"><b>MVP</b> {who(autoMvp.name)} <small>{tr("best ACS: {acs}", { acs: autoMvp.acs })}</small></p>}
+        {details && (details.all || []).length > 0 && <div data-part="stats maps"><VlrStats details={details} m={m} /></div>}
         {ex.hasDetails && !details && <Skeleton lines={6} height={16} />}
         {!(details && (details.all || []).length) && !(ex.hasDetails && !details) && (ex.pstats || []).length > 0 && teamsOf(ex.pstats, m).map((g, i) => (
-          <table className="mmstats" key={i}>
+          <table className="mmstats" data-part="stats" key={i}>
             <thead>
               {g.team !== undefined && <tr className="mmstatsteam"><th colSpan={5}><span className="mmstatsname"><Crest team={g.team} />{name(g.team)}</span></th></tr>}
               <tr><th>{tr("Player")}</th><th>K</th><th>D</th><th>A</th><th>ACS</th></tr>
@@ -285,11 +288,11 @@ function MatchModal({ e, m, state, onClose, page = false }) {
         ))}
         </div>
         <aside className="mmside">
-        {live && state && <MapPick event={e.event} m={m} live={live} />}
-        {done && state && <MotmVote event={e.event} id={m.id} candidates={candidates} />}
-        {state && m.a && m.b && m.a.name && m.b.name && <HeadToHead m={m} state={state} />}
-        {cmp && state && m.a && m.b && m.a.name && m.b.name && <Compare m={m} state={state} />}
-        {state && m.a && m.b && m.a.name && m.b.name && <Comments event={e.event} id={m.id} />}
+        {live && state && <div data-part="pronos summary"><MapPick event={e.event} m={m} live={live} /></div>}
+        {done && state && <div data-part="pronos summary"><MotmVote event={e.event} id={m.id} candidates={candidates} /></div>}
+        {state && m.a && m.b && m.a.name && m.b.name && <div data-part="summary stats"><HeadToHead m={m} state={state} /></div>}
+        {cmp && state && m.a && m.b && m.a.name && m.b.name && <div data-part="summary stats"><Compare m={m} state={state} /></div>}
+        {state && m.a && m.b && m.a.name && m.b.name && <div data-part="comments"><Comments event={e.event} id={m.id} /></div>}
         </aside>
         </div>
         {playing && (
@@ -307,6 +310,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
           })}
           {state && m.a && m.b && m.a.name && m.b.name && <button type="button" className="btn" aria-pressed={cmp} onClick={() => setCmp(!cmp)}>{tr("Compare the teams")}</button>}
           {done && <a className="btn" href={`/api/og/${e.event}/${m.id}`} target="_blank" rel="noopener noreferrer">🖼 {tr("Result picture")}</a>}
+          {m.a && m.b && m.a.name && m.b.name && <a className="btn" href={`/api/og/story/${e.event}/${m.id}`} target="_blank" rel="noopener noreferrer" download={`story-${m.id}.png`}>📱 {tr("Story 9:16")}</a>}
           {google && <a className="btn" href={google} target="_blank" rel="noopener noreferrer">{tr("Add to Google Calendar")}</a>}
           {google && icsUrl && <a className="btn" href={icsUrl} download={`match-${m.id}.ics`}>{tr("Add to my calendar (.ics)")}</a>}
           {page ? <CopyLink href={`/match/${e.event}/${m.id}`} /> : <a className="btn" href={`/match/${e.event}/${m.id}`}>{tr("Match page")}</a>}

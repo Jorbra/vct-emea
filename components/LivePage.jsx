@@ -39,7 +39,7 @@ function View({ live, next }) {
         <b>{m.score ? `${m.score.a} – ${m.score.b}` : "vs"}</b>
         <span><Crest team={m.b} />{(m.b && m.b.name) || tr("TBD")}</span>
       </div>
-      {m.score && (m.score.maps || []).length > 0 && <div className="livemaps">{m.score.maps.map((x) => <span key={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>}
+      {m.score && (m.score.maps || []).length > 0 && <div className="livemaps">{m.score.maps.map((x) => <span key={x.map} data-map={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>}
       <div className="row">
         {m.stream && m.live && !multi && <button type="button" className={"btn" + (on ? " pri" : "")} onClick={() => setWatch(`${m.event}:${m.id}`)}>{on ? tr("Playing here") : tr("Watch here")}</button>}
         {m.stream && m.live && multi && host && embedUrl(m.stream, host) && <label className="sw"><input type="checkbox" checked={screens.some((s) => keyOf(s) === keyOf(m))} onChange={() => tick(m)} /> {tr("On screen")}</label>}
