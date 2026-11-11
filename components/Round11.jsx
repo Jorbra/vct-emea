@@ -366,7 +366,7 @@ export function EditorSearch({ initial, onOpen }) {
   const hits = k.length >= 2 ? items.filter((x) => x.label.toLowerCase().includes(k)).slice(0, 12) : [];
   return (
     <div className="edsearch">
-      <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("Find a team or a match to edit…")} aria-label={tr("Search")} />
+      <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("Find a team or a match to edit… (/)")} aria-label={tr("Search")} />
       {hits.length > 0 && <ul>{hits.map((h, i) => <li key={i}><button type="button" onClick={() => { onOpen(h.event, true); setQ(""); }}><span>{h.kind === "team" ? "👥" : "⚔️"} {h.label}</span><small>{tr(EVENT_NAMES[h.event] || h.event)}</small></button></li>)}</ul>}
     </div>
   );

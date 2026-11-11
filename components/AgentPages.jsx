@@ -9,6 +9,7 @@ import SiteNav from "./SiteNav.jsx";
 import { AgentIcon, MapThumb } from "./Assets.jsx";
 import { EmptyState, SectionHead } from "./Round11.jsx";
 import { AgentDuel } from "./Round13.jsx";
+import { RoleMates } from "./Round14.jsx";
 
 function Top({ title }) {
   const tr = useT();
@@ -68,9 +69,16 @@ function Agent({ a }) {
                 <ol className="agbest">{a.best.map((p) => <li key={p.slug}><a href={`/player/${p.slug}`}>{p.name}</a><span>{p.r != null ? p.r.toFixed(2) : "–"}</span><small>{p.maps} {tr("maps")} · {p.acs ?? "–"} ACS</small></li>)}</ol>
               )}
             </section>
+            {(a.teams || []).length > 0 && (
+              <section>
+                <SectionHead icon="👥" title={tr("Teams that play it most")} />
+                <ol className="agbest">{a.teams.map((t) => <li key={t.slug}><a href={`/team/${t.slug}`}>{t.name}</a><span>{t.won}–{t.played - t.won}</span><small>{t.played} {tr("maps")}</small></li>)}</ol>
+              </section>
+            )}
           </aside>
         </div>
       )}
+      <RoleMates name={a.name} role={a.role} />
       <p className="note">{tr("From vlr.gg's tables of the site's events. Pictures: valorant-api.com.")}</p>
     </div>
   );

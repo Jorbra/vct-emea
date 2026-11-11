@@ -8,6 +8,7 @@ import SiteNav from "./SiteNav.jsx";
 import { Flag } from "./TeamCard.jsx";
 import { EVENT_NAMES, teamHref } from "../lib/paths.js";
 import { AgentTierList } from "./Round13.jsx";
+import { OtherMaps } from "./Round14.jsx";
 import { AgentIcon, AgentList, mapInfo, mapMinimap, mapSplash } from "./Assets.jsx";
 
 function View({ card, name = "", top = [], tiers = [], event, events }) {
@@ -89,6 +90,7 @@ function View({ card, name = "", top = [], tiers = [], event, events }) {
             </section>
           )}
           {card.closest && <p className="note">{tr("Closest map")} : <a href={`/match/${card.closest.event}/${card.closest.id}`}>{card.closest.ta} {card.closest.a}–{card.closest.b} {card.closest.tb}</a></p>}
+          <OtherMaps current={card.map} />
           <p className="vlrcredit">{tr("Numbers from")} <a href="https://www.vlr.gg/" target="_blank" rel="noopener noreferrer">vlr.gg</a></p>
         </>
       )}

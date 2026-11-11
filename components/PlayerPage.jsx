@@ -21,6 +21,9 @@ import { PlayerRadar } from "./Round8Bits.jsx";
 import { CareerTimeline } from "./Round10.jsx";
 import { PlayerHero } from "./Round11.jsx";
 import { RatingByMap } from "./Round13.jsx";
+
+// the map where the player rates best (2 maps at least there)
+const bestMap = (t) => ((t && t.byMap) || []).filter((x) => x.r != null && x.n >= 2).sort((a, b) => b.r - a.r)[0] || null;
 import { AgentIcon, AgentList, agentInfo } from "./Assets.jsx";
 
 /** A name, linked to its page on this site when it has one. */
@@ -179,7 +182,7 @@ function View({ p }) {
           <div className="tname"><span className="pt"><Flag cc={p.cc} /><span>{p.name}</span><FollowStar slug={p.slug || teamSlug(p.name)} />{p.captain && <span className="tcapt" title={tr("Captain")}>C</span>}</span></div>
           {about.length > 0 && <div className="tsub">{about.map((x, i) => <Fragment key={i}>{i ? " · " : ""}{x}</Fragment>)}</div>}
           <p className="hint followhint">{tr("Follow this player to be alerted when they become a free agent or sign with a team.")} <AlertsButton /></p>
-          {p.tour && (p.tour.agents || []).length > 0 && <div className="pcardpool">{p.tour.agents.slice(0, 3).map((a) => <AgentIcon key={a.name} name={a.name} size={28} link />)}</div>}
+          {p.tour && (p.tour.agents || []).length > 0 && <div className="pcardpool">{p.tour.agents.slice(0, 3).map((a) => <AgentIcon key={a.name} name={a.name} size={28} link />)}{bestMap(p.tour) && <a className="bestmap" href={`/map/${bestMap(p.tour).map.toLowerCase()}`}>🗺️ {bestMap(p.tour).map} · {bestMap(p.tour).r.toFixed(2)}</a>}</div>}
           {hero && (
             <div className="pcardnums">
               {hero.nums.map(([label, value]) => <div key={label}><b>{value}</b><span>{label}</span></div>)}

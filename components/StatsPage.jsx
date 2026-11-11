@@ -10,6 +10,7 @@ import { Flag } from "./TeamCard.jsx";
 import { EVENT_NAMES, teamSlug } from "../lib/paths.js";
 import { AgentMapTable, FormList } from "./Round10.jsx";
 import { AgentIcon, AgentList, MapThumb } from "./Assets.jsx";
+import { StatsShortcuts } from "./Round14.jsx";
 
 const PCOLS = [["maps", "Maps"], ["r", "R"], ["acs", "ACS"], ["kd", "K/D"], ["kast", "KAST"], ["adr", "ADR"], ["hs", "HS%"], ["k", "K"], ["d", "D"], ["a", "A"], ["fk", "FK"], ["fd", "FD"]];
 const PCT = ["kast", "hs"];
@@ -194,6 +195,7 @@ function View({ stats, event, events }) {
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
       <SiteNav />
+      <StatsShortcuts />
       {events.length > 1 && (
         <div className="tabs sub" role="tablist" aria-label={tr("Event")}>
           {events.map((e) => <a key={e} role="tab" aria-selected={e === event} className="tablink" href={`/stats?e=${e}`}>{tr(EVENT_NAMES[e] || e)}</a>)}

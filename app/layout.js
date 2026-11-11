@@ -13,6 +13,7 @@ import { SiteBanner } from "../components/Round6Bits.jsx";
 import { HEAD_SCRIPT } from "../lib/headscripts.js";
 import { CommandPalette } from "../components/Round8Bits.jsx";
 import { SiteFooter } from "../components/Round9.jsx";
+import { BackToTop } from "../components/Round14.jsx";
 import { LiveTeamBanner, Welcome } from "../components/Round11.jsx";
 import { getDb } from "../lib/db.js";
 import { activeBanner } from "../lib/round6.js";
@@ -62,7 +63,7 @@ export default async function RootLayout({ children }) {
         {banner && <LangProvider lang={lang}><SiteBanner banner={banner} /></LangProvider>}
         <LangProvider lang={lang}><LiveTeamBanner /><Welcome teams={welcomeTeams} /></LangProvider>
         <div id="content" tabIndex={-1}>{children}</div>
-        <LangProvider lang={lang}><SiteFooter /></LangProvider>
+        <LangProvider lang={lang}><SiteFooter /><BackToTop /></LangProvider>
         <EditorAccess lang={lang} isAdmin={await isAdmin()} />
         <MatchAlerts />
         <LangProvider lang={lang}><MobileTabs /><ResultToast /><TeamTheme /><CommandPalette /></LangProvider>

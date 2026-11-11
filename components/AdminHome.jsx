@@ -12,6 +12,7 @@ import BotPanel from "./BotPanel.jsx";
 import { BulkScores, MissingLogos } from "./Round9.jsx";
 import { ControlRoom } from "./Round10.jsx";
 import { ActivityFeed, EditorKpis, EditorSearch } from "./Round11.jsx";
+import { GamesToday, MetaDraft, MissingPictures, SlashToSearch, VlrTables } from "./Round14.jsx";
 import { missingLogos, openMatches } from "../lib/r9pure.js";
 
 const GROUPS = [
@@ -67,6 +68,8 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
       <p className="guidelink"><a className="btn" href="/admin/nouveautes">{tr("What's new and how it works")}</a></p>
       {initial.admin && <EditorKpis initial={initial} />}
       {initial.admin && <EditorSearch initial={initial} onOpen={onOpen} />}
+      {initial.admin && <SlashToSearch />}
+      {initial.admin && initial.admin.r14 && <MissingPictures missing={initial.admin.r14.missing} />}
       {initial.admin && <ControlRoom initial={initial} call={call} onDone={onDone} />}
       {initial.admin && <ActivityFeed />}
       {initial.admin && <QuickLive initial={initial} call={call} onDone={onDone} />}
@@ -74,6 +77,9 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
       {initial.admin && initial.admin.checklist && initial.admin.checklist.length > 0 && <Checklist list={initial.admin.checklist} />}
       {initial.admin && initial.admin.health && <Health rows={initial.admin.health} />}
       {initial.admin && <BotPanel />}
+      {initial.admin && initial.admin.r14 && <VlrTables data={initial.admin.r14.vlr} call={call} onDone={onDone} />}
+      {initial.admin && initial.admin.r14 && <GamesToday games={initial.admin.r14.games} />}
+      {initial.admin && initial.admin.r14 && <MetaDraft text={initial.admin.r14.meta} />}
       {initial.admin && initial.admin.steps && <Journal admin={initial.admin} call={call} onDone={onDone} />}
       {initial.admin && <BannerEditor banner={initial.admin.banner} call={call} onDone={onDone} />}
       {initial.admin && initial.admin.visits && <Visits v={initial.admin.visits} activity={initial.admin.activity} />}

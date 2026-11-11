@@ -6,6 +6,7 @@ import { ThemeSwitch } from "./theme.jsx";
 import { EmeaMark } from "./Brand.jsx";
 import SearchBar from "./SearchBar.jsx";
 import { siteHref } from "../lib/paths.js";
+import { LostAgent } from "./Round14.jsx";
 
 function View() {
   const tr = useT();
@@ -18,6 +19,7 @@ function View() {
       </div>
       <SiteNav />
       <div className="nf">
+        <LostAgent />
         <div className="nfcode">404</div>
         <h2>{tr("This page does not exist.")}</h2>
         <p>{tr("The link may be old. Use the search above, or go back to a page of the site.")}</p>

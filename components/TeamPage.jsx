@@ -28,6 +28,7 @@ import { TeamTimeline } from "./Round8Bits.jsx";
 import { PartTabs } from "./Round10.jsx";
 import { RosterCards } from "./Round11.jsx";
 import { TeamCompCards } from "./Round13.jsx";
+import { MapPoolTiles } from "./Round14.jsx";
 
 export default function TeamPage(props) {
   return (
@@ -372,12 +373,7 @@ function TeamTournament({ s }) {
         <div><b>{s.roundsW} – {s.roundsL}</b><span>{tr("Rounds")}</span></div>
         <div><b>{diff > 0 ? `+${diff}` : diff}</b><span>+/–</span></div>
       </div>
-      <div className="tablewrap">
-        <table>
-          <thead><tr><th>{tr("Map")}</th><th>{tr("Played")}</th><th>{tr("Won")}</th><th>%</th></tr></thead>
-          <tbody>{s.byMap.map((m) => <tr key={m.map}><td>{m.map}</td><td>{m.played}</td><td>{m.won}</td><td>{Math.round((m.won / m.played) * 100)}%</td></tr>)}</tbody>
-        </table>
-      </div>
+      <MapPoolTiles list={s.byMap} />
       {(s.comps || []).length > 0 && (
         <>
           <h3>{tr("Compositions by map")}</h3>

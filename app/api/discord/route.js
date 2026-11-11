@@ -24,6 +24,8 @@ import { communityTiers, seasonHonours, teamChances, tierTeams } from "../../../
 import { quizQuestions, quizRanking, weekOf, weeklyQuiz } from "../../../lib/round6.js";
 import { pickSplit, playersInForm } from "../../../lib/round10.js";
 import { matchPreview } from "../../../lib/round11.js";
+import { agentTiers, ratingByMap } from "../../../lib/round13.js";
+import { agentPage } from "../../../lib/agentpage.js";
 import { ratings as r8ratings } from "../../../lib/r8data.js";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +47,10 @@ function context(db, lang, now) {
     stats: (ev = "") => tournamentStats(state(), readDetails(db, ev)),
     extra: (ev = "") => extraStats(state(), readDetails(db, ev)),
     mapCard: (name, ev = "") => mapCard(state(), readDetails(db, ev), name),
+    agentTiers: (map) => agentTiers(readDetails(db, ""), map),
+    agentPage: (name) => agentPage(name, db),
+    byMap: (slug) => ratingByMap(readDetails(db, ""), slug),
+    details: (event, id) => detailsOf(db, event, id),
     h2h: (a, b) => compareTeams(state(), a, b),
     teamInfo: (slug) => readTeamInfo()[slug] || null,
     ranking: () => seasonRanking(db, state(), { limit: 10, now }),
