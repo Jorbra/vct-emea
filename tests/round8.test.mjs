@@ -103,11 +103,11 @@ test("day board: what is missing today", () => {
   const db = qualifier();
   const now = Date.now();
   const ms = allMatches(getState(db)).filter((x) => x.event === "meq1" && x.a && x.b && x.a.name && x.b.name).slice(0, 2);
-  setMatchTime(db, { event: "meq1", id: ms[0].id, at: new Date(now - 3600000).toISOString() });
+  setMatchTime(db, { event: "meq1", id: ms[0].id, at: new Date(now - 4 * 3600000).toISOString() });
   setMatchTime(db, { event: "meq1", id: ms[1].id, at: new Date(now + 60000).toISOString() });
   const b = dayBoard(getState(db), { [`meq1:${ms[0].id}`]: "ana" }, now);
   const late = b.find((x) => x.id === ms[0].id);
-  // only today's matches (Paris): the one an hour ago may fall on yesterday right after midnight
+  // only today's matches (Paris): the one 4 hours ago may fall on yesterday early in the day
   if (late) { assert.deepEqual(late.missing, ["score"]); assert.equal(late.who, "ana"); }
   const soon = b.find((x) => x.id === ms[1].id);
   if (soon) assert.deepEqual(soon.missing, []);
@@ -118,4 +118,17 @@ test("bot: /simule and /tierlist are known and turned on", () => {
     assert.ok(COMMANDS.some((x) => x.name === c), c);
     assert.ok(BOT_COMMANDS.includes(c), c);
   }
+});
+
+test("a live match finished on vlr.gg gets its result and is no longer live", async () => {
+  const { closeFromVlr } = await import("../lib/vlrmatch.js");
+  const { setMatchLive, getMatchLive } = await import("../lib/db.js");
+  const db = qualifier();
+  const m = allMatches(getState(db)).find((x) => x.event === "meq1" && x.a && x.b && x.a.name && x.b.name);
+  assert.equal(await closeFromVlr(db, getState(db), "meq1", m.id, { sa: 1, sb: 0 }), false); // not live: nothing
+  setMatchLive(db, { event: "meq1", id: m.id, live: true, a: 0, b: 0 });
+  assert.equal(await closeFromVlr(db, getState(db), "meq1", m.id, { sa: 1, sb: 1 }), false); // no winner
+  assert.equal(await closeFromVlr(db, getState(db), "meq1", m.id, { sa: 1, sb: 0 }), true);
+  assert.equal(allMatches(getState(db)).find((x) => x.event === "meq1" && x.id === m.id).sa, 1);
+  assert.equal((getMatchLive(db).meq1 || {})[m.id], undefined);
 });

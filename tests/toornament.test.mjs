@@ -317,3 +317,25 @@ test("a bracket that is not full: the teams with a bye wait in round 2, the firs
   // a full first round is left as it is
   assert.equal(fillByes(rows.filter((r) => r.round !== 2)).length, 3);
 });
+
+test("a live match Toornament removes is no longer live; a result already on the site is not set live again", () => {
+  const db = fresh();
+  round(db, start(), teams());
+  const rows = start();
+  for (const r of rows.filter((x) => x.round === 1)) win(r, 1, 0);
+  rows.filter((x) => x.round === 2).forEach((r, k) => { r.a = { ...r.a, pid: k ? "e" : "a", name: k ? "E" : "A" }; r.b = { ...r.b, pid: k ? "g" : "c", name: k ? "G" : "C" }; win(r, 2, 0); });
+  // the third place match (round 3, number 2) goes live
+  const third = rows.find((x) => x.round === 3 && x.n === 2);
+  third.a = { ...third.a, pid: "c", name: "C" }; third.b = { ...third.b, pid: "g", name: "G" }; third.status = "running";
+  round(db, rows, teams());
+  assert.ok(getMatchLive(db).meq1["third-1"]);
+  // Toornament removes it: off the site's live matches
+  round(db, rows.filter((x) => x !== third), teams());
+  assert.equal((getMatchLive(db).meq1 || {})["third-1"], undefined);
+  // the final is running on Toornament but already has a result on the site (from vlr.gg): not live
+  const gf = rows.find((x) => x.round === 3 && x.n === 1);
+  gf.a = { ...gf.a, pid: "a", name: "A" }; gf.b = { ...gf.b, pid: "e", name: "E" }; gf.status = "running";
+  saveQualifierScore(db, { event: "meq1", id: "gf-1", sa: 3, sb: 1 });
+  round(db, rows.filter((x) => x !== third), teams());
+  assert.equal((getMatchLive(db).meq1 || {})["gf-1"], undefined);
+});
