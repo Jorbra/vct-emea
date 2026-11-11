@@ -79,8 +79,9 @@ export function Podium({ ranking }) {
   const [first, second, third] = ranking;
   const step = (r, place, cls) => (
     <div className={"pdstep " + cls}>
-      <b className="pdname">{r.name}</b>
+      <b className="pdname" style={r.style && r.style.color ? { color: r.style.color } : undefined}>{r.style && r.style.emoji ? `${r.style.emoji} ` : ""}{r.name}</b>
       <span className="pdpts">{r.points} pts</span>
+      {r.week ? <small className="pdweek">+{r.week} {tr("this week")}</small> : null}
       <div className="pdblock"><span>{place}</span></div>
     </div>
   );
@@ -117,7 +118,7 @@ export function SeasonTable({ ranking, me }) {
         <tbody>{ranking.map((r, i) => (
           <tr key={r.name} className={me && r.name === me ? "me" : ""}>
             <td>{i + 1}</td>
-            <td>{r.name}{r.badges.length > 0 && <span className="badges">{r.badges.slice(0, 4).map((b, k) => { const [icon, label] = BADGE[b.kind](b, tr); return <span key={k} className="badge" title={label} aria-label={label}>{icon}</span>; })}</span>}</td>
+            <td><span style={r.style && r.style.color ? { color: r.style.color } : undefined}>{r.style && r.style.emoji ? `${r.style.emoji} ` : ""}{r.name}</span>{r.week ? <small className="pdweek"> +{r.week}</small> : null}{r.badges.length > 0 && <span className="badges">{r.badges.slice(0, 4).map((b, k) => { const [icon, label] = BADGE[b.kind](b, tr); return <span key={k} className="badge" title={label} aria-label={label}>{icon}</span>; })}</span>}</td>
             <td><b>{r.points}</b>{r.pickem ? <small> ({tr("incl. {n} from Who qualifies?", { n: r.pickem })})</small> : null}</td>
             <td>{r.good} / {r.total}{r.total ? ` · ${Math.round((r.good / r.total) * 100)}%` : ""}</td>
           </tr>

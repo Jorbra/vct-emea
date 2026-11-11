@@ -224,7 +224,7 @@ export function BracketTools() {
 
 // ---- R1. the home page, arranged by the visitor
 
-export const HOME_BLOCKS = [["live", "Featured match and next matches"], ["strips", "Today's matches"], ["poll", "Poll"], ["hero", "Road to the Kickoff"], ["myteams", "My teams"], ["news", "News"], ["kickoff", "Kickoff teams"], ["events", "Events"], ["road", "Road to the Kickoff (steps)"], ["gc", "Game Changers"]];
+export const HOME_BLOCKS = [["live", "Featured match and next matches"], ["strips", "Today's matches"], ["poll", "Poll"], ["qualified", "Qualified teams"], ["hero", "Road to the Kickoff"], ["myteams", "My teams"], ["news", "News"], ["kickoff", "Kickoff teams"], ["events", "Events"], ["road", "Road to the Kickoff (steps)"], ["gc", "Game Changers"]];
 const HOME_KEY = "vct-home-layout";
 
 export function HomeCustomize() {

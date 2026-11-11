@@ -17,6 +17,7 @@ import { allMatches, eventData, matchesOf } from "../lib/matchlist.js";
 import { scoreLabel } from "../lib/scoretext.js";
 import { EVENT_NAMES, siteHref, teamSlug } from "../lib/paths.js";
 import { TIME_EVENTS } from "../lib/schedule.js";
+import { WeekView } from "./Round9.jsx";
 
 const REGIONS = [
   ["all", "All", null],
@@ -77,6 +78,7 @@ function View({ initial }) {
   const fav = useFavorites();
   const [region, setRegion] = useState("all");
   const [favOnly, setFavOnly] = useState(false);
+  const [view, setView] = useState("month");
   const [month, setMonth] = useState(null); // first day of the month shown, known once on the client (its time zone)
   useEffect(() => { const n = new Date(); setMonth(new Date(n.getFullYear(), n.getMonth(), 1)); }, []);
 
@@ -140,7 +142,8 @@ function View({ initial }) {
           <button type="button" className="btn" aria-label={tr("Next month")} onClick={() => go(1)}>›</button>
         </div>
       </div>
-      {grid}
+      <div className="navpills calview" role="group" aria-label={tr("View")}><button type="button" data-on={view === "month"} aria-pressed={view === "month"} onClick={() => setView("month")}>{tr("Month")}</button><button type="button" data-on={view === "week"} aria-pressed={view === "week"} onClick={() => setView("week")}>{tr("Week")}</button></div>
+      {view === "week" ? <WeekView matches={shown} /> : grid}
       <MatchModalProvider state={initial} events={events}>
         <div className="sched calagenda">{month && <Agenda days={days} />}</div>
       </MatchModalProvider>

@@ -197,11 +197,18 @@ function AboutView() {
   return (
     <div className="wrap teampage">
       <Top title={tr("About")} />
-      <article className="newsbody">
+      <div className="abouthero">
         <h2>{tr("A site made by a fan")}</h2>
         <p>{tr("This site follows VCT EMEA and Game Changers EMEA: results, brackets, teams and players. It is not official: it is not affiliated with or endorsed by Riot Games, and the names and logos belong to their owners.")}</p>
+      </div>
+      <div className="aboutcards">
+        <a href="/live"><b>🔴 {tr("Follow")}</b><span>{tr("Live scores, match night, calendar and alerts for your teams.")}</span></a>
+        <a href="/jeux"><b>🎮 {tr("Play")}</b><span>{tr("Predictions, games of the day, fantasy, quiz and tier list.")}</span></a>
+        <a href="/stats"><b>📊 {tr("Learn")}</b><span>{tr("Stats, power ranking, rivalries, hall of fame and how the events work.")}</span></a>
+      </div>
+      <article className="newsbody">
         <h2>{tr("Where the information comes from")}</h2>
-        <p>{tr("Results and schedules are entered by the site's editors.")}</p>
+        <p>{tr("Brackets, times and results come from Toornament and vlr.gg as they are published, checked and completed by the site's editors.")}</p>
         <p>{tr("Team, player and tournament information comes from")} <a href="https://liquipedia.net/valorant/" target="_blank" rel="noopener noreferrer">Liquipedia</a>{tr(", under the CC-BY-SA licence; it may have been reformatted here.")}</p>
         <p>{tr("Career statistics and some recent results come from")} <a href="https://www.vlr.gg/" target="_blank" rel="noopener noreferrer">vlr.gg</a>.</p>
         <h2>{tr("Your data")}</h2>

@@ -12,6 +12,7 @@ import { localeOf } from "../lib/i18n.js";
 import { EVENT_NAMES } from "../lib/paths.js";
 import Pickem from "./Pickem.jsx";
 import { SwipePicks } from "./Round8Bits.jsx";
+import { MvpPicks, StyleEditor } from "./Round9.jsx";
 import { BadgeShowcase, DiscordLink, GroupBoard, Groups, Podium, SeasonTable, ShareCard } from "./Fans.jsx";
 
 function Top({ title, crumbs = [] }) {
@@ -114,6 +115,7 @@ function PredictionsView({ matches, ranking, pickem, group, groups }) {
       <Top title={tr("Predictions")} crumbs={[[tr("Predictions")]]} />
       <p className="note">{tr("Pick the winner of each match before it starts. A point for every right pick.")}</p>
       {!token && <p className="err">{tr("Your browser blocks what predictions need to be kept.")}</p>}
+      {me.name && <StyleEditor />}
       {me.name ? <p className="note">{tr("You play as {name}.", { name: me.name })} <ShareCard name={me.name} /> <DiscordLink token={token} /></p> : (
         <label className="f predname">{tr("Your name in the ranking")}<input value={name} maxLength={20} onChange={(e) => setName(e.target.value)} /></label>
       )}
@@ -122,6 +124,7 @@ function PredictionsView({ matches, ranking, pickem, group, groups }) {
       <div className="cols">
         <main>
           {pickem && <Pickem events={pickem.events} boards={pickem.boards} token={token} name={me.name || name.trim()} />}
+          <MvpPicks name={me.name} />
           {matches.length > 0 && token && <div className="swipeonly"><SwipePicks matches={matches} picks={me.picks} onPick={(m, team) => pick(m, team)} /></div>}
           <section>
             <h2>{tr("Open matches")}</h2>

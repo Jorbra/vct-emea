@@ -12,6 +12,7 @@ import { useAutoRefresh } from "./autoRefresh.js";
 import { embedUrl } from "../lib/media.js";
 import { EVENT_NAMES } from "../lib/paths.js";
 import { formatMatchTime } from "../lib/schedule.js";
+import { TvMode } from "./Round9.jsx";
 
 function View({ live, next }) {
   const tr = useT();
@@ -90,6 +91,7 @@ function View({ live, next }) {
               </aside>
             </div>
           ) : withStream.length === 0 ? <p className="note">{tr("No stream link is known for these matches yet.")}</p> : null}
+          <TvMode live={live} />
           <h2>{tr("Live now")} <small>({live.length})</small></h2>
           <div className="livegrid">{live.map((m) => card(m, current && `${m.event}:${m.id}` === `${current.event}:${current.id}`))}</div>
         </>

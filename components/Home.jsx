@@ -25,6 +25,8 @@ import HomeNext from "./HomeNext.jsx";
 import FeaturedMatch from "./FeaturedMatch.jsx";
 import Stories from "./Stories.jsx";
 import { HomeCustomize, HomePoll } from "./Round8Bits.jsx";
+import { QualifiedStrip } from "./Round9.jsx";
+import { qualifiedTeams } from "../lib/r9pure.js";
 import { InstallButton } from "./Fans.jsx";
 import { TeamThemePicker } from "./visual.jsx";
 
@@ -221,6 +223,7 @@ function HomeView({ initial }) {
       </div>
       <div data-block="strips"><HomeStrips events={matchEvents} state={initial} /></div>
       <div data-block="poll"><HomePoll /></div>
+      <div data-block="qualified"><QualifiedStrip list={qualifiedTeams(initial)} /></div>
 
       <div className="hero compact" data-block="hero">
         <div>

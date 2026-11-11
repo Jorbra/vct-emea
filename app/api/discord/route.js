@@ -20,7 +20,8 @@ import { siteTeams } from "../../../lib/teams.js";
 import { detailsOf, extraStats, mapCard, readDetails, tournamentStats } from "../../../lib/tstats.js";
 import { EVENTS } from "../../../lib/bracket.js";
 import { powerRanking } from "../../../lib/round6.js";
-import { communityTiers, teamChances, tierTeams } from "../../../lib/round8.js";
+import { communityTiers, seasonHonours, teamChances, tierTeams } from "../../../lib/round8.js";
+import { quizQuestions, quizRanking, weekOf, weeklyQuiz } from "../../../lib/round6.js";
 import { ratings as r8ratings } from "../../../lib/r8data.js";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +48,8 @@ function context(db, lang, now) {
     ranking: () => seasonRanking(db, state(), { limit: 10, now }),
     power: once("power", () => powerRanking(state(), now)),
     chances: (name) => { const { rating } = r8ratings(); return teamChances(state(), rating, name); },
+    quiz: () => { const w = weekOf(now); return { questions: quizQuestions(weeklyQuiz(state(), w)), best: quizRanking(db, w, 3) }; },
+    honours: () => seasonHonours(state(), powerRanking(state(), now)),
     tiers: () => { const t = tierTeams(state()); return { teams: t, ...communityTiers(db, t) }; },
     guild: "",
     recap: (ev) => (EVENTS.includes(ev) ? recapOf(state(), readDetails(db, ev), ev) : null),

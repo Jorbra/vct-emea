@@ -11,6 +11,7 @@ import { LangProvider } from "../components/lang.jsx";
 import { ResultToast, TeamTheme } from "../components/visual.jsx";
 import { SPOILER_SCRIPT, SiteBanner } from "../components/Round6Bits.jsx";
 import { CommandPalette } from "../components/Round8Bits.jsx";
+import { ACCENT_SCRIPT, SiteFooter } from "../components/Round9.jsx";
 import { getDb } from "../lib/db.js";
 import { activeBanner } from "../lib/round6.js";
 
@@ -44,7 +45,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang={lang} dir={isRtl(lang) ? "rtl" : "ltr"} data-theme={theme} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: SPOILER_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: SPOILER_SCRIPT + ACCENT_SCRIPT }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
@@ -56,6 +57,7 @@ export default async function RootLayout({ children }) {
         <a className="skip" href="#content">{makeT(lang)("Go to the content")}</a>
         {banner && <LangProvider lang={lang}><SiteBanner banner={banner} /></LangProvider>}
         <div id="content" tabIndex={-1}>{children}</div>
+        <LangProvider lang={lang}><SiteFooter /></LangProvider>
         <EditorAccess lang={lang} isAdmin={await isAdmin()} />
         <MatchAlerts />
         <LangProvider lang={lang}><MobileTabs /><ResultToast /><TeamTheme /><CommandPalette /></LangProvider>

@@ -9,6 +9,8 @@ import { allMatches, editorAgenda, eventData, matchesOf } from "../lib/matchlist
 import { formatMatchTime, TIME_EVENTS } from "../lib/schedule.js";
 import { eventStatus, formatDates } from "../lib/status.js";
 import BotPanel from "./BotPanel.jsx";
+import { BulkScores, MissingLogos } from "./Round9.jsx";
+import { missingLogos, openMatches } from "../lib/r9pure.js";
 
 const GROUPS = [
   ["Europe", ["q1", "q2", "playoffs"]],
@@ -69,6 +71,8 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
       {initial.admin && initial.admin.steps && <Journal admin={initial.admin} call={call} onDone={onDone} />}
       {initial.admin && <BannerEditor banner={initial.admin.banner} call={call} onDone={onDone} />}
       {initial.admin && initial.admin.visits && <Visits v={initial.admin.visits} activity={initial.admin.activity} />}
+      {initial.admin && <BulkScores list={openMatches(initial)} call={call} onDone={onDone} />}
+      {initial.admin && <MissingLogos list={missingLogos(initial)} onOpen={onOpen} />}
       {initial.admin && <Exports />}
       {initial.admin && initial.admin.polls && <PollsEditor polls={initial.admin.polls} call={call} onDone={onDone} />}
       {initial.admin && initial.admin.schedScores && <ScheduledScores list={initial.admin.schedScores} initial={initial} call={call} onDone={onDone} />}

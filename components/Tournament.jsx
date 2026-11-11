@@ -29,6 +29,9 @@ import EventStats from "./EventStats.jsx";
 import { knownPlayer } from "../lib/playerstats.js";
 import { MatchModalProvider } from "./MatchModal.jsx";
 import { BracketTools } from "./Round8Bits.jsx";
+import { EventHero } from "./Round9.jsx";
+import { eventTeamsOf } from "../lib/teams.js";
+import { eventNumbers, qualifiedTeams } from "../lib/r9pure.js";
 
 // Türkiye stages, like the EU ones: the Qualifier Playoffs (event "tr") and the two open qualifiers before it
 const TR_STAGES = [
@@ -704,6 +707,7 @@ function TournamentView({ initial, start, archive }) {
         </div>
       )}
 
+      {event !== "gc" && <EventHero numbers={eventNumbers(initial, event)} teams={eventTeamsOf(initial, event)} qualified={qualifiedTeams(initial).filter((q) => q.event === event).map((q) => ({ name: q.team, logo: q.logo }))} />}
       {statusText && <p className="statusline">{statusText}</p>}
 
       <MatchTimes event={event} times={initial.times ? initial.times[event] : {}} live={initial.live ? initial.live[event] : {}} extra={initial.extra ? initial.extra[event] : {}}>

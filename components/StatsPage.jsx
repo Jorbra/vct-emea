@@ -32,6 +32,24 @@ function Players({ list }) {
         </label>
         <input type="search" className="lftfind" placeholder={tr("Find a player or a team")} aria-label={tr("Find a player or a team")} value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
+      {rows.length >= 3 && (() => {
+        const top = rows.filter((p) => p[sort] != null).slice(0, 10);
+        const max = Math.max(...top.map((p) => p[sort])) || 1;
+        const min = Math.min(...top.map((p) => p[sort]));
+        const fmt = (v) => (["r", "kd"].includes(sort) ? Number(v).toFixed(2) : Math.round(v));
+        return (
+          <figure className="statchart" aria-label={tr("Top 10")}>
+            <figcaption>{tr("Top 10")} · {String(sort).toUpperCase() === "R" ? "Rating" : String(sort).toUpperCase()}</figcaption>
+            {top.map((p, i) => (
+              <div key={p.slug || p.name} className="scrow">
+                <span className="scname">{i + 1}. {p.name}<small> · {p.team}</small></span>
+                <span className="scbar"><i style={{ width: `${Math.max(8, Math.round(((p[sort] - min * 0.9) / (max - min * 0.9)) * 100))}%` }} /></span>
+                <b>{fmt(p[sort])}</b>
+              </div>
+            ))}
+          </figure>
+        );
+      })()}
       <div className="vlrscroll">
         <table className="vlrtable statstable">
           <thead>

@@ -43,8 +43,8 @@ const Icon = ({ name }) => (
 const GROUPS = [
   ["Follow", [["/", "Home", "home"], ["/live", "Live", "live"], ["/soiree", "Match night", "night"], ["/moi", "My week", "week"], ["/calendar", "Calendar", "calendar"]]],
   ["Play", [["/predictions", "Predictions", "target"], ["/jeux", "Games of the day", "games"], ["/fantasy", "Fantasy", "fantasy"], ["/quiz", "Quiz of the week", "quiz"], ["/tierlist", "Tier list", "tier"], ["/simulateur", "Qualification simulator", "sim"]]],
-  ["Stats", [["/puissance", "Power ranking", "power"], ["/stats", "Stats", "stats"], ["/rivalites", "Rivalries", "rival"], ["/compare", "Compare", "compare"], ["/pays", "Countries", "flag"]]],
-  ["More", [["/transfers", "Transfers", "transfers"], ["/lft", "LFT", "lft"], ["/news", "News", "news"], ["/palmares", "Hall of fame", "trophy"], ["/archives", "Archives of past seasons", "archives"]]],
+  ["Stats", [["/puissance", "Power ranking", "power"], ["/stats", "Stats", "stats"], ["/rivalites", "Rivalries", "rival"], ["/compare", "Compare", "compare"], ["/equipes", "Compare teams", "compare"], ["/pays", "Countries", "flag"]]],
+  ["More", [["/transfers", "Transfers", "transfers"], ["/lft", "LFT", "lft"], ["/news", "News", "news"], ["/palmares", "Hall of fame", "trophy"], ["/format", "How the events work", "about"], ["/archives", "Archives of past seasons", "archives"]]],
 ];
 const LINKS = GROUPS.flatMap(([, list]) => list);
 
