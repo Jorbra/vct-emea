@@ -146,14 +146,41 @@ function HigherLower({ day, onEnd }) {
 
 // ---- mystery logo
 
+/** How light a logo is (0 dark … 1 light), from its visible pixels; null when it cannot be read. */
+function logoLightness(img) {
+  try {
+    const c = document.createElement("canvas");
+    const w = (c.width = 48);
+    const h = (c.height = 48);
+    const ctx = c.getContext("2d", { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0, w, h);
+    const d = ctx.getImageData(0, 0, w, h).data;
+    let sum = 0;
+    let n = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 100) continue; // transparent: not part of the logo
+      sum += (0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 255;
+      n += 1;
+    }
+    return n ? sum / n : null;
+  } catch {
+    return null;
+  }
+}
+
 function MysteryLogo({ teams, day, onEnd }) {
   const tr = useT();
   const { g, error, busy, play } = useGame("logo", onEnd);
+  // a light logo on a dark background, a dark one on a light background: never white on white
+  const [bg, setBg] = useState("mid");
+  const readBg = (el) => { const l = logoLightness(el); setBg(l == null ? "mid" : l > 0.62 ? "dark" : l < 0.38 ? "light" : "mid"); };
+  // an image already in the cache can be loaded before the page listens: read it as soon as it is there
+  const imgRef = (el) => { if (el && el.complete && el.naturalWidth && !el.dataset.read) { el.dataset.read = "1"; readBg(el); } };
   if (!g) return error ? <p className="note">{error}</p> : <p className="note">…</p>;
   return (
     <>
       <p className="note">{tr("Which team is this? 5 guesses, the logo gets clearer after each one.")}</p>
-      <div className="glogo"><img src={`/api/jeux/logo?d=${day}`} alt={tr("Mystery logo")} style={{ filter: `blur(${g.blur}px) ${g.done ? "" : "grayscale(.6)"}` }} draggable={false} /></div>
+      <div className={"glogo " + bg}><img src={`/api/jeux/logo?d=${day}`} alt={tr("Mystery logo")} style={{ filter: `blur(${g.blur}px) ${g.done ? "" : "grayscale(.6)"}` }} draggable={false} ref={imgRef} onLoad={(e) => { e.currentTarget.dataset.read = "1"; readBg(e.currentTarget); }} /></div>
       {!g.done && <Guess id="gteams" list={teams} onPick={play} busy={busy} placeholder={tr("A team's name")} />}
       {error && <p className="err" role="alert">{error}</p>}
       {g.guesses.length > 0 && <ul className="gtries">{g.guesses.map((x) => <li key={x.name} className={x.ok ? "ok" : "ko"}>{x.ok ? "✅" : "❌"} {x.name}</li>)}</ul>}

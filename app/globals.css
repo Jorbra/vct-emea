@@ -1893,7 +1893,9 @@ html[data-nospoil] .rtoasts { display: none; }
 .gside small { color: var(--muted); }
 .gdone { list-style: none; padding: 0; display: grid; gap: 4px; font-size: 14px; }
 .gdone b.w { color: var(--lime); }
-.glogo { display: flex; justify-content: center; padding: 18px; background: #fff; border-radius: 8px; margin: 10px 0; overflow: hidden; }
+.glogo { display: flex; justify-content: center; padding: 18px; background: #7d7d82; border-radius: 8px; margin: 10px 0; overflow: hidden; transition: background .3s; }
+.glogo.dark { background: #15161a; }
+.glogo.light { background: #f2f2f0; }
 .glogo img { width: 180px; height: 180px; object-fit: contain; transition: filter .5s; user-select: none; pointer-events: none; }
 .gtries { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .gtries li { padding: 4px 10px; border: 1px solid var(--line); border-radius: 5px; font-size: 14px; }
