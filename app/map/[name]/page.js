@@ -4,6 +4,7 @@ import { getDb, getState } from "../../../lib/db.js";
 import { LANG_COOKIE, normLang } from "../../../lib/i18n.js";
 import { workSoon } from "../../../lib/readsoon.js";
 import { eventsWithDetails, extraStats, mapCard, readDetails } from "../../../lib/tstats.js";
+import { topAgents } from "../../../lib/mappage.js";
 
 export const dynamic = "force-dynamic";
 
@@ -24,5 +25,5 @@ export default async function Page({ params, searchParams }) {
   const entries = readDetails(db, event);
   const card = mapCard(getState(db), entries, name);
   if (card) card.comps = extraStats(getState(db), entries).mapComps[name.toLowerCase()] || [];
-  return <MapPage card={card} event={event} events={events} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />;
+  return <MapPage card={card} name={name} top={topAgents(entries, name)} event={event} events={events} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />;
 }

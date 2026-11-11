@@ -148,7 +148,7 @@ function Agents({ list }) {
         <thead><tr><th className="vlrp">{tr("Agent")}</th><th>{tr("Picked")}</th><th>{tr("Pick rate")}</th><th>{tr("Maps won")}</th><th>{tr("Best players")}</th></tr></thead>
         <tbody>{list.map((a) => (
           <tr key={a.agent}>
-            <td className="vlrp"><AgentIcon name={a.name} size={30} label /></td>
+            <td className="vlrp"><AgentIcon name={a.name} size={30} label link /></td>
             <td>{a.picks}</td>
             <td>{total ? Math.round((a.picks / (total / 5)) * 100) : 0}%</td>
             <td>{a.pct}%</td>

@@ -9,6 +9,7 @@ import SiteNav from "./SiteNav.jsx";
 import { Flag } from "./TeamCard.jsx";
 import { fanToken } from "./Fans.jsx";
 import { teamHref } from "../lib/paths.js";
+import { AgentIcon } from "./Assets.jsx";
 
 function Top({ title }) {
   const tr = useT();
@@ -84,7 +85,7 @@ function Fantasy({ pool, budget, season, week }) {
             const taken = Object.values(slots).includes(p.slug);
             return (
               <tr key={p.slug}>
-                <td><a href={`/player/${p.slug}`}>{p.name}</a>{role === "joker" && <small className="hint"> · {tr(ROLE_NAME[p.role])}</small>}</td><td>{p.team}</td><td>{p.r != null ? p.r.toFixed(2) : "–"}</td><td>{p.acs ?? "–"}</td><td><b>{p.price}</b></td>
+                <td>{p.agent ? <AgentIcon name={p.agent} size={20} /> : null} <a href={`/player/${p.slug}`}>{p.name}</a>{role === "joker" && <small className="hint"> · {tr(ROLE_NAME[p.role])}</small>}</td><td>{p.team}</td><td>{p.r != null ? p.r.toFixed(2) : "–"}</td><td>{p.acs ?? "–"}</td><td><b>{p.price}</b></td>
                 <td><button type="button" className="btn small" disabled={taken} onClick={() => setSlots({ ...slots, [role]: p.slug })}>{taken ? "✓" : tr("Pick")}</button></td>
               </tr>
             );

@@ -7,9 +7,12 @@ import SearchBar from "./SearchBar.jsx";
 import SiteNav from "./SiteNav.jsx";
 import { Flag } from "./TeamCard.jsx";
 import { EVENT_NAMES, teamHref } from "../lib/paths.js";
-import { AgentList, mapSplash } from "./Assets.jsx";
+import { AgentIcon, AgentList, mapInfo, mapMinimap, mapSplash } from "./Assets.jsx";
 
-function View({ card, event, events }) {
+function View({ card, name = "", top = [], event, events }) {
+  // the map's own name (its picture's), even when nobody played it yet
+  const known = mapInfo(card ? card.map : name);
+  const shown = card ? card.map : (known && Object.keys(known).length ? name.charAt(0).toUpperCase() + name.slice(1) : "");
   const tr = useT();
   const base = card ? `/map/${encodeURIComponent(card.map.toLowerCase())}` : "/stats";
   return (
@@ -20,8 +23,21 @@ function View({ card, event, events }) {
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
       <SiteNav />
-      <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › <a href="/stats">{tr("Stats")}</a> › {card ? card.map : tr("Map")}</nav>
-      {card && mapSplash(card.map) && <div className="maphero" style={{ backgroundImage: `url(${mapSplash(card.map)})` }}><b>{card.map}</b></div>}
+      <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › <a href="/map">{tr("Maps")}</a> › {card ? card.map : shown || tr("Map")}</nav>
+      {shown && mapSplash(shown) && (
+        <div className="maphero big" style={{ backgroundImage: `url(${mapSplash(shown)})` }}>
+          <div className="mhtext">
+            <b>{shown}</b>
+            <div className="aghnums">
+              <div><b>{card ? card.played : 0}</b><span>{tr("maps played")}</span></div>
+              {card && card.attack != null && <div><b>{card.attack}%</b><span>{tr("Attack")}</span></div>}
+              {card && <div><b>{card.overtime}</b><span>{tr("in overtime")}</span></div>}
+            </div>
+            {top.length > 0 && <div className="mhagents">{top.map((a) => <span key={a.name}><AgentIcon name={a.name} size={34} link /><small>{a.pct}%</small></span>)}</div>}
+          </div>
+          {mapMinimap(shown) && <img className="minimap" src={mapMinimap(shown)} alt={tr("Map layout")} loading="lazy" />}
+        </div>
+      )}
       <div className="tabs sub" role="tablist" aria-label={tr("Event")}>
         <a role="tab" className="tablink" aria-selected={!event} href={base}>{tr("All events")}</a>
         {events.map((e) => <a key={e} role="tab" className="tablink" aria-selected={e === event} href={`${base}?e=${e}`}>{tr(EVENT_NAMES[e] || e)}</a>)}
@@ -66,7 +82,7 @@ function View({ card, event, events }) {
               <h2>{tr("Most played compositions")}</h2>
               <table className="vlrtable statstable">
                 <thead><tr><th className="vlrp">{tr("Agents")}</th><th>{tr("Played")}</th><th>{tr("Won")}</th><th>%</th></tr></thead>
-                <tbody>{card.comps.map((c, i) => <tr key={i}><td className="vlrp"><AgentList list={c.agents} size={24} /></td><td>{c.played}</td><td>{c.won}</td><td>{Math.round((c.won / c.played) * 100)}%</td></tr>)}</tbody>
+                <tbody>{card.comps.map((c, i) => <tr key={i}><td className="vlrp"><AgentList list={c.agents} size={24} link /></td><td>{c.played}</td><td>{c.won}</td><td>{Math.round((c.won / c.played) * 100)}%</td></tr>)}</tbody>
               </table>
             </section>
           )}

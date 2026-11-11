@@ -177,6 +177,7 @@ function View({ p }) {
           <div className="tname"><span className="pt"><Flag cc={p.cc} /><span>{p.name}</span><FollowStar slug={p.slug || teamSlug(p.name)} />{p.captain && <span className="tcapt" title={tr("Captain")}>C</span>}</span></div>
           {about.length > 0 && <div className="tsub">{about.map((x, i) => <Fragment key={i}>{i ? " · " : ""}{x}</Fragment>)}</div>}
           <p className="hint followhint">{tr("Follow this player to be alerted when they become a free agent or sign with a team.")} <AlertsButton /></p>
+          {p.tour && (p.tour.agents || []).length > 0 && <div className="pcardpool">{p.tour.agents.slice(0, 3).map((a) => <AgentIcon key={a.name} name={a.name} size={28} link />)}</div>}
           {hero && (
             <div className="pcardnums">
               {hero.nums.map(([label, value]) => <div key={label}><b>{value}</b><span>{label}</span></div>)}

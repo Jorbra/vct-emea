@@ -2439,3 +2439,57 @@ a.bt small { color: var(--muted); }
   linear-gradient(120deg, var(--surface) 40%, color-mix(in srgb, var(--agc) 30%, var(--surface)) 100%); }
 .thead.pcard.withagent::after { right: 18px; bottom: 10px; font-size: clamp(34px, 5.5vw, 72px); line-height: .9; text-transform: uppercase; color: var(--agc); opacity: .55; text-shadow: 0 2px 18px rgba(0, 0, 0, .6); }
 @media (max-width: 640px) { .thead.pcard.withagent { background-position: 0 0, right -90px top 18%, 0 0; } .thead.pcard.withagent::after { font-size: 30px; opacity: .4; } }
+
+/* ---- agents' pages, roster cards with the agent, minimap, agent pool */
+.aghero { position: relative; min-height: 260px; margin: 10px 0 18px; padding: 26px; border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; background: linear-gradient(90deg, var(--surface) 35%, color-mix(in srgb, var(--surface) 50%, transparent) 65%, transparent 100%), var(--agimg, none) right -20px top 15% / auto 200% no-repeat, linear-gradient(120deg, var(--surface) 40%, color-mix(in srgb, var(--agc) 35%, var(--surface)) 100%); }
+.aghtext { position: relative; display: grid; gap: 6px; max-width: 520px; }
+.aghtext img { filter: drop-shadow(0 2px 8px rgba(0,0,0,.5)); }
+.aghero h2 { margin: 0; font-size: clamp(38px, 7vw, 72px); line-height: .95; text-transform: uppercase; color: var(--agc); }
+.agrole { color: var(--muted); font-weight: 600; }
+.aghnums { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 10px; }
+.aghnums div { display: grid; }
+.aghnums b { font-size: 30px; color: var(--lime); }
+.aghnums span { font-size: 12px; color: var(--muted); }
+.agmaps { display: grid; gap: 8px; }
+.agmaprow { display: grid; grid-template-columns: minmax(130px, 200px) 1fr 52px; align-items: center; gap: 12px; color: var(--fg); text-decoration: none; }
+.agbar { height: 10px; border-radius: 6px; background: var(--line); overflow: hidden; }
+.agbar i { display: block; height: 100%; background: var(--agc, var(--lime)); }
+.agmaprow b { text-align: right; }
+.agbest { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+.agbest li { display: grid; grid-template-columns: 1fr auto; }
+.agbest li span { font-weight: 700; color: var(--lime); }
+.agbest small { grid-column: 1 / -1; color: var(--muted); }
+.aggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin: 14px 0; }
+.agcard { position: relative; display: grid; align-content: end; gap: 2px; min-height: 200px; padding: 12px; border: 1px solid var(--line); border-radius: var(--r-card); color: var(--fg); text-decoration: none; overflow: hidden; background: linear-gradient(180deg, transparent 35%, var(--surface) 88%), var(--agimg, none) center top / 150% auto no-repeat, linear-gradient(160deg, color-mix(in srgb, var(--agc) 40%, var(--surface)), var(--surface)); transition: transform .18s ease, border-color .18s ease; }
+.agcard:hover { transform: translateY(-3px); border-color: var(--agc); }
+.agcard b { font-size: 20px; text-transform: uppercase; color: var(--agc); }
+.agcard small, .agcard span { font-size: 12px; color: var(--muted); }
+a.agicon { text-decoration: none; color: inherit; }
+a.agicon:hover img { transform: scale(1.12); }
+.agicon img { transition: transform .15s ease; }
+.rcard.withagent { position: relative; overflow: hidden; background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 30%, transparent) 0%, var(--surface) 78%), var(--agimg, none) center 10% / 170% auto no-repeat, var(--surface); }
+.rcard.withagent > * { position: relative; }
+.rcagent { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--agc); }
+.maphero { position: relative; }
+.maphero .minimap { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); height: 82%; max-height: 180px; width: auto; filter: drop-shadow(0 4px 14px rgba(0,0,0,.6)); opacity: .95; }
+.pcardpool { position: relative; display: flex; gap: 6px; margin: 6px 0 2px; }
+.pcardpool img { border-radius: 8px; background: rgba(0,0,0,.25); }
+@media (max-width: 640px) { .agmaprow { grid-template-columns: 120px 1fr 44px; } .maphero .minimap { height: 64%; } }
+
+/* ---- maps' pages */
+.maphero.big { height: auto; min-height: 240px; align-items: center; padding: 24px; }
+.maphero.big::before { background: linear-gradient(90deg, rgba(0,0,0,.82) 30%, rgba(0,0,0,.35) 70%, rgba(0,0,0,.2)); }
+.mhtext { position: relative; display: grid; gap: 8px; color: #fff; }
+.mhtext > b { font-size: clamp(40px, 7vw, 72px); line-height: .95; }
+.mhtext .aghnums b { font-size: 28px; color: var(--lime); }
+.mhtext .aghnums span { color: rgba(255,255,255,.75); }
+.mhagents { display: flex; gap: 12px; }
+.mhagents span { display: grid; justify-items: center; gap: 2px; }
+.mhagents small { font-size: 12px; color: rgba(255,255,255,.8); }
+.mpgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin: 14px 0; }
+.mpcard { position: relative; display: grid; align-content: end; gap: 4px; min-height: 170px; padding: 14px; border-radius: var(--r-card); overflow: hidden; color: #fff; text-decoration: none; background: linear-gradient(0deg, rgba(0,0,0,.85) 10%, rgba(0,0,0,.15) 75%), var(--mpimg) center / cover no-repeat; border: 1px solid var(--line); transition: transform .18s ease, border-color .18s ease; }
+.mpcard:hover { transform: translateY(-3px); border-color: var(--lime); }
+.mpcard.unplayed { filter: grayscale(.7); opacity: .8; }
+.mpcard b { font: 800 26px var(--font-display); text-transform: uppercase; letter-spacing: .03em; }
+.mpcard small { color: rgba(255,255,255,.8); }
+.mpmini { position: absolute; right: 8px; top: 8px; width: 72px; height: 72px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,.7)); }

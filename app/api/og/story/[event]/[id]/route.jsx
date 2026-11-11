@@ -3,6 +3,7 @@ import { getDb, getState } from "../../../../../../lib/db.js";
 import { allMatches } from "../../../../../../lib/matchlist.js";
 import { EVENT_NAMES } from "../../../../../../lib/paths.js";
 import { logoData, nameColor } from "../../../../../../lib/ogimg.js";
+import ASSETS from "../../../../../../lib/valorant-assets.json";
 
 export const dynamic = "force-dynamic";
 
@@ -27,9 +28,16 @@ export async function GET(_req, { params }) {
     );
   };
   const maps = (ex.maps || []).filter((x) => x.a != null);
+  // the last map played (the decisive one) behind the picture
+  const last = maps.length ? String(maps[maps.length - 1].map || "").toLowerCase() : "";
+  const mk = Object.keys(ASSETS.maps).find((k) => k.toLowerCase() === last);
+  const splash = mk ? ASSETS.maps[mk].splash : "";
   return new ImageResponse(
     (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", width: "100%", height: "100%", background: "#0d0f14", padding: "120px 60px", fontFamily: "sans-serif", color: "#fff" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", width: "100%", height: "100%", background: "#0d0f14", padding: "120px 60px", fontFamily: "sans-serif", color: "#fff", position: "relative" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {splash ? <img src={splash} width={3413} height={1920} style={{ position: "absolute", left: -1166, top: 0, opacity: 0.35 }} alt="" /> : null}
+        {splash ? <div style={{ display: "flex", position: "absolute", left: 0, top: 0, width: "100%", height: "100%", background: "linear-gradient(180deg, rgba(13,15,20,0.85) 0%, rgba(13,15,20,0.4) 50%, rgba(13,15,20,0.9) 100%)" }} /> : null}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
           <div style={{ display: "flex", fontSize: 44, color: "#c8f03c", fontWeight: 700, letterSpacing: 4 }}>{done ? "RÉSULTAT" : live ? "EN DIRECT" : "À VENIR"}</div>
           <div style={{ display: "flex", fontSize: 40, color: "#a0a09c" }}>{EVENT_NAMES[event] || event}</div>

@@ -4,6 +4,7 @@ import { siteTeams } from "../../../../../lib/teams.js";
 import { teamSlug } from "../../../../../lib/paths.js";
 import { readDetails, tournamentStats } from "../../../../../lib/tstats.js";
 import { logoData } from "../../../../../lib/ogimg.js";
+import ASSETS from "../../../../../lib/valorant-assets.json";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,8 @@ export async function GET(_req, { params }) {
   const team = siteTeams(state).find((t) => teamSlug(t.name) === teamSlug(p.team));
   const logo = logoData(db, team);
   const agent = p.agents && p.agents[0] ? p.agents[0].name.toUpperCase() : "";
+  // the main agent's portrait and colour (valorant-api.com)
+  const ag = ASSETS.agents[agent.toLowerCase().replace(/[^a-z]/g, "")] || null;
   const fix = (v, d) => (v == null ? "–" : Number(v).toFixed(d));
   const stat = (v, l) => (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -27,7 +30,10 @@ export async function GET(_req, { params }) {
   return new ImageResponse(
     (
       <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", background: "#0c0e13", padding: 60, fontFamily: "sans-serif", position: "relative" }}>
-        <div style={{ display: "flex", position: "absolute", right: -20, bottom: -60, fontSize: 300, fontWeight: 800, color: "#161a24" }}>{agent}</div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {ag && ag.portrait ? <img src={ag.portrait} width={760} height={760} style={{ position: "absolute", right: -120, top: -40, objectFit: "contain", opacity: 0.9 }} alt="" /> : null}
+        <div style={{ display: "flex", position: "absolute", left: 0, top: 0, width: "100%", height: "100%", background: "linear-gradient(90deg, #0c0e13 45%, rgba(12,14,19,0.55) 70%, rgba(12,14,19,0) 100%)" }} />
+        <div style={{ display: "flex", position: "absolute", right: 30, bottom: 30, fontSize: 96, fontWeight: 800, color: ag ? ag.color : "#161a24", opacity: 0.8 }}>{agent}</div>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {logo ? <img src={logo} width={72} height={72} style={{ objectFit: "contain" }} alt="" /> : null}

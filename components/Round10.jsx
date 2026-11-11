@@ -146,7 +146,7 @@ export function AgentMapTable({ data }) {
       <h2>{tr("Agents by map")}</h2>
       <p className="note">{tr("The share of teams that picked each agent on each map.")}</p>
       <div className="tablewrap"><table className="agmap">
-        <thead><tr><th>{tr("Map")}</th>{data.agents.map((a) => <th key={a}><AgentIcon name={a} size={26} /></th>)}</tr></thead>
+        <thead><tr><th>{tr("Map")}</th>{data.agents.map((a) => <th key={a}><AgentIcon name={a} size={26} link /></th>)}</tr></thead>
         <tbody>{data.maps.map(({ map, games }) => (
           <tr key={map}><th scope="row" data-map={map}><MapThumb map={map}><small> ({games})</small></MapThumb></th>
             {data.keys.map((k) => { const v = data.cells[`${map}|${k}`] || 0; return <td key={k} style={{ "--v": v / 100 }} className={v >= 50 ? "hot" : ""}>{v ? `${v}%` : "–"}</td>; })}

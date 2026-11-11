@@ -7,7 +7,7 @@ import { fanToken } from "./Fans.jsx";
 import { useFavorites } from "./favorites.js";
 import { EVENT_NAMES, teamSlug } from "../lib/paths.js";
 import { allMatches } from "../lib/matchlist.js";
-import { AgentIcon, AgentList } from "./Assets.jsx";
+import { AgentIcon, AgentList, agentInfo } from "./Assets.jsx";
 
 const safe = (f, d) => { try { return f(); } catch { return d; } };
 const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
@@ -263,10 +263,10 @@ export function RosterCards({ list }) {
     <section>
       <SectionHead icon="👥" title={tr("The players")} />
       <div className="rcards">{list.sort((a, b) => (b.r || 0) - (a.r || 0)).map((p) => (
-        <a key={p.slug} href={`/player/${p.slug}`} className="rcard">
+        <a key={p.slug} href={`/player/${p.slug}`} className={"rcard" + (agentInfo(p.agent) ? " withagent" : "")} style={agentInfo(p.agent) ? { "--agc": agentInfo(p.agent).color, "--agimg": `url(${agentInfo(p.agent).portrait})` } : undefined}>
           <span className="rcav" aria-hidden="true">{p.name.charAt(0).toUpperCase()}</span>
           <b>{p.name}</b>
-          {p.agent ? <AgentIcon name={p.agent} size={26} label /> : null}
+          {p.agent ? <span className="rcagent">{agentInfo(p.agent) ? agentInfo(p.agent).name : p.agent}</span> : null}
           <div className="rcnums"><span><b>{p.r != null ? p.r.toFixed(2) : "–"}</b>R</span><span><b>{p.acs ?? "–"}</b>ACS</span><span><b>{p.kd != null ? Number(p.kd).toFixed(2) : "–"}</b>K/D</span></div>
         </a>
       ))}</div>

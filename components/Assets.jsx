@@ -13,20 +13,17 @@ export const mapInfo = (name) => {
 };
 
 /** An agent's icon (its name in the tooltip), or its name when the icon is unknown. */
-export function AgentIcon({ name, size = 22, label = false }) {
+export function AgentIcon({ name, size = 22, label = false, link = false }) {
   const a = agentInfo(name);
   const shown = a ? a.name : cap(name);
   if (!a) return <span className="agtxt">{shown}</span>;
-  return (
-    <span className={"agicon" + (label ? " lbl" : "")} title={shown}>
-      <img src={a.icon} alt={shown} width={size} height={size} loading="lazy" />
-      {label && <span>{shown}</span>}
-    </span>
-  );
+  const inner = <><img src={a.icon} alt={shown} width={size} height={size} loading="lazy" />{label && <span>{shown}</span>}</>;
+  if (link) return <a className={"agicon" + (label ? " lbl" : "")} title={shown} href={`/agent/${norm(a.name)}`}>{inner}</a>;
+  return <span className={"agicon" + (label ? " lbl" : "")} title={shown}>{inner}</span>;
 }
 
 /** Several agents in a row. */
-export const AgentList = ({ list, size = 22 }) => <span className="aglist">{(list || []).map((a, i) => <AgentIcon key={`${a}${i}`} name={typeof a === "string" ? a : a.name} size={size} />)}</span>;
+export const AgentList = ({ list, size = 22, link = false }) => <span className="aglist">{(list || []).map((a, i) => <AgentIcon key={`${a}${i}`} name={typeof a === "string" ? a : a.name} size={size} link={link} />)}</span>;
 
 /** A map's small picture with its name. */
 export function MapThumb({ map, children = null }) {
@@ -38,6 +35,9 @@ export function MapThumb({ map, children = null }) {
     </span>
   );
 }
+
+/** A map's layout seen from above (minimap): its address, or "". */
+export const mapMinimap = (map) => (mapInfo(map) || {}).icon || "";
 
 /** A map's large picture, for a page header or a background: its address, or "". */
 export const mapSplash = (map) => (mapInfo(map) || {}).splash || "";
