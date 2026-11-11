@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 // A tag can be up to 7 letters (used for the logo file name); the small badge only has room for 3.
+export const DEFAULT_LOGO = "/brand/default-team.png";
 const initialsOf = (t) => (t && t.name && (t.tag || t.name.slice(0, 2).toUpperCase()).slice(0, 3)) || "?";
 
 export function Crest({ team }) {
@@ -23,12 +24,10 @@ export function Crest({ team }) {
     );
   }
   if (!team || !team.name) return <div className="crest open">?</div>;
-  // No logo set: a badge whose colour comes from the team name, so every team looks distinct without any setup.
-  let h = 0;
-  for (const ch of team.name) h = (h * 31 + ch.charCodeAt(0)) % 360;
+  // No logo (or a broken one): the site's default logo, the team's initials for screen readers
   return (
-    <div className="crest gen" style={{ "--h": h }}>
-      {initialsOf(team)}
+    <div className="crest logo deflogo" title={team.name}>
+      <img src={DEFAULT_LOGO} alt={initialsOf(team)} loading="lazy" />
     </div>
   );
 }

@@ -2073,3 +2073,4 @@ html[data-nospoil] .stories { display: none; }
 .swl.on, .swr.on { opacity: 1; color: var(--lime); }
 .swbtns { display: flex; gap: 8px; }
 .dayboard tr.todo td:last-child { color: var(--danger); font-weight: 600; }
+.crest.deflogo img { padding: 14%; box-sizing: border-box; object-fit: contain; }
