@@ -2438,8 +2438,4 @@ a.bt small { color: var(--muted); }
   var(--agimg, none) right -30px top 18% / auto 210% no-repeat,
   linear-gradient(120deg, var(--surface) 40%, color-mix(in srgb, var(--agc) 30%, var(--surface)) 100%); }
 .thead.pcard.withagent::after { right: 18px; bottom: 10px; font-size: clamp(34px, 5.5vw, 72px); line-height: .9; text-transform: uppercase; color: var(--agc); opacity: .55; text-shadow: 0 2px 18px rgba(0, 0, 0, .6); }
-.playerpage .pcardnums b, .playerpage .phtiles b { color: var(--agc, var(--lime)); }
-.playerpage .phdonut, .playerpage .phtiles div { border-color: color-mix(in srgb, var(--agc, var(--line)) 35%, var(--line)); }
-.playerpage .crbar { border-color: var(--agc, var(--lime)); background: color-mix(in srgb, var(--agc, var(--lime)) 25%, var(--surface)); }
 @media (max-width: 640px) { .thead.pcard.withagent { background-position: 0 0, right -90px top 18%, 0 0; } .thead.pcard.withagent::after { font-size: 30px; opacity: .4; } }
-:root[data-theme="light"] .playerpage .pcardnums b, :root[data-theme="light"] .playerpage .phtiles b { color: color-mix(in srgb, var(--agc, #4d6b00) 70%, #000); }
