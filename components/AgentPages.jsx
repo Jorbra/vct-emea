@@ -10,6 +10,7 @@ import { AgentIcon, MapThumb } from "./Assets.jsx";
 import { EmptyState, SectionHead } from "./Round11.jsx";
 import { AgentDuel } from "./Round13.jsx";
 import { RoleMates } from "./Round14.jsx";
+import { RoleShare, SortPick } from "./Round15.jsx";
 
 function Top({ title }) {
   const tr = useT();
@@ -92,7 +93,8 @@ function Agents({ list }) {
   // a role to show only its agents
   const [role, setRole] = useState("");
   const roles = [...new Set(list.map((x) => x.role).filter(Boolean))];
-  const shown = role ? list.filter((x) => x.role === role) : list;
+  const [sort, setSort] = useState("picks");
+  const shown = (role ? list.filter((x) => x.role === role) : list).slice().sort(sort === "win" ? (x, y) => y.pct - x.pct || y.picks - x.picks : sort === "name" ? (x, y) => x.name.localeCompare(y.name) : (x, y) => y.picks - x.picks);
   return (
     <div className="wrap teampage">
       <Top title={tr("Agents")} />
@@ -102,7 +104,9 @@ function Agents({ list }) {
         <div className="chips rolechips" role="group" aria-label={tr("Role")}>
           <button type="button" className={role ? "" : "on"} aria-pressed={!role} onClick={() => setRole("")}>{tr("All")}</button>
           {roles.map((r) => <button key={r} type="button" className={role === r ? "on" : ""} aria-pressed={role === r} onClick={() => setRole(r)}>{tr(r)}</button>)}
+          <SortPick value={sort} onChange={setSort} items={[["picks", tr("Most picked")], ["win", tr("Best win rate")], ["name", tr("A to Z")]]} />
         </div>
+        <RoleShare list={list} />
         <div className="aggrid">{shown.map((a) => (
           <a key={a.key} href={`/agent/${a.key}`} className="agcard" style={{ "--agc": a.color || "var(--lime)", ...(a.portrait ? { "--agimg": `url(${a.portrait})` } : {}) }}>
             <b>{a.name}</b>
@@ -119,17 +123,20 @@ export const AgentsPage = (p) => <LangProvider lang={p.lang}><Agents {...p} /></
 
 // ---- every map
 
-function Maps({ list }) {
+function Maps({ list: all }) {
   const tr = useT();
+  const [sort, setSort] = useState("played");
+  const list = all.slice().sort(sort === "attack" ? (x, y) => (y.attack ?? -1) - (x.attack ?? -1) : sort === "name" ? (x, y) => x.name.localeCompare(y.name) : (x, y) => y.played - x.played || x.name.localeCompare(y.name));
   return (
     <div className="wrap teampage">
       <Top title={tr("Maps")} />
       <p className="note">{tr("The maps of the pool, most played on the site's events first.")}</p>
+      <div className="chips rolechips"><SortPick value={sort} onChange={setSort} items={[["played", tr("Most played")], ["attack", tr("Attack-sided first")], ["name", tr("A to Z")]]} /></div>
       <div className="mpgrid">{list.map((m) => (
         <a key={m.key} href={`/map/${m.key}`} className={"mpcard" + (m.played ? "" : " unplayed")} style={{ "--mpimg": `url(${m.splash})` }}>
           <img className="mpmini" src={m.icon} alt="" loading="lazy" />
           <b>{m.name}</b>
-          <small>{m.played ? `${m.played} ${tr("maps played")}` : tr("Not played yet")}</small>
+          <small>{m.played ? `${m.played} ${tr("maps played")}` : tr("Not played yet")}{m.attack != null ? ` · ${tr("Attack")} ${m.attack}%` : ""}</small>
           {m.agents.length > 0 && <span className="aglist">{m.agents.map((a) => <AgentIcon key={a.name} name={a.name} size={24} />)}</span>}
         </a>
       ))}</div>

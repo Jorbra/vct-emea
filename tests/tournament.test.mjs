@@ -1741,7 +1741,7 @@ test("search: tournaments, teams and people; the site's own first, and every res
   const lists = { teams: [["Team Vitality", "VIT", "1/11/v.png"], ["LOUD", "LOUD", "8/8b/l.png"]], players: { players: [["Jamppi", "fi"], ["aspas", "br"]], staff: [["Coachy", "fr"]] } };
   const items = searchIndex(initial, info, lists);
   const s = (q) => searchAll(items, q);
-  assert.deepEqual(s("k"), { events: [], teams: [], players: [], matches: [], maps: [] }); // too short
+  assert.deepEqual(s("k"), { events: [], teams: [], players: [], matches: [], maps: [], agents: [] }); // too short
   assert.equal(s("kickoff").events[0].href, "/vctemea/kickoff/overview");
   assert.ok(s("turquie").events.some((e) => e.name === "Türkiye Qualifier Playoffs")); // by another word
   assert.equal(s("champions").events.length, 1); // once, though two results name it
@@ -1758,7 +1758,7 @@ test("search: tournaments, teams and people; the site's own first, and every res
   assert.equal(s("ali").players[0].sub, "Beşiktaş Esports");
   assert.equal(s("aspas").players[0].href, "/player/aspas");
   assert.equal(s("coachy").players[0].href, "/player/coachy"); // staff too
-  assert.deepEqual(s("zzzz"), { events: [], teams: [], players: [], matches: [], maps: [] });
+  assert.deepEqual(s("zzzz"), { events: [], teams: [], players: [], matches: [], maps: [], agents: [] });
 });
 
 test("where the editor opens from a page of the site, and on which view", async () => {

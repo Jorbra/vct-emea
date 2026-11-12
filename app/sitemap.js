@@ -3,6 +3,7 @@ import { allMatches } from "../lib/matchlist.js";
 import { listNews } from "../lib/community.js";
 import { siteHref, teamHref, EVENT_NAMES } from "../lib/paths.js";
 import { siteTeams } from "../lib/teams.js";
+import ASSETS from "../lib/valorant-assets.json";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,9 @@ export default function sitemap() {
     ...siteTeams(state).map((t) => teamHref(t.name)).filter(Boolean),
     ...allMatches(state).filter((m) => m.a && m.b && m.a.name && m.b.name).map((m) => `/match/${m.event}/${m.id}`),
     ...listNews(db).map((n) => `/news/${n.id}`),
+    "/agent", "/agent/duel", "/map", "/jeux", "/fantasy", "/quiz", "/tierlist", "/puissance",
+    ...Object.keys(ASSETS.agents).map((k) => `/agent/${k}`),
+    ...Object.entries(ASSETS.maps).filter(([, v]) => v.icon).map(([k]) => `/map/${k.toLowerCase()}`),
   ];
   return [...new Set(paths)].map((p) => ({ url: base + p }));
 }

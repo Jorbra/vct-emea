@@ -26,6 +26,7 @@ import { pickSplit, playersInForm } from "../../../lib/round10.js";
 import { matchPreview } from "../../../lib/round11.js";
 import { agentTiers, ratingByMap } from "../../../lib/round13.js";
 import { agentPage } from "../../../lib/agentpage.js";
+import { styleAnswer } from "../../../lib/botstyle.js";
 import { ratings as r8ratings } from "../../../lib/r8data.js";
 
 export const dynamic = "force-dynamic";
@@ -253,7 +254,7 @@ export async function POST(req) {
   // the others read more: "thinking…" now, the answer right after
   after(async () => {
     let payload;
-    try { payload = answerButtons(name, i, answerCommand(name, i, ctx), ctx.site, settings.lang); } catch (e) { console.log(`[bot] ${name}: ${e.message}`); payload = { content: L("Oups, une erreur. Réessaie dans un instant.", "Oops, an error. Try again in a moment.") }; }
+    try { payload = answerButtons(name, i, styleAnswer(answerCommand(name, i, ctx), ctx.site, settings.lang), ctx.site, settings.lang); } catch (e) { console.log(`[bot] ${name}: ${e.message}`); payload = { content: L("Oups, une erreur. Réessaie dans un instant.", "Oops, an error. Try again in a moment.") }; }
     try { await editOriginal(i.application_id, i.token, payload); } catch (e) { console.log(`[bot] reply: ${e.message}`); }
   });
   return NextResponse.json({ type: 5 });

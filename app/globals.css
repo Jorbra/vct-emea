@@ -2632,3 +2632,28 @@ a.agicon:hover img { transform: scale(1.12); }
 .warnbox { border: 1px solid #ffb347; border-radius: 12px; padding: 4px 14px; background: color-mix(in srgb, #ffb347 8%, var(--surface)); }
 @media (prefers-reduced-motion: reduce) { .lostagent img { animation: none; } .totop { transition: none; } }
 @media (max-width: 640px) { .vlrbar { grid-template-columns: 1fr 60px; } .vlrbar .vbar { grid-column: 1 / -1; grid-row: 2; } }
+
+/* ---- round 15: sorting, roles' share, MVP card, team band with its map, footer agents, search pictures */
+.sortpick { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; font-size: 13px; color: var(--muted); }
+.sortpick select { padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font-weight: 600; }
+.roleshare { margin: 8px 0 4px; }
+.rsbar { display: flex; height: 12px; border-radius: 8px; overflow: hidden; background: var(--line); }
+.rsbar i { display: block; height: 100%; }
+.rslegend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; font-size: 13px; }
+.rslegend span { display: inline-flex; align-items: center; gap: 6px; }
+.rslegend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.mvpcard { position: relative; display: grid; gap: 4px; margin: 12px 0; padding: 16px 18px; min-height: 140px; border-radius: var(--r-card); border: 1px solid var(--line); overflow: hidden; background: linear-gradient(90deg, var(--surface) 45%, color-mix(in srgb, var(--surface) 40%, transparent) 75%, transparent), var(--agimg, none) right -10px top 15% / auto 230% no-repeat, linear-gradient(120deg, var(--surface) 40%, color-mix(in srgb, var(--agc, var(--lime)) 35%, var(--surface))); }
+.mvpcard > small { text-transform: uppercase; letter-spacing: .1em; font-weight: 800; color: var(--lime); }
+.mvpcard > b { font: 800 30px var(--font-display); }
+.mvpcard > b a { color: var(--fg); }
+.mvpnums { display: flex; flex-wrap: wrap; gap: 14px; color: var(--muted); }
+.mvpnums b { color: var(--fg); font-size: 18px; }
+.mvpcard em { font-style: normal; font-weight: 800; text-transform: uppercase; color: var(--agc, var(--lime)); }
+.mvpcard .hint { margin: 0; }
+.thband.withmap { height: 96px; background: linear-gradient(180deg, color-mix(in srgb, var(--team, var(--band)) 55%, transparent), color-mix(in srgb, var(--team, var(--band)) 85%, var(--surface))), var(--mapimg) center 40% / cover no-repeat; }
+.footagents { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: -8px 0 18px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.footagents a { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; background: color-mix(in srgb, var(--agc) 14%, transparent); transition: transform .15s ease, background .15s ease; }
+.footagents a:hover { transform: translateY(-3px); background: color-mix(in srgb, var(--agc) 35%, transparent); }
+.lpimg.mappic { width: 34px; height: 22px; object-fit: cover; border-radius: 4px; }
+.lpimg.agpic { border-radius: 6px; background: rgba(0,0,0,.25); }
+.bestmap.dl { background: var(--lime); color: var(--lime-ink, #111); }

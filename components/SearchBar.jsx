@@ -34,6 +34,7 @@ function Pic({ r }) {
   }
   if (r.logo) return <img className="lpimg" src={logoUrl(r.logo)} alt="" loading="lazy" />;
   if (r.type === "player") return <Flag cc={r.cc} />;
+  if (r.pic) return <img className={"lpimg " + (r.type === "map" ? "mappic" : "agpic")} src={r.pic} alt="" loading="lazy" />;
   if (r.type === "map") return <span className="lpimg none mapletter" aria-hidden="true">{r.name.charAt(0)}</span>;
   return <span className="lpimg none" aria-hidden="true" />;
   /* eslint-enable @next/next/no-img-element */
@@ -94,7 +95,7 @@ export default function SearchBar() {
     return () => { document.removeEventListener("mousedown", onDown); window.removeEventListener("keydown", onKey); };
   }, []);
 
-  const groups = res ? [["Tournaments", res.events], ["Teams", res.teams], ["Players", res.players], ["Matches", res.matches || []], ["Maps", res.maps || []]].filter(([, l]) => l.length) : [];
+  const groups = res ? [["Tournaments", res.events], ["Teams", res.teams], ["Players", res.players], ["Matches", res.matches || []], ["Maps", res.maps || []], ["Agents", res.agents || []]].filter(([, l]) => l.length) : [];
   const flat = groups.flatMap(([, l]) => l);
   const go = (r) => {
     if (!r || !r.href) return;
@@ -114,7 +115,7 @@ export default function SearchBar() {
   return (
     <div className="searchbar" ref={box} role="search">
       <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M16.5 16.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-      <input ref={input} type="search" value={q} placeholder={tr("Search: tournament, team, player, match")} aria-label={tr("Search: tournament, team, player, match")}
+      <input ref={input} type="search" value={q} placeholder={tr("Search: team, player, match, agent, map")} aria-label={tr("Search: team, player, match, agent, map")}
         role="combobox" aria-expanded={!!shown} aria-controls="searchres" autoComplete="off" spellCheck="false"
         onChange={(e) => { setQ(e.target.value); setOpen(true); }} onFocus={() => setOpen(true)} onKeyDown={onKey} />
       {shown && (

@@ -18,6 +18,7 @@ import { Score, Skeleton, useTeamColor } from "./visual.jsx";
 import { PartTabs } from "./Round10.jsx";
 import { MatchPreview } from "./Round11.jsx";
 import { MatchComps, Veto } from "./Round13.jsx";
+import { MvpCard } from "./Round15.jsx";
 import { mapList, mapSplash } from "./Assets.jsx";
 
 export { EVENT_NAMES };
@@ -279,7 +280,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
         <div className="mmcols">
         <div className="mmmain">
         {ex.mvp && <p className="mmmvp" data-part="summary stats"><b>MVP</b> {who(ex.mvp)}</p>}
-        {!ex.mvp && done && autoMvp && <p className="mmmvp" data-part="summary stats"><b>MVP</b> {who(autoMvp.name)} <small>{tr("best ACS: {acs}", { acs: autoMvp.acs })}</small></p>}
+        {!ex.mvp && done && autoMvp && <MvpCard r={autoMvp} who={who} />}
         {details && (details.all || []).length > 0 && <div data-part="stats maps"><VlrStats details={details} m={m} /></div>}
         {ex.hasDetails && !details && <Skeleton lines={6} height={16} />}
         {!(details && (details.all || []).length) && !(ex.hasDetails && !details) && (ex.pstats || []).length > 0 && teamsOf(ex.pstats, m).map((g, i) => (

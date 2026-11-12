@@ -9,6 +9,7 @@ import { useFavorites } from "./favorites.js";
 import { EVENT_NAMES, teamSlug } from "../lib/paths.js";
 import { localeOf } from "../lib/i18n.js";
 import { DensitySwitch } from "./Round10.jsx";
+import { FootAgents } from "./Round15.jsx";
 
 const safe = (f, d) => { try { return f(); } catch { return d; } };
 
@@ -144,6 +145,7 @@ export function SiteFooter() {
   const tr = useT();
   return (
     <footer className="sitefoot">
+      <FootAgents />
       <div className="ftcols">
         <div><b>VCT EMEA</b><p>{tr("Results, brackets, schedule and teams of the VCT EMEA and Game Changers EMEA, updated live.")}</p><AccentPicker /><DensitySwitch /></div>
         <div><b>{tr("Follow")}</b><a href="/live">{tr("Live")}</a><a href="/calendar">{tr("Calendar")}</a><a href="/soiree">{tr("Match night")}</a><a href="/news">{tr("News")}</a></div>

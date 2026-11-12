@@ -29,6 +29,7 @@ import { PartTabs } from "./Round10.jsx";
 import { RosterCards } from "./Round11.jsx";
 import { TeamCompCards } from "./Round13.jsx";
 import { MapPoolTiles } from "./Round14.jsx";
+import { mapSplash } from "./Assets.jsx";
 
 export default function TeamPage(props) {
   return (
@@ -338,12 +339,12 @@ function OutsideTeam({ lp, org = [], outside, vlr, updating }) {
 
 /** The team's numbers in the tournaments, from vlr.gg's tables. */
 /** The team's header: a banner in the color of its logo, the logo over it, its key numbers and recent form. */
-function TeamHead({ team, children, stats = [], form = [], timeline = null }) {
+function TeamHead({ team, children, stats = [], form = [], timeline = null, map = "" }) {
   const tr = useT();
   const color = useTeamColor(team && team.logo);
   return (
     <div className={"thead teamhero" + (color ? " tinted" : "")} style={color ? { "--team": color } : undefined}>
-      <div className="thband" aria-hidden="true" />
+      <div className={"thband" + (map && mapSplash(map) ? " withmap" : "")} aria-hidden="true" style={map && mapSplash(map) ? { "--mapimg": `url(${mapSplash(map)})` } : undefined} />
       <div className="thbody">
         {children}
         {(stats.length > 0 || form.length > 0) && (
@@ -425,7 +426,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null, r
         <p className="pathlinks">{tr("Run")} : {p.events.filter((e) => e.matches.length).map((e, n) => <span key={e.event}>{n ? " · " : ""}<a href={`/parcours/${e.event}/${slug}`}>{tr(EVENT_NAMES[e.event])}</a></span>)}</p>
       )}
 
-      <TeamHead team={t} stats={headStats} form={form} timeline={<TeamTimeline rows={rows} name={t.name} />}>
+      <TeamHead team={t} stats={headStats} form={form} timeline={<TeamTimeline rows={rows} name={t.name} />} map={tstats && tstats.byMap && tstats.byMap[0] ? tstats.byMap[0].map : ""}>
         <Crest team={t} />
         <div>
           <div className="tname">{p.name}{t.tag ? <span className="ttag">{t.tag}</span> : null}<FavStar slug={slug} /></div>
