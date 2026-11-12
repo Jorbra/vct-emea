@@ -9,6 +9,7 @@ import { Flag } from "./TeamCard.jsx";
 import SearchBar from "./SearchBar.jsx";
 import { EVENT_NAMES, teamSlug } from "../lib/paths.js";
 import { dayText, moneyText } from "../lib/format.js";
+import { CompareHeads } from "./Round16.jsx";
 
 function Top({ title, crumb }) {
   const tr = useT();
@@ -83,6 +84,7 @@ function CompareView({ a, b, qa, qb }) {
       </form>
       {qa && !a && <p className="err">{tr("Unknown player: {name}", { name: qa })}</p>}
       {qb && !b && <p className="err">{tr("Unknown player: {name}", { name: qb })}</p>}
+      {a && b && <CompareHeads a={a} b={b} />}
       {a && b && (
         <div className="tablewrap wide">
           <table>

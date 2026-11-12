@@ -45,7 +45,7 @@ export default async function Page({ searchParams }) {
   if (a || b) {
     const db = getDb();
     const stats = tournamentStats(getState(db), readDetails(db));
-    for (const p of [a, b]) if (p) { const t = playerTournament(stats, teamSlug(p.name)); p.season = t ? { maps: t.maps, r: t.r, acs: t.acs, kd: t.kd, kast: t.kast, adr: t.adr, hs: t.hs, fk: t.fk, fd: t.fd } : null; }
+    for (const p of [a, b]) if (p) { const t = playerTournament(stats, teamSlug(p.name)); p.season = t ? { agent: (t.agents && t.agents[0] && t.agents[0].name) || "", maps: t.maps, r: t.r, acs: t.acs, kd: t.kd, kast: t.kast, adr: t.adr, hs: t.hs, fk: t.fk, fd: t.fd } : null; }
   }
   readSoon();
   return <ComparePage a={a} b={b} qa={qa} qb={qb} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />;

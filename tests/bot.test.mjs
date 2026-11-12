@@ -124,7 +124,7 @@ test("more commands: map, compare, head to head, agent, records, recap, schedule
   assert.match(text(answerCommand("records", cmd("records"), ctx)), /Alpha\*\* 400/);
   assert.match(text(answerCommand("recap", cmd("recap", { tournoi: "q1" }), ctx)), /Pas de récap/);
   assert.match(text(answerCommand("calendrier", cmd("calendrier", { jour: "week" }), ctx)), /7 prochains jours/);
-  assert.equal(helpMessage("fr", ["top"]).embeds[0].description.includes("/top"), false);
+  assert.equal(helpMessage("fr", ["top"]).embeds[0].fields.some((f) => f.value.includes("`/top`") || f.value.includes("`/top ")), false);
   assert.deepEqual(autocomplete(cmd("carte", { nom: "lo" }, { focused: "nom" }), ctx).map((c) => c.value), ["Lotus"]);
   assert.ok(autocomplete(cmd("compare", { joueur1: "team" }, { focused: "joueur1" }), ctx).length >= 0);
 });

@@ -40,7 +40,7 @@ function Agent({ a }) {
         <div className="aghtext">
           {a.icon && <img src={a.icon} alt="" width="56" height="56" />}
           <h2>{a.name}</h2>
-          {a.role && <span className="agrole">{tr(ROLE[a.role] || a.role)}</span>}
+          {a.role && <span className="agrole">{tr(ROLE[a.role] || a.role)}{a.rank ? ` · ${tr("#{n} most picked", { n: a.rank })}` : ""}</span>}
           <div className="aghnums">
             <div><b>{a.picks}</b><span>{tr("maps picked")}</span></div>
             <div><b>{a.share}%</b><span>{tr("of the teams")}</span></div>

@@ -9,6 +9,7 @@ import SiteNav from "./SiteNav.jsx";
 import { fanToken } from "./Fans.jsx";
 import { confetti } from "./visual.jsx";
 import { shareText } from "../lib/gameshare.js";
+import ASSETS from "../lib/valorant-assets.json";
 
 async function post(body) {
   const r = await fetch("/api/jeux", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: fanToken(), ...body }) });
@@ -222,6 +223,9 @@ function MysteryAgent({ agents, day, onEnd }) {
 
 // ---- the page
 
+// a picture behind each game's card
+const GAME_ART = { joueur: (ASSETS.agents.cypher || {}).portrait, duel: (ASSETS.maps.Ascent || {}).splash, logo: (ASSETS.maps.Lotus || {}).splash, agent: (ASSETS.agents.reyna || {}).portrait };
+
 const NAMES = { joueur: "Mystery player", duel: "Higher or lower", logo: "Mystery logo", agent: "Mystery agent" };
 const ICONS = { joueur: "🕵️", duel: "⚖️", logo: "🛡️", agent: "🦸" };
 
@@ -244,7 +248,7 @@ function Games({ day, available, players, teams, agents = [], rankings, counts }
       <div className="ghub">
         <div className="gstreakbox"><b>🔥 {me ? me.streak : "–"}</b><span>{tr("days in a row")}</span></div>
         {available.map((k) => (
-          <button key={k} type="button" className={"gcard" + (open === k ? " on" : "")} onClick={() => setOpen(k)} aria-pressed={open === k}>
+          <button key={k} type="button" className={"gcard art " + k + (open === k ? " on" : "")} onClick={() => setOpen(k)} aria-pressed={open === k} style={GAME_ART[k] ? { "--art": `url(${GAME_ART[k]})` } : undefined}>
             <span className="gicon" aria-hidden="true">{ICONS[k]}</span>
             <b>{tr(NAMES[k])}</b>
             <small>{status(k)} · {tr("{n} players", { n: counts[k] || 0 })}</small>

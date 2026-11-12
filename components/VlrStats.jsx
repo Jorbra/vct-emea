@@ -5,7 +5,7 @@ import { useT } from "./lang.jsx";
 import { Crest } from "./Crest.jsx";
 import { Flag } from "./TeamCard.jsx";
 import { playerHref } from "../lib/playerstats.js";
-import { AgentList } from "./Assets.jsx";
+import { AgentList, mapList } from "./Assets.jsx";
 
 const COLS = [["r", "R", "Rating 2.0"], ["acs", "ACS", "Average Combat Score"], ["k", "K", "Kills"], ["d", "D", "Deaths"], ["a", "A", "Assists"], ["pm", "+/–", "Kills – Deaths"], ["kast", "KAST", "Kill, Assist, Trade, Survive %"], ["adr", "ADR", "Average Damage per Round"], ["hs", "HS%", "Headshot %"], ["fk", "FK", "First Kills"], ["fd", "FD", "First Deaths"], ["fpm", "+/–", "First Kills – First Deaths"]];
 const PCT = ["kast", "hs"];
@@ -56,7 +56,7 @@ export default function VlrStats({ details, m }) {
       <div className="tabs sub vlrtabs" role="tablist" aria-label={tr("Maps")}>
         <button type="button" role="tab" aria-selected={tab < 0} onClick={() => setTab(-1)}>{tr("All maps")}</button>
         {maps.map((x, i) => (
-          <button type="button" role="tab" key={x.map + i} aria-selected={tab === i} onClick={() => setTab(i)}>
+          <button type="button" role="tab" key={x.map + i} aria-selected={tab === i} onClick={() => setTab(i)} className={mapList(x.map) ? "maptab" : ""} style={mapList(x.map) ? { "--mapimg": `url(${mapList(x.map)})` } : undefined}>
             {x.map} <small>{x.a}–{x.b}</small>
           </button>
         ))}

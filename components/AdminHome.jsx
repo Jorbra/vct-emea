@@ -13,6 +13,7 @@ import { BulkScores, MissingLogos } from "./Round9.jsx";
 import { ControlRoom } from "./Round10.jsx";
 import { ActivityFeed, EditorKpis, EditorSearch } from "./Round11.jsx";
 import { GamesToday, MetaDraft, MissingPictures, SlashToSearch, VlrTables } from "./Round14.jsx";
+import { SharePictures } from "./Round16.jsx";
 import { missingLogos, openMatches } from "../lib/r9pure.js";
 
 const GROUPS = [
@@ -80,6 +81,7 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
       {initial.admin && initial.admin.r14 && <VlrTables data={initial.admin.r14.vlr} call={call} onDone={onDone} />}
       {initial.admin && initial.admin.r14 && <GamesToday games={initial.admin.r14.games} />}
       {initial.admin && initial.admin.r14 && <MetaDraft text={initial.admin.r14.meta} />}
+      {initial.admin && <SharePictures initial={initial} now={now} />}
       {initial.admin && initial.admin.steps && <Journal admin={initial.admin} call={call} onDone={onDone} />}
       {initial.admin && <BannerEditor banner={initial.admin.banner} call={call} onDone={onDone} />}
       {initial.admin && initial.admin.visits && <Visits v={initial.admin.visits} activity={initial.admin.activity} />}
