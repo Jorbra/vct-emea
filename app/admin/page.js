@@ -22,6 +22,7 @@ import { recapOf } from "../../lib/recap.js";
 import { readDetails } from "../../lib/tstats.js";
 import { eventChecklist, listSteps } from "../../lib/more.js";
 import { editorR14 } from "../../lib/round14.js";
+import { sourcesReport } from "../../lib/sourcesreport.js";
 import { dayOf } from "../../lib/games.js";
 
 export const dynamic = "force-dynamic";
@@ -40,7 +41,7 @@ export default async function Page({ params }) {
   // Nothing from the database is sent to someone who is not signed in.
   const db = getDb();
   const state = me ? getState(db) : null;
-  const initial = me ? { ...state, admin: { steps: listSteps(db), checklist: eventChecklist(state), health: healthReport(db), visits: visitReport(db), activity: activityReport(db), banner: readBanner(db), claims: listClaims(db), polls: listPolls(db), schedScores: listScheduledScores(db), dayBoard: dayBoard(state, listClaims(db)), me: me.who || "", drafts: newsDrafts(Object.fromEntries(["q1", "q2", "trq1", "trq2", "meq1", "meq2", "naq1", "naq2"].map((ev) => [ev, state.qualifiers && state.qualifiers[ev] ? recapOf(state, readDetails(db, ev), ev) : null])), listNews(db)), comments: latestComments(db), sync: readItems("tsync_meta"), accounts: countAccounts(db), roles: me.who ? [] : listRoles(db), rosterDiffs: rosterDiffs(state, readTeamInfo()), who: me.who, undo: lastAction(db), history: listHistory(db, 200), editors: me.who ? [] : listEditors(db), seasons: listSeasons(db), news: listNews(db), voters: listVoters(db), r14: editorR14(db, state, dayOf()) } } : null;
+  const initial = me ? { ...state, admin: { steps: listSteps(db), checklist: eventChecklist(state), health: healthReport(db), visits: visitReport(db), activity: activityReport(db), banner: readBanner(db), claims: listClaims(db), polls: listPolls(db), schedScores: listScheduledScores(db), dayBoard: dayBoard(state, listClaims(db)), me: me.who || "", drafts: newsDrafts(Object.fromEntries(["q1", "q2", "trq1", "trq2", "meq1", "meq2", "naq1", "naq2"].map((ev) => [ev, state.qualifiers && state.qualifiers[ev] ? recapOf(state, readDetails(db, ev), ev) : null])), listNews(db)), comments: latestComments(db), sync: readItems("tsync_meta"), accounts: countAccounts(db), roles: me.who ? [] : listRoles(db), rosterDiffs: rosterDiffs(state, readTeamInfo()), who: me.who, undo: lastAction(db), history: listHistory(db, 200), editors: me.who ? [] : listEditors(db), seasons: listSeasons(db), news: listNews(db), voters: listVoters(db), r14: editorR14(db, state, dayOf()), sources: sourcesReport(db) } } : null;
   // signed in with an account that has no access: it is told so, rather than asked for a password
   const account = me ? "" : readAccountToken(db, (await cookies()).get(ACCOUNT_COOKIE)?.value, process.env.SESSION_SECRET);
   return <Admin initial={initial} isAdmin={!!me} denied={account} lang={lang} start={start} />;

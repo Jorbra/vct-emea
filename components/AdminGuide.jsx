@@ -82,7 +82,7 @@ const HOW = [
       "Le score en cartes de vlr.gg remplace le score de rounds donné par Toornament, seulement s'il désigne le même gagnant.",
       "Une page toutes les 10 secondes au plus, quelques-unes à chaque passage du cron ou d'une visite. Si vlr.gg refuse, tout s'arrête pour 24 heures.",
       "Les détails qu'un éditeur a saisis ou modifiés à la main ne sont jamais écrasés. Les forfaits n'ont pas de page de statistiques.",
-      "Pour un autre tournoi, il faut ajouter le numéro de son événement vlr.gg dans lib/vlrmatch.js (VLR_EVENTS).",
+      "Pour un autre tournoi, colle sa page vlr.gg (et sa page Toornament pour un qualifier) dans « Sources : liens Toornament et vlr.gg » sur l'accueil de l'éditeur : le site la suit dès le prochain tour.",
     ],
   },
   {
