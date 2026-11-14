@@ -132,3 +132,14 @@ test("a live match finished on vlr.gg gets its result and is no longer live", as
   assert.equal(allMatches(getState(db)).find((x) => x.event === "meq1" && x.id === m.id).sa, 1);
   assert.equal((getMatchLive(db).meq1 || {})[m.id], undefined);
 });
+
+test("a match finished on vlr.gg before Toornament opens it gets its result too", async () => {
+  const { closeFromVlr } = await import("../lib/vlrmatch.js");
+  const db = qualifier();
+  const ms = allMatches(getState(db)).filter((x) => x.event === "meq1" && x.a && x.b && x.a.name && x.b.name);
+  assert.equal(await closeFromVlr(db, getState(db), "meq1", ms[0].id, { sa: 1, sb: 0 }, true), true);
+  assert.equal(allMatches(getState(db)).find((x) => x.event === "meq1" && x.id === ms[0].id).sa, 1);
+  // a score already there stays
+  assert.equal(await closeFromVlr(db, getState(db), "meq1", ms[0].id, { sa: 0, sb: 1 }, true), false);
+  assert.equal(allMatches(getState(db)).find((x) => x.event === "meq1" && x.id === ms[0].id).sa, 1);
+});
