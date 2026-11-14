@@ -15,6 +15,7 @@ import { formatMatchTime } from "../lib/schedule.js";
 import { TvMode } from "./Round9.jsx";
 import { EmptyState } from "./Round11.jsx";
 import { StreamScore } from "./StreamScore.jsx";
+import { MyStreams } from "./MyStreams.jsx";
 
 function View({ live, next }) {
   const tr = useT();
@@ -58,7 +59,7 @@ function View({ live, next }) {
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
       <SiteNav />
-      {live.length === 0 ? <EmptyState text={tr("No match is being played right now.")} /> : (
+      {live.length === 0 ? <><EmptyState text={tr("No match is being played right now.")} /><MyStreams live={live} host={host} /></> : (
         <>
           {playable.length > 1 && (
             <div className="toggles"><label className="sw"><input type="checkbox" checked={multi} onChange={(e) => setMulti(e.target.checked)} /> {tr("Several streams at once (up to 4)")}</label></div>
@@ -96,6 +97,7 @@ function View({ live, next }) {
               </aside>
             </div>
           ) : withStream.length === 0 ? <p className="note">{tr("No stream link is known for these matches yet.")}</p> : null}
+          <MyStreams live={live} host={host} />
           <TvMode live={live} />
           <h2>{tr("Live now")} <small>({live.length})</small></h2>
           <div className="livegrid">{live.map((m) => card(m, current && `${m.event}:${m.id}` === `${current.event}:${current.id}`))}</div>

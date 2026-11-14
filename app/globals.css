@@ -2893,3 +2893,16 @@ a.agicon:hover img { transform: scale(1.12); }
 .ssopen { display: inline-flex; align-items: center; margin-left: auto; padding: 0 12px; font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; }
 .ssmap + .ssopen { margin-left: 0; }
 @media (max-width: 640px) { .ssopen { display: none; } .ssteam { padding: 0 8px; font-size: 15px; } .ssmap { display: none; } }
+
+/* ---- the visitor's own streams on the live page */
+.mystreams { margin: 18px 0; }
+.msform { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.msform input { flex: 1 1 320px; min-width: 0; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+.msform select, .msbar select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); max-width: 220px; }
+.msbar { display: flex; align-items: stretch; gap: 6px; min-width: 0; }
+.msbar .streamscore { flex: 1; min-width: 0; }
+.msbar select { max-width: 150px; font-size: 13px; }
+.msname { flex: 1; display: flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); border-bottom: 3px solid var(--lime); font: 800 17px var(--font-display); text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msx { flex: none; width: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font-size: 22px; cursor: pointer; }
+.msx:hover { border-color: #ff4655; color: #ff4655; }
+@media (max-width: 640px) { .msbar { flex-wrap: wrap; } .msbar select { order: 3; max-width: none; flex: 1; } }

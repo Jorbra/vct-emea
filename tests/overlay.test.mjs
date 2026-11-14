@@ -42,3 +42,10 @@ test("overlay settings: known values only", () => {
   assert.equal(overlayParams({ accent: "red" }).accent, "");
   assert.equal(overlayParams({ match: "../../etc" }).match, "");
 });
+
+test("streams the visitors add: Kick too, names and pasted links", async () => {
+  const { embedUrl } = await import("../lib/media.js");
+  assert.equal(embedUrl("https://kick.com/gaules", "site.test"), "https://player.kick.com/gaules?autoplay=false");
+  assert.equal(embedUrl("https://kick.com/", "site.test"), "");
+  assert.equal(embedUrl("http://kick.com/x", "site.test"), "");
+});
