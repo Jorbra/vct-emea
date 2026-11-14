@@ -15,6 +15,7 @@ import { ActivityFeed, EditorKpis, EditorSearch } from "./Round11.jsx";
 import { GamesToday, MetaDraft, MissingPictures, SlashToSearch, VlrTables } from "./Round14.jsx";
 import { SharePictures } from "./Round16.jsx";
 import { SourcesEditor } from "./SourcesEditor.jsx";
+import { ScheduledNews, SyncLog, TeamAliases } from "./Editor17.jsx";
 import { missingLogos, openMatches } from "../lib/r9pure.js";
 
 const GROUPS = [
@@ -79,6 +80,9 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
       {initial.admin && initial.admin.checklist && initial.admin.checklist.length > 0 && <Checklist list={initial.admin.checklist} />}
       {initial.admin && initial.admin.health && <Health rows={initial.admin.health} />}
       {initial.admin && initial.admin.sources && <SourcesEditor list={initial.admin.sources} call={call} onDone={onDone} />}
+      {initial.admin && initial.admin.teamAliases && <TeamAliases aliases={initial.admin.teamAliases} call={call} onDone={onDone} />}
+      {initial.admin && initial.admin.syncLog && <SyncLog list={initial.admin.syncLog} />}
+      {initial.admin && initial.admin.scheduled && <ScheduledNews list={initial.admin.scheduled} call={call} onDone={onDone} />}
       {initial.admin && <BotPanel />}
       {initial.admin && initial.admin.r14 && <VlrTables data={initial.admin.r14.vlr} call={call} onDone={onDone} />}
       {initial.admin && initial.admin.r14 && <GamesToday games={initial.admin.r14.games} />}
