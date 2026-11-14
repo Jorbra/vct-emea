@@ -30,30 +30,68 @@ const ROLE = { Duelist: "Duelist", Initiator: "Initiator", Controller: "Controll
 
 // ---- one agent
 
-// the key each ability is on, as in the game
-const KEYS = { Grenade: "C", Ability1: "Q", Ability2: "E", Ultimate: "X", Passive: "—" };
+// the key each ability is on, as in the game, and what kind it is
+const KEYS = { Grenade: "C", Ability1: "Q", Ability2: "E", Ultimate: "X", Passive: "" };
+const KINDS = { Grenade: "Basic ability", Ability1: "Basic ability", Ability2: "Signature ability", Ultimate: "Ultimate", Passive: "Passive" };
+// the game's colour codes in the texts (<debuffred>…</>, <teal>…</>…)
+const TONES = { debuffred: "red", red: "red", teal: "teal", green: "teal", yellow: "gold", gold: "gold", orange: "gold", blue: "blue" };
 
-/** The agent's abilities: icon, key, name and what it does, in the visitor's language. */
-function Abilities({ list, color }) {
+/** An ability's text as the game writes it: paragraphs, its coloured words, its words in capitals kept bold. */
+function AbilityText({ text }) {
+  const paras = String(text || "").replace(/\r/g, "").split(/\n\s*\n|\n/).map((x) => x.trim()).filter(Boolean);
+  const words = (t, key) => t.split(/(?<!\p{L})(\p{Lu}[\p{Lu}'’-]{2,}(?:\s+\p{Lu}[\p{Lu}'’-]{1,})*)(?!\p{L})/u).map((w, i) => (i % 2 ? <b key={`${key}-${i}`} className="abcap">{w}</b> : w));
+  return paras.map((para, n) => {
+    const parts = [];
+    let last = 0;
+    const re = /<([a-z]+)>([\s\S]*?)<\/\w*>/gi;
+    let m;
+    while ((m = re.exec(para))) {
+      if (m.index > last) parts.push(...words(para.slice(last, m.index), `${n}-${last}`));
+      parts.push(<span key={`${n}-t${m.index}`} className={"abtone " + (TONES[m[1].toLowerCase()] || "agc")}>{m[2]}</span>);
+      last = m.index + m[0].length;
+    }
+    if (last < para.length) parts.push(...words(para.slice(last), `${n}-${last}`));
+    return <p key={n}>{parts}</p>;
+  });
+}
+
+/** The agent's abilities: a row of icons to pick one, its card below with the whole text, in the visitor's language. */
+function Abilities({ list, color, name }) {
   const tr = useT();
-  const [open, setOpen] = useState("");
+  const [cur, setCur] = useState(0);
   if (!list || !list.length) return null;
   const fr = tr.lang === "fr";
+  const x = list[Math.min(cur, list.length - 1)];
+  const t = (fr ? x.fr : x.en) || x.en;
+  // arrows move between the abilities, like the game's own page
+  const onKey = (e) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); setCur((c) => (c + 1) % list.length); }
+    if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.preventDefault(); setCur((c) => (c - 1 + list.length) % list.length); }
+  };
   return (
-    <section className="abilities" style={{ "--agc": color || "var(--lime)" }}>
+    <section className="abil" style={{ "--agc": color || "var(--lime)" }}>
       <SectionHead icon="⚡" title={tr("Abilities")} />
-      <div className="abgrid">{list.map((x) => {
-        const t = (fr ? x.fr : x.en) || x.en;
-        const ult = x.slot === "Ultimate";
-        return (
-          <button key={x.slot} type="button" className={"abcard" + (ult ? " ult" : "") + (open === x.slot ? " on" : "")} onClick={() => setOpen(open === x.slot ? "" : x.slot)} aria-expanded={open === x.slot}>
-            <span className="abicon">{x.icon ? <img src={x.icon} alt="" width="40" height="40" loading="lazy" /> : null}<kbd>{KEYS[x.slot] || ""}</kbd></span>
-            <span className="abtext"><b>{t.name}</b><small>{ult ? tr("Ultimate") : x.slot === "Passive" ? tr("Passive") : tr("Ability")}</small></span>
-            <p>{t.text}</p>
-          </button>
-        );
-      })}</div>
-      <p className="hint">{tr("Tap an ability to read all of it. Source: valorant-api.com.")}</p>
+      <div className="abtabs" role="tablist" aria-label={tr("Abilities of {agent}", { agent: name })} onKeyDown={onKey}>
+        {list.map((y, i) => {
+          const yt = (fr ? y.fr : y.en) || y.en;
+          return (
+            <button key={y.slot} type="button" role="tab" id={`ab-${y.slot}`} aria-selected={i === cur} aria-controls="abpanel" tabIndex={i === cur ? 0 : -1}
+              className={"abtab" + (y.slot === "Ultimate" ? " ult" : "") + (i === cur ? " on" : "")} onClick={() => setCur(i)} title={yt.name}>
+              <span className="abtabicon">{y.icon ? <img src={y.icon} alt="" width="44" height="44" loading="lazy" /> : null}</span>
+              <span className="abtabkey">{KEYS[y.slot] || tr("Passive")}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="abpanel" id="abpanel" role="tabpanel" aria-labelledby={`ab-${x.slot}`} key={x.slot}>
+        <div className="abbig">{x.icon ? <img src={x.icon} alt="" width="96" height="96" /> : null}</div>
+        <div className="abbody">
+          <small className="abkind">{KEYS[x.slot] ? <kbd>{KEYS[x.slot]}</kbd> : null}{tr(KINDS[x.slot] || "Ability")}</small>
+          <h3>{t.name}</h3>
+          <div className="abdesc"><AbilityText text={t.text} /></div>
+        </div>
+      </div>
+      <p className="hint">{tr("Source: valorant-api.com.")}</p>
     </section>
   );
 }
@@ -85,7 +123,7 @@ function Agent({ a }) {
           </div>
         </div>
       </div>
-      <Abilities list={a.abilities} color={a.color} />
+      <Abilities list={a.abilities} color={a.color} name={a.name} />
       {a.picks === 0 ? <EmptyState text={tr("Not played on the site's events yet.")} /> : (
         <div className="cols">
           <main>
