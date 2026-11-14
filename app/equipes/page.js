@@ -5,6 +5,8 @@ import { getDb, getState } from "../../lib/db.js";
 import { LANG_COOKIE, normLang } from "../../lib/i18n.js";
 import { compareTeams } from "../../lib/playerstats.js";
 import { siteTeams } from "../../lib/teams.js";
+import { readDetails, tournamentStats } from "../../lib/tstats.js";
+import { teamSlug } from "../../lib/paths.js";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Comparer des équipes · VCT EMEA", description: "Deux équipes face à face : bilan, cartes et confrontations." };
@@ -18,6 +20,8 @@ export default async function Page({ searchParams }) {
   const a = pick(sp.a);
   const b = pick(sp.b);
   const c = a && b ? compareTeams(state, a, b) : null;
+  // each team's maps, from vlr.gg's tables
+  if (c) { const ts = tournamentStats(state, readDetails(getDb(), "")).teams; c.pools = { a: (ts[teamSlug(a.name)] || {}).byMap || [], b: (ts[teamSlug(b.name)] || {}).byMap || [] }; }
   const slim = (t) => (t ? { name: t.name, logo: t.logo || "", tag: t.tag || "" } : t === undefined ? undefined : null);
   return <TeamComparePage teams={teams.map((t) => t.name).sort((x, y) => x.localeCompare(y))} a={sp.a ? slim(a) || null : undefined} b={sp.b ? slim(b) || null : undefined} c={c} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />;
 }

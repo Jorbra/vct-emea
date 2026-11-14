@@ -11,6 +11,7 @@ import { EmptyState, SectionHead } from "./Round11.jsx";
 import { AgentDuel } from "./Round13.jsx";
 import { RoleMates } from "./Round14.jsx";
 import { RoleShare, SortPick } from "./Round15.jsx";
+import { AgentByEvent } from "./Round19.jsx";
 
 function Top({ title }) {
   const tr = useT();
@@ -124,6 +125,7 @@ function Agent({ a }) {
         </div>
       </div>
       <Abilities list={a.abilities} color={a.color} name={a.name} />
+      <AgentByEvent list={a.byEvent} color={a.color} />
       {a.picks === 0 ? <EmptyState text={tr("Not played on the site's events yet.")} /> : (
         <div className="cols">
           <main>

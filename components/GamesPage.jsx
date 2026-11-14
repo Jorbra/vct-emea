@@ -221,15 +221,39 @@ function MysteryAgent({ agents, day, onEnd }) {
   );
 }
 
+// ---- mystery map
+
+function MysteryMap({ maps, day, onEnd }) {
+  const tr = useT();
+  const { g, error, busy, play } = useGame("map", onEnd);
+  if (!g) return error ? <p className="note">{error}</p> : <p className="note">…</p>;
+  return (
+    <>
+      <p className="note">{tr("Which map is this layout? 4 guesses, it gets clearer after each one.")}</p>
+      <div className={"gmap" + (g.done ? " done" : "")}><img src={`/api/jeux/map?d=${day}`} alt={tr("Mystery map")} style={{ filter: `blur(${g.blur}px)`, transform: `rotate(${g.turn}deg)` }} draggable={false} /></div>
+      {!g.done && <Guess id="gmaps" list={maps} onPick={play} busy={busy} placeholder={tr("A map's name")} />}
+      {error && <p className="err" role="alert">{error}</p>}
+      {g.guesses.length > 0 && <ul className="gtries">{g.guesses.map((x) => <li key={x.name} className={x.ok ? "ok" : "ko"}>{x.ok ? "✅" : "❌"} {x.name}</li>)}</ul>}
+      {!g.done && <p className="hint">{tr("{n} guesses left", { n: 4 - g.guesses.length })}</p>}
+      {g.done && (
+        <>
+          <p className={"gend " + (g.won ? "ok" : "ko")}>{g.won ? tr("Found in {n}!", { n: g.guesses.length }) : tr("Missed. It was:")} <a href={`/map/${g.reveal.key}`}>{g.reveal.name}</a></p>
+          <Share game="map" g={g} day={day} />
+        </>
+      )}
+    </>
+  );
+}
+
 // ---- the page
 
 // a picture behind each game's card
-const GAME_ART = { joueur: (ASSETS.agents.cypher || {}).portrait, duel: (ASSETS.maps.Ascent || {}).splash, logo: (ASSETS.maps.Lotus || {}).splash, agent: (ASSETS.agents.reyna || {}).portrait };
+const GAME_ART = { joueur: (ASSETS.agents.cypher || {}).portrait, duel: (ASSETS.maps.Ascent || {}).splash, logo: (ASSETS.maps.Lotus || {}).splash, agent: (ASSETS.agents.reyna || {}).portrait, map: (ASSETS.maps.Haven || {}).splash };
 
-const NAMES = { joueur: "Mystery player", duel: "Higher or lower", logo: "Mystery logo", agent: "Mystery agent" };
-const ICONS = { joueur: "🕵️", duel: "⚖️", logo: "🛡️", agent: "🦸" };
+const NAMES = { joueur: "Mystery player", duel: "Higher or lower", logo: "Mystery logo", agent: "Mystery agent", map: "Mystery map" };
+const ICONS = { joueur: "🕵️", duel: "⚖️", logo: "🛡️", agent: "🦸", map: "🗺️" };
 
-function Games({ day, available, players, teams, agents = [], rankings, counts }) {
+function Games({ day, available, players, teams, agents = [], maps = [], rankings, counts }) {
   const tr = useT();
   const [me, setMe] = useState(null);
   const [open, setOpen] = useState(available[0] || "");
@@ -244,7 +268,7 @@ function Games({ day, available, players, teams, agents = [], rankings, counts }
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
       <SiteNav />
-      <p className="note">{tr("Four new games every day at midnight, the same for everyone. Play each one once, share your result, and keep your streak going.")}</p>
+      <p className="note">{tr("Five new games every day at midnight, the same for everyone. Play each one once, share your result, and keep your streak going.")}</p>
       <div className="ghub">
         <div className="gstreakbox"><b>🔥 {me ? me.streak : "–"}</b><span>{tr("days in a row")}</span></div>
         {available.map((k) => (
@@ -264,6 +288,7 @@ function Games({ day, available, players, teams, agents = [], rankings, counts }
           {open === "duel" && <HigherLower day={day} onEnd={refresh} />}
           {open === "logo" && <MysteryLogo teams={teams} day={day} onEnd={refresh} />}
           {open === "agent" && <MysteryAgent agents={agents} day={day} onEnd={refresh} />}
+          {open === "map" && <MysteryMap maps={maps} day={day} onEnd={refresh} />}
           <h3 className="sub">{tr("Today's best")}</h3>
           {(rankings[open] || []).length === 0 ? <p className="hint">{tr("Nobody yet. Your name in the predictions puts you here.")}</p> : (
             <ol className="quizrank">{rankings[open].map((r, i) => <li key={r.name}><span>{["🥇", "🥈", "🥉"][i] || `${i + 1}.`}</span> {r.name} <b>{open === "duel" ? `${r.score}/10` : `${r.score} pts`}</b></li>)}</ol>

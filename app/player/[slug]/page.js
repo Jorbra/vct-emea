@@ -16,6 +16,7 @@ import { sharedPreview } from "../../../lib/preview.js";
 import { requestDue, requestFetch, updateDue } from "../../../lib/teamfetch.js";
 import { siteTeams } from "../../../lib/teams.js";
 import { playerTournament, readDetails, tournamentStats } from "../../../lib/tstats.js";
+import { allMatches } from "../../../lib/matchlist.js";
 
 export const dynamic = "force-dynamic";
 
@@ -75,7 +76,19 @@ export default async function Page({ params, searchParams }) {
   const profile = load(slug, (await searchParams).maj === "1");
   if (!profile) notFound();
   readSoon();
-  return <PlayerPage profile={profile} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />;
+  // the team's matches still to come or being played, for the band under the card
+  const state = getState(getDb());
+  const team = String(profile.team || "");
+  const live = state.live || {};
+  profile.teamRows = team ? allMatches(state).filter((m) => m.sa == null && m.a && m.b && [m.a.name, m.b.name].includes(team)).map((m) => ({ event: m.event, id: m.id, a: m.a, b: m.b, sa: null, at: m.at || "", live: !!m.live })).slice(0, 20) : [];
+  profile.teamLive = Object.fromEntries(profile.teamRows.filter((m) => m.live).map((m) => [m.event, { [m.id]: (live[m.event] || {})[m.id] || {} }]));
+  const ld = { "@context": "https://schema.org", "@type": "Person", name: profile.name, ...(profile.realName ? { alternateName: profile.realName } : {}), ...(team ? { memberOf: { "@type": "SportsTeam", name: team } } : {}), ...(profile.cc ? { nationality: profile.cc.toUpperCase() } : {}), knowsAbout: "VALORANT" };
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
+      <PlayerPage profile={profile} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />
+    </>
+  );
 }
 
 export async function generateMetadata({ params }) {

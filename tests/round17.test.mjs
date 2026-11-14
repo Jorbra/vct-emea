@@ -79,3 +79,22 @@ test("the season as a timeline: every lane and event, the qualified teams", asyn
   assert.deepEqual(t[0].events.map((e) => e.event), ["q1", "q2", "playoffs"]);
   assert.ok(t.every((l) => l.events.every((e) => ["done", "live", "upcoming"].includes(e.state) && Array.isArray(e.qualified))));
 });
+
+test("mystery map: a layout to name in 4 guesses, clearer each time", async () => {
+  const { dailyPuzzles, playMove, readGame } = await import("../lib/games.js");
+  const { openDb } = await import("../lib/db.js");
+  const maps = ["Ascent", "Bind", "Haven", "Lotus", "Split"].map((n) => ({ key: n.toLowerCase(), name: n, icon: "https://x/m.png" }));
+  const pz = dailyPuzzles({ players: [], logos: [], maps }, "2026-11-15");
+  assert.ok(pz.map && pz.map.answer.name && [90, 180, 270].includes(pz.map.turn));
+  const db = openDb(":memory:");
+  const token = "m".repeat(30);
+  const names = maps.map((m) => m.name);
+  let g = readGame(db, pz, { token, game: "map" });
+  assert.equal(g.blur, 14);
+  const wrong = names.filter((n) => n !== pz.map.answer.name);
+  g = playMove(db, pz, { maps: names }, { token, game: "map", move: wrong[0] });
+  assert.equal(g.blur, 9);
+  assert.equal(playMove(db, pz, { maps: names }, { token, game: "map", move: "Nowhere" }).status, 400);
+  g = playMove(db, pz, { maps: names }, { token, game: "map", move: pz.map.answer.name });
+  assert.ok(g.done && g.won && g.turn === 0 && g.reveal.name === pz.map.answer.name);
+});

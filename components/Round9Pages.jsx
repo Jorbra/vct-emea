@@ -7,6 +7,7 @@ import SearchBar from "./SearchBar.jsx";
 import SiteNav from "./SiteNav.jsx";
 import { Crest } from "./Crest.jsx";
 import { EVENT_NAMES, teamHref } from "../lib/paths.js";
+import { PoolsCompare } from "./Round19.jsx";
 
 function Top({ title }) {
   const tr = useT();
@@ -59,6 +60,7 @@ function TeamCompare({ teams, a, b, c }) {
             {bar(tr("Maps won"), c.a.mw, c.b.mw)}
             {bar(tr("Map rate"), c.a.mw + c.a.ml ? Math.round((c.a.mw / (c.a.mw + c.a.ml)) * 100) : 0, c.b.mw + c.b.ml ? Math.round((c.b.mw / (c.b.mw + c.b.ml)) * 100) : 0, (x) => `${x}%`)}
           </div>
+          {c.pools && (c.pools.a.length > 0 || c.pools.b.length > 0) && <PoolsCompare a={a} b={b} pools={c.pools} />}
           <section>
             <h2>{tr("Their meetings")}</h2>
             {c.meetings.length === 0 ? <p className="note">{tr("Never met on the site.")}</p> : (

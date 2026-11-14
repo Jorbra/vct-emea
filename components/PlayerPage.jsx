@@ -22,6 +22,7 @@ import { CareerTimeline } from "./Round10.jsx";
 import { PlayerHero } from "./Round11.jsx";
 import { RatingByMap } from "./Round13.jsx";
 import { AgentMastery } from "./Round16.jsx";
+import { NextMatchBanner } from "./Team18.jsx";
 
 // the map where the player rates best (2 maps at least there)
 const bestMap = (t) => ((t && t.byMap) || []).filter((x) => x.r != null && x.n >= 2).sort((a, b) => b.r - a.r)[0] || null;
@@ -194,6 +195,7 @@ function View({ p }) {
         </div>
       </div>
       <PlayerHero p={p} />
+      {(p.teamRows || []).length > 0 && <NextMatchBanner rows={p.teamRows} name={p.team} live={p.teamLive || {}} />}
       {p.tour && p.ranges && <PlayerRadar stats={p.tour} ranges={p.ranges} />}
       {p.lp && <CareerTimeline history={p.lp.history} />}
       {p.lpState === "pending" && <p className="note lpwait" role="status">{tr("Looking for this information…")}</p>}
