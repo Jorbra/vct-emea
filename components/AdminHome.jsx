@@ -815,7 +815,7 @@ function Manage({ admin, call, onDone }) {
       <Seasons seasons={admin.seasons || []} call={call} onDone={onDone} />
       <section>
         <h2>{tr("Streaming (OBS)")}</h2>
-        <p className="note">{tr("In OBS, add a browser source with this page: it shows the live match, or the next one, on a transparent background.")} <a href="/overlay" target="_blank" rel="noopener noreferrer">/overlay</a></p>
+        <p className="note">{tr("In OBS, add a browser source with this page: it shows the live match, or the next one, on a transparent background.")} <a href="/overlay/studio" target="_blank" rel="noopener noreferrer">/overlay/studio</a></p>
       </section>
       <section>
         <h2>{tr("Backups")}</h2>
