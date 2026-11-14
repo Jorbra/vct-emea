@@ -9,7 +9,7 @@ import SiteNav from "./SiteNav.jsx";
 import { fanToken } from "./Fans.jsx";
 import { confetti } from "./visual.jsx";
 import { shareText } from "../lib/gameshare.js";
-import ASSETS from "../lib/valorant-assets.json";
+import { VIEW as ASSETS } from "./Assets.jsx";
 
 async function post(body) {
   const r = await fetch("/api/jeux", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: fanToken(), ...body }) });

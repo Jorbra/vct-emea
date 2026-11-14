@@ -12,7 +12,7 @@ test("agents' pages: known agents have a page even unplayed, unknown ones none",
   assert.equal(j.key, "jett");
   assert.equal(j.name, "Jett");
   assert.equal(j.picks, 0);
-  assert.ok(j.portrait.startsWith("https://"));
+  assert.equal(j.portrait, "/va/agents/jett-portrait.webp");
   assert.ok(/^#/.test(j.color));
   assert.deepEqual(j.maps, []);
   assert.equal(agentPage("kayo", db).name, "KAY/O");
@@ -81,7 +81,7 @@ test("round 13: mystery agent", async () => {
 test("agents' mastery poses: every agent has one, served from the site", async () => {
   const ASSETS = (await import("../lib/valorant-assets.json", { with: { type: "json" } })).default;
   for (const [k, a] of Object.entries(ASSETS.agents)) assert.match(a.pose || "", /^https:\/\/wiki\.playvalorant\.com\/en-us\/images\/thumb\/Mastery_I_Pose_/, k);
-  assert.equal(agentPage("Jett", openDb(":memory:")).pose, "/api/pose/jett");
+  assert.equal(agentPage("Jett", openDb(":memory:")).pose, "/va/agents/jett-pose.webp");
 });
 
 test("agents' abilities: every agent, in French and English, with its key", () => {

@@ -1,7 +1,13 @@
 "use client";
 
 // The agents' icons and the maps' pictures, from valorant-api.com (Riot's game assets, which fan sites may show).
-import ASSETS from "../lib/valorant-assets.json";
+import RAW from "../lib/valorant-assets.json";
+import LOCAL from "../lib/valorant-local.json";
+import { withLocal } from "../lib/assetmerge.js";
+
+/** The pictures as the pages show them: light copies from the site itself. */
+export const VIEW = withLocal(RAW, LOCAL);
+const ASSETS = VIEW;
 
 const norm = (s) => String(s || "").toLowerCase().replace(/[^a-z]/g, "");
 const cap = (s) => String(s || "").charAt(0).toUpperCase() + String(s || "").slice(1);

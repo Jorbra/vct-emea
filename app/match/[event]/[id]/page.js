@@ -10,11 +10,13 @@ import { scoreLabel } from "../../../../lib/scoretext.js";
 import { workSoon } from "../../../../lib/readsoon.js";
 import { detailsOf } from "../../../../lib/tstats.js";
 
+import { publicState } from "../../../../lib/publicstate.js";
+
 export const dynamic = "force-dynamic";
 
 function load(event, id) {
   if (!TIME_EVENTS.includes(event)) return null;
-  const state = getState(getDb());
+  const state = publicState(getState(getDb()));
   const items = matchesOf(event, eventData(state, event));
   const m = items.find((x) => x.id === id);
   if (!m) return null;

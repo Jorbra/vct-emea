@@ -8,6 +8,8 @@ import { eventPreview, sharedPreview } from "../../lib/preview.js";
 import { workSoon } from "../../lib/readsoon.js";
 
 // Always read the database on request: results change while the event runs.
+import { publicState } from "../../lib/publicstate.js";
+
 export const dynamic = "force-dynamic";
 
 // Every tab of the site (/vctemea/eu/playoff/swiss, /vctemea/kickoff/overview...); "/" is the home page.
@@ -30,5 +32,5 @@ export default async function Page({ params }) {
   if (path !== href) redirect(href);
   const initial = getState(getDb());
   const lang = normLang((await cookies()).get(LANG_COOKIE)?.value);
-  return <Tournament initial={initial} lang={lang} start={start} />;
+  return <Tournament initial={publicState(initial)} lang={lang} start={start} />;
 }

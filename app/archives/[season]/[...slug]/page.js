@@ -6,6 +6,8 @@ import { LANG_COOKIE, normLang } from "../../../../lib/i18n.js";
 import { parseSitePath, siteHref } from "../../../../lib/paths.js";
 import { getSeason } from "../../../../lib/seasons.js";
 
+import { publicState } from "../../../../lib/publicstate.js";
+
 export const dynamic = "force-dynamic";
 
 /** An archived season: the site's event pages, frozen, under /archives/<season>/... */
@@ -18,7 +20,7 @@ export default async function Page({ params }) {
   const href = siteHref(start.event, start.tab);
   if (path !== href) redirect(`/archives/${season}${href}`);
   const lang = normLang((await cookies()).get(LANG_COOKIE)?.value);
-  return <Tournament initial={s.state} lang={lang} start={start} archive={{ prefix: `/archives/${season}`, name: s.name }} />;
+  return <Tournament initial={publicState(s.state)} lang={lang} start={start} archive={{ prefix: `/archives/${season}`, name: s.name }} />;
 }
 
 export async function generateMetadata({ params }) {

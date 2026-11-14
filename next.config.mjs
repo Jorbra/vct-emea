@@ -7,6 +7,13 @@ const nextConfig = {
   },
   // NEXT_DIST_DIR: another build folder, so that a build can run while npm run dev keeps .next.
   distDir: process.env.NEXT_DIST_DIR || ".next",
+  // the light copies of the game's pictures and the brand files do not change: browsers keep them a week, the CDN a month
+  async headers() {
+    return [
+      { source: "/va/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=604800, s-maxage=2592000, stale-while-revalidate=2592000" }] },
+      { source: "/brand/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=86400, s-maxage=604800" }] },
+    ];
+  },
 };
 
 export default nextConfig;

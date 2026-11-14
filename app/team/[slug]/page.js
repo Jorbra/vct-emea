@@ -14,6 +14,8 @@ import { workSoon } from "../../../lib/readsoon.js";
 import { extraStats, readDetails, tournamentStats } from "../../../lib/tstats.js";
 
 // Always read the database on request: results change while the events run.
+import { publicState } from "../../../lib/publicstate.js";
+
 export const dynamic = "force-dynamic";
 
 /**
@@ -48,7 +50,7 @@ export default async function Page({ params, searchParams }) {
   const tstats = p && tournamentStats(initial, entries).teams[key] ? { ...tournamentStats(initial, entries).teams[key], comps: extraStats(initial, entries).teamComps[key] || [] } : null;
   // each of its players' numbers, for the roster cards
   const rosterStats = p ? tournamentStats(initial, entries).players.filter((x) => x.team && x.team.toLowerCase() === p.name.toLowerCase()).map(({ slug, name, r, acs, kd, maps, agents }) => ({ slug, name, r, acs, kd, maps, agent: agents[0] ? agents[0].name : "" })) : [];
-  return <TeamPage rosterStats={rosterStats} tstats={tstats} initial={p ? initial : null} slug={key} lang={lang} lp={lp} org={orgOf(teamInfo, key)} outside={outside} vlr={linkVlr(vlrEntry, dir)} updating={!entry || lpNow || vlrNow} />;
+  return <TeamPage rosterStats={rosterStats} tstats={tstats} initial={p ? publicState(initial) : null} slug={key} lang={lang} lp={lp} org={orgOf(teamInfo, key)} outside={outside} vlr={linkVlr(vlrEntry, dir)} updating={!entry || lpNow || vlrNow} />;
 }
 
 export async function generateMetadata({ params }) {

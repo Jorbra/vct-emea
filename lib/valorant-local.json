@@ -1,0 +1,410 @@
+{
+ "agents": {
+  "gekko": {
+   "icon": "/va/agents/gekko-icon.webp",
+   "pose": "/va/agents/gekko-pose.webp",
+   "portrait": "/va/agents/gekko-portrait.webp"
+  },
+  "fade": {
+   "icon": "/va/agents/fade-icon.webp",
+   "pose": "/va/agents/fade-pose.webp",
+   "portrait": "/va/agents/fade-portrait.webp"
+  },
+  "breach": {
+   "icon": "/va/agents/breach-icon.webp",
+   "pose": "/va/agents/breach-pose.webp",
+   "portrait": "/va/agents/breach-portrait.webp"
+  },
+  "deadlock": {
+   "icon": "/va/agents/deadlock-icon.webp",
+   "pose": "/va/agents/deadlock-pose.webp",
+   "portrait": "/va/agents/deadlock-portrait.webp"
+  },
+  "tejo": {
+   "icon": "/va/agents/tejo-icon.webp",
+   "pose": "/va/agents/tejo-pose.webp",
+   "portrait": "/va/agents/tejo-portrait.webp"
+  },
+  "raze": {
+   "icon": "/va/agents/raze-icon.webp",
+   "pose": "/va/agents/raze-pose.webp",
+   "portrait": "/va/agents/raze-portrait.webp"
+  },
+  "chamber": {
+   "icon": "/va/agents/chamber-icon.webp",
+   "pose": "/va/agents/chamber-pose.webp",
+   "portrait": "/va/agents/chamber-portrait.webp"
+  },
+  "kayo": {
+   "icon": "/va/agents/kayo-icon.webp",
+   "pose": "/va/agents/kayo-pose.webp",
+   "portrait": "/va/agents/kayo-portrait.webp"
+  },
+  "skye": {
+   "icon": "/va/agents/skye-icon.webp",
+   "pose": "/va/agents/skye-pose.webp",
+   "portrait": "/va/agents/skye-portrait.webp"
+  },
+  "cypher": {
+   "icon": "/va/agents/cypher-icon.webp",
+   "portrait": "/va/agents/cypher-portrait.webp",
+   "pose": "/va/agents/cypher-pose.webp"
+  },
+  "sova": {
+   "icon": "/va/agents/sova-icon.webp",
+   "pose": "/va/agents/sova-pose.webp",
+   "portrait": "/va/agents/sova-portrait.webp"
+  },
+  "miks": {
+   "icon": "/va/agents/miks-icon.webp",
+   "pose": "/va/agents/miks-pose.webp",
+   "portrait": "/va/agents/miks-portrait.webp"
+  },
+  "killjoy": {
+   "pose": "/va/agents/killjoy-pose.webp",
+   "icon": "/va/agents/killjoy-icon.webp",
+   "portrait": "/va/agents/killjoy-portrait.webp"
+  },
+  "harbor": {
+   "icon": "/va/agents/harbor-icon.webp",
+   "pose": "/va/agents/harbor-pose.webp",
+   "portrait": "/va/agents/harbor-portrait.webp"
+  },
+  "vyse": {
+   "icon": "/va/agents/vyse-icon.webp",
+   "pose": "/va/agents/vyse-pose.webp",
+   "portrait": "/va/agents/vyse-portrait.webp"
+  },
+  "viper": {
+   "icon": "/va/agents/viper-icon.webp",
+   "pose": "/va/agents/viper-pose.webp",
+   "portrait": "/va/agents/viper-portrait.webp"
+  },
+  "hush": {
+   "icon": "/va/agents/hush-icon.webp",
+   "pose": "/va/agents/hush-pose.webp",
+   "portrait": "/va/agents/hush-portrait.webp"
+  },
+  "phoenix": {
+   "icon": "/va/agents/phoenix-icon.webp",
+   "pose": "/va/agents/phoenix-pose.webp",
+   "portrait": "/va/agents/phoenix-portrait.webp"
+  },
+  "veto": {
+   "icon": "/va/agents/veto-icon.webp",
+   "pose": "/va/agents/veto-pose.webp",
+   "portrait": "/va/agents/veto-portrait.webp"
+  },
+  "astra": {
+   "icon": "/va/agents/astra-icon.webp",
+   "pose": "/va/agents/astra-pose.webp",
+   "portrait": "/va/agents/astra-portrait.webp"
+  },
+  "brimstone": {
+   "icon": "/va/agents/brimstone-icon.webp",
+   "pose": "/va/agents/brimstone-pose.webp",
+   "portrait": "/va/agents/brimstone-portrait.webp"
+  },
+  "iso": {
+   "icon": "/va/agents/iso-icon.webp",
+   "pose": "/va/agents/iso-pose.webp",
+   "portrait": "/va/agents/iso-portrait.webp"
+  },
+  "clove": {
+   "pose": "/va/agents/clove-pose.webp",
+   "icon": "/va/agents/clove-icon.webp",
+   "portrait": "/va/agents/clove-portrait.webp"
+  },
+  "neon": {
+   "icon": "/va/agents/neon-icon.webp",
+   "pose": "/va/agents/neon-pose.webp",
+   "portrait": "/va/agents/neon-portrait.webp"
+  },
+  "yoru": {
+   "icon": "/va/agents/yoru-icon.webp",
+   "pose": "/va/agents/yoru-pose.webp",
+   "portrait": "/va/agents/yoru-portrait.webp"
+  },
+  "waylay": {
+   "icon": "/va/agents/waylay-icon.webp",
+   "pose": "/va/agents/waylay-pose.webp",
+   "portrait": "/va/agents/waylay-portrait.webp"
+  },
+  "sage": {
+   "pose": "/va/agents/sage-pose.webp",
+   "icon": "/va/agents/sage-icon.webp",
+   "portrait": "/va/agents/sage-portrait.webp"
+  },
+  "reyna": {
+   "icon": "/va/agents/reyna-icon.webp",
+   "pose": "/va/agents/reyna-pose.webp",
+   "portrait": "/va/agents/reyna-portrait.webp"
+  },
+  "omen": {
+   "icon": "/va/agents/omen-icon.webp",
+   "pose": "/va/agents/omen-pose.webp",
+   "portrait": "/va/agents/omen-portrait.webp"
+  },
+  "jett": {
+   "pose": "/va/agents/jett-pose.webp",
+   "icon": "/va/agents/jett-icon.webp",
+   "portrait": "/va/agents/jett-portrait.webp"
+  }
+ },
+ "maps": {
+  "Gauntlet": {
+   "list": "/va/maps/gauntlet-list.webp",
+   "splash": "/va/maps/gauntlet-splash.webp"
+  },
+  "Ascent": {
+   "list": "/va/maps/ascent-list.webp",
+   "icon": "/va/maps/ascent-mini.webp",
+   "splash": "/va/maps/ascent-splash.webp"
+  },
+  "Split": {
+   "splash": "/va/maps/split-splash.webp",
+   "list": "/va/maps/split-list.webp",
+   "icon": "/va/maps/split-mini.webp"
+  },
+  "Fracture": {
+   "list": "/va/maps/fracture-list.webp",
+   "icon": "/va/maps/fracture-mini.webp",
+   "splash": "/va/maps/fracture-splash.webp"
+  },
+  "Bind": {
+   "splash": "/va/maps/bind-splash.webp",
+   "list": "/va/maps/bind-list.webp",
+   "icon": "/va/maps/bind-mini.webp"
+  },
+  "Breeze": {
+   "list": "/va/maps/breeze-list.webp",
+   "icon": "/va/maps/breeze-mini.webp",
+   "splash": "/va/maps/breeze-splash.webp"
+  },
+  "Abyss": {
+   "splash": "/va/maps/abyss-splash.webp",
+   "list": "/va/maps/abyss-list.webp",
+   "icon": "/va/maps/abyss-mini.webp"
+  },
+  "Lotus": {
+   "list": "/va/maps/lotus-list.webp",
+   "icon": "/va/maps/lotus-mini.webp",
+   "splash": "/va/maps/lotus-splash.webp"
+  },
+  "Sunset": {
+   "splash": "/va/maps/sunset-splash.webp",
+   "list": "/va/maps/sunset-list.webp",
+   "icon": "/va/maps/sunset-mini.webp"
+  },
+  "Pearl": {
+   "list": "/va/maps/pearl-list.webp",
+   "icon": "/va/maps/pearl-mini.webp",
+   "splash": "/va/maps/pearl-splash.webp"
+  },
+  "Summit": {
+   "splash": "/va/maps/summit-splash.webp",
+   "list": "/va/maps/summit-list.webp",
+   "icon": "/va/maps/summit-mini.webp"
+  },
+  "Icebox": {
+   "list": "/va/maps/icebox-list.webp",
+   "icon": "/va/maps/icebox-mini.webp",
+   "splash": "/va/maps/icebox-splash.webp"
+  },
+  "Corrode": {
+   "splash": "/va/maps/corrode-splash.webp",
+   "list": "/va/maps/corrode-list.webp",
+   "icon": "/va/maps/corrode-mini.webp"
+  },
+  "Haven": {
+   "list": "/va/maps/haven-list.webp",
+   "icon": "/va/maps/haven-mini.webp",
+   "splash": "/va/maps/haven-splash.webp"
+  }
+ },
+ "abilities": {
+  "gekko": {
+   "Grenade": "/va/abilities/gekko-grenade.webp",
+   "Ultimate": "/va/abilities/gekko-ultimate.webp",
+   "Ability1": "/va/abilities/gekko-ability1.webp",
+   "Ability2": "/va/abilities/gekko-ability2.webp"
+  },
+  "fade": {
+   "Grenade": "/va/abilities/fade-grenade.webp",
+   "Ability2": "/va/abilities/fade-ability2.webp",
+   "Ability1": "/va/abilities/fade-ability1.webp",
+   "Ultimate": "/va/abilities/fade-ultimate.webp"
+  },
+  "breach": {
+   "Grenade": "/va/abilities/breach-grenade.webp",
+   "Ultimate": "/va/abilities/breach-ultimate.webp",
+   "Ability2": "/va/abilities/breach-ability2.webp",
+   "Ability1": "/va/abilities/breach-ability1.webp"
+  },
+  "deadlock": {
+   "Grenade": "/va/abilities/deadlock-grenade.webp",
+   "Ability1": "/va/abilities/deadlock-ability1.webp",
+   "Ultimate": "/va/abilities/deadlock-ultimate.webp",
+   "Ability2": "/va/abilities/deadlock-ability2.webp"
+  },
+  "tejo": {
+   "Grenade": "/va/abilities/tejo-grenade.webp",
+   "Ability2": "/va/abilities/tejo-ability2.webp",
+   "Ability1": "/va/abilities/tejo-ability1.webp",
+   "Ultimate": "/va/abilities/tejo-ultimate.webp"
+  },
+  "raze": {
+   "Ability1": "/va/abilities/raze-ability1.webp",
+   "Grenade": "/va/abilities/raze-grenade.webp",
+   "Ultimate": "/va/abilities/raze-ultimate.webp",
+   "Ability2": "/va/abilities/raze-ability2.webp"
+  },
+  "chamber": {
+   "Grenade": "/va/abilities/chamber-grenade.webp",
+   "Ability1": "/va/abilities/chamber-ability1.webp",
+   "Ability2": "/va/abilities/chamber-ability2.webp",
+   "Ultimate": "/va/abilities/chamber-ultimate.webp"
+  },
+  "kayo": {
+   "Grenade": "/va/abilities/kayo-grenade.webp",
+   "Ability2": "/va/abilities/kayo-ability2.webp",
+   "Ability1": "/va/abilities/kayo-ability1.webp",
+   "Ultimate": "/va/abilities/kayo-ultimate.webp"
+  },
+  "skye": {
+   "Ability1": "/va/abilities/skye-ability1.webp",
+   "Ultimate": "/va/abilities/skye-ultimate.webp",
+   "Ability2": "/va/abilities/skye-ability2.webp",
+   "Grenade": "/va/abilities/skye-grenade.webp"
+  },
+  "cypher": {
+   "Grenade": "/va/abilities/cypher-grenade.webp",
+   "Ultimate": "/va/abilities/cypher-ultimate.webp",
+   "Ability2": "/va/abilities/cypher-ability2.webp",
+   "Ability1": "/va/abilities/cypher-ability1.webp"
+  },
+  "sova": {
+   "Grenade": "/va/abilities/sova-grenade.webp",
+   "Ability1": "/va/abilities/sova-ability1.webp",
+   "Ability2": "/va/abilities/sova-ability2.webp",
+   "Ultimate": "/va/abilities/sova-ultimate.webp"
+  },
+  "miks": {
+   "Ability1": "/va/abilities/miks-ability1.webp",
+   "Ability2": "/va/abilities/miks-ability2.webp",
+   "Grenade": "/va/abilities/miks-grenade.webp",
+   "Ultimate": "/va/abilities/miks-ultimate.webp"
+  },
+  "killjoy": {
+   "Grenade": "/va/abilities/killjoy-grenade.webp",
+   "Ability1": "/va/abilities/killjoy-ability1.webp",
+   "Ability2": "/va/abilities/killjoy-ability2.webp",
+   "Ultimate": "/va/abilities/killjoy-ultimate.webp"
+  },
+  "harbor": {
+   "Ability2": "/va/abilities/harbor-ability2.webp",
+   "Grenade": "/va/abilities/harbor-grenade.webp",
+   "Ability1": "/va/abilities/harbor-ability1.webp",
+   "Ultimate": "/va/abilities/harbor-ultimate.webp"
+  },
+  "vyse": {
+   "Ability1": "/va/abilities/vyse-ability1.webp",
+   "Grenade": "/va/abilities/vyse-grenade.webp",
+   "Ability2": "/va/abilities/vyse-ability2.webp",
+   "Ultimate": "/va/abilities/vyse-ultimate.webp"
+  },
+  "viper": {
+   "Grenade": "/va/abilities/viper-grenade.webp",
+   "Ability1": "/va/abilities/viper-ability1.webp",
+   "Ability2": "/va/abilities/viper-ability2.webp",
+   "Ultimate": "/va/abilities/viper-ultimate.webp"
+  },
+  "hush": {
+   "Grenade": "/va/abilities/hush-grenade.webp",
+   "Ability2": "/va/abilities/hush-ability2.webp",
+   "Ability1": "/va/abilities/hush-ability1.webp",
+   "Ultimate": "/va/abilities/hush-ultimate.webp",
+   "Passive": "/va/abilities/hush-passive.webp"
+  },
+  "phoenix": {
+   "Ability1": "/va/abilities/phoenix-ability1.webp",
+   "Grenade": "/va/abilities/phoenix-grenade.webp",
+   "Ultimate": "/va/abilities/phoenix-ultimate.webp",
+   "Ability2": "/va/abilities/phoenix-ability2.webp"
+  },
+  "veto": {
+   "Ability1": "/va/abilities/veto-ability1.webp",
+   "Grenade": "/va/abilities/veto-grenade.webp",
+   "Ultimate": "/va/abilities/veto-ultimate.webp",
+   "Ability2": "/va/abilities/veto-ability2.webp"
+  },
+  "astra": {
+   "Grenade": "/va/abilities/astra-grenade.webp",
+   "Ability1": "/va/abilities/astra-ability1.webp",
+   "Passive": "/va/abilities/astra-passive.webp",
+   "Ultimate": "/va/abilities/astra-ultimate.webp",
+   "Ability2": "/va/abilities/astra-ability2.webp"
+  },
+  "brimstone": {
+   "Grenade": "/va/abilities/brimstone-grenade.webp",
+   "Ability2": "/va/abilities/brimstone-ability2.webp",
+   "Ability1": "/va/abilities/brimstone-ability1.webp",
+   "Ultimate": "/va/abilities/brimstone-ultimate.webp"
+  },
+  "iso": {
+   "Ability2": "/va/abilities/iso-ability2.webp",
+   "Ability1": "/va/abilities/iso-ability1.webp",
+   "Grenade": "/va/abilities/iso-grenade.webp",
+   "Ultimate": "/va/abilities/iso-ultimate.webp"
+  },
+  "clove": {
+   "Grenade": "/va/abilities/clove-grenade.webp",
+   "Ability2": "/va/abilities/clove-ability2.webp",
+   "Ultimate": "/va/abilities/clove-ultimate.webp",
+   "Ability1": "/va/abilities/clove-ability1.webp"
+  },
+  "neon": {
+   "Grenade": "/va/abilities/neon-grenade.webp",
+   "Ability2": "/va/abilities/neon-ability2.webp",
+   "Ability1": "/va/abilities/neon-ability1.webp",
+   "Ultimate": "/va/abilities/neon-ultimate.webp"
+  },
+  "yoru": {
+   "Ability1": "/va/abilities/yoru-ability1.webp",
+   "Grenade": "/va/abilities/yoru-grenade.webp",
+   "Ability2": "/va/abilities/yoru-ability2.webp",
+   "Ultimate": "/va/abilities/yoru-ultimate.webp"
+  },
+  "waylay": {
+   "Grenade": "/va/abilities/waylay-grenade.webp",
+   "Ability1": "/va/abilities/waylay-ability1.webp",
+   "Ultimate": "/va/abilities/waylay-ultimate.webp",
+   "Ability2": "/va/abilities/waylay-ability2.webp"
+  },
+  "sage": {
+   "Ability2": "/va/abilities/sage-ability2.webp",
+   "Ability1": "/va/abilities/sage-ability1.webp",
+   "Grenade": "/va/abilities/sage-grenade.webp",
+   "Ultimate": "/va/abilities/sage-ultimate.webp"
+  },
+  "reyna": {
+   "Ability1": "/va/abilities/reyna-ability1.webp",
+   "Ultimate": "/va/abilities/reyna-ultimate.webp",
+   "Ability2": "/va/abilities/reyna-ability2.webp",
+   "Grenade": "/va/abilities/reyna-grenade.webp"
+  },
+  "omen": {
+   "Grenade": "/va/abilities/omen-grenade.webp",
+   "Ability1": "/va/abilities/omen-ability1.webp",
+   "Ultimate": "/va/abilities/omen-ultimate.webp",
+   "Ability2": "/va/abilities/omen-ability2.webp"
+  },
+  "jett": {
+   "Grenade": "/va/abilities/jett-grenade.webp",
+   "Ability2": "/va/abilities/jett-ability2.webp",
+   "Ability1": "/va/abilities/jett-ability1.webp",
+   "Ultimate": "/va/abilities/jett-ultimate.webp",
+   "Passive": "/va/abilities/jett-passive.webp"
+  }
+ }
+}

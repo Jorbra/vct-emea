@@ -4,7 +4,7 @@
 // for the editors: vlr.gg's tables, today's games, the week's meta as a draft, the pictures missing.
 import { useEffect, useState } from "react";
 import { useT } from "./lang.jsx";
-import ASSETS from "../lib/valorant-assets.json";
+import { VIEW as ASSETS } from "./Assets.jsx";
 import { mapList } from "./Assets.jsx";
 import { EVENT_NAMES } from "../lib/paths.js";
 

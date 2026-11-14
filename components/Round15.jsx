@@ -2,7 +2,7 @@
 
 // Round 15: sorting chips, the roles' share of the picks, the MVP's card, the footer's band of agents.
 import { useT } from "./lang.jsx";
-import ASSETS from "../lib/valorant-assets.json";
+import { VIEW as ASSETS } from "./Assets.jsx";
 import { agentInfo } from "./Assets.jsx";
 
 const ROLE_COLORS = { Duelist: "#ff5c7a", Initiator: "#ffb347", Controller: "#7d8cff", Sentinel: "#5cd6aa" };

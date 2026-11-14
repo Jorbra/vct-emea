@@ -10,15 +10,19 @@ export const typing = () => {
 
 /**
  * Keeps the page current (also after changes made by another editor or straight in the database): asks the server for
- * fresh data every 30 seconds (each time counts against the free host's limits) and when the tab comes back, but never while someone is typing or the tab is hidden.
+ * fresh data every minute, every 30 s on the live pages (each time counts against the free host's limits) and when the tab comes back, but never while someone is typing or the tab is hidden.
  * React keeps what is on screen; only what changed on the server is redrawn.
  */
-export function useAutoRefresh(ms = 30000, enabled = true) {
+export function useAutoRefresh(ms = 60000, enabled = true) {
   const router = useRouter();
   useEffect(() => {
     if (!enabled) return undefined;
+    // coming back to the tab refreshes too, but never twice within 20 s: switching tabs back and forth costs nothing
+    let last = Date.now();
     const tick = () => {
-      if (!document.hidden && !typing()) router.refresh();
+      if (document.hidden || typing() || Date.now() - last < 20000) return;
+      last = Date.now();
+      router.refresh();
     };
     const t = setInterval(tick, ms);
     window.addEventListener("focus", tick);

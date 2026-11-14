@@ -176,7 +176,7 @@ function HomeView({ initial, spot = [] }) {
     times: (initial.times && initial.times[e]) || {}, live: (initial.live && initial.live[e]) || {},
     extra: (initial.extra && initial.extra[e]) || {}, stream: (initial.info && initial.info[e] && initial.info[e].stream) || "",
   })), [initial]);
-  useAutoRefresh();
+  useAutoRefresh(30000);
 
   const REGION = { q1: "eu", q2: "eu", playoffs: "eu", trq1: "tr", trq2: "tr", tr: "tr", meq1: "mena", meq2: "mena", naq1: "mena", naq2: "mena", mena: "mena", kickoff: "emea", gc: "gc" };
   const card = (key, title, meta, outLabel) => {

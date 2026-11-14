@@ -11,7 +11,7 @@ import { EVENT_NAMES } from "../lib/paths.js";
 /** For OBS (a browser source, transparent background): the match being played, else the next one. Optional ?event=kickoff. */
 function View({ initial, event }) {
   const tr = useT();
-  useAutoRefresh();
+  useAutoRefresh(30000);
   const [now, setNow] = useState(null);
   useEffect(() => {
     setNow(Date.now());
