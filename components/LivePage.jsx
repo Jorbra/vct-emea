@@ -16,6 +16,12 @@ import { TvMode } from "./Round9.jsx";
 import { EmptyState } from "./Round11.jsx";
 import { StreamScore } from "./StreamScore.jsx";
 import { MyStreams } from "./MyStreams.jsx";
+import { TensionBadges } from "./LiveMore.jsx";
+import { tension } from "../lib/livemore.js";
+
+// the tense matches first (overtime, then a deciding map), the others as they come
+const weight = (m) => { const t = tension(m.score, m.bo); return t.ot ? 2 : t.decider ? 1 : 0; };
+const tenseFirst = (list) => list.map((m, i) => ({ m, i, w: weight(m) })).sort((x, y) => y.w - x.w || x.i - y.i).map((x) => x.m);
 
 function View({ live, next }) {
   const tr = useT();
@@ -42,6 +48,7 @@ function View({ live, next }) {
         <b>{m.score ? `${m.score.a} – ${m.score.b}` : "vs"}</b>
         <span><Crest team={m.b} />{(m.b && m.b.name) || tr("TBD")}</span>
       </div>
+      {m.live && <TensionBadges t={tension(m.score, m.bo)} />}
       {m.score && (m.score.maps || []).length > 0 && <div className="livemaps">{m.score.maps.map((x) => <span key={x.map} data-map={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>}
       <div className="row">
         {m.stream && m.live && !multi && <button type="button" className={"btn" + (on ? " pri" : "")} onClick={() => setWatch(`${m.event}:${m.id}`)}>{on ? tr("Playing here") : tr("Watch here")}</button>}
@@ -100,7 +107,7 @@ function View({ live, next }) {
           <MyStreams live={live} host={host} />
           <TvMode live={live} />
           <h2>{tr("Live now")} <small>({live.length})</small></h2>
-          <div className="livegrid">{live.map((m) => card(m, current && `${m.event}:${m.id}` === `${current.event}:${current.id}`))}</div>
+          <div className="livegrid">{tenseFirst(live).map((m) => card(m, current && `${m.event}:${m.id}` === `${current.event}:${current.id}`))}</div>
         </>
       )}
       {next.length > 0 && (

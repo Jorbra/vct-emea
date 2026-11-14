@@ -29,7 +29,7 @@ function Top({ title }) {
 
 function Search({ q, found }) {
   const tr = useT();
-  const groups = found ? [["teams", tr("Teams")], ["players", tr("Players")], ["matches", tr("Matches")], ["events", tr("Events")], ["maps", tr("Maps")]].filter(([k]) => (found[k] || []).length) : [];
+  const groups = found ? [["teams", tr("Teams")], ["players", tr("Players")], ["matches", tr("Matches")], ["events", tr("Events")], ["maps", tr("Maps")], ["agents", tr("Agents")]].filter(([k]) => (found[k] || []).length) : [];
   const [tab, setTab] = useState(groups[0] ? groups[0][0] : "teams");
   const total = found ? groups.reduce((s, [k]) => s + found[k].length, 0) : 0;
   return (
@@ -41,7 +41,7 @@ function Search({ q, found }) {
           <PartTabs value={tab} onChange={setTab} label={tr("Search")} items={groups.map(([k, l]) => [k, `${l} (${found[k].length})`])} />
           <div className="sresults">{(found[tab] || []).map((x, i) => (
             <a key={i} href={x.href} className="sres">
-              {x.crest ? <Crest team={x.crest} /> : x.logo ? <Crest team={{ name: x.name, logo: x.logo }} /> : <span className="sresi" aria-hidden="true">{tab === "players" ? "👤" : tab === "matches" ? "⚔️" : tab === "maps" ? "🗺️" : "🏆"}</span>}
+              {x.crest ? <Crest team={x.crest} /> : x.logo ? <Crest team={{ name: x.name, logo: x.logo }} /> : x.pic ? <img className={"srespic " + tab} src={x.pic} alt="" loading="lazy" /> : <span className="sresi" aria-hidden="true">{tab === "players" ? "👤" : tab === "matches" ? "⚔️" : tab === "maps" ? "🗺️" : "🏆"}</span>}
               <b>{x.name}</b>{x.sub && <small>{x.sub}</small>}
             </a>
           ))}</div>

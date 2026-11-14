@@ -3019,3 +3019,5 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .nightband button { border: 0; background: none; color: #fff; font-size: 20px; cursor: pointer; }
 @keyframes nightflow { to { background-position: 200% 0; } }
 @media (prefers-reduced-motion: reduce) { .nightband { animation: none; } }
+.srespic { width: 34px; height: 34px; object-fit: contain; border-radius: 8px; background: rgba(0,0,0,.2); }
+.srespic.maps { width: 54px; object-fit: cover; }
