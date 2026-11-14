@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
 import { ThemeSwitch } from "./theme.jsx";
 import { EmeaMark } from "./Brand.jsx";
@@ -174,12 +174,23 @@ export const AgentPage = (p) => <LangProvider lang={p.lang}><Agent {...p} /></La
 
 // ---- every agent
 
+/** A card's two pictures: the one shown and the one on hover. */
+const cardPics = (a, look) => {
+  const main = look === "pose" && a.pose ? a.pose : a.portrait;
+  const other = look === "pose" && a.pose ? a.portrait : a.pose;
+  return { ...(main ? { "--agimg": `url(${main})` } : {}), ...(other ? { "--agpose": `url(${other})` } : {}) };
+};
+
 function Agents({ list }) {
   const tr = useT();
   // a role to show only its agents
   const [role, setRole] = useState("");
   const roles = [...new Set(list.map((x) => x.role).filter(Boolean))];
   const [sort, setSort] = useState("picks");
+  // the cards' picture: the classic portrait or the Mastery I pose (the other one shows on hover), remembered on this device
+  const [look, setLookState] = useState("classic");
+  useEffect(() => { try { if (localStorage.getItem("vct-agent-look") === "pose") setLookState("pose"); } catch { /* not remembered */ } }, []);
+  const setLook = (v) => { setLookState(v); try { localStorage.setItem("vct-agent-look", v); } catch { /* not remembered */ } };
   const shown = (role ? list.filter((x) => x.role === role) : list).slice().sort(sort === "win" ? (x, y) => y.pct - x.pct || y.picks - x.picks : sort === "name" ? (x, y) => x.name.localeCompare(y.name) : (x, y) => y.picks - x.picks);
   return (
     <div className="wrap teampage">
@@ -190,11 +201,15 @@ function Agents({ list }) {
         <div className="chips rolechips" role="group" aria-label={tr("Role")}>
           <button type="button" className={role ? "" : "on"} aria-pressed={!role} onClick={() => setRole("")}>{tr("All")}</button>
           {roles.map((r) => <button key={r} type="button" className={role === r ? "on" : ""} aria-pressed={role === r} onClick={() => setRole(r)}>{tr(r)}</button>)}
+          <div className="lookpick inline" role="group" aria-label={tr("Picture")}>
+            <button type="button" className={look === "classic" ? "on" : ""} aria-pressed={look === "classic"} onClick={() => setLook("classic")}>{tr("Classic")}</button>
+            <button type="button" className={look === "pose" ? "on" : ""} aria-pressed={look === "pose"} onClick={() => setLook("pose")}>{tr("Mastery I")}</button>
+          </div>
           <SortPick value={sort} onChange={setSort} items={[["picks", tr("Most picked")], ["win", tr("Best win rate")], ["name", tr("A to Z")]]} />
         </div>
         <RoleShare list={list} />
         <div className="aggrid">{shown.map((a) => (
-          <a key={a.key} href={`/agent/${a.key}`} className={"agcard" + (a.pose ? " haspose" : "")} style={{ "--agc": a.color || "var(--lime)", ...(a.portrait ? { "--agimg": `url(${a.portrait})` } : {}), ...(a.pose ? { "--agpose": `url(${a.pose})` } : {}) }}>
+          <a key={a.key} href={`/agent/${a.key}`} className={"agcard" + (a.pose ? " haspose" : "") + (look === "pose" && a.pose ? " posed" : "")} style={{ "--agc": a.color || "var(--lime)", ...cardPics(a, look) }}>
             <b>{a.name}</b>
             <small>{a.role ? tr(ROLE[a.role] || a.role) : ""}</small>
             <span>{a.share}% {tr("of the teams")} · {a.pct}% {tr("won")}</span>

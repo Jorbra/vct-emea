@@ -2738,3 +2738,8 @@ a.agicon:hover img { transform: scale(1.12); }
 }
 @media (prefers-reduced-motion: reduce) { .abpanel { animation: none; } }
 .abdesc .abcap { font-size: .86em; letter-spacing: .04em; color: var(--agc); }
+.lookpick.inline { display: inline-flex; gap: 4px; padding: 3px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); }
+.lookpick.inline button { color: var(--fg); }
+.lookpick.inline button.on { background: var(--lime); color: var(--lime-ink, #111); }
+.agcard.posed { background-size: auto, 125% auto, auto; background-position: 0 0, center 12%, 0 0; }
+.agcard.posed:hover { background-size: auto, 150% auto, auto; background-position: 0 0, center top, 0 0; }
