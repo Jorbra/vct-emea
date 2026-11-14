@@ -19,6 +19,8 @@ import { PartTabs } from "./Round10.jsx";
 import { MatchPreview } from "./Round11.jsx";
 import { MatchComps, Veto } from "./Round13.jsx";
 import { MvpCard } from "./Round15.jsx";
+import { RoundChart, TensionBadges } from "./LiveMore.jsx";
+import { tension } from "../lib/livemore.js";
 import { mapList, mapSplash } from "./Assets.jsx";
 
 export { EVENT_NAMES };
@@ -240,6 +242,9 @@ function MatchModal({ e, m, state, onClose, page = false }) {
         {page && details && <div data-part="summary maps" className="spoil"><Veto list={details.veto} /><MatchComps details={details} a={name(m.a)} b={name(m.b)} /></div>}
         {live && (live.maps || []).length > 0 && (
           <div className="mmlive">
+            <TensionBadges t={tension(live, m.bo)} />
+            <RoundChart rounds={live.rounds} a={(m.a && (m.a.tag || m.a.name)) || "A"} b={(m.b && (m.b.tag || m.b.name)) || "B"} />
+            <p className="row"><a className="btn small" href={`/ecran/${e.event}/${m.id}`}>📱 {tr("Second screen")}</a></p>
             <div className="mmlivemaps">{live.maps.map((x) => <span key={x.map} data-map={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>
             {(live.feed || []).length > 0 && (
               <ol className="mmfeed" aria-label={tr("Match feed")}>
@@ -298,7 +303,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
         {done && state && <div data-part="pronos summary"><MotmVote event={e.event} id={m.id} candidates={candidates} /></div>}
         {state && m.a && m.b && m.a.name && m.b.name && <div data-part="summary stats"><HeadToHead m={m} state={state} /></div>}
         {cmp && state && m.a && m.b && m.a.name && m.b.name && <div data-part="summary stats"><Compare m={m} state={state} /></div>}
-        {state && m.a && m.b && m.a.name && m.b.name && <div data-part="comments"><Comments event={e.event} id={m.id} /></div>}
+        {state && m.a && m.b && m.a.name && m.b.name && <div data-part="comments"><Comments event={e.event} id={m.id} live={!!live} /></div>}
         </aside>
         </div>
         {playing && (

@@ -211,7 +211,7 @@ export function InstallButton() {
 }
 
 /** The comments under a match: read by all, written with the name of the predictions. */
-export function Comments({ event, id }) {
+export function Comments({ event, id, live = false }) {
   const tr = useT();
   const [list, setList] = useState(null);
   const [text, setText] = useState("");
@@ -219,9 +219,12 @@ export function Comments({ event, id }) {
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     let on = true;
-    fetch(`/api/comments?event=${event}&id=${id}`).then((r) => (r.ok ? r.json() : null)).then((j) => { if (on && j) setList(j.comments); }).catch(() => { /* offline */ });
-    return () => { on = false; };
-  }, [event, id]);
+    const load = () => fetch(`/api/comments?event=${event}&id=${id}`).then((r) => (r.ok ? r.json() : null)).then((j) => { if (on && j) setList(j.comments); }).catch(() => { /* offline */ });
+    load();
+    // during the match: a live chat, read again every 5 s while the page is shown
+    const t = live ? setInterval(() => { if (!document.hidden) load(); }, 5000) : null;
+    return () => { on = false; if (t) clearInterval(t); };
+  }, [event, id, live]);
   const send = async (e) => {
     e.preventDefault();
     setErr("");
@@ -235,7 +238,7 @@ export function Comments({ event, id }) {
   const fmt = (iso) => new Date(iso).toLocaleString(tr.lang === "fr" ? "fr-FR" : undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   return (
     <section className="comments">
-      <h3>{tr("Comments")} {list && list.length > 0 && <small>({list.length})</small>}</h3>
+      <h3>{live ? <><i className="ssdot inline" /> {tr("Live chat")}</> : tr("Comments")} {list && list.length > 0 && <small>({list.length})</small>}</h3>
       {list === null && <Skeleton lines={2} />}
       {list && list.length === 0 && <p className="hint">{tr("No comment yet.")}</p>}
       {list && list.length > 0 && <ul>{list.map((c) => <li key={c.id}><b>{c.name}</b> <small>{fmt(c.at)}</small><p>{c.body}</p></li>)}</ul>}
