@@ -9,6 +9,7 @@ import SiteNav from "./SiteNav.jsx";
 import { Crest } from "./Crest.jsx";
 import { PartTabs } from "./Round10.jsx";
 import { EmptyState } from "./Round11.jsx";
+import { SeasonTimeline } from "./Season17.jsx";
 
 function Top({ title }) {
   const tr = useT();
@@ -53,7 +54,7 @@ export const SearchPage = (p) => <LangProvider lang={p.lang}><Search {...p} /></
 
 // ---- A14. the season's feed
 
-function Season({ feed }) {
+function Season({ feed, timeline = [] }) {
   const tr = useT();
   const [kind, setKind] = useState("all");
   const shown = feed.filter((x) => kind === "all" || x.kind === kind);
@@ -61,6 +62,7 @@ function Season({ feed }) {
   return (
     <div className="wrap teampage">
       <Top title={tr("The season's feed")} />
+      <SeasonTimeline lanes={timeline} />
       <PartTabs value={kind} onChange={setKind} label={tr("Show")} items={[["all", tr("All")], ["result", tr("Results")], ["qualified", tr("Qualified")], ["transfer", tr("Transfers")]]} />
       {shown.length === 0 ? <EmptyState text={tr("Nothing yet.")} /> : (
         <ol className="sfeed">{shown.map((x, i) => (

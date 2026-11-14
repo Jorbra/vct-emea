@@ -70,3 +70,12 @@ test("Toornament: the editors' names rename the teams", async () => {
   const plan = planSync({ event: "meq1", rows, teams: null, site: { slots: [], scores: {}, bo: {}, times: {}, live: {} }, last: {}, aliases: { FNC: { name: "Fnatic", tag: "FNC" } } });
   assert.ok(plan.slots.some((s) => s.name === "Fnatic" && s.tag === "FNC"));
 });
+
+test("the season as a timeline: every lane and event, the qualified teams", async () => {
+  const { getState, openDb } = await import("../lib/db.js");
+  const { seasonTimeline, LANES } = await import("../lib/season17.js");
+  const t = seasonTimeline(getState(openDb(":memory:")));
+  assert.deepEqual(t.map((l) => l.lane), LANES.map(([l]) => l));
+  assert.deepEqual(t[0].events.map((e) => e.event), ["q1", "q2", "playoffs"]);
+  assert.ok(t.every((l) => l.events.every((e) => ["done", "live", "upcoming"].includes(e.state) && Array.isArray(e.qualified))));
+});

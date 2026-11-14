@@ -2984,3 +2984,38 @@ a.agicon:hover img { transform: scale(1.12); }
 .synclog .src.tor { color: #6fb8ff; }
 .synclog .src.vlr { color: #ff6b77; }
 @media (max-width: 760px) { .synclog li { grid-template-columns: 1fr 1fr; } }
+
+/* ---- round 17: the season at a glance */
+.frise { margin: 14px 0 22px; }
+.friselanes { display: grid; gap: 10px; }
+.friselane { display: grid; grid-template-columns: 120px 1fr; gap: 10px; align-items: stretch; }
+.friselabel { align-self: center; font: 800 15px var(--font-display); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.frisetrack { display: flex; gap: 0; margin: 0; padding: 0 0 6px; list-style: none; overflow-x: auto; scroll-snap-type: x proximity; }
+.frisestep { position: relative; display: flex; align-items: center; flex: 0 0 auto; scroll-snap-align: start; }
+.friselink { width: 26px; height: 3px; background: var(--line); }
+.frisestep.done .friselink, .frisestep.live .friselink { background: var(--lime); }
+.frisenode { display: grid; gap: 3px; width: 190px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); text-decoration: none; transition: transform .15s ease, border-color .15s ease; }
+.frisenode:hover { transform: translateY(-2px); border-color: var(--lime); }
+.frisenode b { font: 800 15px var(--font-display); }
+.frisenode small { color: var(--muted); font-size: 12px; }
+.frisedot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.frisedot.done { background: var(--lime); }
+.frisedot.live { background: #ff4655; animation: osdot 1.6s infinite; }
+.frisestate { font-style: normal; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.frisestate.live { color: #ff6b77; }
+.frisestate.done { color: var(--lime); }
+.frisestep.live .frisenode { border-color: #ff4655; }
+.frisequal { display: flex; gap: 3px; margin-top: 2px; }
+.frisequal .crest { width: 22px; height: 22px; }
+@media (max-width: 640px) { .friselane { grid-template-columns: 1fr; } .friselabel { align-self: start; } }
+
+/* ---- match night: while a big match is live */
+html[data-matchnight="1"] body { background-image: radial-gradient(1200px 400px at 50% -120px, color-mix(in srgb, #ff4655 18%, transparent), transparent 70%); background-attachment: fixed; }
+html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff4655 55%, transparent); }
+.nightband { position: sticky; top: 0; z-index: 70; display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: linear-gradient(90deg, #ff4655, #ff7a2f, #ff4655); background-size: 200% 100%; animation: nightflow 6s linear infinite; color: #fff; }
+.nightband a { flex: 1; color: #fff; text-decoration: none; font-size: 14px; text-align: center; }
+.nightband strong { font-family: var(--font-display); font-size: 16px; }
+.nightband span { opacity: .9; }
+.nightband button { border: 0; background: none; color: #fff; font-size: 20px; cursor: pointer; }
+@keyframes nightflow { to { background-position: 200% 0; } }
+@media (prefers-reduced-motion: reduce) { .nightband { animation: none; } }
