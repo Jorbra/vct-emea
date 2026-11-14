@@ -237,7 +237,7 @@ export function QualifiedStrip({ list }) {
   return (
     <section className="qualstrip">
       <h2>🎟️ {tr("Qualified teams")}</h2>
-      <div className="qualrow">{list.map((q) => <a key={q.event + q.slug} href={`/team/${q.slug}`} className="qualcard"><Crest team={{ name: q.team, logo: q.logo }} /><b>{q.team}</b><small>{tr(q.name)} → {tr(q.to)}</small></a>)}</div>
+      <div className="qualrow">{list.map((q) => <a key={q.event + q.slug} href={`/team/${q.slug}`} className="qualcard" title={q.team}><Crest team={{ name: q.team, logo: q.logo }} /><b>{q.team}</b><small>{tr(q.name)} → {tr(q.to)}</small></a>)}</div>
     </section>
   );
 }

@@ -35,6 +35,11 @@ const ICON = {
   trophy: "M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8",
   power: "M4 20h16M7 20v-6M12 20V8M17 20v-10M5 9l5-4 4 3 6-4",
   quiz: "M12 4a8 8 0 1 0 .01 0M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01",
+  // an agent (a head with a visor), a folded map, two shields, a feed
+  agent: "M12 3a5 5 0 0 1 5 5v2a5 5 0 0 1-10 0V8a5 5 0 0 1 5-5zM7 9h10M5 21c1-3.5 3.8-5 7-5s6 1.5 7 5",
+  map: "M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14",
+  teams: "M8 4l5 2v4c0 3-2 5-5 6-3-1-5-3-5-6V6zM16 8l5 2v3.5c0 2.6-1.8 4.4-4.3 5.3M13 19.5c.6.3 1.3.5 2 .5",
+  feed: "M5 5h14M5 10h14M5 15h9M5 20h6M18 15v6M15 18h6",
 };
 const Icon = ({ name }) => (
   <svg className="navicon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={ICON[name]} /></svg>
@@ -44,8 +49,8 @@ const Icon = ({ name }) => (
 const GROUPS = [
   ["Follow", [["/", "Home", "home"], ["/live", "Live", "live"], ["/soiree", "Match night", "night"], ["/moi", "My week", "week"], ["/calendar", "Calendar", "calendar"]]],
   ["Play", [["/predictions", "Predictions", "target"], ["/jeux", "Games of the day", "games"], ["/fantasy", "Fantasy", "fantasy"], ["/quiz", "Quiz of the week", "quiz"], ["/tierlist", "Tier list", "tier"], ["/simulateur", "Qualification simulator", "sim"]]],
-  ["Stats", [["/puissance", "Power ranking", "power"], ["/stats", "Stats", "stats"], ["/rivalites", "Rivalries", "rival"], ["/agent", "Agents", "quiz"], ["/map", "Maps", "stats"], ["/compare", "Compare", "compare"], ["/equipes", "Compare teams", "compare"], ["/pays", "Countries", "flag"]]],
-  ["More", [["/transfers", "Transfers", "transfers"], ["/lft", "LFT", "lft"], ["/news", "News", "news"], ["/saison", "The season's feed", "news"], ["/palmares", "Hall of fame", "trophy"], ["/format", "How the events work", "about"], ["/archives", "Archives of past seasons", "archives"]]],
+  ["Stats", [["/puissance", "Power ranking", "power"], ["/stats", "Stats", "stats"], ["/rivalites", "Rivalries", "rival"], ["/agent", "Agents", "agent"], ["/map", "Maps", "map"], ["/compare", "Compare", "compare"], ["/equipes", "Compare teams", "teams"], ["/pays", "Countries", "flag"]]],
+  ["More", [["/transfers", "Transfers", "transfers"], ["/lft", "LFT", "lft"], ["/news", "News", "news"], ["/saison", "The season's feed", "feed"], ["/palmares", "Hall of fame", "trophy"], ["/format", "How the events work", "about"], ["/archives", "Archives of past seasons", "archives"]]],
 ];
 const LINKS = GROUPS.flatMap(([, list]) => list);
 
