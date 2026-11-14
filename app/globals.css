@@ -2743,3 +2743,14 @@ a.agicon:hover img { transform: scale(1.12); }
 .lookpick.inline button.on { background: var(--lime); color: var(--lime-ink, #111); }
 .agcard.posed { background-size: auto, 125% auto, auto; background-position: 0 0, center 12%, 0 0; }
 .agcard.posed:hover { background-size: auto, 150% auto, auto; background-position: 0 0, center top, 0 0; }
+
+/* ---- agent banner: the whole agent shown, classic or pose, the switch out of the way */
+.aghero { min-height: 340px; background-position: 0 0, right 4% bottom, 0 0; background-size: auto, auto 100%, auto; transition: background-size .25s ease; }
+.aghero.posed { background-position: 0 0, right 3% center, 0 0; background-size: auto, auto 96%, auto; }
+.aghero .lookpick { top: auto; bottom: 12px; right: 12px; }
+@media (max-width: 640px) {
+  .aghero { min-height: 300px; padding-bottom: 60px; background-position: 0 0, right -30px bottom, 0 0; background-size: auto, auto 88%, auto; }
+  .aghero.posed { background-position: 0 0, right -20px bottom 40px, 0 0; background-size: auto, auto 78%, auto; }
+}
+.aghero .lookpick { position: static; justify-self: start; margin-top: 12px; background: rgba(0,0,0,.35); }
+@media (max-width: 640px) { .aghero { padding-bottom: 26px; } }

@@ -106,12 +106,6 @@ function Agent({ a }) {
       <Top title={a.name} />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › <a href="/agent">{tr("Agents")}</a> › <span>{a.name}</span></nav>
       <div className={"aghero" + (look === "pose" ? " posed" : "")} style={{ "--agc": a.color || "var(--lime)", ...(pic ? { "--agimg": `url(${pic})` } : {}) }}>
-        {a.pose && (
-          <div className="lookpick" role="group" aria-label={tr("Picture")}>
-            <button type="button" className={look === "classic" ? "on" : ""} aria-pressed={look === "classic"} onClick={() => setLook("classic")}>{tr("Classic")}</button>
-            <button type="button" className={look === "pose" ? "on" : ""} aria-pressed={look === "pose"} onClick={() => setLook("pose")}>{tr("Mastery I")}</button>
-          </div>
-        )}
         <div className="aghtext">
           {a.icon && <img src={a.icon} alt="" width="56" height="56" />}
           <h2>{a.name}</h2>
@@ -121,6 +115,12 @@ function Agent({ a }) {
             <div><b>{a.share}%</b><span>{tr("of the teams")}</span></div>
             <div><b>{a.pct}%</b><span>{tr("maps won")}</span></div>
           </div>
+          {a.pose && (
+            <div className="lookpick" role="group" aria-label={tr("Picture")}>
+              <button type="button" className={look === "classic" ? "on" : ""} aria-pressed={look === "classic"} onClick={() => setLook("classic")}>{tr("Classic")}</button>
+              <button type="button" className={look === "pose" ? "on" : ""} aria-pressed={look === "pose"} onClick={() => setLook("pose")}>{tr("Mastery I")}</button>
+            </div>
+          )}
         </div>
       </div>
       <Abilities list={a.abilities} color={a.color} name={a.name} />
