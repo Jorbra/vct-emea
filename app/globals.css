@@ -2298,7 +2298,7 @@ a.bt small { color: var(--muted); }
   .pin:hover { background: var(--surface-2); }
   .pin .pindot { color: var(--lime); font-size: 11px; }
   .pin b { margin-inline-start: auto; color: #ff4655; font-size: 12px; }
-  html[data-nav="mini"] body:has(.sitenav) { padding-inline-start: 68px; }
+  html[data-nav="mini"] body:has(.sitenav) { padding-inline-start: 100px; } /* 68 px of menu and the same 32 px gap as when it is open */
   html[data-nav="mini"] .sitenav { width: 68px !important; overflow-x: hidden; }
   html[data-nav="mini"] .sitenav a span, html[data-nav="mini"] .sitenav .navgroup, html[data-nav="mini"] .sitenav .navcmd span, html[data-nav="mini"] .sitenav .navcmd kbd, html[data-nav="mini"] .sitenav .navspoil span, html[data-nav="mini"] .pinned, html[data-nav="mini"] .navbrand span { display: none; }
   html[data-nav="mini"] .sitenav a, html[data-nav="mini"] .sitenav .navcmd, html[data-nav="mini"] .sitenav .navspoil { justify-content: center; padding-inline: 0; }
