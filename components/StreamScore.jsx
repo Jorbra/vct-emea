@@ -10,12 +10,13 @@ import { mapList } from "./Assets.jsx";
 const CORNERS = ["tl", "tr", "bl", "br"];
 const tagOf = (t, tr) => (t ? (t.tag || t.name || tr("TBD")) : tr("TBD"));
 
-export function StreamScore({ m, corner = "tl", onMove }) {
+export function StreamScore({ m, corner = "tr", onMove }) {
   const tr = useT();
   const ca = useTeamColor(m.a && m.a.logo);
   const cb = useTeamColor(m.b && m.b.logo);
   const s = m.score || {};
-  const maps = (s.maps || []).filter((x) => x && x.map);
+  // a map vlr.gg has not named yet ("TBD") is not shown
+  const maps = (s.maps || []).filter((x) => x && x.map && !/^tbd$/i.test(String(x.map).trim()));
   const now = maps.find((x) => !x.done) || null;
   const need = m.bo ? Math.ceil(m.bo / 2) : 0;
   const pips = (won, side) => (need > 1 ? <span className={"sspips " + side}>{Array.from({ length: need }, (_, i) => <i key={i} className={i < won ? "on" : ""} />)}</span> : null);

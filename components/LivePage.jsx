@@ -80,13 +80,13 @@ function View({ live, next }) {
               {screens.map((m) => (
                 <div key={keyOf(m)} className="liveplayer">
                   <iframe src={embedUrl(m.stream, host).replace(/([?&])autoplay=(true|1)/, "$1autoplay=false")} title={`${(m.a && m.a.name) || ""} vs ${(m.b && m.b.name) || ""}`} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
-                  {scoreOn ? <StreamScore m={m} corner={corners[keyOf(m)] || "tl"} onMove={(c) => moveScore(keyOf(m), c)} /> : <span className="mslabel">{(m.a && m.a.name) || tr("TBD")} vs {(m.b && m.b.name) || tr("TBD")}</span>}
+                  {scoreOn ? <StreamScore m={m} corner={corners[keyOf(m)] || "tr"} onMove={(c) => moveScore(keyOf(m), c)} /> : <span className="mslabel">{(m.a && m.a.name) || tr("TBD")} vs {(m.b && m.b.name) || tr("TBD")}</span>}
                 </div>
               ))}
             </div>
           ) : src ? (
             <div className="liveroom">
-              <div className="liveplayer"><iframe src={src} title={tr("Live")} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />{scoreOn && <StreamScore m={current} corner={corners[keyOf(current)] || "tl"} onMove={(c) => moveScore(keyOf(current), c)} />}</div>
+              <div className="liveplayer"><iframe src={src} title={tr("Live")} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />{scoreOn && <StreamScore m={current} corner={corners[keyOf(current)] || "tr"} onMove={(c) => moveScore(keyOf(current), c)} />}</div>
               <aside className="liveside">
                 <span className="livebadge">{tr("LIVE")}</span>
                 <div className="lsteams">
