@@ -12,7 +12,8 @@
     "#0f1923",
     "#3a2656",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Gekko.png/700px-Mastery_I_Pose_Gekko.png"
   },
   "fade": {
    "name": "Fade",
@@ -25,7 +26,8 @@
     "#0f1923",
     "#18344c",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Fade.png/700px-Mastery_I_Pose_Fade.png?c4881"
   },
   "breach": {
    "name": "Breach",
@@ -38,7 +40,8 @@
     "#0f1923",
     "#523a23",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Breach.png/700px-Mastery_I_Pose_Breach.png?e7a75"
   },
   "deadlock": {
    "name": "Deadlock",
@@ -51,7 +54,8 @@
     "#0f1923",
     "#221c3d",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Deadlock.png/700px-Mastery_I_Pose_Deadlock.png"
   },
   "tejo": {
    "name": "Tejo",
@@ -64,7 +68,8 @@
     "#0f1923",
     "#ffffff",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Tejo.png/700px-Mastery_I_Pose_Tejo.png"
   },
   "raze": {
    "name": "Raze",
@@ -77,7 +82,8 @@
     "#0f1923",
     "#2c5942",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Raze.png/700px-Mastery_I_Pose_Raze.png?27c44"
   },
   "chamber": {
    "name": "Chamber",
@@ -90,7 +96,8 @@
     "#0f1923",
     "#372d2b",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Chamber.png/700px-Mastery_I_Pose_Chamber.png"
   },
   "kayo": {
    "name": "KAY/O",
@@ -103,7 +110,8 @@
     "#0f1923",
     "#1a1e4b",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_KAYO.png/700px-Mastery_I_Pose_KAYO.png?9960f"
   },
   "skye": {
    "name": "Skye",
@@ -116,7 +124,8 @@
     "#0f1923",
     "#4f1413",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Skye.png/700px-Mastery_I_Pose_Skye.png?14c54"
   },
   "cypher": {
    "name": "Cypher",
@@ -129,7 +138,8 @@
     "#0f1923",
     "#3f3f6c",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Cypher.png/700px-Mastery_I_Pose_Cypher.png?f01f3"
   },
   "sova": {
    "name": "Sova",
@@ -142,7 +152,8 @@
     "#0f1923",
     "#101c47",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Sova.png/700px-Mastery_I_Pose_Sova.png?27c44"
   },
   "miks": {
    "name": "Miks",
@@ -155,7 +166,8 @@
     "#0f1923",
     "#344673",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Miks.png/700px-Mastery_I_Pose_Miks.png"
   },
   "killjoy": {
    "name": "Killjoy",
@@ -168,7 +180,8 @@
     "#0f1923",
     "#413950",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Killjoy.png/700px-Mastery_I_Pose_Killjoy.png?c4881"
   },
   "harbor": {
    "name": "Harbor",
@@ -181,7 +194,8 @@
     "#0f1923",
     "#11434e",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Harbor.png/700px-Mastery_I_Pose_Harbor.png?14c54"
   },
   "vyse": {
    "name": "Vyse",
@@ -194,7 +208,8 @@
     "#0f1923",
     "#ffffff",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Vyse.png/700px-Mastery_I_Pose_Vyse.png?9960f"
   },
   "viper": {
    "name": "Viper",
@@ -207,7 +222,8 @@
     "#0f1923",
     "#2c4f5e",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Viper.png/700px-Mastery_I_Pose_Viper.png?27c44"
   },
   "hush": {
    "name": "Hush",
@@ -220,7 +236,8 @@
     "#0f1923",
     "#f47ac7",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Hush.png/700px-Mastery_I_Pose_Hush.png?6051c"
   },
   "phoenix": {
    "name": "Phoenix",
@@ -233,7 +250,8 @@
     "#0f1923",
     "#262423",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Phoenix.png/700px-Mastery_I_Pose_Phoenix.png?14c54"
   },
   "veto": {
    "name": "Veto",
@@ -246,7 +264,8 @@
     "#0f1923",
     "#0f1923",
     "#1a5d65"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Veto.png/700px-Mastery_I_Pose_Veto.png?27c44"
   },
   "astra": {
    "name": "Astra",
@@ -259,7 +278,8 @@
     "#0f1923",
     "#5210c6",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Astra.png/700px-Mastery_I_Pose_Astra.png"
   },
   "brimstone": {
    "name": "Brimstone",
@@ -272,7 +292,8 @@
     "#0f1923",
     "#211d21",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Brimstone.png/700px-Mastery_I_Pose_Brimstone.png?56b12"
   },
   "iso": {
    "name": "Iso",
@@ -285,7 +306,8 @@
     "#0f1923",
     "#20155d",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Iso.png/700px-Mastery_I_Pose_Iso.png?56b12"
   },
   "clove": {
    "name": "Clove",
@@ -298,7 +320,8 @@
     "#0f1923",
     "#c347c7",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Clove.png/700px-Mastery_I_Pose_Clove.png"
   },
   "neon": {
    "name": "Neon",
@@ -311,7 +334,8 @@
     "#0f1923",
     "#38328e",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Neon.png/700px-Mastery_I_Pose_Neon.png?9960f"
   },
   "yoru": {
    "name": "Yoru",
@@ -324,7 +348,8 @@
     "#0f1923",
     "#261e4f",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Yoru.png/700px-Mastery_I_Pose_Yoru.png?27c44"
   },
   "waylay": {
    "name": "Waylay",
@@ -337,7 +362,8 @@
     "#0f1923",
     "#0f1923",
     "#482e61"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Waylay.png/700px-Mastery_I_Pose_Waylay.png?27c44"
   },
   "sage": {
    "name": "Sage",
@@ -350,7 +376,8 @@
     "#0f1923",
     "#102d23",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Sage.png/700px-Mastery_I_Pose_Sage.png"
   },
   "reyna": {
    "name": "Reyna",
@@ -363,7 +390,8 @@
     "#0f1923",
     "#2f2664",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Reyna.png/700px-Mastery_I_Pose_Reyna.png?9960f"
   },
   "omen": {
    "name": "Omen",
@@ -376,7 +404,8 @@
     "#0f1923",
     "#344673",
     "#0f1923"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Omen.png/700px-Mastery_I_Pose_Omen.png?27c44"
   },
   "jett": {
    "name": "Jett",
@@ -389,7 +418,8 @@
     "#0f1923",
     "#0f1923",
     "#25607a"
-   ]
+   ],
+   "pose": "https://wiki.playvalorant.com/en-us/images/thumb/Mastery_I_Pose_Jett.png/700px-Mastery_I_Pose_Jett.png?f01f3"
   }
  },
  "maps": {

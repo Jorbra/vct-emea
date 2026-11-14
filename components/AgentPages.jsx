@@ -32,11 +32,20 @@ const ROLE = { Duelist: "Duelist", Initiator: "Initiator", Controller: "Controll
 
 function Agent({ a }) {
   const tr = useT();
+  // the picture shown in the banner: the classic portrait or the Mastery I pose
+  const [look, setLook] = useState("classic");
+  const pic = look === "pose" && a.pose ? a.pose : a.portrait;
   return (
     <div className="wrap teampage">
       <Top title={a.name} />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › <a href="/agent">{tr("Agents")}</a> › <span>{a.name}</span></nav>
-      <div className="aghero" style={{ "--agc": a.color || "var(--lime)", ...(a.portrait ? { "--agimg": `url(${a.portrait})` } : {}) }}>
+      <div className={"aghero" + (look === "pose" ? " posed" : "")} style={{ "--agc": a.color || "var(--lime)", ...(pic ? { "--agimg": `url(${pic})` } : {}) }}>
+        {a.pose && (
+          <div className="lookpick" role="group" aria-label={tr("Picture")}>
+            <button type="button" className={look === "classic" ? "on" : ""} aria-pressed={look === "classic"} onClick={() => setLook("classic")}>{tr("Classic")}</button>
+            <button type="button" className={look === "pose" ? "on" : ""} aria-pressed={look === "pose"} onClick={() => setLook("pose")}>{tr("Mastery I")}</button>
+          </div>
+        )}
         <div className="aghtext">
           {a.icon && <img src={a.icon} alt="" width="56" height="56" />}
           <h2>{a.name}</h2>
@@ -79,6 +88,16 @@ function Agent({ a }) {
           </aside>
         </div>
       )}
+      {a.pose && (
+        <section className="agposes">
+          <SectionHead icon="🖼️" title={tr("Poses")} />
+          <div>
+            <figure style={{ "--agc": a.color || "var(--lime)" }}><img src={a.portrait} alt={`${a.name} · ${tr("Classic")}`} loading="lazy" /><figcaption>{tr("Classic")}</figcaption></figure>
+            <figure style={{ "--agc": a.color || "var(--lime)" }}><img src={a.pose} alt={`${a.name} · ${tr("Mastery I")}`} loading="lazy" /><figcaption>{tr("Mastery I")} <small>{tr("Agent Mastery reward")}</small></figcaption></figure>
+          </div>
+          <p className="hint">{tr("Mastery pose: official VALORANT wiki.")}</p>
+        </section>
+      )}
       <RoleMates name={a.name} role={a.role} />
       <p className="note">{tr("From vlr.gg's tables of the site's events. Pictures: valorant-api.com.")}</p>
     </div>
@@ -108,7 +127,7 @@ function Agents({ list }) {
         </div>
         <RoleShare list={list} />
         <div className="aggrid">{shown.map((a) => (
-          <a key={a.key} href={`/agent/${a.key}`} className="agcard" style={{ "--agc": a.color || "var(--lime)", ...(a.portrait ? { "--agimg": `url(${a.portrait})` } : {}) }}>
+          <a key={a.key} href={`/agent/${a.key}`} className={"agcard" + (a.pose ? " haspose" : "")} style={{ "--agc": a.color || "var(--lime)", ...(a.portrait ? { "--agimg": `url(${a.portrait})` } : {}), ...(a.pose ? { "--agpose": `url(${a.pose})` } : {}) }}>
             <b>{a.name}</b>
             <small>{a.role ? tr(ROLE[a.role] || a.role) : ""}</small>
             <span>{a.share}% {tr("of the teams")} · {a.pct}% {tr("won")}</span>

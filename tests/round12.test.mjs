@@ -77,3 +77,9 @@ test("round 13: mystery agent", async () => {
   assert.ok(g.done && g.won);
   assert.equal(g.reveal.key, pz.agent.answer.key);
 });
+
+test("agents' mastery poses: every agent has one, served from the site", async () => {
+  const ASSETS = (await import("../lib/valorant-assets.json", { with: { type: "json" } })).default;
+  for (const [k, a] of Object.entries(ASSETS.agents)) assert.match(a.pose || "", /^https:\/\/wiki\.playvalorant\.com\/en-us\/images\/thumb\/Mastery_I_Pose_/, k);
+  assert.equal(agentPage("Jett", openDb(":memory:")).pose, "/api/pose/jett");
+});

@@ -2685,3 +2685,15 @@ a.agicon:hover img { transform: scale(1.12); }
 .sharepics li span { flex: 1 1 260px; }
 .sharepics small { color: var(--muted); }
 @media (max-width: 640px) { .cmpheads { grid-template-columns: 1fr; } .cmphead.r { text-align: left; } .cmpvs { text-align: center; } }
+
+/* ---- agents' mastery poses */
+.aghero .lookpick { position: absolute; top: 12px; right: 12px; z-index: 2; display: flex; gap: 4px; padding: 3px; border-radius: 999px; background: rgba(0,0,0,.45); backdrop-filter: blur(6px); }
+.lookpick button { padding: 5px 12px; border: 0; border-radius: 999px; background: none; color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; }
+.lookpick button.on { background: var(--agc); color: #111; }
+.aghero.posed { background-position: 0 0, right -10px center, 0 0; background-size: auto, auto 125%, auto; }
+.agposes > div { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.agposes figure { margin: 0; display: grid; gap: 6px; padding: 12px; border-radius: var(--r-card); border: 1px solid var(--line); background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--agc) 35%, transparent), var(--surface) 70%); }
+.agposes img { width: 100%; height: 320px; object-fit: contain; filter: drop-shadow(0 10px 24px rgba(0,0,0,.45)); }
+.agposes figcaption { font-weight: 800; text-transform: uppercase; color: var(--agc); }
+.agposes figcaption small { display: block; font-weight: 500; text-transform: none; color: var(--muted); }
+.agcard.haspose:hover { background-image: linear-gradient(180deg, transparent 35%, var(--surface) 88%), var(--agpose), linear-gradient(160deg, color-mix(in srgb, var(--agc) 40%, var(--surface)), var(--surface)); background-size: auto, 125% auto, auto; background-position: 0 0, center 10%, 0 0; }
