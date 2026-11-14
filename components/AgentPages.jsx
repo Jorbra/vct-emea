@@ -30,6 +30,34 @@ const ROLE = { Duelist: "Duelist", Initiator: "Initiator", Controller: "Controll
 
 // ---- one agent
 
+// the key each ability is on, as in the game
+const KEYS = { Grenade: "C", Ability1: "Q", Ability2: "E", Ultimate: "X", Passive: "—" };
+
+/** The agent's abilities: icon, key, name and what it does, in the visitor's language. */
+function Abilities({ list, color }) {
+  const tr = useT();
+  const [open, setOpen] = useState("");
+  if (!list || !list.length) return null;
+  const fr = tr.lang === "fr";
+  return (
+    <section className="abilities" style={{ "--agc": color || "var(--lime)" }}>
+      <SectionHead icon="⚡" title={tr("Abilities")} />
+      <div className="abgrid">{list.map((x) => {
+        const t = (fr ? x.fr : x.en) || x.en;
+        const ult = x.slot === "Ultimate";
+        return (
+          <button key={x.slot} type="button" className={"abcard" + (ult ? " ult" : "") + (open === x.slot ? " on" : "")} onClick={() => setOpen(open === x.slot ? "" : x.slot)} aria-expanded={open === x.slot}>
+            <span className="abicon">{x.icon ? <img src={x.icon} alt="" width="40" height="40" loading="lazy" /> : null}<kbd>{KEYS[x.slot] || ""}</kbd></span>
+            <span className="abtext"><b>{t.name}</b><small>{ult ? tr("Ultimate") : x.slot === "Passive" ? tr("Passive") : tr("Ability")}</small></span>
+            <p>{t.text}</p>
+          </button>
+        );
+      })}</div>
+      <p className="hint">{tr("Tap an ability to read all of it. Source: valorant-api.com.")}</p>
+    </section>
+  );
+}
+
 function Agent({ a }) {
   const tr = useT();
   // the picture shown in the banner: the classic portrait or the Mastery I pose
@@ -57,6 +85,7 @@ function Agent({ a }) {
           </div>
         </div>
       </div>
+      <Abilities list={a.abilities} color={a.color} />
       {a.picks === 0 ? <EmptyState text={tr("Not played on the site's events yet.")} /> : (
         <div className="cols">
           <main>

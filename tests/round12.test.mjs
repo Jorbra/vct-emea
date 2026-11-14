@@ -83,3 +83,12 @@ test("agents' mastery poses: every agent has one, served from the site", async (
   for (const [k, a] of Object.entries(ASSETS.agents)) assert.match(a.pose || "", /^https:\/\/wiki\.playvalorant\.com\/en-us\/images\/thumb\/Mastery_I_Pose_/, k);
   assert.equal(agentPage("Jett", openDb(":memory:")).pose, "/api/pose/jett");
 });
+
+test("agents' abilities: every agent, in French and English, with its key", () => {
+  const db = openDb(":memory:");
+  const j = agentPage("Jett", db);
+  assert.deepEqual(j.abilities.map((x) => x.slot), ["Grenade", "Ability1", "Ability2", "Ultimate", "Passive"]);
+  assert.equal(j.abilities[3].en.name, "Blade Storm");
+  assert.ok(j.abilities[3].fr.name && j.abilities[3].fr.text);
+  for (const k of ["omen", "hush", "kayo", "veto", "miks"]) assert.ok(agentPage(k, db).abilities.length >= 4, k);
+});

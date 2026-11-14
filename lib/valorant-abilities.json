@@ -1,0 +1,1625 @@
+{
+ "source": "valorant-api.com",
+ "agents": {
+  "gekko": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/e370fa57-4757-3604-3648-499e1f642d3f/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Mosh Pit",
+     "text": "EQUIP <whitebold>Mosh</>. FIRE to throw. ALT FIRE to lob. On landing, create a zone that deals low <debuffred>damage</> over time before exploding, dealing high <debuffred>damage</> to all players.\r\n\r\nReverts to a <whitebold>Globule</>."
+    },
+    "fr": {
+     "name": "Pogo",
+     "text": "ÉQUIPEZ-vous de <whitebold>Pogo</>. TIREZ pour le lancer. Utilisez le TIR SECONDAIRE pour lancer <whitebold>Pogo</> en cloche. À l'atterrissage, <whitebold>Pogo</> crée une zone qui inflige de faibles <debuffred>dégâts</> sur la durée avant d'exploser, infligeant d'importants <debuffred>dégâts</> à tous les joueurs.\r\n\r\n<whitebold>Pogo</> redevient un <whitebold>globule</>."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/e370fa57-4757-3604-3648-499e1f642d3f/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Wingman",
+     "text": "EQUIP a destructible <whitebold>Wingman</>. FIRE to send it forward. <debuffred>Chases</> the first enemy it sees, <debuffred>concussing</> on impact. ALT FIRE to have <whitebold>Wingman</> plant or defuse at a targeted bomb site.\r\n\r\nReverts to a <whitebold>Globule</>."
+    },
+    "fr": {
+     "name": "Altego",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Altego</> destructible. TIREZ pour lancer <whitebold>Altego</> devant vous. Il <debuffred>pourchasse</> le premier ennemi rencontré, le <debuffred>désorientant</> à l'impact. Utilisez le TIR SECONDAIRE pour qu'<whitebold>Altego</> pose ou désamorce sur un site de bombe ciblé.\r\n\r\n<whitebold>Altego</> redevient un <whitebold>globule</>."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/e370fa57-4757-3604-3648-499e1f642d3f/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Dizzy",
+     "text": "EQUIP a destructible <whitebold>Dizzy</>. FIRE to throw. Fires plasma at enemies in line of sight, <debuffred>blinding</> them.\r\n\r\nReverts to a <whitebold>Globule</>."
+    },
+    "fr": {
+     "name": "Verti",
+     "text": "ÉQUIPEZ-vous d'une <whitebold>Verti</> destructible. TIREZ pour la lancer. Elle tire des projectiles de plasma sur les ennemis dans son champ de vision, les <debuffred>aveuglant</>.\r\n\r\n<whitebold>Verti</> redevient un <whitebold>globule</>."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/e370fa57-4757-3604-3648-499e1f642d3f/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Thrash",
+     "text": "EQUIP a destructible <whitebold>Thrash</>. FIRE to take control. FIRE again to lunge and explode, <debuffred>detaining</> all players. FIRE while lunging to explode early.\r\n\r\nReverts to a <whitebold>Globule</> only once."
+    },
+    "fr": {
+     "name": "Mordicus",
+     "text": "ÉQUIPEZ-vous d'une <whitebold>Mordicus</> destructible. TIREZ pour prendre le contrôle. TIREZ à nouveau pour bondir vers l'avant et exploser, ce qui <debuffred>retient</> tous les joueurs. TIREZ pendant le bond pour déclencher l'explosion prématurément.\r\n\r\n<whitebold>Mordicus</> redevient un <whitebold>globule</> une seule fois."
+    }
+   },
+   {
+    "slot": "Passive",
+    "icon": "",
+    "en": {
+     "name": "Globule",
+     "text": "Gekko’s abilities transform into a <whitebold>Globule</> after use.\r\n\r\nINTERACT to reclaim nearby <whitebold>Globules</> to gain another charge after a short cooldown."
+    },
+    "fr": {
+     "name": "Globule",
+     "text": "Les compétences de Gekko se transforment en <whitebold>globules</> après utilisation.\r\n\r\nINTERAGISSEZ pour récupérer les <whitebold>globules</> à proximité et obtenir une charge supplémentaire après un court délai de récupération."
+    }
+   }
+  ],
+  "fade": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Prowler",
+     "text": "EQUIP a destructible <whitebold>Prowler</>. FIRE to send it forward. HOLD FIRE to steer towards your crosshair. <debuffred>Chases</> the first enemy or <whitebold>Terror Trail</> it sees, <debuffred>nearsighting</> on impact."
+    },
+    "fr": {
+     "name": "Rôdeur",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Rôdeur</> destructible. TIREZ pour le lancer devant vous. MAINTENEZ LE TIR pour le guider dans la direction de votre réticule. Le <whitebold>Rôdeur</> <debuffred>pourchasse</> le premier ennemi ou suit la première <whitebold>piste de terreur</> qu'il voit, <debuffred>rendant myope</> à l'impact."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Seize",
+     "text": "EQUIP <whitebold>Seize</>. FIRE to throw. REACTIVATE to drop early. On landing, <debuffred>deafen</>, <debuffred>decay</>, and <debuffred>tether</> enemies."
+    },
+    "fr": {
+     "name": "Capture",
+     "text": "ÉQUIPEZ-vous de <whitebold>Capture</>. TIREZ pour la lancer. RÉACTIVEZ pour la faire tomber prématurément. À l'atterrissage, elle <debuffred>assourdit</>, <debuffred>désagrège</> et <debuffred>attache</> les ennemis."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Haunt",
+     "text": "EQUIP a destructible <whitebold>Haunt</>. FIRE to throw. REACTIVATE to drop early. On landing, <debuffred>mark</> and <debuffred>reveal</> enemies in range and line of sight."
+    },
+    "fr": {
+     "name": "Hanteur",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Hanteur</> destructible. TIREZ pour le lancer. RÉACTIVEZ pour le faire tomber prématurément. À l'atterrissage, le <whitebold>Hanteur</> <debuffred>marque</> et <debuffred>révèle</> les ennemis à portée et dans son champ de vision."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Nightfall",
+     "text": "EQUIP <whitebold>Nightfall</>. FIRE to send forward a wave that <debuffred>deafens</>, <debuffred>decays</>, and <debuffred>marks</> enemies."
+    },
+    "fr": {
+     "name": "Nuit tombante",
+     "text": "ÉQUIPEZ-vous de <whitebold>Nuit tombante</>. TIREZ pour envoyer une vague qui <debuffred>assourdit</>, <debuffred>désagrège</> et <debuffred>marque</> les ennemis."
+    }
+   },
+   {
+    "slot": "Passive",
+    "icon": "",
+    "en": {
+     "name": "Terror Trails",
+     "text": "<debuffred>Marked</> enemies have their location tracked by <whitebold>Terror Trails</>."
+    },
+    "fr": {
+     "name": "Pistes de terreur",
+     "text": "Les ennemis <debuffred>marqués</> voient leur position suivie par des <whitebold>pistes de terreur</>."
+    }
+   }
+  ],
+  "breach": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/5f8d3a7f-467b-97f3-062c-13acf203c006/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Aftershock",
+     "text": "EQUIP <whitebold>Aftershock</>. FIRE to send a zone through a wall, exploding to repeatedly deal <debuffred>damage</> to all players."
+    },
+    "fr": {
+     "name": "Réplique",
+     "text": "ÉQUIPEZ-vous de <whitebold>Réplique</>. TIREZ pour envoyer une zone à travers un mur, qui explose afin d'infliger à plusieurs reprises des <debuffred>dégâts</> à tous les joueurs."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/5f8d3a7f-467b-97f3-062c-13acf203c006/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Flashpoint",
+     "text": "EQUIP a <whitebold>Flashpoint</>. FIRE to send it through a wall, exploding to <debuffred>flash</> all players looking at it."
+    },
+    "fr": {
+     "name": "Point d'ignition",
+     "text": "ÉQUIPEZ-vous de <whitebold>Point d'ignition</>. TIREZ pour l'envoyer à travers un mur, provoquant une explosion qui <debuffred>aveugle</> tous les joueurs qui la regardent."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/5f8d3a7f-467b-97f3-062c-13acf203c006/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Fault Line",
+     "text": "EQUIP <whitebold>Fault Line</>. HOLD FIRE to increase distance. RELEASE to detonate a zone that <debuffred>concusses</> all players."
+    },
+    "fr": {
+     "name": "Ligne de fracture",
+     "text": "ÉQUIPEZ-vous de <whitebold>Ligne de fracture</>. MAINTENEZ LE TIR pour augmenter la distance. RELÂCHEZ pour déclencher une zone qui <debuffred>désoriente</> tous les joueurs."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/5f8d3a7f-467b-97f3-062c-13acf203c006/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Rolling Thunder",
+     "text": "EQUIP <whitebold>Rolling Thunder</>. FIRE to send forward a wave that <debuffred>concusses</> and <debuffred>knocks up</> all players."
+    },
+    "fr": {
+     "name": "Onde sismique",
+     "text": "ÉQUIPEZ-vous d'<whitebold>Onde sismique</>. TIREZ pour envoyer une vague qui <debuffred>désoriente</> et <debuffred>projette en l'air</> tous les joueurs."
+    }
+   }
+  ],
+  "deadlock": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/cc8b64c8-4b25-4ff9-6e7f-37b4da43d235/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Barrier Mesh",
+     "text": "EQUIP <whitebold>Barrier Mesh</>. FIRE to throw. On landing, create destructible markers that fortify after a delay. These markers form barriers that block player movement."
+    },
+    "fr": {
+     "name": "Disque barrière",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Disque barrière</>. TIREZ pour le lancer. À l'atterrissage, vous créez des marques destructibles qui se renforcent après un délai. Ces marques forment des barrières qui bloquent le déplacement des joueurs."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/cc8b64c8-4b25-4ff9-6e7f-37b4da43d235/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Sonic Sensor",
+     "text": "EQUIP a destructible <whitebold>Sonic Sensor</>. FIRE to place. Triggers on nearby detected enemy noise, creating a zone that <debuffred>concusses</> all players. <whitebold>Sonic Sensor</> <teal>stealths</> after placement.\r\n\r\nCan be picked up."
+    },
+    "fr": {
+     "name": "Radar ultrason",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Radar ultrason</> destructible. TIREZ pour le placer. Il se déclenche en cas de bruit ennemi détecté à proximité, créant une zone qui <debuffred>désoriente</> tous les joueurs. <whitebold>Radar ultrason</> <teal>devient furtif</> après avoir été placé.\r\n\r\nPeut être ramassé."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/cc8b64c8-4b25-4ff9-6e7f-37b4da43d235/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "GravNet",
+     "text": "EQUIP <whitebold>GravNet</>. FIRE to throw. ALT FIRE to lob. Explodes on landing, forcing all players to <debuffred>crouch</> and move <debuffred>slowly</> until they remove the net."
+    },
+    "fr": {
+     "name": "GravNet",
+     "text": "ÉQUIPEZ-vous d'une grenade <whitebold>GravNet</>. TIREZ pour la lancer. Utilisez le TIR SECONDAIRE pour la lancer en cloche. Elle explose à l'atterrissage, obligeant tous les joueurs à <debuffred>s'accroupir</> et à se déplacer <debuffred>lentement</> jusqu'à ce qu'ils retirent le filet."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/cc8b64c8-4b25-4ff9-6e7f-37b4da43d235/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Annihilation",
+     "text": "EQUIP <whitebold>Annihilation</>. FIRE to launch a zone, forcing the first enemy caught into a destructible cocoon that pulls them along a path for <debuffred>lethal damage</> unless the cocoon is destroyed."
+    },
+    "fr": {
+     "name": "Annihilation",
+     "text": "ÉQUIPEZ-vous d'<whitebold>Annihilation</>. TIREZ pour créer une zone qui enferme le premier ennemi touché dans un cocon destructible qui le traîne le long d'un parcours lui infligeant des <debuffred>dégâts mortels</>, à moins que le cocon ne soit détruit."
+    }
+   }
+  ],
+  "tejo": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/b444168c-4e35-8076-db47-ef9bf368f384/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Stealth Drone",
+     "text": "EQUIP a destructible <whitebold>Stealth Drone</>. FIRE to take control. FIRE again to <debuffred>reveal</> and <debuffred>suppress</> nearby enemies in range and line of sight."
+    },
+    "fr": {
+     "name": "Drone furtif",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Drone furtif</> destructible. TIREZ pour prendre le contrôle. TIREZ de nouveau pour <debuffred>révéler</> et <debuffred>neutraliser</> les ennemis à portée et dans la ligne de mire."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/b444168c-4e35-8076-db47-ef9bf368f384/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Special Delivery",
+     "text": "EQUIP <whitebold>Special Delivery</>. FIRE to launch. ALT FIRE to launch with a bounce. Explodes on any surface, <debuffred>concussing</> and <debuffred>damaging</> all players."
+    },
+    "fr": {
+     "name": "Livraison spéciale",
+     "text": "ÉQUIPEZ-vous de <whitebold>Livraison spéciale</>. TIREZ pour lancer la compétence. Utilisez le TIR SECONDAIRE pour lancer avec un rebond. Elle explose sur n'importe quelle surface, <debuffred>désoriente</> et inflige des <debuffred>dégâts</> à tous les joueurs."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/b444168c-4e35-8076-db47-ef9bf368f384/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Guided Salvo",
+     "text": "EQUIP a tactical map. FIRE to set locations. ALT FIRE to launch missiles that travel to and repeatedly pulse, dealing <debuffred>damage</> to all players."
+    },
+    "fr": {
+     "name": "Salve autoguidée",
+     "text": "ÉQUIPEZ-vous d'une carte tactique. TIREZ pour définir les positions. Utilisez le TIR SECONDAIRE pour lancer des missiles qui se déplacent et émettent des impulsions à plusieurs reprises, infligeant des <debuffred>dégâts</> à tous les joueurs."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/b444168c-4e35-8076-db47-ef9bf368f384/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Armageddon",
+     "text": "EQUIP a tactical map. FIRE to set, pivot and FIRE again to cast a wave that deals high <debuffred>damage</> to all players. ALT FIRE to cancel targeting."
+    },
+    "fr": {
+     "name": "Apocalypse",
+     "text": "ÉQUIPEZ-vous d'une carte tactique. TIREZ pour cibler, pivotez, puis TIREZ de nouveau pour lancer une vague infligeant de lourds <debuffred>dégâts</> à tous les joueurs. Utilisez le TIR SECONDAIRE pour annuler la visée."
+    }
+   }
+  ],
+  "raze": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/f94c3b30-42be-e959-889c-5aa313dba261/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Boom Bot",
+     "text": "EQUIP a destructible <whitebold>Boom Bot</>. FIRE to send it forward. <debuffred>Chases</> the first enemy it sees, exploding and dealing <debuffred>damage</> to enemies on impact."
+    },
+    "fr": {
+     "name": "Boum Bot",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Boum Bot</> destructible. TIREZ pour le lancer devant vous. Le <whitebold>Boum Bot</> <debuffred>pourchasse</> le premier ennemi rencontré, explose et inflige des <debuffred>dégâts</> aux ennemis à l'impact."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/f94c3b30-42be-e959-889c-5aa313dba261/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Blast Pack",
+     "text": "INSTANTLY throw a destructible <whitebold>Blast Pack</> that sticks to surfaces that fully arms after a delay. REACTIVATE to detonate, <debuffred>knocking away</> anything hit.\r\n\r\nIf fully armed, <whitebold>Blast Pack</> will also deal <debuffred>damage</> to enemies."
+    },
+    "fr": {
+     "name": "Pack explosif",
+     "text": "Lancez INSTANTANÉMENT un <whitebold>Pack explosif</> destructible qui colle aux surfaces et devient pleinement opérationnel après un certain délai. RÉACTIVEZ pour faire exploser le pack, qui <debuffred>repoussera</> tout ce qui est touché.\r\n\r\nQuand le <whitebold>Pack explosif</> est complètement armé, il inflige également des <debuffred>dégâts</> aux ennemis."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/f94c3b30-42be-e959-889c-5aa313dba261/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Paint Shells",
+     "text": "EQUIP <whitebold>Paint Shells</>. FIRE to throw. ALT FIRE to lob. After a delay, explode, dealing <debuffred>damage</> and creating sub-munitions, each also dealing <debuffred>damage</> to all players.\r\n\r\nResets every two kills."
+    },
+    "fr": {
+     "name": "Grenade gigogne",
+     "text": "ÉQUIPEZ-vous de <whitebold>Grenade gigogne</>. TIREZ pour la lancer. Utilisez le TIR SECONDAIRE pour la lancer en cloche. Après un délai, la grenade explose, infligeant des <debuffred>dégâts</> et créant des sous-munitions, chacune infligeant également des <debuffred>dégâts</> à tous les joueurs.\r\n\r\nSe réinitialise toutes les 2 éliminations."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/f94c3b30-42be-e959-889c-5aa313dba261/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Showstopper",
+     "text": "INSTANTLY prepare <whitebold>Showstopper</>. FIRE to launch. Explodes on any surface, dealing high <debuffred>damage</> to all players."
+    },
+    "fr": {
+     "name": "Bouquet final",
+     "text": "Préparez IMMÉDIATEMENT <whitebold>Bouquet final</>. TIREZ pour lancer la compétence. Elle explose sur n'importe quelle surface, infligeant de lourds <debuffred>dégâts</> à tous les joueurs."
+    }
+   }
+  ],
+  "chamber": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/22697a3d-45bf-8dd7-4fec-84a9e28c69d7/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Trademark",
+     "text": "EQUIP a destructible <whitebold>Trademark</>. FIRE to place. Triggers on nearby visible enemies in range, creating a zone that <debuffred>slows</> all players.\r\n\r\nCan be recalled."
+    },
+    "fr": {
+     "name": "Guet-apens",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Guet-apens</> destructible. TIREZ pour le placer. Se déclenche sur les ennemis visibles à portée, créant une zone qui <debuffred>ralentit</> tous les joueurs.\r\n\r\nPeut être rappelé."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/22697a3d-45bf-8dd7-4fec-84a9e28c69d7/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Headhunter",
+     "text": "EQUIP <whitebold>Headhunter</>. FIRE to shoot. ALT FIRE to aim down sights."
+    },
+    "fr": {
+     "name": "Chasseur de têtes",
+     "text": "ÉQUIPEZ-vous de <whitebold>Chasseur de têtes</>. TIREZ pour faire feu. Utilisez le TIR SECONDAIRE pour viser."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/22697a3d-45bf-8dd7-4fec-84a9e28c69d7/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Rendezvous",
+     "text": "EQUIP a destructible <whitebold>Rendezvous</>. FIRE to place. While in range, REACTIVATE to instantly teleport to it.\r\n\r\nCan be recalled."
+    },
+    "fr": {
+     "name": "Rendez-vous",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Rendez-vous</> destructible. TIREZ pour le placer. Lorsque vous êtes à portée, RÉACTIVEZ pour vous téléporter instantanément à l'emplacement de cette compétence.\r\n\r\nPeut être rappelée."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/22697a3d-45bf-8dd7-4fec-84a9e28c69d7/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Tour De Force",
+     "text": "ACTIVATE to access a sniper rifle that deals <debuffred>lethal damage</> with direct hits to the upper body.\r\n\r\nFIRE to shoot. ALT FIRE to aim down sights. On kills, create a zone that <debuffred>slows</> all players."
+    },
+    "fr": {
+     "name": "Tour de force",
+     "text": "ACTIVEZ pour obtenir un fusil de précision infligeant des <debuffred>dégâts mortels</> en cas de tir direct dans le haut du corps.\r\n\r\nTIREZ pour faire feu. Utilisez le TIR SECONDAIRE pour viser. En cas d'élimination, vous créez une zone qui <debuffred>ralentit</> tous les joueurs."
+    }
+   }
+  ],
+  "kayo": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/601dbbe7-43ce-be57-2a40-4abd24953621/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "FRAG/ment",
+     "text": "EQUIP <whitebold>FRAG/ment</>. FIRE to throw. ALT FIRE to lob. Explodes on landing, repeatedly dealing pulses of <debuffred>damage</> to all players."
+    },
+    "fr": {
+     "name": "FRAG/ment",
+     "text": "ÉQUIPEZ-vous de <whitebold>FRAG/ment</>. TIREZ pour le lancer. Utilisez le TIR SECONDAIRE pour le lancer en cloche. Il explose à l'atterrissage, infligeant à plusieurs reprises des salves de <debuffred>dégâts</> à tous les joueurs."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/601dbbe7-43ce-be57-2a40-4abd24953621/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "FLASH/drive",
+     "text": "EQUIP a <whitebold>FLASH/drive</>. FIRE to throw. ALT FIRE to lob. After a delay, explode, <debuffred>flashing</> all players looking at it."
+    },
+    "fr": {
+     "name": "MÉMOIRE/flash",
+     "text": "ÉQUIPEZ-vous de <whitebold>MÉMOIRE/flash</>. TIREZ pour la lancer. Utilisez le TIR SECONDAIRE pour la lancer en cloche. Après un délai, elle explose, <debuffred>aveuglant</> tous les joueurs qui la regardent."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/601dbbe7-43ce-be57-2a40-4abd24953621/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "ZERO/point",
+     "text": "EQUIP a destructible <whitebold>ZERO/point</>. FIRE to throw. Pulses on any surface, <debuffred>suppressing</> enemies within range."
+    },
+    "fr": {
+     "name": "POINT/zéro",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>POINT/zéro</> destructible. TIREZ pour le lancer. Il émet des pulsations sur toute surface, <debuffred>neutralisant</> les ennemis à portée."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/601dbbe7-43ce-be57-2a40-4abd24953621/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "NULL/cmd",
+     "text": "INSTANTLY gain <teal>overloaded</> and repeatedly send out a pulse that <debuffred>suppresses</> enemies within range.\r\n\r\n<teal>Overloaded</> grants <teal>combat stim</>. Upon taking <debuffred>lethal damage</>, KAY/O is downed and can be re-stabilized."
+    },
+    "fr": {
+     "name": "CMD/null",
+     "text": "La compétence atteint INSTANTANÉMENT l'état de <teal>surcharge</> et émet à plusieurs reprises une impulsion qui <debuffred>neutralise</> les ennemis à portée.\r\n\r\n<teal>Surchargé</> octroie un effet de <teal>stimulant de combat</>. Lorsqu'il subit des <debuffred>dégâts mortels</>, KAY/O est mis à terre et peut être réanimé."
+    }
+   }
+  ],
+  "skye": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/6f2a04ca-43e0-be17-7f36-b3908627744d/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Regrowth",
+     "text": "EQUIP <whitebold>Regrowth</>. HOLD FIRE to <teal>heal</> allies in range and line of sight. Uses a limited healing pool.\r\n\r\nCannot heal self."
+    },
+    "fr": {
+     "name": "Revitalisation",
+     "text": "ÉQUIPEZ-vous de <whitebold>Revitalisation</>. MAINTENEZ LE TIR pour <teal>soigner</> les alliés à portée et dans la ligne de mire. Utilise une réserve de soins limitée.\r\n\r\nImpossible de se soigner soi-même."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/6f2a04ca-43e0-be17-7f36-b3908627744d/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Trailblazer",
+     "text": "EQUIP a destructible <whitebold>Trailblazer</>. FIRE to take control. FIRE again to lunge and explode, <debuffred>concussing</> all players and dealing <debuffred>damage</> to enemies on direct hits."
+    },
+    "fr": {
+     "name": "Éclaireur",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Éclaireur</> destructible. TIREZ pour prendre le contrôle. TIREZ à nouveau pour bondir et exploser, <debuffred>désorientant</> tous les joueurs et infligeant des <debuffred>dégâts</> aux ennemis touchés directement."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/6f2a04ca-43e0-be17-7f36-b3908627744d/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Guiding Light",
+     "text": "EQUIP a <whitebold>Guiding Light</>. FIRE to send it forward. HOLD FIRE to steer towards your crosshair. REACTIVATE to detonate, <debuffred>flashing</> all players looking at it."
+    },
+    "fr": {
+     "name": "Guide éclatant",
+     "text": "ÉQUIPEZ-vous de <whitebold>Guide éclatant</>. TIREZ pour le lancer devant vous. MAINTENEZ LE TIR pour le guider dans la direction de votre réticule. RÉACTIVEZ pour déclencher l'explosion, <debuffred>aveuglant</> tous les joueurs qui le regardent."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/6f2a04ca-43e0-be17-7f36-b3908627744d/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Seekers",
+     "text": "EQUIP destructible <whitebold>Seekers</>. FIRE to send out up to three <whitebold>Seekers</>. <debuffred>Chases</> the three closest enemies, <debuffred>nearsighting</> and <debuffred>slowing</> on impact."
+    },
+    "fr": {
+     "name": "Traqueurs",
+     "text": "ÉQUIPEZ-vous de <whitebold>Traqueurs</> destructibles. TIREZ pour envoyer jusqu'à trois <whitebold>Traqueurs</>. Les <whitebold>Traqueurs</> <debuffred>pourchassent</> les trois ennemis les plus proches, les <debuffred>rendant myopes</> et les <debuffred>ralentissant</> à l'impact."
+    }
+   }
+  ],
+  "cypher": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/117ed9e3-49f3-6512-3ccf-0cada7e3823b/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Trapwire",
+     "text": "EQUIP a destructible <whitebold>Trapwire</>. FIRE to place a wire between surfaces. <whitebold>Trapwire</> <teal>stealths</> after placement. Triggers when enemies come in contact, <debuffred>tethering</> enemies, and after a delay, <debuffred>revealing</> them if <whitebold>Trapwire</> is not destroyed.\r\n\r\nCan be picked up."
+    },
+    "fr": {
+     "name": "Fil de détente",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Fil de détente</> destructible. TIREZ pour placer un fil entre les surfaces. Le <whitebold>Fil de détente</> <teal>devient furtif</> après avoir été posé. Le fil se déclenche lorsque des ennemis entrent en contact avec, les <debuffred>attache</>, puis, après un délai, <debuffred>les révèle</> si le <whitebold>Fil de détente</> n'est pas détruit.\r\n\r\nPeut être ramassé."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/117ed9e3-49f3-6512-3ccf-0cada7e3823b/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Cyber Cage",
+     "text": "INSTANTLY throw a <whitebold>Cyber Cage</>. INTERACT to create a vision-blocking cylinder that plays an audio cue when enemies come in contact.\r\n\r\nCan be picked up during BUY PHASE."
+    },
+    "fr": {
+     "name": "Cybercage",
+     "text": "Lancez INSTANTANÉMENT une <whitebold>Cybercage</>. INTERAGISSEZ avec cette <whitebold>Cybercage</> pour créer un cylindre bloquant la vision qui émet un signal sonore lorsque des ennemis entrent en contact.\r\n\r\nPeut être récupérée pendant la PHASE D'ACHATS."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/117ed9e3-49f3-6512-3ccf-0cada7e3823b/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Spycam",
+     "text": "EQUIP a destructible <whitebold>Spycam</>. FIRE to place. <whitebold>Spycam</> <teal>stealths</> after placement. REACTIVATE to control it. FIRE to shoot a dart that <debuffred>snapshots</> enemies hit until they remove it.\r\n\r\nCan be picked up."
+    },
+    "fr": {
+     "name": "Caméra espionne",
+     "text": "ÉQUIPEZ-vous d'une <whitebold>Caméra espionne</> destructible. TIREZ pour la placer. La <whitebold>Caméra espionne</> <teal>devient furtive</> après avoir été placée. RÉACTIVEZ pour en reprendre le contrôle. TIREZ pour lancer une fléchette qui <debuffred>révèle</> les ennemis touchés jusqu'à ce qu'ils enlèvent la fléchette.\r\n\r\nPeut être ramassée."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/117ed9e3-49f3-6512-3ccf-0cada7e3823b/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Neural Theft",
+     "text": "ACTIVATE on a targeted dead enemy. After a delay, <debuffred>snapshot</> living enemies twice."
+    },
+    "fr": {
+     "name": "Vol neural",
+     "text": "ACTIVEZ sur un ennemi mort ciblé. Après un délai, les ennemis vivants sont <debuffred>révélés</> deux fois."
+    }
+   }
+  ],
+  "sova": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/320b2a48-4d9b-a075-30f1-1f93a9b638fa/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Owl Drone",
+     "text": "EQUIP a destructible <whitebold>Owl Drone</>. FIRE to take control. FIRE again to shoot a dart that repeatedly <debuffred>reveals</> enemies."
+    },
+    "fr": {
+     "name": "Drone rapace",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Drone rapace</> destructible. TIREZ pour prendre le contrôle. TIREZ à nouveau pour décocher une fléchette qui <debuffred>révèle</> les ennemis à plusieurs reprises."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/320b2a48-4d9b-a075-30f1-1f93a9b638fa/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Shock Bolt",
+     "text": "EQUIP a <whitebold>Shock Bolt</>. FIRE to shoot a bolt that explodes on any surface, dealing <debuffred>damage</> to all players. HOLD FIRE to increase the bolt’s velocity. ALT FIRE to add up to two bounces."
+    },
+    "fr": {
+     "name": "Électroflèche",
+     "text": "ÉQUIPEZ-vous d'une <whitebold>Électroflèche</>. TIREZ pour décocher une flèche qui explose au contact de n'importe quelle surface, infligeant des <debuffred>dégâts</> à tous les joueurs. MAINTENEZ LE TIR pour augmenter la vélocité de la flèche. Utilisez le TIR SECONDAIRE pour ajouter jusqu'à deux rebonds à cette flèche."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/320b2a48-4d9b-a075-30f1-1f93a9b638fa/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Recon Bolt",
+     "text": "EQUIP a destructible <whitebold>Recon Bolt</>. FIRE to shoot a bolt that repeatedly <debuffred>reveals</> nearby enemies in range and line of sight. HOLD FIRE to increase the bolt’s velocity. ALT FIRE to add up to two bounces."
+    },
+    "fr": {
+     "name": "Flèche de reconnaissance",
+     "text": "ÉQUIPEZ-vous d'une <whitebold>Flèche de reconnaissance</> destructible. TIREZ pour décocher une flèche qui <debuffred>révèle</> à plusieurs reprises les ennemis à portée et dans la ligne de mire. MAINTENEZ LE TIR pour augmenter la vélocité de la flèche. Utilisez le TIR SECONDAIRE pour ajouter jusqu'à deux rebonds à cette flèche."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/320b2a48-4d9b-a075-30f1-1f93a9b638fa/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Hunter's Fury",
+     "text": "EQUIP <whitebold>Hunter’s Fury</>. FIRE to shoot a zone that deals <debuffred>damage</>. Can be fired up to two more times.\r\n\r\nEnemies hit are <debuffred>revealed</> to Sova."
+    },
+    "fr": {
+     "name": "Fureur du chasseur",
+     "text": "ÉQUIPEZ-vous de <whitebold>Fureur du chasseur</>. TIREZ pour lancer une zone qui inflige des <debuffred>dégâts</>. Peut être déclenchée jusqu'à deux fois supplémentaires.\r\n\r\nLes ennemis touchés sont <debuffred>révélés</> à Sova."
+    }
+   }
+  ],
+  "miks": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/7c8a4701-4de6-9355-b254-e09bc2a34b72/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "M-pulse",
+     "text": "EQUIP a destructible <whitebold>M-Pulse</>. ALT FIRE to toggle between <debuffred>concuss</> or <teal>heal</>. FIRE to throw. Repeatedly pulses on landing, applying the selected effect on all players within range."
+    },
+    "fr": {
+     "name": "M-pulsion",
+     "text": "ÉQUIPEZ-vous d'une <whitebold>M-pulsion</> destructible. Utilisez le TIR SECONDAIRE pour basculer entre des effets de <debuffred>désorientation</> ou de <teal>soins</>. TIREZ pour la lancer. Cette compétence émet des impulsions à plusieurs reprises à l'atterrissage, appliquant l'effet sélectionné à tous les joueurs à portée."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/7c8a4701-4de6-9355-b254-e09bc2a34b72/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Harmonize",
+     "text": "EQUIP <whitebold>Harmonize</>. FIRE on a targeted ally to grant <teal>combat stim</> and <teal>haste</> to them and yourself. On kills while active, refresh the <teal>buff</> if both <whitebold>Harmonized</> players are still alive. ALT FIRE to self-cast with no refresh."
+    },
+    "fr": {
+     "name": "Harmonisation",
+     "text": "ÉQUIPEZ-vous d'<whitebold>Harmonisation</>. TIREZ sur un allié ciblé pour octroyer un effet de <teal>stimulant de combat</> et d'<teal>accélération</> à cet allié ainsi qu'à vous-même. En cas d'élimination pendant que cette compétence est active, le <teal>buff</> se réinitialise si les deux joueurs <whitebold>harmonisés</> sont toujours en vie. Utilisez le TIR SECONDAIRE pour lancer cette compétence sur vous-même sans réinitialisation."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/7c8a4701-4de6-9355-b254-e09bc2a34b72/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Waveform",
+     "text": "EQUIP a tactical map. FIRE to set smoke locations. ALT FIRE to cast smokes."
+    },
+    "fr": {
+     "name": "Forme d'onde",
+     "text": "ÉQUIPEZ-vous d'une carte tactique. TIREZ pour définir les positions des fumigènes. Utilisez le TIR SECONDAIRE pour lancer des fumigènes."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/7c8a4701-4de6-9355-b254-e09bc2a34b72/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Bassquake",
+     "text": "EQUIP <whitebold>Bassquake</>. FIRE to send forward a zone that <debuffred>deafens</>, <debuffred>knocks back</>, and <debuffred>slows</> all players."
+    },
+    "fr": {
+     "name": "Basse sismique",
+     "text": "ÉQUIPEZ-vous de <whitebold>Basse sismique</>. TIREZ pour envoyer vers l'avant une zone qui <debuffred>assourdit</>, <debuffred>repousse</> et <debuffred>ralentit</> tous les joueurs."
+    }
+   }
+  ],
+  "killjoy": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Nanoswarm",
+     "text": "EQUIP a destructible <whitebold>Nanoswarm</>. FIRE to throw. ALT FIRE to lob. <whitebold>Nanoswarm</> <teal>stealths</> after landing. INTERACT to create a zone that deals <debuffred>damage</> to all players.\r\n\r\nCan be picked up during BUY PHASE."
+    },
+    "fr": {
+     "name": "Essaim de nanites",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Essaim de nanites</> destructible. TIREZ pour le lancer. Utilisez le TIR SECONDAIRE pour le lancer en cloche. L'<whitebold>Essaim de nanites</> <teal>devient furtif</> après l'atterrissage. INTERAGISSEZ avec pour créer une zone qui inflige des <debuffred>dégâts</> à tous les joueurs.\r\n\r\nPeut être récupéré pendant la PHASE D'ACHATS."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "ALARMBOT",
+     "text": "EQUIP a destructible <whitebold>Alarmbot</>. FIRE to place. <whitebold>Alarmbot</> <teal>stealths</> after placement. Triggers on nearby visible enemies in range. <debuffred>Chases</> the first enemy it sees, exploding and applying <debuffred>vulnerable</>.\r\n\r\nCan be recalled."
+    },
+    "fr": {
+     "name": "Bot-alarme",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Bot-alarme</> destructible. TIREZ pour le placer. Le <whitebold>Bot-alarme</> <teal>devient furtif</> après avoir été placé. Le <whitebold>Bot-alarme</> se déclenche sur les ennemis visibles à portée. Il <debuffred>pourchasse</> le premier ennemi rencontré, explose et le rend <debuffred>vulnérable</>.\r\n\r\nPeut être rappelé."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "TURRET",
+     "text": "EQUIP a destructible <whitebold>Turret</>. While equipped, REACTIVATE to flip the direction or HOLD ALT FIRE to rotate. FIRE to place. Shoots at enemies in line of sight.\r\n\r\nCan be recalled."
+    },
+    "fr": {
+     "name": "Tourelle",
+     "text": "ÉQUIPEZ-vous d'une <whitebold>Tourelle</> destructible. Lorsqu'elle est équipée, RÉACTIVEZ pour changer la direction de la <whitebold>Tourelle</> ou MAINTENEZ LE TIR SECONDAIRE pour faire pivoter la <whitebold>Tourelle</>. TIREZ pour la placer. La <whitebold>Tourelle</> tire sur les ennemis dans sa ligne de mire.\r\n\r\nPeut être rappelée."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Lockdown",
+     "text": "EQUIP a destructible <whitebold>Lockdown</>. FIRE to prepare a zone. After a delay, <debuffred>detain</> enemies within range."
+    },
+    "fr": {
+     "name": "Confinement",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Confinement</> destructible. TIREZ pour préparer une zone. Après un délai, les ennemis à portée sont <debuffred>retenus</>."
+    }
+   }
+  ],
+  "harbor": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/95b78ed7-4637-86d9-7e41-71ba8c293152/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Storm Surge",
+     "text": "EQUIP <whitebold>Storm Surge</>. FIRE to throw. Explodes on landing, <debuffred>nearsighting</> and <debuffred>slowing</> all players."
+    },
+    "fr": {
+     "name": "Tempête déferlante",
+     "text": "ÉQUIPEZ-vous de <whitebold>Tempête déferlante</>. TIREZ pour la lancer. Elle explose à l'atterrissage, <debuffred>rend myope</> et <debuffred>ralentit</> tous les joueurs."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/95b78ed7-4637-86d9-7e41-71ba8c293152/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "High Tide",
+     "text": "EQUIP <whitebold>High Tide</>. FIRE to send forward a vision-blocking wall that <debuffred>slows</> all players who come in contact. HOLD FIRE to steer towards your crosshair. ALT FIRE to stop early."
+    },
+    "fr": {
+     "name": "Marée haute",
+     "text": "ÉQUIPEZ-vous de <whitebold>Marée haute</>. TIREZ pour envoyer un mur bloquant la vision qui <debuffred>ralentit</> tous les joueurs au contact. MAINTENEZ LE TIR pour le guider dans la direction de votre réticule. Utilisez le TIR SECONDAIRE pour interrompre."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/95b78ed7-4637-86d9-7e41-71ba8c293152/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Cove",
+     "text": "ENTER The Deep. REACTIVATE to cast a smoke. HOLD FIRE/ALT FIRE to adjust distance. RELOAD to toggle view. After casting, REACTIVATE to transform the smoke into a destructible shield."
+    },
+    "fr": {
+     "name": "Dôme aqueux",
+     "text": "ENTREZ dans les profondeurs. RÉACTIVEZ pour lancer un fumigène. MAINTENEZ LE TIR/TIR SECONDAIRE pour ajuster la distance. RECHARGER pour changer de vue. Après avoir lancé cette compétence, RÉACTIVEZ pour transformer le fumigène en une protection destructible."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/95b78ed7-4637-86d9-7e41-71ba8c293152/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Reckoning",
+     "text": "EQUIP <whitebold>Reckoning</>. FIRE to push forward a vision-blocking wall that <debuffred>nearsights</> and <debuffred>slows</> all players who come in contact. REACTIVATE to stop the wall early."
+    },
+    "fr": {
+     "name": "Raz-de-marée",
+     "text": "ÉQUIPEZ-vous de <whitebold>Raz-de-marée</>. TIREZ pour envoyer un mur bloquant la vision qui <debuffred>rend myopes</> et <debuffred>ralentit</> tous les joueurs au contact. RÉACTIVEZ pour arrêter le mur prématurément."
+    }
+   }
+  ],
+  "vyse": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/efba5359-4016-a1e5-7626-b1ae76895940/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Razorvine",
+     "text": "EQUIP a destructible <whitebold>Razorvine</>. FIRE to throw. <whitebold>Razorvine</> <teal>stealths</> after landing. INTERACT to create a zone that <debuffred>slows</> and deals <debuffred>damage</> when players move through it.\r\n\r\nCan be recalled during BUY PHASE."
+    },
+    "fr": {
+     "name": "Ronces barbelées",
+     "text": "ÉQUIPEZ-vous de <whitebold>Ronces barbelées</> destructibles. TIREZ pour les lancer. Les <whitebold>Ronces barbelées</> <teal>deviennent furtives</> après l'atterrissage. INTERAGISSEZ pour créer une zone qui <debuffred>ralentit</> et inflige des <debuffred>dégâts</> lorsque les joueurs la traversent.\r\n\r\nPeut être rappelée pendant la PHASE D'ACHATS."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/efba5359-4016-a1e5-7626-b1ae76895940/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Shear",
+     "text": "EQUIP <whitebold>Shear</>. FIRE to place. <whitebold>Shear</> <teal>stealths</> after placement. Triggers when enemies walk on it, and after a delay, create a brief indestructible wall.\r\n\r\nCan be recalled during BUY PHASE."
+    },
+    "fr": {
+     "name": "Cisaille",
+     "text": "ÉQUIPEZ-vous de <whitebold>Cisaille.</> TIREZ pour la placer. La <whitebold>Cisaille</> <teal>devient furtive</> après avoir été placée. La <whitebold>Cisaille</> se déclenche lorsque des ennemis marchent dessus et, après un délai, crée un mur indestructible temporaire.\r\n\r\nPeut être rappelée pendant la PHASE D'ACHATS."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/efba5359-4016-a1e5-7626-b1ae76895940/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Arc Rose",
+     "text": "EQUIP a destructible <whitebold>Arc Rose</>. FIRE to place. ALT FIRE to place it through a wall. REACTIVATE to <debuffred>flash</> all players looking at it. \r\n\r\nCan be recalled."
+    },
+    "fr": {
+     "name": "Rose métallique",
+     "text": "ÉQUIPEZ-vous d'une <whitebold>Rose métallique</> destructible. TIREZ pour la placer. Utilisez le TIR SECONDAIRE pour la placer à travers un mur. RÉACTIVEZ pour <debuffred>aveugler</> tous les joueurs qui la regardent. \r\n\r\nPeut être rappelée."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/efba5359-4016-a1e5-7626-b1ae76895940/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Steel Garden",
+     "text": "EQUIP <whitebold>Steel Garden</>. FIRE to prepare a zone. After a delay, <debuffred>jam</> enemy primary weapons within range."
+    },
+    "fr": {
+     "name": "Jardin d'acier",
+     "text": "ÉQUIPEZ-vous de <whitebold>Jardin d'acier</>. TIREZ pour préparer une zone. Après un délai, il <debuffred>enraye</> les armes ennemies principales à portée."
+    }
+   }
+  ],
+  "viper": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/707eab51-4836-f488-046a-cda6bf494859/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Snake Bite",
+     "text": "EQUIP <whitebold>Snake Bite</>. FIRE to launch. On landing, create a zone that grants <debuffred>vulnerable</> and deals low <debuffred>damage</> to all players."
+    },
+    "fr": {
+     "name": "Morsure du serpent",
+     "text": "ÉQUIPEZ-vous de <whitebold>Morsure du serpent</>. TIREZ pour lancer la compétence. À l'atterrissage, cette compétence crée une zone qui rend les joueurs <debuffred>vulnérables</> et inflige de faibles <debuffred>dégâts</> à tous les joueurs."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/707eab51-4836-f488-046a-cda6bf494859/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Poison Cloud",
+     "text": "EQUIP <whitebold>Poison Cloud</>. FIRE to throw. ALT FIRE to lob. REACTIVATE to consume fuel to create a <whitebold>toxic</> smoke that <debuffred>decays</> enemies.\r\n\r\nCan be picked up during BUY PHASE."
+    },
+    "fr": {
+     "name": "Nuage de poison",
+     "text": "ÉQUIPEZ-vous de <whitebold>Nuage de poison</>. TIREZ pour le lancer. Utilisez le TIR SECONDAIRE pour le lancer en cloche. RÉACTIVEZ pour consommer du carburant et créer une fumée <whitebold>toxique</> qui <debuffred>désagrège</> les ennemis.\r\n\r\nPeut être récupéré pendant la PHASE D'ACHATS."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/707eab51-4836-f488-046a-cda6bf494859/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Toxic Screen",
+     "text": "EQUIP <whitebold>Toxic Screen</>. FIRE to send forward and place a line of emitters. REACTIVATE to consume fuel to create a <whitebold>toxic</> vision-blocking wall that <debuffred>decays</> enemies."
+    },
+    "fr": {
+     "name": "Écran toxique",
+     "text": "ÉQUIPEZ-vous d'<whitebold>Écran toxique</>. TIREZ pour envoyer et placer une ligne de diffuseurs. RÉACTIVEZ pour consommer du carburant et créer un mur <whitebold>toxique</> bloquant la vision qui <debuffred>désagrège</> les ennemis."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/707eab51-4836-f488-046a-cda6bf494859/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Viper's Pit",
+     "text": "EQUIP <whitebold>Viper’s Pit</>. FIRE to form a large <whitebold>toxic</> vision-blocking cloud that <debuffred>decays</> enemies inside.\r\n\r\nHOLD ACTIVATE to cancel the cloud."
+    },
+    "fr": {
+     "name": "Nid de vipères",
+     "text": "ÉQUIPEZ-vous de <whitebold>Nid de vipères</>. TIREZ pour créer un grand nuage <whitebold>toxique</> qui bloque la vision et qui <debuffred>désagrège</> les ennemis à l'intérieur.\r\n\r\nMAINTENEZ ACTIVER pour annuler le nuage."
+    }
+   },
+   {
+    "slot": "Passive",
+    "icon": "",
+    "en": {
+     "name": "Toxin",
+     "text": "Viper’s <whitebold>Toxin</> continuously inflicts <debuffred>decay</> when enemies come in contact. Passively recharge fuel over time."
+    },
+    "fr": {
+     "name": "Toxine",
+     "text": "La <whitebold>toxine</> de Viper inflige en continu de la <debuffred>désagrégation</> lorsque des ennemis entrent en contact. Récupère passivement du carburant sur la durée."
+    }
+   }
+  ],
+  "hush": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/ddd5a15c-4fbe-42fa-3789-11a55ca5ee04/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Flow",
+     "text": "INSTANTLY create an anchor. If Hush is in the air, briefly levitate in place. After a delay, propel towards it."
+    },
+    "fr": {
+     "name": "Flux",
+     "text": "Créez INSTANTANÉMENT une ancre. Si Hush est en l'air, vous lévitez brièvement sur place. Après un délai, vous vous élancez vers l'ancre."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/ddd5a15c-4fbe-42fa-3789-11a55ca5ee04/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Flashbulb",
+     "text": "EQUIP <whitebold>Flashbulb</>. FIRE to throw. ALT FIRE to prepare it instead. REACTIVATE to direct it towards your crosshair. Explodes on any surface or after a delay, <debuffred>flashing</> all players looking at it."
+    },
+    "fr": {
+     "name": "Ampoule aveuglante",
+     "text": "ÉQUIPEZ <whitebold>Ampoule aveuglante</>. TIREZ pour la lancer. Utilisez le TIR SECONDAIRE pour la préparer à la place. RÉACTIVEZ pour la diriger vers votre réticule. Elle explose sur n'importe quelle surface ou après un délai, <debuffred>aveuglant</> tous les joueurs qui la regardent."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/ddd5a15c-4fbe-42fa-3789-11a55ca5ee04/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Displacement",
+     "text": "EQUIP <whitebold>Displacement</>. FIRE to throw. ALT FIRE to prepare it instead. REACTIVATE to direct it towards your crosshair. Explodes on any surface or after a delay, <debuffred>pulling</> all players towards the center and <debuffred>concussing</> them if they collide with any surface or another player.\r\n\r\nResets every two kills."
+    },
+    "fr": {
+     "name": "Déplacement",
+     "text": "ÉQUIPEZ <whitebold>Déplacement</>. TIREZ pour le lancer. Utilisez le TIR SECONDAIRE pour le préparer à la place. RÉACTIVEZ pour le diriger vers votre réticule. Celui-ci explose sur n'importe quelle surface ou après un délai, ce qui <debuffred>attire</> tous les joueurs vers le centre et les <debuffred>désoriente</> s'ils entrent en collision avec une surface ou un autre joueur.\r\n\r\nSe réinitialise toutes les 2 éliminations."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/ddd5a15c-4fbe-42fa-3789-11a55ca5ee04/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Suspension",
+     "text": "INSTANTLY prepare <whitebold>Suspension</>. FIRE to send it forward, steering with your crosshair. REACTIVATE or press FIRE again to detonate, <debuffred>levitating</> all players."
+    },
+    "fr": {
+     "name": "Suspension",
+     "text": "Préparez INSTANTANÉMENT <whitebold>Suspension</>. TIREZ pour l'envoyer vers l'avant, en la dirigeant avec votre réticule. RÉACTIVEZ ou TIREZ à nouveau pour la faire exploser, ce qui fera <debuffred>léviter</> tous les joueurs."
+    }
+   },
+   {
+    "slot": "Passive",
+    "icon": "https://media.valorant-api.com/agents/ddd5a15c-4fbe-42fa-3789-11a55ca5ee04/abilities/passive/displayicon.png",
+    "en": {
+     "name": "Telekinesis",
+     "text": "Hush can pick up weapons, the Spike, and INTERACT with switches from an increased range."
+    },
+    "fr": {
+     "name": "Télékinésie",
+     "text": "Hush peut ramasser des armes ou le spike et INTERAGIR avec des interrupteurs à une portée accrue."
+    }
+   }
+  ],
+  "phoenix": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/eb93336a-449b-9c1b-0a54-a891f7921d69/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Blaze",
+     "text": "EQUIP <whitebold>Blaze</>. FIRE to send forward a vision-blocking <whitebold>fire</> wall that deals <debuffred>damage</> to all players. HOLD FIRE to steer towards your crosshair."
+    },
+    "fr": {
+     "name": "Brasier",
+     "text": "ÉQUIPEZ-vous de <whitebold>Brasier</>. TIREZ pour envoyer un mur de <whitebold>feu</> qui bloque la vision et inflige des <debuffred>dégâts</> à tous les joueurs. MAINTENEZ LE TIR pour le guider dans la direction de votre réticule."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/eb93336a-449b-9c1b-0a54-a891f7921d69/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Hot Hands",
+     "text": "EQUIP <whitebold>Hot Hands</>. FIRE to throw. ALT FIRE to lob. On landing, create a <whitebold>fire</> zone that deals <debuffred>damage</> to all players."
+    },
+    "fr": {
+     "name": "Mains brûlantes",
+     "text": "ÉQUIPEZ-vous de <whitebold>Mains brûlantes</>. TIREZ pour lancer. Utilisez le TIR SECONDAIRE pour lancer en cloche. À l'atterrissage, créez une zone de <whitebold>feu</> qui inflige des <debuffred>dégâts</> à tous les joueurs."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/eb93336a-449b-9c1b-0a54-a891f7921d69/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Curveball",
+     "text": "EQUIP a <whitebold>Curveball</>. FIRE to curve left, ALT FIRE to curve right. After a delay, explode, <debuffred>flashing</> all players looking at it.\r\n\r\nResets every two kills."
+    },
+    "fr": {
+     "name": "Balle courbe",
+     "text": "ÉQUIPEZ-vous d'une <whitebold>Balle courbe</>. TIREZ pour courber à gauche, utilisez le TIR SECONDAIRE pour courber à droite. Après un délai, elle explose, <debuffred>aveuglant</> tous les joueurs qui la regardent.\r\n\r\nSe réinitialise toutes les 2 éliminations."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/eb93336a-449b-9c1b-0a54-a891f7921d69/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Run it Back",
+     "text": "INSTANTLY place a marker at your location. Upon taking <debuffred>lethal damage</> or when <whitebold>Run it Back</> expires, return to the marker with full health and the amount of armor you had when the ability was activated."
+    },
+    "fr": {
+     "name": "Revanche",
+     "text": "Placez INSTANTANÉMENT un marqueur sur votre position. Lorsque vous subissez des <debuffred>dégâts mortels</> ou que <whitebold>Revanche</> expire, vous retournez sur cette marque avec tous vos PV et la quantité d'armure que vous aviez lorsque la compétence était active."
+    }
+   },
+   {
+    "slot": "Passive",
+    "icon": "",
+    "en": {
+     "name": "Inner Fire",
+     "text": "Phoenix <teal>heals</> while standing in his own <whitebold>fire</> instead of taking damage."
+    },
+    "fr": {
+     "name": "Feu intérieur",
+     "text": "Phoenix <teal>se soigne</> lorsqu'il reste debout dans son propre <whitebold>feu</> au lieu de subir des dégâts."
+    }
+   }
+  ],
+  "veto": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/92eeef5d-43b5-1d4a-8d03-b3927a09034b/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Crosscut",
+     "text": "EQUIP a destructible <whitebold>Crosscut</>. FIRE to place. While in range, INTERACT to teleport to it.\r\n\r\nCan be recalled during BUY PHASE."
+    },
+    "fr": {
+     "name": "Vortex",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Vortex</> destructible. TIREZ pour le placer. Lorsque vous êtes à portée, INTERAGISSEZ pour vous téléporter dessus.\r\n\r\nPeut être rappelé pendant la PHASE D'ACHATS."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/92eeef5d-43b5-1d4a-8d03-b3927a09034b/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Chokehold",
+     "text": "EQUIP a destructible <whitebold>Chokehold</>. FIRE to throw. <whitebold>Chokehold</> <teal>stealths</> after landing. Triggers on nearby visible enemies in range, <debuffred>deafening</>, <debuffred>decaying</>, and <debuffred>tethering</> enemies.\r\n\r\nCan be recalled during BUY PHASE."
+    },
+    "fr": {
+     "name": "Étranglement",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Étranglement</> destructible. TIREZ pour le lancer. L'<whitebold>Étranglement</> <teal>devient furtif</> après l'atterrissage. L'<whitebold>Étranglement</> se déclenche sur les ennemis visibles à portée, les <debuffred>assourdissant</>, les <debuffred>désagrégeant</> et les <debuffred>attachant</>.\r\n\r\nPeut être rappelé pendant la PHASE D'ACHATS."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/92eeef5d-43b5-1d4a-8d03-b3927a09034b/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Interceptor",
+     "text": "EQUIP a destructible <whitebold>Interceptor</>. FIRE to place. REACTIVATE to activate. While active, destroy any enemy utility that can be shot or would bounce off players in range and line of sight.\r\n\r\nCan be recalled."
+    },
+    "fr": {
+     "name": "Intercepteur",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Intercepteur</> destructible. TIREZ pour le placer. RÉACTIVEZ pour l'activer. Lorsqu'il est actif, il détruit tout utilitaire ennemi pouvant être touché par un tir ou qui rebondirait sur les joueurs se trouvant à portée et dans la ligne de mire.\r\n\r\nPeut être rappelé."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/92eeef5d-43b5-1d4a-8d03-b3927a09034b/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Evolution",
+     "text": "INSTANTLY gain <teal>evolution</>.\r\n\r\n<teal>Evolution</> grants <teal>combat stim</>, continuous <teal>healing</>, and <teal>immunity</> to all debuffs and damage, except weapons."
+    },
+    "fr": {
+     "name": "Évolution",
+     "text": "Obtenez INSTANTANÉMENT <teal>Évolution</>.\r\n\r\n<teal>Évolution</> octroie des effets de <teal>stimulant de combat</>, de <teal>soins</> continus et d'<teal>immunité</> à tous les malus et dégâts, à l'exception des armes."
+    }
+   }
+  ],
+  "astra": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/41fb69c1-4189-7b37-f117-bcaf1e96f1bf/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Gravity Well",
+     "text": "ACTIVATE a <whitebold>Star</> to create a zone that <debuffred>pulls</> all players to the center, exploding and applying <debuffred>vulnerable</> to all players."
+    },
+    "fr": {
+     "name": "Puits de gravité",
+     "text": "ACTIVEZ une <whitebold>étoile</> pour créer une zone qui <debuffred>attire</> tous les joueurs vers le centre, explose et rend tous les joueurs <debuffred>vulnérables</>."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/41fb69c1-4189-7b37-f117-bcaf1e96f1bf/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Nova Pulse",
+     "text": "ACTIVATE a <whitebold>Star</> to detonate it, <debuffred>concussing</> all players hit."
+    },
+    "fr": {
+     "name": "Impulsion nova",
+     "text": "ACTIVEZ une <whitebold>étoile</> pour la faire exploser, <debuffred>désorientant</> tous les joueurs touchés."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/41fb69c1-4189-7b37-f117-bcaf1e96f1bf/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Nebula",
+     "text": "ACTIVATE a <whitebold>Star</> to transform it into a smoke."
+    },
+    "fr": {
+     "name": "Nébuleuse",
+     "text": "ACTIVEZ une <whitebold>étoile</> pour créer un fumigène."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/41fb69c1-4189-7b37-f117-bcaf1e96f1bf/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Cosmic Divide",
+     "text": "ENTER <whitebold>Astral Form</>. ALT FIRE to EQUIP <whitebold>Cosmic Divide</>. FIRE to set, pivot and FIRE again to create an indestructible wall that blocks audio."
+    },
+    "fr": {
+     "name": "Division cosmique",
+     "text": "ENTREZ dans la <whitebold>forme astrale</>. Utilisez le TIR SECONDAIRE pour ÉQUIPER <whitebold>Division cosmique</>. TIREZ pour placer, pivotez, puis TIREZ à nouveau pour créer un mur indestructible qui bloque le son."
+    }
+   },
+   {
+    "slot": "Passive",
+    "icon": "https://media.valorant-api.com/agents/41fb69c1-4189-7b37-f117-bcaf1e96f1bf/abilities/passive/displayicon.png",
+    "en": {
+     "name": "Astral Form",
+     "text": "ACTIVATE ULTIMATE to ENTER <whitebold>Astral Form</>. FIRE to cast <whitebold>Stars</>. \r\n\r\nINTERACT to recall a <whitebold>Star</>. Recalling a <whitebold>Star</> forms a brief smoke."
+    },
+    "fr": {
+     "name": "Forme astrale",
+     "text": "ACTIVEZ votre ULTIME pour ENTRER en <whitebold>forme astrale</>. TIREZ pour lancer des <whitebold>étoiles</>. \r\n\r\nINTERAGISSEZ avec une <whitebold>étoile</> pour la rappeler. Rappeler une <whitebold>étoile</> crée un bref fumigène."
+    }
+   }
+  ],
+  "brimstone": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/9f0d8ba9-4140-b941-57d3-a7ad57c6b417/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Stim Beacon",
+     "text": "INSTANTLY throw a <whitebold>Stim Beacon</>. On landing, create a zone that grants <teal>combat stim</> and <teal>haste</> to allies."
+    },
+    "fr": {
+     "name": "Balise stimulante",
+     "text": "Lancez INSTANTANÉMENT une <whitebold>Balise stimulante</>. À l'atterrissage, elle crée une zone qui octroie un effet de <teal>stimulant de combat</> et d'<teal>accélération</> aux alliés."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/9f0d8ba9-4140-b941-57d3-a7ad57c6b417/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Incendiary",
+     "text": "EQUIP <whitebold>Incendiary</>. FIRE to launch. On landing, create a zone that deals <debuffred>damage</> to all players."
+    },
+    "fr": {
+     "name": "Bombe incendiaire",
+     "text": "ÉQUIPEZ-vous de <whitebold>Bombe incendiaire</>. TIREZ pour la lancer. À l'atterrissage, elle crée une zone qui inflige des <debuffred>dégâts</> à tous les joueurs."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/9f0d8ba9-4140-b941-57d3-a7ad57c6b417/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Sky Smoke",
+     "text": "EQUIP a tactical map. FIRE to set smoke locations. ALT FIRE to cast smokes."
+    },
+    "fr": {
+     "name": "Frappe fumigène",
+     "text": "ÉQUIPEZ-vous d'une carte tactique. TIREZ pour définir les positions des fumigènes. Utilisez le TIR SECONDAIRE pour lancer des fumigènes."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/9f0d8ba9-4140-b941-57d3-a7ad57c6b417/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Orbital Strike",
+     "text": "EQUIP a tactical map. FIRE to cast an <whitebold>Orbital Strike</> at a location, dealing high <debuffred>damage</> over time to all players."
+    },
+    "fr": {
+     "name": "Rayon orbital",
+     "text": "ÉQUIPEZ-vous d'une carte tactique. TIREZ pour lancer un <whitebold>Rayon orbital</> à un emplacement, infligeant d'importants <debuffred>dégâts</> sur la durée à tous les joueurs."
+    }
+   }
+  ],
+  "iso": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/0e38b510-41a8-5780-5e8f-568b2a4f2d6c/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Contingency",
+     "text": "EQUIP <whitebold>Contingency</>. FIRE to push forward an indestructible vision-blocking wall. ALT FIRE for a slower wall."
+    },
+    "fr": {
+     "name": "Contingence",
+     "text": "ÉQUIPEZ-vous de <whitebold>Contingence</>. TIREZ pour créer un mur indestructible qui bloque la vision. Utilisez le TIR SECONDAIRE pour créer un mur plus lent."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/0e38b510-41a8-5780-5e8f-568b2a4f2d6c/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Undercut",
+     "text": "EQUIP <whitebold>Undercut</>. FIRE to send it forward. Applies <debuffred>suppress</> and <debuffred>vulnerable</> to all players."
+    },
+    "fr": {
+     "name": "Sape",
+     "text": "ÉQUIPEZ-vous de <whitebold>Sape</>. TIREZ pour la lancer devant vous. <debuffred>Neutralise</> et rend tous les joueurs <debuffred>vulnérables</>."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/0e38b510-41a8-5780-5e8f-568b2a4f2d6c/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Double Tap",
+     "text": "INSTANTLY channel <whitebold>Focus</>. Gain a shield that blocks one instance of damage."
+    },
+    "fr": {
+     "name": "Tir couplé",
+     "text": "Canalisez INSTANTANÉMENT la <whitebold>concentration</>. Gagnez une protection qui bloque une instance de dégâts."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/0e38b510-41a8-5780-5e8f-568b2a4f2d6c/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Kill Contract",
+     "text": "EQUIP <whitebold>Kill Contract</>. FIRE to send forward a zone that pulls you and the first enemy hit into a duel.\r\n\r\nChannel <whitebold>Focus</> at the start of a duel."
+    },
+    "fr": {
+     "name": "Duel à huis clos",
+     "text": "ÉQUIPEZ-vous de <whitebold>Duel à huis clos</>. TIREZ pour envoyer une zone vers l'avant qui vous attire, ainsi que le premier ennemi touché, dans un duel.\r\n\r\nCanalisez la <whitebold>concentration</> au début d'un duel."
+    }
+   },
+   {
+    "slot": "Passive",
+    "icon": "",
+    "en": {
+     "name": "Focus",
+     "text": "While <whitebold>Focused</>, reload faster and spawn destructible energy orbs from dead enemies Iso has damaged or killed.\r\n\r\nWhen an energy orb is shot, grant a shield that blocks one instance of damage and refresh <whitebold>Focus</>."
+    },
+    "fr": {
+     "name": "Concentration",
+     "text": "Une fois <whitebold>concentré</>, vous rechargez plus rapidement et vous faites apparaître des orbes d'énergie destructibles sur les ennemis morts qu'Iso a blessés ou tués.\r\n\r\nLorsque vous tirez sur un orbe d'énergie, vous recevez un bouclier qui absorbe une salve de dégâts et réinitialise la <whitebold>concentration</>."
+    }
+   }
+  ],
+  "clove": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/1dbf2edd-4729-0984-3115-daa5eed44993/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Pick-me-up",
+     "text": "ACTIVATE on a targeted dead enemy that you damaged or killed to gain <teal>haste</> and <teal>overheal</>."
+    },
+    "fr": {
+     "name": "Coup de boost",
+     "text": "ACTIVEZ sur un ennemi mort ciblé que vous avez blessé ou éliminé pour obtenir de <teal>l'accélération</> et de la <teal>surcharge de soins</>."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/1dbf2edd-4729-0984-3115-daa5eed44993/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Meddle",
+     "text": "EQUIP <whitebold>Meddle</>. FIRE to throw. Explodes on landing, <debuffred>decaying</> all players."
+    },
+    "fr": {
+     "name": "Trouble-fête",
+     "text": "ÉQUIPEZ-vous de <whitebold>Trouble-fête</>. TIREZ pour le lancer. Il explose à l'atterrissage, <debuffred>désagrégeant</> tous les joueurs."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/1dbf2edd-4729-0984-3115-daa5eed44993/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Ruse",
+     "text": "EQUIP a tactical map. FIRE to set smoke locations. ALT FIRE to cast smokes.\r\n\r\nWhile dead, Clove can access <whitebold>Ruse</> to cast brief smokes."
+    },
+    "fr": {
+     "name": "Ruse",
+     "text": "ÉQUIPEZ-vous d'une carte tactique. TIREZ pour définir les positions des fumigènes. Utilisez le TIR SECONDAIRE pour lancer des fumigènes.\r\n\r\nLorsque Clove est éliminé·e, iel peut accéder à <whitebold>Ruse</> pour lancer des fumigènes de courte durée."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/1dbf2edd-4729-0984-3115-daa5eed44993/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Not Dead Yet",
+     "text": "On death, ACTIVATE to channel a <teal>self-resurrect</>. During the channel, Clove is <teal>intangible</>. REACTIVATE to end the channel early. Once resurrected, secure a kill or damaging assist to stay alive."
+    },
+    "fr": {
+     "name": "Toujours debout",
+     "text": "En cas de mort, ACTIVEZ pour canaliser une <teal>auto-résurrection</>. Pendant la canalisation, Clove est <teal>intangible</>. RÉACTIVEZ pour mettre fin à la canalisation prématurément. Une fois ressuscité·e, Clove doit obtenir une élimination ou une assistance blessante pour rester en vie."
+    }
+   }
+  ],
+  "neon": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/bb2a4828-46eb-8cd1-e765-15848195d751/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Fast Lane",
+     "text": "INSTANTLY launch two vision-blocking walls that extend until they hit a surface."
+    },
+    "fr": {
+     "name": "Voie rapide",
+     "text": "Lancez INSTANTANÉMENT deux murs bloquant la vision qui s'étendent jusqu'à rencontrer une surface."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/bb2a4828-46eb-8cd1-e765-15848195d751/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Relay Bolt",
+     "text": "INSTANTLY throw a bolt that bounces once. Explodes on each surface, <debuffred>concussing</> all players."
+    },
+    "fr": {
+     "name": "Éclair relais",
+     "text": "Lancez INSTANTANÉMENT un projectile qui rebondit une fois. Il explose sur chaque surface, <debuffred>désorientant</> tous les joueurs."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/bb2a4828-46eb-8cd1-e765-15848195d751/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "High Gear",
+     "text": "INSTANTLY consume fuel to gain <teal>haste</>. REACTIVATE to cancel. ALT FIRE to slide forward or in your movement direction.\r\n\r\nSlide resets every two kills."
+    },
+    "fr": {
+     "name": "Vitesse supérieure",
+     "text": "Consommez INSTANTANÉMENT du carburant pour obtenir de l'<teal>accélération</>. RÉACTIVEZ pour annuler. Utilisez TIR SECONDAIRE pour glisser vers l'avant ou dans votre direction de déplacement.\r\n\r\nLa glissade se réinitialise toutes les 2 éliminations."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/bb2a4828-46eb-8cd1-e765-15848195d751/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Overdrive",
+     "text": "INSTANTLY refresh <whitebold>High Gear</>. Access an accurate lightning beam that can be used while activating <whitebold>High Gear</>.\r\n\r\nFIRE to shoot. On kills, fully recharge fuel."
+    },
+    "fr": {
+     "name": "Ultra-vitesse",
+     "text": "Réinitialisez INSTANTANÉMENT <whitebold>Vitesse supérieure</>. Vous avez accès à un rayon électrique précis pouvant être utilisé lors de l'activation de <whitebold>Vitesse supérieure</>.\r\n\r\nTIREZ pour faire feu. En cas d'élimination, le carburant est entièrement rechargé."
+    }
+   },
+   {
+    "slot": "Passive",
+    "icon": "",
+    "en": {
+     "name": "Battery",
+     "text": "Passively recharge fuel over time."
+    },
+    "fr": {
+     "name": "Batterie",
+     "text": "Récupère passivement du carburant sur la durée."
+    }
+   }
+  ],
+  "yoru": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/7f94d92c-4234-0a36-9646-3a87eb8b5c89/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "FAKEOUT",
+     "text": "EQUIP <whitebold>Fakeout</>. FIRE to send a destructible clone forward. ALT FIRE to place a marker at your location. INTERACT to transform the marker into a clone.\r\n\r\nClones continuously walk forward and will turn toward the first enemy that shoots it, <debuffred>flashing</> all players looking at it."
+    },
+    "fr": {
+     "name": "Feinte",
+     "text": "ÉQUIPEZ-vous de <whitebold>Feinte</>. TIREZ pour envoyer un clone destructible vers l'avant. Utilisez le TIR SECONDAIRE pour placer un marqueur sur votre position. INTERAGISSEZ pour transformer le marqueur en clone.\r\n\r\nLes clones avancent continuellement et se tournent vers le premier ennemi qui leur tire dessus, <debuffred>aveuglant</> tous les joueurs qui les regardent."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/7f94d92c-4234-0a36-9646-3a87eb8b5c89/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "BLINDSIDE",
+     "text": "EQUIP <whitebold>Blindside</>. FIRE to throw. After bouncing off a surface, explode, <debuffred>flashing</> all players looking at it."
+    },
+    "fr": {
+     "name": "Angle mort",
+     "text": "ÉQUIPEZ-vous d'<whitebold>Angle mort</>. TIREZ pour le lancer. Après avoir rebondi sur une surface, il explose, <debuffred>aveuglant</> tous les joueurs qui le regardent."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/7f94d92c-4234-0a36-9646-3a87eb8b5c89/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "GATECRASH",
+     "text": "EQUIP a <whitebold>Gatecrash</>. FIRE to send it forward. ALT FIRE to place. REACTIVATE to teleport to it. INTERACT to fake a teleport.\r\n\r\nResets every two kills."
+    },
+    "fr": {
+     "name": "Visite surprise",
+     "text": "ÉQUIPEZ-vous de <whitebold>Visite surprise</>. TIREZ pour la lancer devant vous. Utilisez le TIR SECONDAIRE pour la placer. RÉACTIVEZ pour vous téléporter à l'emplacement de la compétence. INTERAGISSEZ pour simuler une téléportation.\r\n\r\nSe réinitialise toutes les 2 éliminations."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/7f94d92c-4234-0a36-9646-3a87eb8b5c89/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "DIMENSIONAL DRIFT",
+     "text": "EQUIP <whitebold>Dimensional Drift</>. FIRE to become <teal>intangible</> and <teal>invisible</>. <whitebold>Gatecrash</> is accessible during this state. REACTIVATE to exit early."
+    },
+    "fr": {
+     "name": "Transfert dimensionnel",
+     "text": "ÉQUIPEZ-vous de <whitebold>Transfert dimensionnel</>. TIREZ pour devenir <teal>intangible</> et <teal>invisible</>. <whitebold>Visite surprise</> est accessible pendant cet état. RÉACTIVEZ pour quitter prématurément."
+    }
+   }
+  ],
+  "waylay": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/df1cb487-4902-002e-5c17-d28e83e78588/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Saturate",
+     "text": "EQUIP <whitebold>Saturate</>. FIRE to throw. Explodes on landing, <debuffred>hindering</> all players."
+    },
+    "fr": {
+     "name": "Saturation",
+     "text": "ÉQUIPEZ <whitebold>Saturation</>. TIREZ pour la lancer. Elle explose à l'atterrissage, <debuffred>entravant</> tous les joueurs."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/df1cb487-4902-002e-5c17-d28e83e78588/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Lightspeed",
+     "text": "EQUIP <whitebold>Lightspeed</>. FIRE to dash forward twice. ALT FIRE to dash forward once.\r\n\r\nOnly the first dash can launch upward."
+    },
+    "fr": {
+     "name": "Vitesse lumière",
+     "text": "ÉQUIPEZ-vous de <whitebold>Vitesse lumière</>. Utilisez le TIR PRINCIPAL pour vous ruer en avant deux fois. Utilisez le TIR SECONDAIRE pour vous ruer vers l'avant une seule fois.\r\n\r\nSeule la première ruée peut être lancée vers le haut."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/df1cb487-4902-002e-5c17-d28e83e78588/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Refract",
+     "text": "INSTANTLY place a marker at your location. REACTIVATE to travel to it. While traveling, Waylay is <teal>immune</> but cannot see enemies.\r\n\r\nResets every two kills."
+    },
+    "fr": {
+     "name": "Réfraction",
+     "text": "Placez INSTANTANÉMENT un marqueur sur votre position. RÉACTIVEZ pour vous y rendre. Pendant qu'elle se déplace, Waylay est <teal>immunisée</> mais ne peut pas voir les ennemis.\r\n\r\nSe réinitialise toutes les 2 éliminations."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/df1cb487-4902-002e-5c17-d28e83e78588/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Convergent Paths",
+     "text": "EQUIP <whitebold>Convergent Paths</>. FIRE to gain <teal>haste</> and send forward a zone that <debuffred>hinders</> all players."
+    },
+    "fr": {
+     "name": "Croisée des chemins",
+     "text": "ÉQUIPEZ-vous de <whitebold>Croisée des chemins</>. TIREZ pour obtenir de l'<teal>accélération</> et projeter une zone qui <debuffred>entrave</> tous les joueurs."
+    }
+   }
+  ],
+  "sage": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/569fdd95-4d10-43ab-ca70-79becc718b46/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Barrier Orb",
+     "text": "EQUIP a destructible <whitebold>Barrier Orb</>. While equipped, REACTIVATE to pivot the wall or HOLD ALT FIRE to rotate. FIRE to place a destructible wall that fortifies after a delay."
+    },
+    "fr": {
+     "name": "Orbe barrière",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Orbe barrière</> destructible. Lorsque cette compétence est équipée, RÉACTIVEZ pour faire pivoter le mur ou MAINTENEZ LE TIR SECONDAIRE pour lui faire faire une rotation. TIREZ pour créer un mur destructible qui se renforce après un délai."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/569fdd95-4d10-43ab-ca70-79becc718b46/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Slow Orb",
+     "text": "EQUIP a <whitebold>Slow Orb</>. FIRE to throw. On landing, create a zone that <debuffred>slows</> all players and plays an audio cue when enemies run through it."
+    },
+    "fr": {
+     "name": "Orbe de lenteur",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Orbe de lenteur</>. TIREZ pour le lancer. À l'atterrissage, il crée une zone qui <debuffred>ralentit</> tous les joueurs et qui émet un signal sonore lorsque des ennemis la traversent."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/569fdd95-4d10-43ab-ca70-79becc718b46/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Healing Orb",
+     "text": "EQUIP <whitebold>Healing Orb</>. FIRE on a damaged ally to grant <teal>healing</>. ALT FIRE to self-cast."
+    },
+    "fr": {
+     "name": "Orbe de soin",
+     "text": "ÉQUIPEZ-vous d'un <whitebold>Orbe de soin</>. TIREZ sur un allié blessé pour lui octroyer des <teal>soins</>. Utilisez le TIR SECONDAIRE pour lancer la compétence sur vous-même."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/569fdd95-4d10-43ab-ca70-79becc718b46/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Resurrection",
+     "text": "EQUIP <whitebold>Resurrection</>. FIRE on a targeted dead ally to <teal>resurrect</> them."
+    },
+    "fr": {
+     "name": "Résurrection",
+     "text": "ÉQUIPEZ-vous de <whitebold>Résurrection</>. TIREZ sur un allié mort ciblé pour le <teal>ressusciter</>."
+    }
+   }
+  ],
+  "reyna": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Leer",
+     "text": "EQUIP a destructible <whitebold>Leer</>. FIRE to send. After a delay, form, <debuffred>nearsighting</> enemies looking at it."
+    },
+    "fr": {
+     "name": "Œillade",
+     "text": "ÉQUIPEZ-vous d'une <whitebold>Œillade</> destructible. TIREZ pour l'envoyer. Après un délai, elle se forme, <debuffred>rendant myopes</> les ennemis qui la regardent."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Devour",
+     "text": "INSTANTLY consume a <whitebold>Soul Orb</> to <teal>heal</>. Excess healing is converted into <teal>overheal</>.\r\n\r\nWhile ULTIMATE is active, <whitebold>Devour</> auto-casts."
+    },
+    "fr": {
+     "name": "Dévoration",
+     "text": "Consommez INSTANTANÉMENT un <whitebold>orbe d'âme</> pour vous <teal>soigner</>. Les soins excédentaires sont convertis en <teal>surcharge de soins</>.\r\n\r\nLorsque l'ULTIME est activé, <whitebold>Dévoration</> se lance automatiquement."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Dismiss",
+     "text": "INSTANTLY consume a <whitebold>Soul Orb</> to briefly become <teal>intangible</>. REACTIVATE to cancel early.\r\n\r\nWhile ULTIMATE is active, also gain <teal>invisibility</>."
+    },
+    "fr": {
+     "name": "Rebuffade",
+     "text": "Consommez INSTANTANÉMENT un <whitebold>orbe d'âme</> pour devenir brièvement <teal>intangible</>. RÉACTIVEZ pour annuler prématurément.\r\n\r\nLorsque l'ULTIME est activé, vous gagnez également de <teal>l'invisibilité</>."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Empress",
+     "text": "INSTANTLY gain <teal>empress</>.\r\n\r\n<teal>Empress</> grants <teal>combat stim</>, endless <whitebold>Soul Orb</> consumption, and permanent <teal>overheal</>."
+    },
+    "fr": {
+     "name": "Impératrice",
+     "text": "Obtenez IMMÉDIATEMENT <teal>Impératrice</>.\r\n\r\n<teal>Impératrice</> confère un effet de <teal>stimulant de combat</>, une consommation infinie d'<whitebold>orbes d'âme</> et une <teal>surcharge de soins</> permanente."
+    }
+   },
+   {
+    "slot": "Passive",
+    "icon": "",
+    "en": {
+     "name": "Vitality",
+     "text": "Spawn a <whitebold>Soul Orb</> from dead enemies Reyna has damaged or killed."
+    },
+    "fr": {
+     "name": "Vitalité",
+     "text": "Faites apparaître un <whitebold>orbe d'âme</> sur des ennemis morts que Reyna a blessés ou éliminés."
+    }
+   }
+  ],
+  "omen": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/8e253930-4c05-31dd-1b6c-968525494517/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Shrouded Step",
+     "text": "EQUIP a <whitebold>Shrouded Step</>. FIRE to briefly channel, then teleport to a targeted location."
+    },
+    "fr": {
+     "name": "Voie des ombres",
+     "text": "ÉQUIPEZ-vous de <whitebold>Voie des ombres</>. TIREZ pour effectuer une courte canalisation avant de vous téléporter vers l'endroit ciblé."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/8e253930-4c05-31dd-1b6c-968525494517/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Paranoia",
+     "text": "EQUIP <whitebold>Paranoia</>. FIRE to send it forward. Applies <debuffred>nearsight</> and <debuffred>deafens</> all players."
+    },
+    "fr": {
+     "name": "Paranoïa",
+     "text": "ÉQUIPEZ-vous de <whitebold>Paranoïa</>. TIREZ pour la lancer devant vous. <debuffred>Rend myopes</> tous les joueurs et les <debuffred>assourdit</>."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/8e253930-4c05-31dd-1b6c-968525494517/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Dark Cover",
+     "text": "ENTER Shadow Vision. REACTIVATE to cast a smoke. HOLD FIRE/ALT FIRE to adjust distance. RELOAD to toggle view."
+    },
+    "fr": {
+     "name": "Voile sombre",
+     "text": "ENTREZ dans la vision des ombres. RÉACTIVEZ pour lancer un fumigène. MAINTENEZ LE TIR/TIR SECONDAIRE pour ajuster la distance. RECHARGEZ pour changer de vue."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/8e253930-4c05-31dd-1b6c-968525494517/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "From the Shadows",
+     "text": "EQUIP a tactical map. FIRE to begin a teleport to a selected location. While teleporting, Omen appears as a destructible shade at the destination. REACTIVATE to cancel."
+    },
+    "fr": {
+     "name": "Depuis les ombres",
+     "text": "ÉQUIPEZ-vous d'une carte tactique. TIREZ pour commencer une téléportation vers l'endroit sélectionné. Pendant la téléportation, Omen apparaît sous la forme d'une ombre destructible à la destination. RÉACTIVEZ pour annuler."
+    }
+   }
+  ],
+  "jett": [
+   {
+    "slot": "Grenade",
+    "icon": "https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/abilities/grenade/displayicon.png",
+    "en": {
+     "name": "Cloudburst",
+     "text": "INSTANTLY throw a cloud. Forms into a brief smoke on any surface or after a delay. HOLD ACTIVATE to steer towards your crosshair."
+    },
+    "fr": {
+     "name": "Averse",
+     "text": "Lancez INSTANTANÉMENT un nuage. Il se transforme en un bref fumigène sur n'importe quelle surface ou après un délai. MAINTENEZ ACTIVER pour diriger vers votre réticule."
+    }
+   },
+   {
+    "slot": "Ability1",
+    "icon": "https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/abilities/ability1/displayicon.png",
+    "en": {
+     "name": "Updraft",
+     "text": "INSTANTLY propel high into the air."
+    },
+    "fr": {
+     "name": "Courant ascendant",
+     "text": "Vous vous propulsez INSTANTANÉMENT dans les airs."
+    }
+   },
+   {
+    "slot": "Ability2",
+    "icon": "https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/abilities/ability2/displayicon.png",
+    "en": {
+     "name": "Tailwind",
+     "text": "INSTANTLY prepare a dash. REACTIVATE to dash forward or in your movement direction.\r\n\r\nResets every two kills."
+    },
+    "fr": {
+     "name": "Vent arrière",
+     "text": "Préparez INSTANTANÉMENT une ruée. RÉACTIVEZ pour vous ruer vers l'avant ou dans votre direction de déplacement.\r\n\r\nSe réinitialise toutes les 2 éliminations."
+    }
+   },
+   {
+    "slot": "Ultimate",
+    "icon": "https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/abilities/ultimate/displayicon.png",
+    "en": {
+     "name": "Blade Storm",
+     "text": "INSTANTLY access five accurate throwing knives that deal <debuffred>lethal damage</> with direct hits to the head.\r\n\r\nFIRE to shoot. On kills, refresh your knives. ALT FIRE to throw all remaining knives without a refresh."
+    },
+    "fr": {
+     "name": "Tempête de lames",
+     "text": "Accédez INSTANTANÉMENT à cinq couteaux de lancer de précision infligeant des <debuffred>dégâts mortels</> en cas de coup direct à la tête.\r\n\r\nTIREZ pour faire feu. En cas d'élimination, vos couteaux se réinitialisent. Utilisez le TIR SECONDAIRE pour lancer tous les couteaux restants sans réinitialisation."
+    }
+   },
+   {
+    "slot": "Passive",
+    "icon": "https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/abilities/passive/displayicon.png",
+    "en": {
+     "name": "Drift",
+     "text": "HOLD JUMP while falling to <teal>glide</>."
+    },
+    "fr": {
+     "name": "Vol",
+     "text": "MAINTENEZ la touche SAUTER en tombant pour <teal>planer</>."
+    }
+   }
+  ]
+ }
+}

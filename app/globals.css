@@ -2697,3 +2697,17 @@ a.agicon:hover img { transform: scale(1.12); }
 .agposes figcaption { font-weight: 800; text-transform: uppercase; color: var(--agc); }
 .agposes figcaption small { display: block; font-weight: 500; text-transform: none; color: var(--muted); }
 .agcard.haspose:hover { background-image: linear-gradient(180deg, transparent 35%, var(--surface) 88%), var(--agpose), linear-gradient(160deg, color-mix(in srgb, var(--agc) 40%, var(--surface)), var(--surface)); background-size: auto, 125% auto, auto; background-position: 0 0, center 10%, 0 0; }
+
+/* ---- agents' abilities */
+.abgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.abcard { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center; padding: 12px; border-radius: var(--r-card); border: 1px solid var(--line); background: linear-gradient(135deg, color-mix(in srgb, var(--agc) 12%, var(--surface)), var(--surface)); color: var(--fg); font: inherit; text-align: start; cursor: pointer; transition: border-color .15s ease, transform .15s ease; }
+.abcard:hover { border-color: var(--agc); transform: translateY(-2px); }
+.abcard.ult { border-color: color-mix(in srgb, var(--agc) 60%, var(--line)); background: linear-gradient(135deg, color-mix(in srgb, var(--agc) 26%, var(--surface)), var(--surface)); }
+.abicon { position: relative; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 12px; background: color-mix(in srgb, var(--agc) 70%, #111); }
+.abicon img { filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+.abicon kbd { position: absolute; right: -6px; bottom: -6px; min-width: 20px; padding: 1px 5px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); font: 800 11px var(--font-display); color: var(--fg); text-align: center; }
+.abtext { display: grid; }
+.abtext b { font: 800 16px var(--font-display); text-transform: uppercase; }
+.abtext small { color: var(--agc); font-weight: 700; font-size: 12px; }
+.abcard p { grid-column: 1 / -1; margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.abcard.on p { display: block; color: var(--fg); }
