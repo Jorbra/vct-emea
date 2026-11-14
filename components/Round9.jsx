@@ -149,7 +149,7 @@ export function SiteFooter() {
       <div className="ftcols">
         <div><b>VCT EMEA</b><p>{tr("Results, brackets, schedule and teams of the VCT EMEA and Game Changers EMEA, updated live.")}</p><AccentPicker /><DensitySwitch /></div>
         <div><b>{tr("Follow")}</b><a href="/live">{tr("Live")}</a><a href="/calendar">{tr("Calendar")}</a><a href="/soiree">{tr("Match night")}</a><a href="/news">{tr("News")}</a></div>
-        <div><b>{tr("Play")}</b><a href="/predictions">{tr("Predictions")}</a><a href="/jeux">{tr("Games of the day")}</a><a href="/fantasy">Fantasy</a><a href="/tierlist">{tr("Tier list")}</a></div>
+        <div><b>{tr("Play")}</b><a href="/predictions">{tr("Predictions")}</a><a href="/jeux">{tr("Games of the day")}</a><a href="/fantasy">Fantasy</a><a href="/tierlist">{tr("Tier list")}</a><a href="/mvp">{tr("The fans' MVP")}</a></div>
         <div><b>{tr("Learn")}</b><a href="/format">{tr("How the events work")}</a><a href="/palmares">{tr("Hall of fame")}</a><a href="/equipes">{tr("Compare teams")}</a><a href="/agent">{tr("Agents")}</a><a href="/map">{tr("Maps")}</a><a href="/overlay/studio">{tr("Stream overlays")}</a><a href="/about">{tr("About")}</a></div>
       </div>
       <p className="ftnote">{tr("Fan site, not affiliated with Riot Games. Data from Toornament, vlr.gg and Liquipedia (CC-BY-SA).")}</p>

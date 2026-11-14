@@ -24,3 +24,13 @@ test("round by round: a score kept each time it changes, 80 at most", () => {
   const p2 = liveUpdate(p1, { maps: [{ map: "Bind", a: 4, b: 1 }] }, false, Date.parse("2026-11-14T18:03:00Z"));
   assert.deepEqual(p2.rounds.map((x) => [x.a, x.b]), [[3, 1], [4, 1]]);
 });
+
+test("the fans' MVP over the season: votes and matches won", async () => {
+  const { openDb } = await import("../lib/db.js");
+  const { motmSeason } = await import("../lib/fans.js");
+  const db = openDb(":memory:");
+  const add = (hash, event, id, player) => db.prepare("INSERT INTO motm (hash, event, id, player, at) VALUES (?, ?, ?, ?, ?)").run(hash, event, id, player, "2026-11-14");
+  add("h1", "q2", "m1", "Pa1ze"); add("h2", "q2", "m1", "Pa1ze"); add("h3", "q2", "m1", "trexx");
+  add("h1", "q2", "m2", "trexx");
+  assert.deepEqual(motmSeason(db), [{ player: "Pa1ze", n: 2, matches: 1 }, { player: "trexx", n: 2, matches: 1 }]);
+});
