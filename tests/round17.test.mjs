@@ -98,3 +98,26 @@ test("mystery map: a layout to name in 4 guesses, clearer each time", async () =
   g = playMove(db, pz, { maps: names }, { token, game: "map", move: pz.map.answer.name });
   assert.ok(g.done && g.won && g.turn === 0 && g.reveal.name === pz.map.answer.name);
 });
+
+test("editor: a stream link alone, today's results as text; bot /mvp", async () => {
+  const { getState, openDb } = await import("../lib/db.js");
+  const { setQualifierTeams, saveQualifierScore } = await import("../lib/qactions.js");
+  const { allMatches } = await import("../lib/matchlist.js");
+  const { setMatchStream, resultsText } = await import("../lib/editor17.js");
+  const db = openDb(":memory:");
+  setQualifierTeams(db, "meq1", Array.from({ length: 8 }, (_, i) => `T${i}`).join("\n"));
+  const m = allMatches(getState(db)).find((x) => x.event === "meq1" && x.a && x.b && x.a.name);
+  db.prepare("INSERT INTO mextra (event, id, stream, vod, highlights, mvp, pstats, maps) VALUES (?, ?, '', 'https://youtu.be/abcdefgh', '', 'T0', '[]', '[]')").run("meq1", m.id);
+  assert.equal((await setMatchStream(db, { event: "meq1", id: m.id, stream: "https://twitch.tv/valorant_emea" })).ok, true);
+  const row = db.prepare("SELECT stream, vod, mvp FROM mextra WHERE event = ? AND id = ?").get("meq1", m.id);
+  assert.deepEqual(row, { stream: "https://twitch.tv/valorant_emea", vod: "https://youtu.be/abcdefgh", mvp: "T0" });
+  const text = resultsText([{ event: "q2", a: { name: "A" }, b: { name: "B" }, sa: 2, sb: 0, win: "a", at: "2026-11-15T19:00:00Z" }, { event: "q2", a: { name: "C" }, b: { name: "D" }, sa: 0, sb: 2, win: "b", at: "2026-11-14T19:00:00Z" }], { q2: "EU Qualifier 2" }, "2026-11-15");
+  assert.match(text, /✅ A 2–0 B/);
+  assert.doesNotMatch(text, /C 0–2 D/);
+  assert.equal(resultsText([], {}, "2026-11-15"), "");
+  const { COMMANDS, answerCommand } = await import("../lib/discordbot.js");
+  const { botCtx, cmd } = await import("./botctx.mjs");
+  assert.ok(COMMANDS.some((c) => c.name === "mvp"));
+  const r = answerCommand("mvp", cmd("mvp"), botCtx(getState(db), { motm: () => [{ player: "Pa1ze", n: 12, matches: 3 }] }));
+  assert.match(r.embeds[0].description, /\*\*Pa1ze\*\* · 12 votes · MVP de 3/);
+});

@@ -1,9 +1,10 @@
 "use client";
 
 // Round 17, for the editors: teams' names, the syncs' log, news to publish later.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useT } from "./lang.jsx";
 import { EVENT_NAMES } from "../lib/paths.js";
+import { allMatches } from "../lib/matchlist.js";
 
 const when = (iso, lang) => (iso ? new Date(iso).toLocaleString(lang === "fr" ? "fr-FR" : undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "");
 
@@ -80,6 +81,55 @@ export function ScheduledNews({ list, call, onDone }) {
         <label className="f">{tr("Publish on")}<input type="datetime-local" value={v.at} onChange={(e) => setV({ ...v, at: e.target.value })} /></label>
         <button type="submit" className="btn pri" disabled={!v.title.trim() || !v.body.trim() || !v.at}>{tr("Schedule")}</button>
       </form>
+    </details>
+  );
+}
+
+/** The matches of the next 36 hours (and the live ones) with no stream link: one field each to add it. */
+export function QuickStreams({ initial, call, onDone }) {
+  const tr = useT();
+  const [now, setNow] = useState(null);
+  const [done, setDone] = useState({});
+  const [v, setV] = useState({});
+  useEffect(() => { setNow(Date.now()); }, []);
+  if (now == null) return null;
+  const list = allMatches(initial).filter((m) => m.a && m.b && m.a.name && m.b.name && m.sa == null && (m.live || (m.at && new Date(m.at).getTime() - now < 36 * 3600000 && new Date(m.at).getTime() > now - 3 * 3600000)))
+    .filter((m) => !(((initial.extra || {})[m.event] || {})[m.id] || {}).stream && !done[`${m.event}:${m.id}`]).slice(0, 15);
+  if (!list.length) return null;
+  const save = async (m) => {
+    const k = `${m.event}:${m.id}`;
+    try { await call("/api/streamlink", { event: m.event, id: m.id, stream: v[k] || "" }); setDone((x) => ({ ...x, [k]: true })); onDone(tr("Stream link saved.")); } catch (e) { onDone(tr.server(e.message)); }
+  };
+  return (
+    <details className="einfo" open>
+      <summary><b>📺 {tr("Matches soon with no stream link")}</b> <small>{list.length}</small></summary>
+      <ul className="quickstreams">{list.map((m) => {
+        const k = `${m.event}:${m.id}`;
+        return (
+          <li key={k}>
+            <span><b>{m.a.name}</b> vs <b>{m.b.name}</b> <small>{m.live ? `🔴 ${tr("Live")}` : when(m.at, tr.lang)} · {tr(EVENT_NAMES[m.event] || m.event)}</small></span>
+            <form onSubmit={(e) => { e.preventDefault(); save(m); }}>
+              <input value={v[k] || ""} onChange={(e) => setV((x) => ({ ...x, [k]: e.target.value }))} placeholder="https://twitch.tv/…" aria-label={tr("Stream link")} />
+              <button type="submit" className="btn small pri" disabled={!(v[k] || "").trim()}>{tr("Save")}</button>
+            </form>
+          </li>
+        );
+      })}</ul>
+    </details>
+  );
+}
+
+/** Today's results as text to paste on a social network. */
+export function ResultsText({ text }) {
+  const tr = useT();
+  const [msg, setMsg] = useState("");
+  if (!text) return null;
+  const copy = async () => { try { await navigator.clipboard.writeText(text); setMsg(tr("Copied.")); } catch { setMsg(""); } };
+  return (
+    <details className="einfo">
+      <summary><b>📝 {tr("Today's results as text, to post")}</b></summary>
+      <pre className="metadraft">{text}</pre>
+      <p className="row"><button type="button" className="btn" onClick={copy}>📋 {tr("Copy")}</button>{msg && <span className="hint" role="status"> {msg}</span>}</p>
     </details>
   );
 }
