@@ -344,3 +344,19 @@ test("a live match Toornament removes is no longer live; a result already on the
   round(db, rows.filter((x) => x !== third), teams());
   assert.equal((getMatchLive(db).meq1 || {})["gf-1"], undefined);
 });
+
+test("Barça on Toornament is Barça eSports on the site, in every event, even one written before", async () => {
+  const { aliasesOf } = await import("../lib/toornament.js");
+  assert.equal(aliasesOf("q2")["Barça"].name, "Barça eSports");
+  const db = fresh();
+  const rows = start();
+  rows[0].a.name = "Barça";
+  round(db, rows, null, "q2");
+  assert.equal(getQualifier(db, "q2").slots[0].name, "Barça eSports");
+  assert.equal(getQualifier(db, "q2").slots[0].tag, "BAR");
+  // a slot named "Barça" by an older round becomes "Barça eSports" at the next one
+  setQualifierSlot(db, { event: "q2", slot: 1, name: "Barça", tag: "", roster: "" });
+  store["tsync:q2"].slots[1] = "Barça";
+  round(db, rows, null, "q2");
+  assert.equal(getQualifier(db, "q2").slots[0].name, "Barça eSports");
+});
