@@ -30,6 +30,7 @@ import { RosterCards } from "./Round11.jsx";
 import { TeamCompCards } from "./Round13.jsx";
 import { MapPoolTiles } from "./Round14.jsx";
 import { mapSplash } from "./Assets.jsx";
+import { NextMatchBanner } from "./Team18.jsx";
 
 export default function TeamPage(props) {
   return (
@@ -435,6 +436,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null, r
           <p><AlertsButton /> <TeamCalendar slug={slug} /> <TeamThemeButton team={t} /> <WallpaperButton team={t} slug={slug} /></p>
         </div>
       </TeamHead>
+      <NextMatchBanner rows={events.flatMap((e) => e.items.map((m) => ({ ...m, event: e.event, at: e.times[m.id] || "", live: !!e.live[m.id] && m.sa == null })))} name={t.name} live={initial.live || {}} />
 
       <OrgNav org={org} />
       <PartTabs value={part} onChange={setPart} label={tr("Team")} items={[["overview", tr("Overview")], ["matches", tr("Matches")], ["players", tr("Players")], ["stats", tr("Stats")], ["history", tr("History")]]} />

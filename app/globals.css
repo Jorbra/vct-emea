@@ -3021,3 +3021,12 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 @media (prefers-reduced-motion: reduce) { .nightband { animation: none; } }
 .srespic { width: 34px; height: 34px; object-fit: contain; border-radius: 8px; background: rgba(0,0,0,.2); }
 .srespic.maps { width: 54px; object-fit: cover; }
+.nextban { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 10px 0 14px; padding: 10px 16px; border-radius: 12px; border: 1px solid var(--line); border-left: 4px solid var(--lime); background: var(--surface); color: var(--fg); text-decoration: none; transition: border-color .15s ease; }
+.nextban:hover { border-color: var(--lime); }
+.nextban.live { border-left-color: #ff4655; }
+.nbstate { font: 800 13px var(--font-display); letter-spacing: .08em; text-transform: uppercase; color: var(--lime); }
+.nextban.live .nbstate { color: #ff6b77; }
+.nbvs { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+.nbvs .crest { width: 26px; height: 26px; }
+.nbwhen { font: 800 22px var(--font-display); font-variant-numeric: tabular-nums; }
+.nextban small { margin-left: auto; color: var(--muted); }
