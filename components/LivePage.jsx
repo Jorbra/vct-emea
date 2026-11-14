@@ -23,17 +23,6 @@ function View({ live, next }) {
   const [watch, setWatch] = useState("");
   const [multi, setMulti] = useState(false);
   const [picked, setPicked] = useState([]);
-  // the score over the streams: shown or not, and the corner of each one (remembered on this device)
-  const [scoreOn, setScoreOnState] = useState(true);
-  const [corners, setCorners] = useState({});
-  useEffect(() => {
-    try {
-      if (localStorage.getItem("vct-stream-score") === "off") setScoreOnState(false);
-      setCorners(JSON.parse(localStorage.getItem("vct-stream-corners") || "{}") || {});
-    } catch { /* not remembered */ }
-  }, []);
-  const setScoreOn = (v) => { setScoreOnState(v); try { localStorage.setItem("vct-stream-score", v ? "on" : "off"); } catch { /* not remembered */ } };
-  const moveScore = (k, c) => setCorners((x) => { const n = { ...x, [k]: c }; try { localStorage.setItem("vct-stream-corners", JSON.stringify(n)); } catch { /* not remembered */ } return n; });
   useEffect(() => setHost(window.location.hostname), []);
   const withStream = live.filter((m) => m.stream);
   const current = withStream.find((m) => `${m.event}:${m.id}` === watch) || withStream[0];
@@ -74,19 +63,21 @@ function View({ live, next }) {
           {playable.length > 1 && (
             <div className="toggles"><label className="sw"><input type="checkbox" checked={multi} onChange={(e) => setMulti(e.target.checked)} /> {tr("Several streams at once (up to 4)")}</label></div>
           )}
-          {withStream.length > 0 && <div className="toggles"><label className="sw"><input type="checkbox" checked={scoreOn} onChange={(e) => setScoreOn(e.target.checked)} /> {tr("Score over the streams")}</label></div>}
           {multi && screens.length > 0 ? (
             <div className={"multistream n" + screens.length}>
               {screens.map((m) => (
-                <div key={keyOf(m)} className="liveplayer">
-                  <iframe src={embedUrl(m.stream, host).replace(/([?&])autoplay=(true|1)/, "$1autoplay=false")} title={`${(m.a && m.a.name) || ""} vs ${(m.b && m.b.name) || ""}`} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
-                  {scoreOn ? <StreamScore m={m} corner={corners[keyOf(m)] || "tr"} onMove={(c) => moveScore(keyOf(m), c)} /> : <span className="mslabel">{(m.a && m.a.name) || tr("TBD")} vs {(m.b && m.b.name) || tr("TBD")}</span>}
+                <div key={keyOf(m)} className="mstile">
+                  {/* the score above the stream, never over the picture */}
+                  <StreamScore m={m} />
+                  <div className="liveplayer">
+                    <iframe src={embedUrl(m.stream, host).replace(/([?&])autoplay=(true|1)/, "$1autoplay=false")} title={`${(m.a && m.a.name) || ""} vs ${(m.b && m.b.name) || ""}`} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
+                  </div>
                 </div>
               ))}
             </div>
           ) : src ? (
             <div className="liveroom">
-              <div className="liveplayer"><iframe src={src} title={tr("Live")} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />{scoreOn && <StreamScore m={current} corner={corners[keyOf(current)] || "tr"} onMove={(c) => moveScore(keyOf(current), c)} />}</div>
+              <div className="liveplayer"><iframe src={src} title={tr("Live")} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /></div>
               <aside className="liveside">
                 <span className="livebadge">{tr("LIVE")}</span>
                 <div className="lsteams">
