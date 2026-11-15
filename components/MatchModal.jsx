@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useT } from "./lang.jsx";
 import { Crest } from "./Crest.jsx";
 import { LiveBadge } from "./matchTime.jsx";
@@ -108,11 +109,13 @@ export function teamsOf(pstats, m) {
 /** The window over the page, or the same content as a page of its own. */
 function Shell({ page, title, boxRef, onClose, children, tab }) {
   if (page) return <div className="mm mmpage" ref={boxRef} tabIndex={-1} data-tab={tab}>{children}</div>;
-  return (
+  // drawn straight into <body>: no section of the page (and its own layer) can come over it
+  const box = (
     <div className="mmback" onClick={onClose}>
       <div className="mm" role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} ref={boxRef} onClick={(ev) => ev.stopPropagation()}>{children}</div>
     </div>
   );
+  return typeof document !== "undefined" ? createPortal(box, document.body) : box;
 }
 
 /** The players of the two teams, each under its team. Nothing when neither has a roster yet. */

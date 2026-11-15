@@ -3138,7 +3138,7 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 /* sections rising into view: scroll-driven, CSS only (browsers without it show them as they are) */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .wrap > section, .wrap > div > section, .wrap > .bento { animation: rv22 linear both; animation-timeline: view(); animation-range: entry 0% entry 35%; }
+    .wrap > section, .wrap > div > section, .wrap > .bento { animation: rv22 linear backwards; animation-timeline: view(); animation-range: entry 0% entry 35%; }
   }
 }
 @keyframes rv22 { from { opacity: 0; transform: translateY(26px) scale(.985); } to { opacity: 1; transform: none; } }

@@ -25,7 +25,7 @@ export function CountUp({ value, ms = 1100 }) {
       io.disconnect();
       const t0 = performance.now();
       const step = (t) => {
-        const k = Math.min(1, (t - t0) / ms);
+        const k = Math.min(1, Math.max(0, (t - t0) / ms));
         setShown(Math.round(value * (1 - Math.pow(1 - k, 3))));
         if (k < 1) raf = requestAnimationFrame(step);
       };
@@ -154,7 +154,7 @@ export function RollNum({ text }) {
       io.disconnect();
       const t0 = performance.now();
       const step = (t) => {
-        const k = Math.min(1, (t - t0) / 900);
+        const k = Math.min(1, Math.max(0, (t - t0) / 900));
         setShown(k < 1 ? m[1] + (end * (1 - Math.pow(1 - k, 3))).toFixed(dec).replace(".", sep) + m[3] : str);
         if (k < 1) raf = requestAnimationFrame(step);
       };
