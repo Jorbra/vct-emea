@@ -121,3 +121,15 @@ test("editor: a stream link alone, today's results as text; bot /mvp", async () 
   const r = answerCommand("mvp", cmd("mvp"), botCtx(getState(db), { motm: () => [{ player: "Pa1ze", n: 12, matches: 3 }] }));
   assert.match(r.embeds[0].description, /\*\*Pa1ze\*\* · 12 votes · MVP de 3/);
 });
+
+test("best players by role and the bot's /role", async () => {
+  const { getState, openDb } = await import("../lib/db.js");
+  const { roleLeaders } = await import("../lib/agentpage.js");
+  assert.deepEqual(roleLeaders(openDb(":memory:")), {});
+  const { COMMANDS, answerCommand } = await import("../lib/discordbot.js");
+  const { botCtx, cmd } = await import("./botctx.mjs");
+  assert.ok(COMMANDS.some((c) => c.name === "role"));
+  const ctx = botCtx(getState(openDb(":memory:")), { roles: () => ({ Duelist: [{ slug: "a", name: "Alpha", team: "T1", r: 1.31, acs: 260, maps: 8, agent: "Jett" }] }) });
+  assert.match(answerCommand("role", cmd("role", { role: "Duelist" }), ctx).embeds[0].description, /\*\*Alpha\*\* \(T1\) · 1\.31 · 260 ACS · Jett/);
+  assert.match(answerCommand("role", cmd("role", { role: "Sentinel" }), ctx).content, /Pas encore/);
+});

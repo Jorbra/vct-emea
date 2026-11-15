@@ -16,7 +16,7 @@ import { TvMode } from "./Round9.jsx";
 import { EmptyState } from "./Round11.jsx";
 import { StreamScore } from "./StreamScore.jsx";
 import { MyStreams } from "./MyStreams.jsx";
-import { TensionBadges } from "./LiveMore.jsx";
+import { GlobalFeed, TensionBadges } from "./LiveMore.jsx";
 import { tension } from "../lib/livemore.js";
 
 // the tense matches first (overtime, then a deciding map), the others as they come
@@ -104,6 +104,7 @@ function View({ live, next }) {
               </aside>
             </div>
           ) : withStream.length === 0 ? <p className="note">{tr("No stream link is known for these matches yet.")}</p> : null}
+          <GlobalFeed live={live} />
           <MyStreams live={live} host={host} />
           <TvMode live={live} />
           <h2>{tr("Live now")} <small>({live.length})</small></h2>

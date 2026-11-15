@@ -25,7 +25,7 @@ import { quizQuestions, quizRanking, weekOf, weeklyQuiz } from "../../../lib/rou
 import { pickSplit, playersInForm } from "../../../lib/round10.js";
 import { matchPreview } from "../../../lib/round11.js";
 import { agentTiers, ratingByMap } from "../../../lib/round13.js";
-import { agentPage } from "../../../lib/agentpage.js";
+import { agentPage, roleLeaders } from "../../../lib/agentpage.js";
 import { styleAnswer } from "../../../lib/botstyle.js";
 import { motmSeason } from "../../../lib/fans.js";
 import { ratings as r8ratings } from "../../../lib/r8data.js";
@@ -51,6 +51,7 @@ function context(db, lang, now) {
     mapCard: (name, ev = "") => mapCard(state(), readDetails(db, ev), name),
     agentTiers: (map) => agentTiers(readDetails(db, ""), map),
     motm: () => motmSeason(db, 10),
+    roles: () => roleLeaders(db),
     agentPage: (name) => agentPage(name, db),
     byMap: (slug) => ratingByMap(readDetails(db, ""), slug),
     details: (event, id) => detailsOf(db, event, id),

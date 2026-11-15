@@ -3057,3 +3057,26 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .abebar { display: flex; align-items: flex-end; width: 28px; height: 100%; border-radius: 6px; background: color-mix(in srgb, var(--agc) 12%, var(--surface)); overflow: hidden; }
 .abebar i { display: block; width: 100%; border-radius: 6px 6px 0 0; background: var(--agc); }
 .abecol small { font-size: 11px; color: var(--muted); text-align: center; line-height: 1.2; }
+
+/* ---- round 20: live feed, best players by role, role badge */
+.globalfeed { margin: 14px 0; }
+.globalfeed ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; max-height: 360px; overflow: auto; }
+.globalfeed li { display: grid; grid-template-columns: 52px minmax(120px, 220px) 1fr; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 8px; background: var(--surface); border-left: 3px solid var(--line); font-size: 14px; }
+.globalfeed li.map { border-left-color: var(--lime); }
+.globalfeed li.start { border-left-color: #6fb8ff; }
+.globalfeed li.round { border-left-color: #ff4655; }
+.globalfeed small { color: var(--muted); font-variant-numeric: tabular-nums; }
+.globalfeed a { color: var(--fg); }
+.roleleaders { margin: 18px 0; }
+.rlgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.rlcol { padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.rlcol h3 { margin: 0 0 6px; font: 800 15px var(--font-display); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.rlcol ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.rlcol li { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 8px; }
+.rlcol li img { border-radius: 5px; background: color-mix(in srgb, var(--agc) 30%, transparent); }
+.rlcol li a { display: grid; color: var(--fg); text-decoration: none; min-width: 0; }
+.rlcol li a b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rlcol li small { color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rlcol li > span { font: 800 16px var(--font-display); color: var(--lime); }
+.rolebadge { display: inline-flex; align-items: center; margin-right: 6px; padding: 2px 10px; border-radius: 999px; background: rgba(0,0,0,.35); color: #fff; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+@media (max-width: 640px) { .globalfeed li { grid-template-columns: 46px 1fr; } .globalfeed li span { grid-column: 2; } }

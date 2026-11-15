@@ -84,3 +84,34 @@ export function CloseAlerts() {
     </div>
   );
 }
+
+/** Every live match's latest moments in one list, newest first: a map starting, a map won, the score of the map being played. */
+export function GlobalFeed({ live }) {
+  const tr = useT();
+  const items = [];
+  for (const m of live || []) {
+    const s = m.score;
+    if (!s) continue;
+    const name = (side) => ((side === "a" ? m.a : m.b) || {}).name || "?";
+    for (const f of s.feed || []) {
+      items.push({ at: f.at, key: `${m.id}${f.at}${f.kind}`, m, text: f.kind === "start" ? tr("{map} starts", { map: f.map }) : tr("{team} wins {map} {a}–{b}", { team: name(f.a > f.b ? "a" : "b"), map: f.map, a: Math.max(f.a, f.b), b: Math.min(f.a, f.b) }), kind: f.kind });
+    }
+    const r = (s.rounds || [])[0];
+    if (r && !/^tbd$/i.test(r.map)) items.push({ at: r.at, key: `${m.id}r${r.at}`, m, text: `${r.map} : ${r.a}–${r.b}`, kind: "round" });
+  }
+  if (!items.length) return null;
+  items.sort((x, y) => String(y.at).localeCompare(String(x.at)));
+  const time = (iso) => new Date(iso).toLocaleTimeString(tr.lang === "fr" ? "fr-FR" : undefined, { hour: "2-digit", minute: "2-digit" });
+  return (
+    <section className="globalfeed">
+      <h2><i className="ssdot inline" /> {tr("Live feed")}</h2>
+      <ol>{items.slice(0, 14).map((x) => (
+        <li key={x.key} className={x.kind}>
+          <small>{time(x.at)}</small>
+          <a href={`/match/${x.m.event}/${x.m.id}`}><b>{(x.m.a && (x.m.a.tag || x.m.a.name)) || "?"} vs {(x.m.b && (x.m.b.tag || x.m.b.name)) || "?"}</b></a>
+          <span>{x.text}</span>
+        </li>
+      ))}</ol>
+    </section>
+  );
+}

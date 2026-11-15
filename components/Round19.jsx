@@ -54,3 +54,30 @@ export function AgentByEvent({ list, color }) {
     </section>
   );
 }
+
+const ROLE_ORDER = ["Duelist", "Initiator", "Controller", "Sentinel"];
+
+/** The best players of each role (from their most played agent), four columns. */
+export function RoleLeaders({ roles }) {
+  const tr = useT();
+  const shown = ROLE_ORDER.filter((r) => (roles[r] || []).length);
+  if (!shown.length) return null;
+  return (
+    <section className="roleleaders">
+      <h2>🎯 {tr("Best players by role")}</h2>
+      <div className="rlgrid">{shown.map((role) => (
+        <div key={role} className="rlcol">
+          <h3>{tr(role)}</h3>
+          <ol>{roles[role].map((p) => (
+            <li key={p.slug} style={{ "--agc": p.color }}>
+              {p.icon && <img src={p.icon} alt="" width="22" height="22" loading="lazy" />}
+              <a href={`/player/${p.slug}`}><b>{p.name}</b><small>{p.team}</small></a>
+              <span>{p.r.toFixed(2)}</span>
+            </li>
+          ))}</ol>
+        </div>
+      ))}</div>
+      <p className="hint">{tr("Role from each player's most played agent; 4 maps at least.")}</p>
+    </section>
+  );
+}

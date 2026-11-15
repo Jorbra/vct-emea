@@ -11,7 +11,7 @@ import { EmptyState, SectionHead } from "./Round11.jsx";
 import { AgentDuel } from "./Round13.jsx";
 import { RoleMates } from "./Round14.jsx";
 import { RoleShare, SortPick } from "./Round15.jsx";
-import { AgentByEvent } from "./Round19.jsx";
+import { AgentByEvent, RoleLeaders } from "./Round19.jsx";
 
 function Top({ title }) {
   const tr = useT();
@@ -183,7 +183,7 @@ const cardPics = (a, look) => {
   return { ...(main ? { "--agimg": `url(${main})` } : {}), ...(other ? { "--agpose": `url(${other})` } : {}) };
 };
 
-function Agents({ list }) {
+function Agents({ list, leaders = {} }) {
   const tr = useT();
   // a role to show only its agents
   const [role, setRole] = useState("");
@@ -210,6 +210,7 @@ function Agents({ list }) {
           <SortPick value={sort} onChange={setSort} items={[["picks", tr("Most picked")], ["win", tr("Best win rate")], ["name", tr("A to Z")]]} />
         </div>
         <RoleShare list={list} />
+        <RoleLeaders roles={leaders} />
         <div className="aggrid">{shown.map((a) => (
           <a key={a.key} href={`/agent/${a.key}`} className={"agcard" + (a.pose ? " haspose" : "") + (look === "pose" && a.pose ? " posed" : "")} style={{ "--agc": a.color || "var(--lime)", ...cardPics(a, look) }}>
             <b>{a.name}</b>
