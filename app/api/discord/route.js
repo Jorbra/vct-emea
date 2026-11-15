@@ -31,6 +31,7 @@ import { similarPlayers, teamRadarFor } from "../../../lib/radar25.js";
 import { styleAnswer } from "../../../lib/botstyle.js";
 import { motmSeason } from "../../../lib/fans.js";
 import { ratings as r8ratings } from "../../../lib/r8data.js";
+import { winChance } from "../../../lib/proba26.js";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -62,6 +63,7 @@ function context(db, lang, now) {
     ranking: () => seasonRanking(db, state(), { limit: 10, now }),
     power: once("power", () => powerRanking(state(), now)),
     chances: (name) => { const { rating } = r8ratings(); return teamChances(state(), rating, name); },
+    proba: (a, b, bo) => { const rows = powerRanking(state(), Date.now(), { min: 1 }); const find = (q) => { const s = teamSlug(q); return rows.find((t) => t.slug === s) || rows.find((t) => t.slug.startsWith(s)) || null; }; const ta = find(a), tb = find(b); if (!ta || !tb || ta.slug === tb.slug) return null; const c = winChance(new Map([[ta.slug, ta.rating], [tb.slug, tb.rating]]), ta.name, tb.name, bo); return c && { ...c, nameA: ta.name, nameB: tb.name }; },
     quiz: () => { const w = weekOf(now); return { questions: quizQuestions(weeklyQuiz(state(), w)), best: quizRanking(db, w, 3) }; },
     honours: () => seasonHonours(state(), powerRanking(state(), now)),
     form: () => playersInForm(state(), tournamentStats(state(), readDetails(db, ""))),

@@ -170,7 +170,7 @@ function MyTeams({ initial }) {
   );
 }
 
-function HomeView({ initial, spot = [], form = [], podium = [] }) {
+function HomeView({ initial, spot = [], form = [], podium = [], elo = {} }) {
   const tr = useT();
   const ev = useMemo(() => eventStatus(initial), [initial]);
   const info = initial.info || {};
@@ -230,7 +230,7 @@ function HomeView({ initial, spot = [], form = [], podium = [] }) {
           <TodayPulse events={matchEvents} />
         </div>
       </div>
-      <div data-block="bento"><HomeBento initial={initial} /></div>
+      <div data-block="bento"><HomeBento initial={initial} elo={elo} /></div>
       <div data-block="spotlight"><Spotlight list={spot} /></div>
       <div data-block="form"><InForm list={form} /></div>
       <div data-block="podium"><HomePodium list={podium} /></div>

@@ -8,6 +8,7 @@ import { useFavorites } from "./favorites.js";
 import { EVENT_NAMES, teamSlug } from "../lib/paths.js";
 import { allMatches } from "../lib/matchlist.js";
 import { AgentIcon, AgentList, agentInfo } from "./Assets.jsx";
+import { MiniChance } from "./Round26.jsx";
 
 const safe = (f, d) => { try { return f(); } catch { return d; } };
 const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
@@ -38,7 +39,7 @@ export function EmptyState({ text, kind = "match" }) {
 
 // ---- R20. the home page as a magazine: tiles
 
-export function HomeBento({ initial }) {
+export function HomeBento({ initial, elo = null }) {
   const tr = useT();
   const [now, setNow] = useState(0);
   useEffect(() => setNow(Date.now()), []);
@@ -56,7 +57,7 @@ export function HomeBento({ initial }) {
       </section>
       <section className="bt bt-next">
         <SectionHead icon="⏰" title={tr("Coming up")} href="/calendar" />
-        {next.map((m) => <a key={m.event + m.id} href={`/match/${m.event}/${m.id}`} className="btrow"><small>{time(m.at)}</small><span>{m.a.name}</span><b>vs</b><span>{m.b.name}</span></a>)}
+        {next.map((m) => <a key={m.event + m.id} href={`/match/${m.event}/${m.id}`} className="btrow"><small>{time(m.at)}</small><span>{m.a.name}</span><b>vs</b><span>{m.b.name}</span><MiniChance m={m} rating={elo} /></a>)}
         {!next.length && <EmptyState text={tr("No match planned.")} />}
       </section>
       <a className="bt bt-games" href="/jeux"><span className="btbig">🎮</span><b>{tr("Games of the day")}</b><small>{tr("Mystery player, higher or lower, mystery logo")}</small></a>

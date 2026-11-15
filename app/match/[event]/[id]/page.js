@@ -10,6 +10,8 @@ import { scoreLabel } from "../../../../lib/scoretext.js";
 import { workSoon } from "../../../../lib/readsoon.js";
 import { detailsOf, readDetails, tournamentStats } from "../../../../lib/tstats.js";
 import { teamPercentiles } from "../../../../lib/radar25.js";
+import { ratingsFor } from "../../../../lib/proba26.js";
+import { ratings as r8ratings } from "../../../../lib/r8data.js";
 
 import { publicState } from "../../../../lib/publicstate.js";
 
@@ -55,7 +57,7 @@ export default async function Page({ params }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
-      <MatchPage e={e} id={id} state={data.state} radar={teamsRadar(m)} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />
+      <MatchPage e={e} id={id} state={data.state} radar={teamsRadar(m)} rating={(() => { try { return ratingsFor(r8ratings().rating, [m]); } catch { return null; } })()} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />
     </>
   );
 }

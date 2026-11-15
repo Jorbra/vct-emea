@@ -17,8 +17,11 @@ export default async function Page() {
   // the players in form: their last 14 days against their season
   let form = [];
   // the season's podium: the three best ratings, 6 maps at least
+  // the power ratings of the teams in the coming matches, for their win chances
+  let elo = {};
+  try { const { ratings } = await import("../lib/r8data.js"); const { ratingsFor } = await import("../lib/proba26.js"); const { allMatches } = await import("../lib/matchlist.js"); elo = ratingsFor(ratings().rating, allMatches(getState(getDb())).filter((m) => m.sa == null && m.a && m.b)); } catch { /* none */ }
   let podium = [];
   try { const { readDetails, tournamentStats } = await import("../lib/tstats.js"); const st = getState(getDb()); podium = tournamentStats(st, readDetails(getDb(), "")).players.filter((p) => p.maps >= 6 && p.r != null).sort((a, b) => b.r - a.r).slice(0, 3).map(({ slug, name, team, r, agents }) => ({ slug, name, team, r, agents: (agents || []).slice(0, 1) })); } catch { /* none */ }
   try { const { playersInForm } = await import("../lib/round10.js"); const { readDetails, tournamentStats } = await import("../lib/tstats.js"); const st = getState(getDb()); form = playersInForm(st, tournamentStats(st, readDetails(getDb(), "")), Date.now(), 6); } catch { /* none */ }
-  return <Home initial={publicState(getState(getDb()))} spot={spot} form={form} podium={podium} lang={lang} />;
+  return <Home initial={publicState(getState(getDb()))} spot={spot} form={form} podium={podium} elo={elo} lang={lang} />;
 }

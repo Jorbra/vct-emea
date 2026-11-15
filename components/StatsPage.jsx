@@ -95,7 +95,10 @@ function Teams({ teams }) {
   const tr = useT();
   const list = Object.entries(teams).map(([slug, t]) => ({ slug, ...t, pct: t.maps ? Math.round((t.mapsWon / t.maps) * 100) : 0, diff: t.roundsW - t.roundsL }))
     .sort((x, y) => y.mapsWon - x.mapsWon || y.diff - x.diff);
+  const cloud = list.filter((t) => t.maps >= 3).map((t) => ({ slug: t.slug, name: t.name, maps: t.maps, win: t.pct, rounds: t.roundsW + t.roundsL ? Math.round((t.roundsW / (t.roundsW + t.roundsL)) * 100) : null, diff: t.maps ? Math.round((t.diff / t.maps) * 10) / 10 : null }));
   return (
+    <>
+    <StatCloud rows={cloud} fields={[["win", tr("Maps won")], ["rounds", tr("Rounds won")], ["diff", tr("Round difference per map")], ["maps", tr("Maps")]]} x="rounds" y="win" hrefOf={(t) => `/team/${t.slug}`} title={tr("Every team at a glance")} note={tr("3 maps at least")} />
     <div className="vlrscroll">
       <table className="vlrtable statstable">
         <thead><tr><th className="vlrp">{tr("Team")}</th><th>{tr("Maps")}</th><th>%</th><th>{tr("Rounds")}</th><th>+/–</th><th>{tr("Best map")}</th><th>{tr("Best player")}</th></tr></thead>
@@ -117,6 +120,7 @@ function Teams({ teams }) {
         </tbody>
       </table>
     </div>
+    </>
   );
 }
 

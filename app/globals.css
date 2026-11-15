@@ -3278,3 +3278,39 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .c25tip .t1 { font: 700 12px var(--font-display); fill: var(--fg); }
 .c25tip .t2 { font: 500 11px var(--font-body); fill: var(--muted); }
 .c25tip { pointer-events: none; }
+
+/* ---- Round 26: the podium on wide screens, win chances, the cloud's axes ---- */
+.podium23 { max-width: 920px; margin-left: auto; margin-right: auto; }
+.pod23, .pod23:hover, .pod23 * { text-decoration: none; }
+.pod23art { bottom: auto; top: 6px; height: calc(100% - 92px); min-height: 150px; object-position: top center; mask-image: linear-gradient(180deg, #000 70%, transparent 100%); -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%); }
+.pod23.p1 .pod23art { height: calc(100% - 100px); }
+.pod23 { min-height: 250px; }
+.pod23.p1 { min-height: 300px; }
+.pod23.p3 { min-height: 225px; }
+.pod23:hover .pod23info b { color: var(--lime); }
+@media (max-width: 560px) { .pod23art { height: calc(100% - 80px); min-height: 110px; } }
+
+.chance26 { margin: 14px 0; }
+.ch26row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 2fr) minmax(0, 1fr); align-items: center; gap: 14px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.ch26team { display: flex; align-items: center; gap: 8px; min-width: 0; color: var(--muted); }
+.ch26team.b { justify-content: flex-end; }
+.ch26team b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 700 15px var(--font-display); color: var(--fg); }
+.ch26team strong { font: 800 26px var(--font-display); font-variant-numeric: tabular-nums; }
+.ch26team.fav strong { color: var(--lime); text-shadow: 0 0 14px color-mix(in srgb, var(--lime) 45%, transparent); }
+.ch26team .crest { width: 30px; height: 30px; }
+.ch26bar { display: flex; height: 14px; border-radius: 99px; overflow: hidden; background: var(--surface-2); gap: 2px; }
+.ch26bar i { display: block; height: 100%; transform-origin: left; animation: r24bar .9s cubic-bezier(.2,.8,.2,1) both; }
+.ch26bar i.a { background: linear-gradient(90deg, color-mix(in srgb, var(--lime) 60%, transparent), var(--lime)); }
+.ch26bar i.b { background: linear-gradient(90deg, #ff4655, color-mix(in srgb, #ff4655 60%, transparent)); transform-origin: right; }
+@media (max-width: 560px) { .ch26row { grid-template-columns: 1fr 1fr; } .ch26bar { grid-column: 1 / -1; grid-row: 2; } .ch26team strong { font-size: 20px; } }
+
+.mch26 { grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; margin-top: -2px; font-size: 11px; color: var(--muted); }
+.mch26 em { font-style: normal; font-variant-numeric: tabular-nums; }
+.mch26 em.fav { color: var(--lime); font-weight: 700; }
+.mch26 > span { height: 4px; border-radius: 99px; background: rgba(255,70,85,.55); overflow: hidden; }
+.mch26 > span i { display: block; height: 100%; background: var(--lime); }
+
+.c25pick { display: inline-flex; gap: 8px; margin-left: 10px; vertical-align: middle; }
+.c25pick label { display: inline-flex; align-items: center; gap: 4px; font: 600 12px var(--font-body); color: var(--muted); }
+.c25pick select { width: auto; padding: 3px 6px; font-size: 12px; }
+@media (max-width: 560px) { .c25pick { display: flex; margin: 6px 0 0; } }
