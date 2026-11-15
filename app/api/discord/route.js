@@ -26,6 +26,7 @@ import { pickSplit, playersInForm } from "../../../lib/round10.js";
 import { matchPreview } from "../../../lib/round11.js";
 import { agentTiers, ratingByMap } from "../../../lib/round13.js";
 import { agentPage, roleLeaders } from "../../../lib/agentpage.js";
+import { podiumBy, radarFor } from "../../../lib/radar24.js";
 import { styleAnswer } from "../../../lib/botstyle.js";
 import { motmSeason } from "../../../lib/fans.js";
 import { ratings as r8ratings } from "../../../lib/r8data.js";
@@ -63,7 +64,8 @@ function context(db, lang, now) {
     quiz: () => { const w = weekOf(now); return { questions: quizQuestions(weeklyQuiz(state(), w)), best: quizRanking(db, w, 3) }; },
     honours: () => seasonHonours(state(), powerRanking(state(), now)),
     form: () => playersInForm(state(), tournamentStats(state(), readDetails(db, ""))),
-    podium: () => tournamentStats(state(), readDetails(db, "")).players.filter((p) => p.maps >= 6 && p.r != null).sort((a, b) => b.r - a.r).slice(0, 3),
+    podium: (stat) => podiumBy(tournamentStats(state(), readDetails(db, "")).players, stat),
+    radar: (q) => radarFor(tournamentStats(state(), readDetails(db, "")).players, q),
     preview: (m) => matchPreview(state(), m, { players: tournamentStats(state(), readDetails(db, "")).players, picks: pickSplit(db, m) }),
     tiers: () => { const t = tierTeams(state()); return { teams: t, ...communityTiers(db, t) }; },
     guild: "",

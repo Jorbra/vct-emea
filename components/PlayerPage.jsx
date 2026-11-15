@@ -25,6 +25,8 @@ import { AgentMastery } from "./Round16.jsx";
 import { NextMatchBanner } from "./Team18.jsx";
 import { Records } from "./Round21.jsx";
 import { RollNum } from "./Round22.jsx";
+import { Radar, TopBadges } from "./Round24.jsx";
+import { topBadges } from "../lib/radar24.js";
 
 // the map where the player rates best (2 maps at least there)
 const bestMap = (t) => ((t && t.byMap) || []).filter((x) => x.r != null && x.n >= 2).sort((a, b) => b.r - a.r)[0] || null;
@@ -126,6 +128,7 @@ function Tournament({ t }) {
       <Trend matches={t.matches} />
       <AgentMastery agents={t.agents} />
       <RatingByMap list={t.byMap} />
+      <Radar a={t.radar} />
       <Records rec={t.records} title={tr("Personal bests")} player />
       {t.agents.length > 0 && <p className="note agline">{tr("Agents")} : {t.agents.map((a) => <span key={a.name}><AgentIcon name={a.name} size={24} /> {a.n}</span>)}</p>}
       <div className="tablewrap">
@@ -188,7 +191,7 @@ function View({ p }) {
           <div className="tname"><span className="pt"><Flag cc={p.cc} /><span>{p.name}</span><FollowStar slug={p.slug || teamSlug(p.name)} />{p.captain && <span className="tcapt" title={tr("Captain")}>C</span>}</span></div>
           {about.length > 0 && <div className="tsub">{about.map((x, i) => <Fragment key={i}>{i ? " · " : ""}{x}</Fragment>)}</div>}
           <p className="hint followhint">{tr("Follow this player to be alerted when they become a free agent or sign with a team.")} <AlertsButton /></p>
-          {p.tour && (p.tour.agents || []).length > 0 && <div className="pcardpool">{agentInfo(p.tour.agents[0].name) && agentInfo(p.tour.agents[0].name).role ? <span className="rolebadge">{tr(agentInfo(p.tour.agents[0].name).role)}</span> : null}{p.tour.agents.slice(0, 3).map((a) => <AgentIcon key={a.name} name={a.name} size={28} link />)}<a className="bestmap dl" href={`/api/og/player/${p.slug}`} download={`${p.slug}-vct-emea.png`} title={tr("Download the card")}>⬇ {tr("Card")}</a>{bestMap(p.tour) && <a className="bestmap" href={`/map/${bestMap(p.tour).map.toLowerCase()}`}>🗺️ {bestMap(p.tour).map} · {bestMap(p.tour).r.toFixed(2)}</a>}</div>}
+          {p.tour && (p.tour.agents || []).length > 0 && <div className="pcardpool">{agentInfo(p.tour.agents[0].name) && agentInfo(p.tour.agents[0].name).role ? <span className="rolebadge">{tr(agentInfo(p.tour.agents[0].name).role)}</span> : null}<TopBadges list={topBadges(p.tour.radar)} />{p.tour.agents.slice(0, 3).map((a) => <AgentIcon key={a.name} name={a.name} size={28} link />)}<a className="bestmap dl" href={`/api/og/player/${p.slug}`} download={`${p.slug}-vct-emea.png`} title={tr("Download the card")}>⬇ {tr("Card")}</a>{bestMap(p.tour) && <a className="bestmap" href={`/map/${bestMap(p.tour).map.toLowerCase()}`}>🗺️ {bestMap(p.tour).map} · {bestMap(p.tour).r.toFixed(2)}</a>}</div>}
           {hero && (
             <div className="pcardnums">
               {hero.nums.map(([label, value]) => <div key={label}><b>{value}</b><span>{label}</span></div>)}

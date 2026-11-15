@@ -13,6 +13,7 @@ import { outsiderProfile, playerProfile } from "../../../lib/playerstats.js";
 import { similarPlayers } from "../../../lib/round11.js";
 import { ratingByMap } from "../../../lib/round13.js";
 import { playerRecords } from "../../../lib/records21.js";
+import { percentiles } from "../../../lib/radar24.js";
 import { sharedPreview } from "../../../lib/preview.js";
 import { requestDue, requestFetch, updateDue } from "../../../lib/teamfetch.js";
 import { siteTeams } from "../../../lib/teams.js";
@@ -58,7 +59,7 @@ function load(slug, update = false) {
     ...person, onSite: !!site, cc: person.cc || (lp && lp.nationality[0] ? lp.nationality[0].cc : ""),
     realName: person.realName || (lp ? lp.name : ""),
     teamLogo: t ? t.logo : (dir.teams[person.teamSlug] || {}).logo || "", teamTag: t ? t.tag : "", teamOnSite: !!t,
-    tour: (() => { const t = playerTournament(tournamentStats(state, readDetails(getDb())), key); return t ? { ...t, byMap: ratingByMap(readDetails(getDb()), key), records: playerRecords(readDetails(getDb()), key) } : t; })(),
+    tour: (() => { const st = tournamentStats(state, readDetails(getDb())); const t = playerTournament(st, key); return t ? { ...t, byMap: ratingByMap(readDetails(getDb()), key), records: playerRecords(readDetails(getDb()), key), radar: percentiles(st.players, t) } : t; })(),
     // the players with the closest numbers
     similar: similarPlayers(tournamentStats(state, readDetails(getDb())).players, key),
     // the spread of each number among the players of the site's events, for the radar

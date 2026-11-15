@@ -3207,3 +3207,40 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .homepod23 { margin-bottom: 8px; }
 .homepod23 h2 .more { margin-left: auto; font: 500 13px var(--font-body); color: var(--muted); text-decoration: none; }
 .homepod23 h2 .more:hover { color: var(--lime); }
+
+/* ---- Round 24: the radar, the top badges, the agent's podium, page transitions ---- */
+.radar24 { margin: 18px 0; }
+.r24body { display: grid; grid-template-columns: minmax(220px, 340px) minmax(0, 1fr); gap: 18px; align-items: center; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: radial-gradient(80% 90% at 20% 50%, color-mix(in srgb, var(--lime) 8%, transparent), transparent 70%), var(--surface); }
+.r24svg { width: 100%; height: auto; overflow: visible; }
+.r24ring { fill: none; stroke: var(--line); stroke-width: 1; }
+.r24ring:last-of-type { stroke: color-mix(in srgb, var(--fg) 25%, transparent); }
+.r24axis { stroke: var(--line); stroke-dasharray: 2 3; }
+.r24a { fill: color-mix(in srgb, var(--lime) 28%, transparent); stroke: var(--lime); stroke-width: 2.5; stroke-linejoin: round; filter: drop-shadow(0 0 10px color-mix(in srgb, var(--lime) 45%, transparent)); transform-origin: 50% 50%; animation: r24grow .9s cubic-bezier(.2,.8,.2,1) both; }
+.r24b { fill: rgba(255, 70, 85, .22); stroke: #ff4655; stroke-width: 2.5; stroke-linejoin: round; transform-origin: 50% 50%; animation: r24grow .9s .15s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes r24grow { from { transform: scale(.2); opacity: .2; } }
+.r24lab { font: 700 12px var(--font-display); fill: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.r24list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.r24list li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 4px 10px; align-items: center; }
+.r24list li:has(.r24v.b) .r24k { grid-row: span 2; }
+.r24k { font: 700 12px var(--font-display); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.r24v { position: relative; display: grid; grid-template-columns: 54px minmax(0, 1fr); align-items: center; gap: 2px 8px; }
+.r24v b { font: 800 16px var(--font-display); font-variant-numeric: tabular-nums; }
+.r24v i { display: block; height: 6px; border-radius: 99px; background: var(--lime); box-shadow: 0 0 8px color-mix(in srgb, var(--lime) 50%, transparent); transform-origin: left; animation: rise .8s ease both; animation-name: r24bar; }
+.r24v.b i { background: #ff4655; box-shadow: 0 0 8px rgba(255,70,85,.45); }
+@keyframes r24bar { from { transform: scaleX(0); } }
+.r24v small { grid-column: 2; font-size: 11px; color: var(--muted); }
+.r24legend { display: flex; gap: 16px; justify-content: center; margin: 8px 0 0; font-weight: 700; }
+.r24legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.r24legend .a::before { background: var(--lime); }
+.r24legend .b::before { background: #ff4655; }
+@media (max-width: 680px) { .r24body { grid-template-columns: 1fr; } .r24svg { max-width: 300px; margin: 0 auto; } }
+
+.topbadges { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.topbadge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font: 700 12px var(--font-display); letter-spacing: .04em; text-transform: uppercase; color: var(--lime); background: color-mix(in srgb, var(--lime) 12%, transparent); border: 1px solid color-mix(in srgb, var(--lime) 45%, transparent); }
+.topbadge.gold { color: #1b1400; background: linear-gradient(135deg, #ffe27a, #f5b70a); border-color: #f5b70a; box-shadow: 0 0 12px rgba(245,183,10,.35); }
+
+.agpod24 { margin-bottom: 18px; }
+
+/* the move from page to page: the logo and the phone tab bar stay still while the page changes */
+.topbar .brandh { view-transition-name: brandh; }
+.mtabs { view-transition-name: mtabs; }

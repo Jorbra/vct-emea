@@ -12,6 +12,7 @@ import { AgentDuel } from "./Round13.jsx";
 import { RoleMates } from "./Round14.jsx";
 import { RoleShare, SortPick } from "./Round15.jsx";
 import { AgentByEvent, RoleLeaders } from "./Round19.jsx";
+import { AgentPodium } from "./Round24.jsx";
 
 function Top({ title }) {
   const tr = useT();
@@ -129,6 +130,7 @@ function Agent({ a }) {
       {a.picks === 0 ? <EmptyState text={tr("Not played on the site's events yet.")} /> : (
         <div className="cols">
           <main>
+            <AgentPodium best={a.best} agent={a.name} />
             <section>
               <SectionHead icon="🗺️" title={tr("Where it is picked")} />
               <div className="agmaps">{a.maps.map((m) => (

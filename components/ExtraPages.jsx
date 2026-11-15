@@ -10,6 +10,7 @@ import SearchBar from "./SearchBar.jsx";
 import { EVENT_NAMES, teamSlug } from "../lib/paths.js";
 import { dayText, moneyText } from "../lib/format.js";
 import { CompareHeads } from "./Round16.jsx";
+import { Radar } from "./Round24.jsx";
 
 function Top({ title, crumb }) {
   const tr = useT();
@@ -124,6 +125,7 @@ function CompareView({ a, b, qa, qb }) {
           })}
         </div>
       )}
+      {a && b && a.season && b.season && <Radar a={a.season.radar} b={b.season.radar} nameA={a.name} nameB={b.name} title={tr("Face to face")} />}
       {a && b && (a.season || b.season) && (
         <div className="tablewrap wide">
           <h2>{tr("This season on the site")}</h2>
