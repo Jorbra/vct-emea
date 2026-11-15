@@ -26,6 +26,7 @@ import FeaturedMatch from "./FeaturedMatch.jsx";
 import { Spotlight, ThemeSuggest } from "./Round13.jsx";
 import { InForm, Records } from "./Round21.jsx";
 import { HomeHero } from "./Round22.jsx";
+import { HomePodium } from "./Round23.jsx";
 import Stories from "./Stories.jsx";
 import { HomeCustomize, HomePoll } from "./Round8Bits.jsx";
 import { QualifiedStrip } from "./Round9.jsx";
@@ -169,7 +170,7 @@ function MyTeams({ initial }) {
   );
 }
 
-function HomeView({ initial, spot = [], form = [] }) {
+function HomeView({ initial, spot = [], form = [], podium = [] }) {
   const tr = useT();
   const ev = useMemo(() => eventStatus(initial), [initial]);
   const info = initial.info || {};
@@ -232,6 +233,7 @@ function HomeView({ initial, spot = [], form = [] }) {
       <div data-block="bento"><HomeBento initial={initial} /></div>
       <div data-block="spotlight"><Spotlight list={spot} /></div>
       <div data-block="form"><InForm list={form} /></div>
+      <div data-block="podium"><HomePodium list={podium} /></div>
       <div data-block="strips"><HomeStrips events={matchEvents} state={initial} /></div>
       <div data-block="poll"><HomePoll /></div>
       <div data-block="qualified"><QualifiedStrip list={qualifiedTeams(initial)} /></div>

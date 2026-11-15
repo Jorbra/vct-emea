@@ -149,3 +149,15 @@ test("records of a map and of a player", async () => {
   assert.deepEqual(alpha.acs.map((x) => [x.map, x.value]), [["Bind", 300], ["Lotus", 250]]);
   assert.equal(playerRecords(entries, "nobody"), null);
 });
+
+test("the bot's /podium: the season's three best ratings", async () => {
+  const { getState, openDb } = await import("../lib/db.js");
+  const { answerCommand } = await import("../lib/discordbot.js");
+  const { botCtx, cmd } = await import("./botctx.mjs");
+  const st = getState(openDb(":memory:"));
+  const p = (name, r) => ({ slug: name.toLowerCase(), name, team: "T", r, acs: 250, maps: 8, agents: [{ name: "Jett", n: 5 }] });
+  const r = answerCommand("podium", cmd("podium"), botCtx(st, { podium: () => [p("Alpha", 1.4), p("Beta", 1.3), p("Gamma", 1.2)] }));
+  assert.match(r.embeds[0].description, /🥇 \*\*Alpha\*\* \(T\) · \*\*1\.40\*\*/);
+  assert.match(r.embeds[0].description, /🥉 \*\*Gamma\*\*/);
+  assert.match(answerCommand("podium", cmd("podium"), botCtx(st, { podium: () => [] })).content, /Pas encore/);
+});

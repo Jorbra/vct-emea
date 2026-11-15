@@ -11,6 +11,7 @@ import { EVENT_NAMES, teamSlug } from "../lib/paths.js";
 import { AgentMapTable, FormList } from "./Round10.jsx";
 import { AgentIcon, AgentList, MapThumb } from "./Assets.jsx";
 import { StatsShortcuts } from "./Round14.jsx";
+import { StatPodium } from "./Round23.jsx";
 
 const PCOLS = [["maps", "Maps"], ["r", "R"], ["acs", "ACS"], ["kd", "K/D"], ["kast", "KAST"], ["adr", "ADR"], ["hs", "HS%"], ["k", "K"], ["d", "D"], ["a", "A"], ["fk", "FK"], ["fd", "FD"]];
 const PCT = ["kast", "hs"];
@@ -41,6 +42,8 @@ function Players({ list }) {
         const min = Math.min(...top.map((p) => p[sort]));
         const fmt = (v) => (["r", "kd"].includes(sort) ? Number(v).toFixed(2) : Math.round(v));
         return (
+          <>
+          <StatPodium list={top.slice(0, 3)} label={String(sort).toUpperCase() === "R" ? "Rating" : String(sort).toUpperCase()} fmt={(p) => String(fmt(p[sort]))} />
           <figure className="statchart" aria-label={tr("Top 10")}>
             <figcaption>{tr("Top 10")} · {String(sort).toUpperCase() === "R" ? "Rating" : String(sort).toUpperCase()}</figcaption>
             {top.map((p, i) => (
@@ -51,6 +54,7 @@ function Players({ list }) {
               </div>
             ))}
           </figure>
+          </>
         );
       })()}
       <div className="vlrscroll">

@@ -234,7 +234,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
           <div className="mfrieze" style={{ ...(colorA ? { "--ta": colorA } : {}), ...(colorB ? { "--tb": colorB } : {}) }} aria-label={tr("Maps")}>
             {frieze.map((x, i) => (
               <span key={i} data-map={x.map} className={"mfmap spoil " + (x.a > x.b ? "wa" : x.b > x.a ? "wb" : "")} style={mapList(x.map) ? { "--mapimg": `url(${mapList(x.map)})` } : undefined}>
-                <small>{tr("Map #{n}", { n: i + 1 })}</small><b>{x.map || "?"}</b><em>{x.a}–{x.b}</em>
+                <small>{tr("Map #{n}", { n: i + 1 })}</small><b>{x.map || "?"}</b><em><span className={x.a > x.b ? "won" : ""}>{x.a}</span>–<span className={x.b > x.a ? "won" : ""}>{x.b}</span></em>{(x.a > x.b || x.b > x.a) && <i className="mfwin">{name(x.a > x.b ? m.a : m.b)}</i>}
               </span>
             ))}
           </div>

@@ -3161,3 +3161,49 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 /* numbers: steady width while they count */
 .pstatbar b, .thnums b { font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: reduce) { .h22art img { transition: none; } }
+
+/* ---- Round 23: the stats podium, the match's map tiles ---- */
+.podium23 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 10px; margin: 6px 0 18px; }
+.pod23 { position: relative; overflow: hidden; isolation: isolate; display: grid; align-content: end; min-height: 230px; padding: 12px 12px 0; border-radius: 14px 14px 6px 6px; border: 1px solid color-mix(in srgb, var(--agc, var(--lime)) 45%, var(--line)); background: radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--agc, var(--lime)) 38%, transparent), transparent 70%), var(--surface); color: var(--fg); text-decoration: none; transition: transform .2s ease, box-shadow .2s ease; }
+.pod23.p1 { min-height: 280px; box-shadow: 0 10px 40px color-mix(in srgb, var(--agc, var(--lime)) 25%, transparent); }
+.pod23.p3 { min-height: 205px; }
+.pod23:hover { transform: translateY(-4px); }
+.pod23art { position: absolute; z-index: -1; left: 50%; bottom: 40px; height: 108%; width: auto; max-width: none; transform: translateX(-50%); object-fit: contain; filter: drop-shadow(0 8px 18px rgba(0,0,0,.45)); transition: transform .4s ease; mask-image: linear-gradient(180deg, #000 55%, transparent 92%); -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 92%); }
+.pod23:hover .pod23art { transform: translateX(-50%) scale(1.04); }
+.pod23rank { position: absolute; top: 10px; left: 12px; font-size: 26px; filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+.pod23info { display: grid; gap: 1px; padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--bg) 78%, transparent); backdrop-filter: blur(6px); border: 1px solid var(--line); }
+.pod23info b { font: 800 18px/1.1 var(--font-display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pod23info small { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pod23info strong { font: 800 24px/1 var(--font-display); color: var(--lime); font-variant-numeric: tabular-nums; }
+.pod23info em { font: 600 11px var(--font-body); font-style: normal; color: var(--muted); letter-spacing: .06em; }
+.pod23step { display: block; margin: 8px -12px 0; padding: 6px 0; text-align: center; font: 800 20px var(--font-display); color: var(--agc, var(--lime)); background: linear-gradient(180deg, color-mix(in srgb, var(--agc, var(--lime)) 22%, var(--surface-2)), var(--surface-2)); border-top: 1px solid color-mix(in srgb, var(--agc, var(--lime)) 40%, var(--line)); }
+.pod23.p1 .pod23step { padding: 14px 0; font-size: 26px; }
+.pod23.p2 .pod23step { padding: 10px 0; }
+@media (max-width: 560px) {
+  .podium23 { gap: 6px; }
+  .pod23 { min-height: 190px; padding: 8px 6px 0; }
+  .pod23.p1 { min-height: 230px; }
+  .pod23.p3 { min-height: 170px; }
+  .pod23info { padding: 6px; }
+  .pod23info b { font-size: 14px; }
+  .pod23info strong { font-size: 18px; }
+  .pod23step { margin: 6px -6px 0; }
+}
+
+/* the match's maps: the map's art, the winner's color, a big score */
+.mfmap { min-height: 92px; align-content: end; padding: 10px 12px; border-radius: 10px; }
+.mfmap[style*="--mapimg"]::before { opacity: .6; transition: transform .5s ease; }
+.mfmap::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, color-mix(in srgb, var(--bg) 92%, transparent) 10%, color-mix(in srgb, var(--bg) 35%, transparent) 100%); }
+.mfmap.wa::after { background: linear-gradient(0deg, color-mix(in srgb, var(--bg) 90%, transparent) 10%, transparent 100%), linear-gradient(90deg, color-mix(in srgb, var(--ta, var(--lime)) 35%, transparent), transparent 70%); }
+.mfmap.wb::after { background: linear-gradient(0deg, color-mix(in srgb, var(--bg) 90%, transparent) 10%, transparent 100%), linear-gradient(270deg, color-mix(in srgb, var(--tb, var(--link)) 35%, transparent), transparent 70%); }
+.mfmap:hover::before { transform: scale(1.06); }
+.mfmap > * { z-index: 1; }
+.mfmap b { font: 800 20px/1 var(--font-display); text-transform: uppercase; letter-spacing: .02em; }
+.mfmap em { font: 800 22px/1 var(--font-display); color: var(--muted); font-variant-numeric: tabular-nums; }
+.mfmap em .won { color: var(--lime); }
+.mfmap .mfwin { font-style: normal; font-size: 11px; color: var(--muted); }
+.mfmap .mfwin::before { content: "🏆 "; }
+
+.homepod23 { margin-bottom: 8px; }
+.homepod23 h2 .more { margin-left: auto; font: 500 13px var(--font-body); color: var(--muted); text-decoration: none; }
+.homepod23 h2 .more:hover { color: var(--lime); }

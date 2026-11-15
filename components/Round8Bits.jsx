@@ -231,7 +231,7 @@ function withNew(l) {
   return { ...l, order, hidden: Array.isArray(l.hidden) ? l.hidden : [] };
 }
 
-export const HOME_BLOCKS = [["hero", "Road to the Kickoff"], ["today", "Today (phones)"], ["live", "Featured match and next matches"], ["bento", "At a glance"], ["spotlight", "Spotlight"], ["form", "In form"], ["strips", "Today's matches"], ["poll", "Poll"], ["qualified", "Qualified teams"], ["myteams", "My teams"], ["news", "News"], ["kickoff", "Kickoff teams"], ["events", "Events"], ["road", "Road to the Kickoff (steps)"], ["gc", "Game Changers"]];
+export const HOME_BLOCKS = [["hero", "Road to the Kickoff"], ["today", "Today (phones)"], ["live", "Featured match and next matches"], ["bento", "At a glance"], ["spotlight", "Spotlight"], ["form", "In form"], ["podium", "The season's best"], ["strips", "Today's matches"], ["poll", "Poll"], ["qualified", "Qualified teams"], ["myteams", "My teams"], ["news", "News"], ["kickoff", "Kickoff teams"], ["events", "Events"], ["road", "Road to the Kickoff (steps)"], ["gc", "Game Changers"]];
 const HOME_KEY = "vct-home-layout";
 
 export function HomeCustomize() {

@@ -63,6 +63,7 @@ function context(db, lang, now) {
     quiz: () => { const w = weekOf(now); return { questions: quizQuestions(weeklyQuiz(state(), w)), best: quizRanking(db, w, 3) }; },
     honours: () => seasonHonours(state(), powerRanking(state(), now)),
     form: () => playersInForm(state(), tournamentStats(state(), readDetails(db, ""))),
+    podium: () => tournamentStats(state(), readDetails(db, "")).players.filter((p) => p.maps >= 6 && p.r != null).sort((a, b) => b.r - a.r).slice(0, 3),
     preview: (m) => matchPreview(state(), m, { players: tournamentStats(state(), readDetails(db, "")).players, picks: pickSplit(db, m) }),
     tiers: () => { const t = tierTeams(state()); return { teams: t, ...communityTiers(db, t) }; },
     guild: "",
