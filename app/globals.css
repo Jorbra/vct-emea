@@ -3244,3 +3244,37 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 /* the move from page to page: the logo and the phone tab bar stay still while the page changes */
 .topbar .brandh { view-transition-name: brandh; }
 .mtabs { view-transition-name: mtabs; }
+
+/* ---- Round 25: similar players, the stats cloud ---- */
+.similar25 { margin: 18px 0; }
+.sim25row { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.sim25 { position: relative; overflow: hidden; display: grid; grid-template-columns: 40px minmax(0, 1fr) 44px; grid-template-areas: "ic nm mt" "ic nb mt"; align-items: center; gap: 2px 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: linear-gradient(120deg, color-mix(in srgb, var(--agc, var(--lime)) 16%, transparent), transparent 60%), var(--surface); color: var(--fg); text-decoration: none; transition: transform .18s ease, border-color .18s ease; }
+.sim25:hover { transform: translateY(-2px); border-color: var(--agc, var(--lime)); }
+.sim25 img { grid-area: ic; width: 40px; height: 40px; border-radius: 8px; background: color-mix(in srgb, var(--agc, var(--lime)) 25%, var(--surface-2)); }
+.sim25name { grid-area: nm; display: grid; min-width: 0; }
+.sim25name b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sim25name small { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sim25nums { grid-area: nb; font-size: 12px; color: var(--muted); }
+.sim25match { grid-area: mt; position: relative; width: 44px; height: 44px; display: grid; place-items: center; }
+.sim25match svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.sim25match circle { fill: none; stroke-width: 3.5; }
+.sim25match .bg { stroke: var(--line); }
+.sim25match .fg { stroke: var(--lime); stroke-linecap: round; transition: stroke-dasharray .8s ease; }
+.sim25match b { font: 800 12px var(--font-display); color: var(--lime); }
+
+.cloud25 { margin: 0 0 18px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.cloud25 figcaption { font: 700 15px var(--font-display); margin-bottom: 6px; }
+.cloud25 figcaption small { font: 500 12px var(--font-body); color: var(--muted); margin-left: 6px; }
+.cloud25 svg { width: 100%; height: auto; display: block; overflow: visible; }
+.c25grid { stroke: var(--line); stroke-width: 1; opacity: .6; }
+.c25avg { stroke: var(--muted); stroke-dasharray: 4 4; opacity: .7; }
+.c25tick { font: 500 10px var(--font-body); fill: var(--muted); }
+.c25axis { font: 700 11px var(--font-display); fill: var(--muted); letter-spacing: .05em; }
+.c25dot { fill: color-mix(in srgb, var(--agc, var(--lime)) 75%, transparent); stroke: var(--bg); stroke-width: 1; transition: r .15s ease; cursor: pointer; }
+.c25dot.top { fill: var(--lime); stroke: var(--bg); stroke-width: 1.5; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--lime) 60%, transparent)); }
+.cloud25 a:hover .c25dot, .cloud25 a:focus .c25dot { r: 8; fill: var(--lime); }
+.c25name { font: 700 11px var(--font-display); fill: var(--fg); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; pointer-events: none; }
+.c25tip rect { fill: var(--surface-2); stroke: var(--lime); }
+.c25tip .t1 { font: 700 12px var(--font-display); fill: var(--fg); }
+.c25tip .t2 { font: 500 11px var(--font-body); fill: var(--muted); }
+.c25tip { pointer-events: none; }

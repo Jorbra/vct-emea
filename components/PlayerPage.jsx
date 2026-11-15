@@ -26,6 +26,7 @@ import { NextMatchBanner } from "./Team18.jsx";
 import { Records } from "./Round21.jsx";
 import { RollNum } from "./Round22.jsx";
 import { Radar, TopBadges } from "./Round24.jsx";
+import { SimilarPlayers } from "./Round25.jsx";
 import { topBadges } from "../lib/radar24.js";
 
 // the map where the player rates best (2 maps at least there)
@@ -129,6 +130,7 @@ function Tournament({ t }) {
       <AgentMastery agents={t.agents} />
       <RatingByMap list={t.byMap} />
       <Radar a={t.radar} />
+      <SimilarPlayers list={t.similar} />
       <Records rec={t.records} title={tr("Personal bests")} player />
       {t.agents.length > 0 && <p className="note agline">{tr("Agents")} : {t.agents.map((a) => <span key={a.name}><AgentIcon name={a.name} size={24} /> {a.n}</span>)}</p>}
       <div className="tablewrap">

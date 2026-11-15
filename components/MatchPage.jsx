@@ -7,9 +7,10 @@ import { EmeaMark } from "./Brand.jsx";
 import SearchBar from "./SearchBar.jsx";
 import { useAutoRefresh } from "./autoRefresh.js";
 import { MatchCard } from "./MatchModal.jsx";
+import { Radar } from "./Round24.jsx";
 import { EVENT_NAMES } from "../lib/paths.js";
 
-function View({ e, id, state }) {
+function View({ e, id, state, radar = null }) {
   const tr = useT();
   useAutoRefresh(30000);
   const m = e.items.find((x) => x.id === id);
@@ -24,10 +25,11 @@ function View({ e, id, state }) {
       <SiteNav />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › <a href={e.href}>{tr(EVENT_NAMES[e.event])}</a> › <span>{title}</span></nav>
       <MatchCard e={e} m={m} state={state} />
+      {radar && <Radar a={radar.a} b={radar.b} nameA={m.a.name} nameB={m.b.name} title={tr("The two teams face to face")} note={tr("Percentile among the teams with 3 maps at least")} />}
     </div>
   );
 }
 
-export default function MatchPage({ e, id, state, lang }) {
-  return <LangProvider lang={lang}><View e={e} id={id} state={state} /></LangProvider>;
+export default function MatchPage({ e, id, state, lang, radar = null }) {
+  return <LangProvider lang={lang}><View e={e} id={id} state={state} radar={radar} /></LangProvider>;
 }

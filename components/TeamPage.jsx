@@ -32,6 +32,7 @@ import { MapPoolTiles } from "./Round14.jsx";
 import { mapSplash } from "./Assets.jsx";
 import { NextMatchBanner } from "./Team18.jsx";
 import { RollNum } from "./Round22.jsx";
+import { Radar } from "./Round24.jsx";
 
 export default function TeamPage(props) {
   return (
@@ -376,6 +377,7 @@ function TeamTournament({ s }) {
         <div><b>{s.roundsW} – {s.roundsL}</b><span>{tr("Rounds")}</span></div>
         <div><b><RollNum text={diff > 0 ? `+${diff}` : String(diff)} /></b><span>+/–</span></div>
       </div>
+      <Radar a={s.radar} title={tr("Where the team stands")} note={tr("Percentile among the teams with 3 maps at least")} />
       <MapPoolTiles list={s.byMap} />
       {(s.comps || []).length > 0 && (
         <>

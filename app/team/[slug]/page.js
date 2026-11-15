@@ -12,6 +12,7 @@ import { orgOf, teamProfile } from "../../../lib/teams.js";
 import { sharedPreview, teamPreview } from "../../../lib/preview.js";
 import { workSoon } from "../../../lib/readsoon.js";
 import { extraStats, readDetails, tournamentStats } from "../../../lib/tstats.js";
+import { teamPercentiles } from "../../../lib/radar25.js";
 
 // Always read the database on request: results change while the events run.
 import { publicState } from "../../../lib/publicstate.js";
@@ -47,7 +48,7 @@ export default async function Page({ params, searchParams }) {
     : null;
   const outside = p ? null : { name, tag: known ? known.tag : "", logo: known ? known.logo : "", pending: !entry };
   const entries = p ? readDetails(getDb()) : [];
-  const tstats = p && tournamentStats(initial, entries).teams[key] ? { ...tournamentStats(initial, entries).teams[key], comps: extraStats(initial, entries).teamComps[key] || [] } : null;
+  const tstats = p && tournamentStats(initial, entries).teams[key] ? { ...tournamentStats(initial, entries).teams[key], comps: extraStats(initial, entries).teamComps[key] || [], radar: teamPercentiles(tournamentStats(initial, entries), p.name) } : null;
   // each of its players' numbers, for the roster cards
   const rosterStats = p ? tournamentStats(initial, entries).players.filter((x) => x.team && x.team.toLowerCase() === p.name.toLowerCase()).map(({ slug, name, r, acs, kd, maps, agents }) => ({ slug, name, r, acs, kd, maps, agent: agents[0] ? agents[0].name : "" })) : [];
   const ld = p ? { "@context": "https://schema.org", "@type": "SportsTeam", name: p.name, sport: "VALORANT", ...(p.team && p.team.logo && /^https?:/.test(p.team.logo) ? { logo: p.team.logo } : {}), athlete: rosterStats.map((x) => ({ "@type": "Person", name: x.name })) } : null;

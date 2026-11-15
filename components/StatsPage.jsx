@@ -12,6 +12,7 @@ import { AgentMapTable, FormList } from "./Round10.jsx";
 import { AgentIcon, AgentList, MapThumb } from "./Assets.jsx";
 import { StatsShortcuts } from "./Round14.jsx";
 import { StatPodium } from "./Round23.jsx";
+import { StatCloud } from "./Round25.jsx";
 
 const PCOLS = [["maps", "Maps"], ["r", "R"], ["acs", "ACS"], ["kd", "K/D"], ["kast", "KAST"], ["adr", "ADR"], ["hs", "HS%"], ["k", "K"], ["d", "D"], ["a", "A"], ["fk", "FK"], ["fd", "FD"]];
 const PCT = ["kast", "hs"];
@@ -54,6 +55,7 @@ function Players({ list }) {
               </div>
             ))}
           </figure>
+          <StatCloud rows={rows} />
           </>
         );
       })()}

@@ -8,7 +8,7 @@ import { StatPodium } from "./Round23.jsx";
 const fmtVal = (key, v) => (v == null ? "–" : key === "r" || key === "kd" || key === "fk" ? Number(v).toFixed(2) : key === "kast" ? `${v}%` : v);
 
 /** The radar: each axis a stat, the distance its percentile; a second player drawn over in another color. */
-export function Radar({ a, b = null, nameA = "", nameB = "", title }) {
+export function Radar({ a, b = null, nameA = "", nameB = "", title, note }) {
   const tr = useT();
   if (!a || a.length < 3) return null;
   const axes = a.map((x) => x.key).filter((k) => !b || b.some((y) => y.key === k));
@@ -22,7 +22,7 @@ export function Radar({ a, b = null, nameA = "", nameB = "", title }) {
   const label = (k) => (a.find((x) => x.key === k) || {}).label || k;
   return (
     <section className="radar24">
-      <h2>🕸️ {title || tr("Where they stand")} <small>{tr("Percentile among the players with 3 maps at least")}</small></h2>
+      <h2>🕸️ {title || tr("Where they stand")} <small>{note || tr("Percentile among the players with 3 maps at least")}</small></h2>
       <div className="r24body">
         <svg viewBox={`0 0 ${S} ${S}`} className="r24svg" role="img" aria-label={tr("Radar of the stats")}>
           {[0.25, 0.5, 0.75, 1].map((f) => <polygon key={f} className="r24ring" points={axes.map((_, i) => at(i, R * f).join(",")).join(" ")} />)}

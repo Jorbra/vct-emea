@@ -8,7 +8,8 @@ import { EVENT_NAMES, siteHref } from "../../../../lib/paths.js";
 import { TIME_EVENTS } from "../../../../lib/schedule.js";
 import { scoreLabel } from "../../../../lib/scoretext.js";
 import { workSoon } from "../../../../lib/readsoon.js";
-import { detailsOf } from "../../../../lib/tstats.js";
+import { detailsOf, readDetails, tournamentStats } from "../../../../lib/tstats.js";
+import { teamPercentiles } from "../../../../lib/radar25.js";
 
 import { publicState } from "../../../../lib/publicstate.js";
 
@@ -29,6 +30,17 @@ function load(event, id) {
   return { state, e, m };
 }
 
+/** Both teams' radars for the match page, when both have 3 maps or more in vlr.gg's tables. */
+function teamsRadar(m) {
+  if (!m.a || !m.b || !m.a.name || !m.b.name) return null;
+  try {
+    const db = getDb();
+    const st = tournamentStats(getState(db), readDetails(db, ""));
+    const a = teamPercentiles(st, m.a.name), b = teamPercentiles(st, m.b.name);
+    return a.length >= 3 && b.length >= 3 ? { a, b } : null;
+  } catch { return null; }
+}
+
 /** A match's own page (/match/kickoff/u1-1): what its window shows, at an address that can be shared. */
 export default async function Page({ params }) {
   workSoon();
@@ -43,7 +55,7 @@ export default async function Page({ params }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
-      <MatchPage e={e} id={id} state={data.state} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />
+      <MatchPage e={e} id={id} state={data.state} radar={teamsRadar(m)} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />
     </>
   );
 }
