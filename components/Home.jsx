@@ -25,6 +25,7 @@ import HomeNext from "./HomeNext.jsx";
 import FeaturedMatch from "./FeaturedMatch.jsx";
 import { Spotlight, ThemeSuggest } from "./Round13.jsx";
 import { InForm, Records } from "./Round21.jsx";
+import { HomeHero } from "./Round22.jsx";
 import Stories from "./Stories.jsx";
 import { HomeCustomize, HomePoll } from "./Round8Bits.jsx";
 import { QualifiedStrip } from "./Round9.jsx";
@@ -219,6 +220,7 @@ function HomeView({ initial, spot = [], form = [] }) {
       {matchEvents.some((e) => e.items.some((m) => e.live[m.id] && m.sa == null)) && <div className="livesweep" aria-hidden="true" />}
       <Stories events={matchEvents} />
       <HomeCustomize />
+      <div data-block="hero"><HomeHero events={matchEvents} /><div className="h22install"><InstallButton /></div></div>
       <div data-block="today" className="mobonly"><TodayCarousel events={matchEvents} /></div>
       <div className="homehead" data-block="live">
         <FeaturedMatch events={matchEvents} />
@@ -234,14 +236,6 @@ function HomeView({ initial, spot = [], form = [] }) {
       <div data-block="poll"><HomePoll /></div>
       <div data-block="qualified"><QualifiedStrip list={qualifiedTeams(initial)} /></div>
 
-      <div className="hero compact" data-block="hero">
-        <div>
-          <div className="herokick">Champions Tour 2027</div>
-          <div className="herotitle">{tr("Road to the EMEA Kickoff")}</div>
-          <p>{tr("Every qualifier, the Qualifier Playoffs and the Kickoff, with results updated live.")}</p>
-        </div>
-        <div className="heroacts"><a className="btn pri" href={siteHref("kickoff")}>Kickoff ›</a><InstallButton /></div>
-      </div>
 
       <div data-block="myteams"><MyTeams initial={initial} /></div>
       <div data-block="news"><LatestNews news={initial.news} /></div>

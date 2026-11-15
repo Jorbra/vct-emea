@@ -10,7 +10,7 @@ export function InForm({ list }) {
   if (!list || !list.length) return null;
   return (
     <section className="inform">
-      <h2>🔥 {tr("In form")} <small>{tr("Last 14 days against their season")}</small></h2>
+      <h2>🔥 {tr("In form")} <small>{tr("Their last maps against the ones before")}</small></h2>
       <div className="informrow">{list.map((p) => (
         <a key={p.slug} href={`/player/${p.slug}`} className="informcard">
           <b>{p.name}</b>

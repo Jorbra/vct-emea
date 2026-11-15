@@ -15,6 +15,7 @@ import { CommandPalette } from "../components/Round8Bits.jsx";
 import { SiteFooter } from "../components/Round9.jsx";
 import { BackToTop } from "../components/Round14.jsx";
 import { CloseAlerts } from "../components/LiveMore.jsx";
+import { Motion } from "../components/Round22.jsx";
 import { MatchNightTheme } from "../components/Season17.jsx";
 import { LiveTeamBanner, Welcome } from "../components/Round11.jsx";
 import { getDb } from "../lib/db.js";
@@ -68,7 +69,7 @@ export default async function RootLayout({ children }) {
         <LangProvider lang={lang}><SiteFooter /><BackToTop /></LangProvider>
         <EditorAccess lang={lang} isAdmin={await isAdmin()} />
         <MatchAlerts />
-        <LangProvider lang={lang}><MobileTabs /><ResultToast /><CloseAlerts /><MatchNightTheme /><TeamTheme /><CommandPalette /></LangProvider>
+        <LangProvider lang={lang}><MobileTabs /><ResultToast /><CloseAlerts /><Motion /><MatchNightTheme /><TeamTheme /><CommandPalette /></LangProvider>
         <AccountSync />
       </body>
     </html>

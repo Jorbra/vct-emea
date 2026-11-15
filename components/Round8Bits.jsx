@@ -224,14 +224,21 @@ export function BracketTools() {
 
 // ---- R1. the home page, arranged by the visitor
 
-export const HOME_BLOCKS = [["today", "Today (phones)"], ["live", "Featured match and next matches"], ["bento", "At a glance"], ["strips", "Today's matches"], ["poll", "Poll"], ["qualified", "Qualified teams"], ["hero", "Road to the Kickoff"], ["myteams", "My teams"], ["news", "News"], ["kickoff", "Kickoff teams"], ["events", "Events"], ["road", "Road to the Kickoff (steps)"], ["gc", "Game Changers"]];
+/** A saved layout with the blocks added since, each at its default place. */
+function withNew(l) {
+  const order = l.order.filter((k) => HOME_BLOCKS.some(([b]) => b === k));
+  HOME_BLOCKS.forEach(([k], i) => { if (!order.includes(k)) order.splice(Math.min(i, order.length), 0, k); });
+  return { ...l, order, hidden: Array.isArray(l.hidden) ? l.hidden : [] };
+}
+
+export const HOME_BLOCKS = [["hero", "Road to the Kickoff"], ["today", "Today (phones)"], ["live", "Featured match and next matches"], ["bento", "At a glance"], ["spotlight", "Spotlight"], ["form", "In form"], ["strips", "Today's matches"], ["poll", "Poll"], ["qualified", "Qualified teams"], ["myteams", "My teams"], ["news", "News"], ["kickoff", "Kickoff teams"], ["events", "Events"], ["road", "Road to the Kickoff (steps)"], ["gc", "Game Changers"]];
 const HOME_KEY = "vct-home-layout";
 
 export function HomeCustomize() {
   const tr = useT();
   const [open, setOpen] = useState(false);
   const [lay, setLay] = useState(null);
-  useEffect(() => { const l = getJson(HOME_KEY, null); setLay(l && Array.isArray(l.order) ? l : { order: HOME_BLOCKS.map(([k]) => k), hidden: [] }); }, []);
+  useEffect(() => { const l = getJson(HOME_KEY, null); setLay(l && Array.isArray(l.order) ? withNew(l) : { order: HOME_BLOCKS.map(([k]) => k), hidden: [] }); }, []);
   const css = useMemo(() => (lay ? lay.order.map((k, i) => `.home [data-block="${k}"]{order:${i + 1}}`).join("") + lay.hidden.map((k) => `.home [data-block="${k}"]{display:none}`).join("") : ""), [lay]);
   if (!lay) return null;
   const save = (l) => { setLay(l); setJson(HOME_KEY, l); };

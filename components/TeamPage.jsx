@@ -31,6 +31,7 @@ import { TeamCompCards } from "./Round13.jsx";
 import { MapPoolTiles } from "./Round14.jsx";
 import { mapSplash } from "./Assets.jsx";
 import { NextMatchBanner } from "./Team18.jsx";
+import { RollNum } from "./Round22.jsx";
 
 export default function TeamPage(props) {
   return (
@@ -371,9 +372,9 @@ function TeamTournament({ s }) {
       <h2>{tr("Tournament stats")}</h2>
       <div className="pstatbar">
         <div><b>{s.mapsWon} – {s.maps - s.mapsWon}</b><span>{tr("Maps")}</span></div>
-        <div><b>{pct}%</b><span>{tr("Maps won")}</span></div>
+        <div><b><RollNum text={`${pct}%`} /></b><span>{tr("Maps won")}</span></div>
         <div><b>{s.roundsW} – {s.roundsL}</b><span>{tr("Rounds")}</span></div>
-        <div><b>{diff > 0 ? `+${diff}` : diff}</b><span>+/–</span></div>
+        <div><b><RollNum text={diff > 0 ? `+${diff}` : String(diff)} /></b><span>+/–</span></div>
       </div>
       <MapPoolTiles list={s.byMap} />
       {(s.comps || []).length > 0 && (

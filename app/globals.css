@@ -3103,3 +3103,61 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .reccol li strong { font: 800 18px var(--font-display); color: var(--lime); }
 .reccol li a { color: var(--fg); }
 .reccol li small, .reccol li small a { color: var(--muted); font-size: 12px; }
+
+/* ---- Round 22: the look ---- */
+.hero22 { position: relative; overflow: hidden; isolation: isolate; border-radius: 14px; border: 1px solid var(--line); min-height: 260px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 18px 28px; padding: 28px 28px 24px; margin-bottom: 14px; color: #fff; background: #0d0d0e; }
+.h22art { position: absolute; inset: 0; z-index: -2; }
+.h22art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.08); transition: opacity 1.4s ease, transform 7s linear; }
+.h22art img.on { opacity: 1; transform: scale(1); }
+.h22shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(10,10,11,.92) 0%, rgba(10,10,11,.7) 45%, rgba(10,10,11,.25) 100%), linear-gradient(0deg, rgba(10,10,11,.85) 0%, transparent 60%); }
+.h22shade::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, var(--lime), transparent 70%); }
+.h22body { display: grid; gap: 8px; max-width: 62ch; }
+.h22kick { font: 700 12px var(--font-body); letter-spacing: .18em; text-transform: uppercase; color: var(--lime); }
+.h22title { margin: 0; font: 800 clamp(30px, 5vw, 52px)/0.95 var(--font-display); text-transform: uppercase; letter-spacing: .01em; text-shadow: 0 2px 24px rgba(0,0,0,.5); }
+.hero22 p { margin: 0; color: rgba(255,255,255,.82); font-size: 15px; }
+.h22acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.h22acts .btn:not(.pri) { background: rgba(255,255,255,.08); color: #fff; border-color: rgba(255,255,255,.25); backdrop-filter: blur(6px); }
+.h22live i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ff4655; margin-right: 7px; animation: livepulse 1.2s infinite; }
+.h22nums { display: flex; gap: 10px; }
+.h22nums > div { position: relative; overflow: hidden; display: grid; gap: 2px; min-width: 96px; padding: 12px 14px; text-align: center; border-radius: 10px; background: rgba(15,15,16,.55); border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(8px); }
+.h22nums b { font: 800 30px/1 var(--font-display); color: var(--lime); font-variant-numeric: tabular-nums; }
+.h22nums > div > span { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+.h22map { position: absolute; top: 14px; right: 16px; font: 700 11px var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.75); text-decoration: none; padding: 4px 9px; border-radius: 999px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.18); animation: fadein .8s ease; }
+.h22map:hover { color: var(--lime); border-color: var(--lime); }
+.h22install:empty { display: none; }
+.h22install { display: flex; justify-content: flex-end; margin: -6px 0 14px; }
+@keyframes h22in { from { opacity: 0; transform: translateY(12px); } }
+@media (max-width: 760px) {
+  .hero22 { grid-template-columns: 1fr; min-height: 0; padding: 22px 18px 18px; }
+  .h22nums > div { flex: 1; min-width: 0; padding: 10px 6px; }
+  .h22nums b { font-size: 24px; }
+  .h22map { display: none; }
+}
+:root[data-theme="light"] .hero22 { border-color: transparent; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+
+/* sections rising into view: scroll-driven, CSS only (browsers without it show them as they are) */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .wrap > section, .wrap > div > section, .wrap > .bento { animation: rv22 linear both; animation-timeline: view(); animation-range: entry 0% entry 35%; }
+  }
+}
+@keyframes rv22 { from { opacity: 0; transform: translateY(26px) scale(.985); } to { opacity: 1; transform: none; } }
+
+/* the glow that follows the pointer on cards */
+.informcard, .evcard, .bt, .reccol, .rlcol, .pstatbar > div, .h22nums > div { --mx: 50%; --my: -200px; }
+@media (hover: hover) {
+  .informcard:hover, .evcard:hover, .bt:hover, .reccol:hover, .rlcol:hover, .pstatbar > div:hover { background-image: radial-gradient(260px circle at var(--mx) var(--my), color-mix(in srgb, var(--lime) 13%, transparent), transparent 70%); }
+  .h22nums > div:hover { background-image: radial-gradient(160px circle at var(--mx) var(--my), rgba(201,240,60,.22), transparent 70%); }
+  .pstatbar > div, .reccol, .rlcol { transition: border-color .2s ease, transform .2s ease; }
+  .pstatbar > div:hover, .reccol:hover, .rlcol:hover { border-color: color-mix(in srgb, var(--lime) 55%, var(--line)); transform: translateY(-2px); }
+}
+
+/* the loading bar between pages */
+.navbar22 { position: fixed; top: 0; left: 0; height: 3px; width: 0; z-index: 9999; pointer-events: none; background: linear-gradient(90deg, var(--lime), #ff4655); box-shadow: 0 0 10px var(--lime); opacity: 0; }
+.navbar22.go { opacity: 1; animation: nav22 8s cubic-bezier(.1,.7,.2,1) forwards; }
+.navbar22.done { width: 100%; opacity: 0; transition: opacity .35s ease .15s; }
+@keyframes nav22 { 0% { width: 0; } 10% { width: 35%; } 40% { width: 70%; } 100% { width: 92%; } }
+
+/* numbers: steady width while they count */
+.pstatbar b, .thnums b { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { .h22art img { transition: none; } }

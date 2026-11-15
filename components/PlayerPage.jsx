@@ -24,6 +24,7 @@ import { RatingByMap } from "./Round13.jsx";
 import { AgentMastery } from "./Round16.jsx";
 import { NextMatchBanner } from "./Team18.jsx";
 import { Records } from "./Round21.jsx";
+import { RollNum } from "./Round22.jsx";
 
 // the map where the player rates best (2 maps at least there)
 const bestMap = (t) => ((t && t.byMap) || []).filter((x) => x.r != null && x.n >= 2).sort((a, b) => b.r - a.r)[0] || null;
@@ -114,13 +115,13 @@ function Tournament({ t }) {
     <section>
       <h2>{tr("Tournament stats")}</h2>
       <div className="pstatbar">
-        <div><b>{fix(t.r)}</b><span>{tr("Rating")}</span></div>
-        <div><b>{t.acs ?? "–"}</b><span>ACS</span></div>
-        <div><b>{fix(t.kd)}</b><span>K/D</span></div>
-        <div><b>{t.kast != null ? `${t.kast}%` : "–"}</b><span>KAST</span></div>
-        <div><b>{t.adr ?? "–"}</b><span>ADR</span></div>
-        <div><b>{t.hs != null ? `${t.hs}%` : "–"}</b><span>HS%</span></div>
-        <div><b>{t.maps}</b><span>{tr("Maps")}</span></div>
+        <div><b><RollNum text={fix(t.r)} /></b><span>{tr("Rating")}</span></div>
+        <div><b><RollNum text={t.acs ?? "–"} /></b><span>ACS</span></div>
+        <div><b><RollNum text={fix(t.kd)} /></b><span>K/D</span></div>
+        <div><b><RollNum text={t.kast != null ? `${t.kast}%` : "–"} /></b><span>KAST</span></div>
+        <div><b><RollNum text={t.adr ?? "–"} /></b><span>ADR</span></div>
+        <div><b><RollNum text={t.hs != null ? `${t.hs}%` : "–"} /></b><span>HS%</span></div>
+        <div><b><RollNum text={t.maps} /></b><span>{tr("Maps")}</span></div>
       </div>
       <Trend matches={t.matches} />
       <AgentMastery agents={t.agents} />
