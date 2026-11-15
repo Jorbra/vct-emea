@@ -14,5 +14,8 @@ export default async function Page() {
   workSoon();
   const lang = normLang((await cookies()).get(LANG_COOKIE)?.value);
   const spot = await homeSpotlight().catch(() => []);
-  return <Home initial={publicState(getState(getDb()))} spot={spot} lang={lang} />;
+  // the players in form: their last 14 days against their season
+  let form = [];
+  try { const { playersInForm } = await import("../lib/round10.js"); const { readDetails, tournamentStats } = await import("../lib/tstats.js"); const st = getState(getDb()); form = playersInForm(st, tournamentStats(st, readDetails(getDb(), "")), Date.now(), 6); } catch { /* none */ }
+  return <Home initial={publicState(getState(getDb()))} spot={spot} form={form} lang={lang} />;
 }

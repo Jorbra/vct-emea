@@ -9,9 +9,10 @@ import { Flag } from "./TeamCard.jsx";
 import { EVENT_NAMES, teamHref } from "../lib/paths.js";
 import { AgentTierList } from "./Round13.jsx";
 import { OtherMaps } from "./Round14.jsx";
+import { Records } from "./Round21.jsx";
 import { AgentIcon, AgentList, mapInfo, mapMinimap, mapSplash } from "./Assets.jsx";
 
-function View({ card, name = "", top = [], tiers = [], event, events }) {
+function View({ card, name = "", top = [], tiers = [], records = null, event, events }) {
   // the map's own name (its picture's), even when nobody played it yet
   const known = mapInfo(card ? card.map : name);
   const shown = card ? card.map : (known && Object.keys(known).length ? name.charAt(0).toUpperCase() + name.slice(1) : "");
@@ -80,6 +81,7 @@ function View({ card, name = "", top = [], tiers = [], event, events }) {
             </section>
           </div>
           <AgentTierList tiers={tiers} map={card.map} />
+          <Records rec={records} title={tr("Records on {map}", { map: card.map })} />
           {(card.comps || []).length > 0 && (
             <section>
               <h2>{tr("Most played compositions")}</h2>

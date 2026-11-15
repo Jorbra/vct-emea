@@ -133,3 +133,19 @@ test("best players by role and the bot's /role", async () => {
   assert.match(answerCommand("role", cmd("role", { role: "Duelist" }), ctx).embeds[0].description, /\*\*Alpha\*\* \(T1\) · 1\.31 · 260 ACS · Jett/);
   assert.match(answerCommand("role", cmd("role", { role: "Sentinel" }), ctx).content, /Pas encore/);
 });
+
+test("records of a map and of a player", async () => {
+  const { mapRecords, playerRecords } = await import("../lib/records21.js");
+  const row = (name, acs, k, r, side = "a") => ({ name, acs, k, r, fk: 2, side, agents: ["jett"] });
+  const entries = [
+    { event: "q1", id: "m1", details: { maps: [{ map: "Bind", a: 13, b: 5, rows: [row("Alpha", 300, 25, 1.5), row("Beta", 200, 15, 1.0, "b")] }, { map: "Lotus", a: 13, b: 11, rows: [row("Alpha", 250, 20, 1.2)] }] } },
+    { event: "q1", id: "m2", details: { maps: [{ map: "Bind", a: 9, b: 13, rows: [row("Beta", 320, 27, 1.6, "b")] }] } },
+  ];
+  const bind = mapRecords(entries, "bind");
+  assert.deepEqual(bind.acs.map((x) => [x.name, x.value]), [["Beta", 320], ["Alpha", 300], ["Beta", 200]]);
+  assert.equal(bind.kills[0].id, "m2");
+  assert.equal(mapRecords(entries, "Haven"), null);
+  const alpha = playerRecords(entries, "alpha");
+  assert.deepEqual(alpha.acs.map((x) => [x.map, x.value]), [["Bind", 300], ["Lotus", 250]]);
+  assert.equal(playerRecords(entries, "nobody"), null);
+});

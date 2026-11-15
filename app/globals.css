@@ -3080,3 +3080,26 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .rlcol li > span { font: 800 16px var(--font-display); color: var(--lime); }
 .rolebadge { display: inline-flex; align-items: center; margin-right: 6px; padding: 2px 10px; border-radius: 999px; background: rgba(0,0,0,.35); color: #fff; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
 @media (max-width: 640px) { .globalfeed li { grid-template-columns: 46px 1fr; } .globalfeed li span { grid-column: 2; } }
+
+/* ---- round 21: in form, records */
+.inform { margin: 14px 0; }
+.inform h2 small { font: 500 13px var(--font-body); color: var(--muted); margin-left: 6px; }
+.informrow { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+.informcard { flex: 0 0 160px; display: grid; gap: 2px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); text-decoration: none; transition: transform .15s ease, border-color .15s ease; }
+.informcard:hover { transform: translateY(-2px); border-color: var(--lime); }
+.informcard b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.informcard small { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.infnums { display: flex; align-items: baseline; gap: 8px; }
+.infnums strong { font: 800 22px var(--font-display); }
+.infnums em { font-style: normal; font-weight: 800; font-size: 13px; }
+.infnums em.up { color: var(--lime); }
+.infnums em.down { color: #ff7b8a; }
+.records21 { margin: 16px 0; }
+.recgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.reccol { padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.reccol h3 { margin: 0 0 6px; font: 800 14px var(--font-display); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.reccol ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.reccol li { display: grid; grid-template-columns: 52px auto 1fr; align-items: center; gap: 8px; font-size: 14px; }
+.reccol li strong { font: 800 18px var(--font-display); color: var(--lime); }
+.reccol li a { color: var(--fg); }
+.reccol li small, .reccol li small a { color: var(--muted); font-size: 12px; }

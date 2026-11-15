@@ -23,6 +23,7 @@ import { PlayerHero } from "./Round11.jsx";
 import { RatingByMap } from "./Round13.jsx";
 import { AgentMastery } from "./Round16.jsx";
 import { NextMatchBanner } from "./Team18.jsx";
+import { Records } from "./Round21.jsx";
 
 // the map where the player rates best (2 maps at least there)
 const bestMap = (t) => ((t && t.byMap) || []).filter((x) => x.r != null && x.n >= 2).sort((a, b) => b.r - a.r)[0] || null;
@@ -124,6 +125,7 @@ function Tournament({ t }) {
       <Trend matches={t.matches} />
       <AgentMastery agents={t.agents} />
       <RatingByMap list={t.byMap} />
+      <Records rec={t.records} title={tr("Personal bests")} player />
       {t.agents.length > 0 && <p className="note agline">{tr("Agents")} : {t.agents.map((a) => <span key={a.name}><AgentIcon name={a.name} size={24} /> {a.n}</span>)}</p>}
       <div className="tablewrap">
         <table>
