@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
-import { after } from "next/server";
 import Home from "../components/Home";
 import { getDb, getState } from "../lib/db.js";
 import { LANG_COOKIE, normLang } from "../lib/i18n.js";
 import { workSoon } from "../lib/readsoon.js";
 import { homeSpotlight } from "../lib/round13.js";
 import { publicState } from "../lib/publicstate.js";
+import { keepFor } from "../lib/keep.js";
 
 // Always read the database on request: results change while the event runs.
 export const dynamic = "force-dynamic";
@@ -15,7 +15,6 @@ export const dynamic = "force-dynamic";
  * 5 seconds of work, for numbers that only move when a match ends. They are kept for a minute; once older, the next
  * visitor still gets them at once and they are worked out again right after that page is sent.
  */
-const HOME_FOR = 60000;
 
 async function computeHome() {
   const spot = await homeSpotlight().catch(() => []);
@@ -36,28 +35,10 @@ async function computeHome() {
   return { spot, elo, podium, form };
 }
 
-async function homeData() {
-  const kept = globalThis.__homeData;
-  if (kept && Date.now() - kept.at < HOME_FOR) return kept.data;
-  if (kept) {
-    // older than a minute: this visitor gets it now, the next ones get fresh numbers
-    if (!kept.refreshing) {
-      kept.refreshing = true;
-      after(async () => {
-        try { globalThis.__homeData = { at: Date.now(), data: await computeHome() }; } catch { kept.refreshing = false; }
-      });
-    }
-    return kept.data;
-  }
-  const data = await computeHome();
-  globalThis.__homeData = { at: Date.now(), data };
-  return data;
-}
-
 /** The home page: every VCT EMEA and Game Changers EMEA event, each linking to its own address. */
 export default async function Page() {
   workSoon();
   const lang = normLang((await cookies()).get(LANG_COOKIE)?.value);
-  const { spot, elo, podium, form } = await homeData();
+  const { spot, elo, podium, form } = await keepFor("home", 60000, computeHome);
   return <Home initial={publicState(getState(getDb()))} spot={spot} form={form} podium={podium} elo={elo} lang={lang} />;
 }
