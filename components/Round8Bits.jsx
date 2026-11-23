@@ -94,7 +94,7 @@ export function NotificationBell() {
     };
     setOpened(Number(safe(() => localStorage.getItem(OPENED), 0)) || 0);
     load();
-    const id = setInterval(load, 120000);
+    const id = setInterval(() => { if (!document.hidden) load(); }, 120000);
     return () => { on = false; clearInterval(id); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {

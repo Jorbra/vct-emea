@@ -49,7 +49,7 @@ export function MatchNightTheme() {
       fetch("/api/livescores").then((r) => (r.ok ? r.json() : null)).then((j) => { if (on && j) setBig((j.live || []).find((m) => m.big) || null); }).catch(() => {});
     };
     const first = setTimeout(load, 2500);
-    const t = setInterval(load, 60000);
+    const t = setInterval(() => { if (!document.hidden) load(); }, 120000);
     return () => { on = false; clearTimeout(first); clearInterval(t); };
   }, []);
   useEffect(() => {

@@ -14,7 +14,7 @@ function View({ initial, event, id }) {
   useEffect(() => {
     let on = true;
     const load = () => { if (document.hidden) return; fetch(`/api/overlay?match=${event}:${id}`, { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (on && j) setD(j); }).catch(() => {}); };
-    const t = setInterval(load, 8000);
+    const t = setInterval(() => { if (!document.hidden) load(); }, 15000);
     return () => { on = false; clearInterval(t); };
   }, [event, id]);
   const m = d.match;

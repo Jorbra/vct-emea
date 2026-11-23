@@ -99,7 +99,7 @@ export function PinnedTeams() {
     let on = true;
     const load = () => fetch("/api/livescores").then((r) => r.json()).then((j) => on && setLive(j.live || [])).catch(() => {});
     load();
-    const t = setInterval(load, 60000);
+    const t = setInterval(() => { if (!document.hidden) load(); }, 120000);
     return () => { on = false; clearInterval(t); };
   }, [fav.list.length]);
   if (!fav.list.length) return null;
@@ -126,7 +126,7 @@ export function LiveTeamBanner() {
     let on = true;
     const load = () => fetch("/api/livescores").then((r) => r.json()).then((j) => on && setLive((j.live || []).filter((m) => m.slugs.some((s) => fav.list.includes(s))))).catch(() => {});
     load();
-    const t = setInterval(load, 45000);
+    const t = setInterval(() => { if (!document.hidden) load(); }, 90000);
     return () => { on = false; clearInterval(t); };
   }, [fav.list.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
   const m = live.find((x) => `${x.event}:${x.id}` !== closed);
@@ -380,7 +380,7 @@ export function ActivityFeed() {
     let on = true;
     const load = () => fetch("/api/activity").then((r) => (r.ok ? r.json() : { items: [] })).then((j) => on && setItems(j.items || [])).catch(() => {});
     load();
-    const t = setInterval(load, 30000);
+    const t = setInterval(() => { if (!document.hidden) load(); }, 60000);
     return () => { on = false; clearInterval(t); };
   }, []);
   if (!items.length) return null;

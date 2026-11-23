@@ -15,7 +15,7 @@ function Night({ initial }) {
   useEffect(() => {
     let on = true;
     const load = () => fetch("/api/soiree").then((r) => (r.ok ? r.json() : null)).then((j) => { if (on && j) { setMatches(j.matches); setAt(new Date().toLocaleTimeString(tr.lang === "fr" ? "fr-FR" : undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" })); } }).catch(() => { /* offline */ });
-    const t = setInterval(load, 20000);
+    const t = setInterval(() => { if (!document.hidden) load(); }, 60000);
     return () => { on = false; clearInterval(t); };
   }, [tr.lang]);
   const sorted = useMemo(() => [...matches].sort((x, y) => Number(y.live) - Number(x.live) || Number(x.sa != null) - Number(y.sa != null) || (x.at || "").localeCompare(y.at || "")), [matches]);

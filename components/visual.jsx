@@ -105,7 +105,7 @@ export function useLiveCount() {
     let on = true;
     const load = () => fetch("/api/now").then((r) => (r.ok ? r.json() : null)).then((j) => { if (on && j) setN(j.items.filter((a) => a.kind === "live").length); }).catch(() => { /* offline */ });
     load();
-    const t = setInterval(load, 60000);
+    const t = setInterval(() => { if (!document.hidden) load(); }, 120000);
     return () => { on = false; clearInterval(t); };
   }, []);
   return n;
@@ -134,7 +134,7 @@ export function ResultToast() {
       setTimeout(() => setShown((s) => s.filter((x) => !fresh.includes(x))), 7000);
     }).catch(() => { /* offline */ });
     load();
-    const t = setInterval(load, 30000);
+    const t = setInterval(() => { if (!document.hidden) load(); }, 60000);
     return () => { on = false; clearInterval(t); };
   }, []);
   if (!shown.length) return null;

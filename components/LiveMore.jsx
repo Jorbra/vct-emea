@@ -69,7 +69,7 @@ export function CloseAlerts() {
       }).catch(() => { /* offline */ });
     };
     const first = setTimeout(load, 4000);
-    const t = setInterval(load, 45000);
+    const t = setInterval(() => { if (!document.hidden) load(); }, 90000);
     return () => { on = false; clearTimeout(first); clearInterval(t); };
   }, []);
   if (!shown.length) return null;

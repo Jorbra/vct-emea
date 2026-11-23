@@ -25,7 +25,7 @@ const tenseFirst = (list) => list.map((m, i) => ({ m, i, w: weight(m) })).sort((
 
 function View({ live, next }) {
   const tr = useT();
-  useAutoRefresh(30000);
+  useAutoRefresh(60000);
   const [host, setHost] = useState("");
   const [watch, setWatch] = useState("");
   const [multi, setMulti] = useState(false);

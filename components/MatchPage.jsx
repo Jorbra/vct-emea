@@ -13,7 +13,7 @@ import { EVENT_NAMES } from "../lib/paths.js";
 
 function View({ e, id, state, radar = null, rating = null }) {
   const tr = useT();
-  useAutoRefresh(30000);
+  useAutoRefresh(60000);
   const m = e.items.find((x) => x.id === id);
   const title = `${(m.a && m.a.name) || tr("TBD")} vs ${(m.b && m.b.name) || tr("TBD")}`;
   return (

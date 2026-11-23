@@ -179,7 +179,7 @@ function HomeView({ initial, spot = [], form = [], podium = [], elo = {} }) {
     times: (initial.times && initial.times[e]) || {}, live: (initial.live && initial.live[e]) || {},
     extra: (initial.extra && initial.extra[e]) || {}, stream: (initial.info && initial.info[e] && initial.info[e].stream) || "",
   })), [initial]);
-  useAutoRefresh(30000);
+  useAutoRefresh(60000);
 
   const REGION = { q1: "eu", q2: "eu", playoffs: "eu", trq1: "tr", trq2: "tr", tr: "tr", meq1: "mena", meq2: "mena", naq1: "mena", naq2: "mena", mena: "mena", kickoff: "emea", gc: "gc" };
   const card = (key, title, meta, outLabel) => {

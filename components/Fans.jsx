@@ -222,7 +222,7 @@ export function Comments({ event, id, live = false }) {
     const load = () => fetch(`/api/comments?event=${event}&id=${id}`).then((r) => (r.ok ? r.json() : null)).then((j) => { if (on && j) setList(j.comments); }).catch(() => { /* offline */ });
     load();
     // during the match: a live chat, read again every 5 s while the page is shown
-    const t = live ? setInterval(() => { if (!document.hidden) load(); }, 5000) : null;
+    const t = live ? setInterval(() => { if (!document.hidden) load(); }, 10000) : null;
     return () => { on = false; if (t) clearInterval(t); };
   }, [event, id, live]);
   const send = async (e) => {
