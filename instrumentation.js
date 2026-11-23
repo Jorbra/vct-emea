@@ -12,4 +12,15 @@ export function register() {
     process.env.TZ = process.env.SITE_TZ || "Europe/Paris";
     process.env.SITE_TZ_SET = "1";
   }
+  // on a server that keeps running: a few seconds after it starts, it opens its heaviest pages itself, so that their
+  // season-wide numbers are ready (lib/keep.js) before the first visitor comes
+  if (process.env.NEXT_RUNTIME === "nodejs" && process.env.BACKGROUND_WORK === "external") {
+    const base = `http://127.0.0.1:${process.env.PORT || 3000}`;
+    setTimeout(async () => {
+      for (const page of ["/", "/stats"]) {
+        try { await fetch(base + page, { signal: AbortSignal.timeout(60000) }); } catch { /* the first visitor will do it */ }
+      }
+      console.log("[warm] home and stats ready");
+    }, 5000).unref?.();
+  }
 }
