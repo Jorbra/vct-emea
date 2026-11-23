@@ -1,0 +1,41 @@
+# Render Blueprint: the site as one Node server (next start), in Frankfurt, next to the visitors.
+# On Render: New > Blueprint > this repository. The secrets (sync: false) are asked for once, never written here.
+# plan: free sleeps after 15 minutes without a visit (about a minute to wake up); "starter" (7 $/month) never sleeps.
+services:
+  - type: web
+    name: vct-emea
+    runtime: node
+    region: frankfurt
+    plan: free
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /robots.txt
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      # the database (Turso): the same values as on Vercel
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+      # the editors' access
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      # the Discord bot and webhook
+      - key: DISCORD_APP_ID
+        sync: false
+      - key: DISCORD_PUBLIC_KEY
+        sync: false
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_WEBHOOK_URL
+        sync: false
+      # optional: the changelog page reads the commits with it
+      - key: GITHUB_TOKEN
+        sync: false
