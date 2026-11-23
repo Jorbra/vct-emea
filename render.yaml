@@ -9,7 +9,8 @@ services:
     plan: free
     branch: main
     buildCommand: npm ci && npm run build
-    startCommand: npm start
+    # 0.0.0.0: Render looks for a port open on IPv4; Next alone listens on IPv6 (::) and Render does not see it
+    startCommand: npx next start -H 0.0.0.0 -p ${PORT:-10000}
     healthCheckPath: /robots.txt
     autoDeploy: true
     envVars:
