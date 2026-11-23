@@ -16,8 +16,8 @@ export default async function Page({ searchParams }) {
   const events = eventsWithDetails(db);
   const asked = String((await searchParams).e || "");
   const event = events.includes(asked) ? asked : events[0] || "";
-  // the tables of an event: several seconds of work over the season, kept a minute (lib/keep.js)
-  const stats = event ? await keepFor(`stats:${event}`, 60000, async () => {
+  // the tables of an event: several seconds of work over the season, kept 5 minutes (lib/keep.js)
+  const stats = event ? await keepFor(`stats:${event}`, 300000, async () => {
     const s = tournamentStats(getState(db), readDetails(db, event));
     const x = extraStats(getState(db), readDetails(db, event));
     // the page gets the tables it shows, not the per-match lists

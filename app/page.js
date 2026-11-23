@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * The home page's blocks that go over the whole season (spotlight, players in form, podium, win chances): about
- * 5 seconds of work, for numbers that only move when a match ends. They are kept for a minute; once older, the next
+ * 5 seconds of work, for numbers that only move when a match ends. They are kept for 5 minutes; once older, the next
  * visitor still gets them at once and they are worked out again right after that page is sent.
  */
 
@@ -39,6 +39,6 @@ async function computeHome() {
 export default async function Page() {
   workSoon();
   const lang = normLang((await cookies()).get(LANG_COOKIE)?.value);
-  const { spot, elo, podium, form } = await keepFor("home", 60000, computeHome);
+  const { spot, elo, podium, form } = await keepFor("home", 300000, computeHome);
   return <Home initial={publicState(getState(getDb()))} spot={spot} form={form} podium={podium} elo={elo} lang={lang} />;
 }
