@@ -1,14 +1,16 @@
 // The nightly backup: the whole Turso database copied into a dated SQLite file, the last 14 kept.
 // On the server, a scheduled task runs it (Coolify: node scripts/backup.mjs, at 0 4 * * *). The files go to
 // BACKUP_DIR, else /app/data/sauvegardes when /app/data exists (the site's persistent volume), else data/sauvegardes.
-// It reads Turso directly, table by table (Turso can only be read over the network), writes a temporary file, checks it,
+// It copies its local copy of Turso table by table, writes a temporary file, checks it,
 // then gives it its name: a backup that stops halfway never replaces a good one. Its date and size are noted in the
 // database, for the editor's "Server" panel.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-delete process.env.TURSO_REPLICA_PATH; // Turso itself, not the site's local copy
+// A local copy of its own (backup-copie.db beside the site's): only what changed since the last night comes from Turso, and
+// the table-by-table copy reads the server's disk, not Turso (which counts every row read against its monthly quota).
+if (process.env.TURSO_REPLICA_PATH) process.env.TURSO_REPLICA_PATH = path.join(path.dirname(process.env.TURSO_REPLICA_PATH), "backup-copie.db");
 
 const KEEP = 14;
 const NAME = /^vct-emea-\d{4}-\d{2}-\d{2}\.db$/;
