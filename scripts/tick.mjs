@@ -1,26 +1,44 @@
 // One round of the site's background work, run apart from the pages: on a server, a scheduled task starts it every
 // minute (Coolify: node scripts/tick.mjs), with BACKGROUND_WORK=external set on the site so the pages leave it alone.
-// It talks to Turso directly (no local copy: copying the whole database every minute would be wasteful), waits on
-// the network as long as it needs, and never makes a visitor wait. It stops after 55 s at most.
-delete process.env.TURSO_REPLICA_PATH;
+// The work runs in a process of its own (scripts/tick-work.mjs), stopped for good after 55 s: its calls to Turso are
+// synchronous, so a timer inside it never fired, and rounds that ran on for two minutes piled up and slowed the site.
+// A round still running (a lock file with its process number) means this one does nothing.
+import { spawn } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const stop = setTimeout(() => {
-  console.log("[tick] still running after 55 s: stopped, the next round takes over");
-  process.exit(0);
-}, 55000);
-stop.unref();
+const LIMIT = 55000;
+const LOCK = path.join(os.tmpdir(), "vct-emea-tick.lock");
 
-const t0 = Date.now();
-try {
-  const { regularWork } = await import("../lib/notify.js");
-  const { readTurn } = await import("../lib/readturn.js");
-  await Promise.all([regularWork(), readTurn()]);
-  // a full round: for the health table and the editor's Server panel
-  const { noteWorked } = await import("../lib/health.js");
-  noteWorked("tick");
-} catch (e) {
-  console.log(`[tick] ${e.message}`);
-  process.exitCode = 1;
+/** True when the lock names a process still alive (and is less than 5 minutes old). */
+export function busy(lock = LOCK, now = Date.now()) {
+  try {
+    const { pid, at } = JSON.parse(fs.readFileSync(lock, "utf8"));
+    if (now - at > 5 * 60000) return false;
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
 }
-console.log(`[tick] done in ${Date.now() - t0} ms`);
-process.exit();
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  if (busy()) {
+    console.log("[tick] the previous round is still running: this one is skipped");
+    process.exit(0);
+  }
+  const work = fileURLToPath(new URL("./tick-work.mjs", import.meta.url));
+  const child = spawn(process.execPath, [work], { stdio: "inherit", env: process.env });
+  try { fs.writeFileSync(LOCK, JSON.stringify({ pid: child.pid, at: Date.now() })); } catch { /* no lock: rounds may meet */ }
+  const stop = setTimeout(() => {
+    console.log(`[tick] still running after ${LIMIT / 1000} s: stopped, the next round takes over`);
+    child.kill("SIGKILL");
+  }, LIMIT);
+  child.on("exit", (code) => {
+    clearTimeout(stop);
+    try { fs.rmSync(LOCK, { force: true }); } catch { /* the next round checks the process anyway */ }
+    process.exit(code ?? 0);
+  });
+}

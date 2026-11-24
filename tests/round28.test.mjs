@@ -152,3 +152,17 @@ test("the history's lines of the background work read in French", async () => {
   assert.match(serverFr("Sources of playoffs: Toornament default, vlr.gg 3233"), /^Sources de .+ : Toornament par défaut, vlr\.gg 3233$/);
   assert.match(serverFr("Result from vlr.gg (match over, before Toornament): meq2 r32-8 2-0"), /^Résultat de vlr\.gg \(match terminé, avant Toornament\) : .+ r32-8 2-0$/);
 });
+
+test("background task: a round still running (its lock, its process alive) makes the next one skip", async () => {
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+  const { busy } = await import("../scripts/tick.mjs");
+  const lock = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "tick-")), "lock");
+  assert.equal(busy(lock), false); // no lock
+  fs.writeFileSync(lock, JSON.stringify({ pid: process.pid, at: Date.now() }));
+  assert.equal(busy(lock), true);
+  assert.equal(busy(lock, Date.now() + 6 * 60000), false); // too old: a round never lasts this long
+  fs.writeFileSync(lock, JSON.stringify({ pid: 2 ** 22 + 12345, at: Date.now() }));
+  assert.equal(busy(lock), false); // its process is gone
+});
