@@ -103,6 +103,7 @@ export function AlertsButton() {
   return (
     <>
       <button type="button" className="btn" disabled={busy} aria-pressed={on} title={tr("For your favorite teams if you have any, otherwise for every match")} onClick={toggle}>{on ? `🔔 ${tr("Match alerts on")}` : `🔕 ${tr("Turn on match alerts")}`}</button>
+      {on && <span className="hint"> {tr("An alert as soon as a match of your teams starts, even with the site closed.")}</span>}
       {on && <label className="digestopt"><input type="checkbox" checked={digest} onChange={(e) => chooseDigest(e.target.checked)} /> {tr("Results in one summary at 10 pm")}</label>}
       {note && <span className="hint" role="status"> {note}</span>}
     </>
