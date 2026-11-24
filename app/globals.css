@@ -3437,3 +3437,14 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .ahhist.compact li.open .histmsg { white-space: normal; overflow-wrap: anywhere; }
 .histn { font-style: normal; color: var(--muted); font-weight: 700; }
 @media (max-width: 640px) { .ahhist.compact li { grid-template-columns: 1fr auto; } .ahhist.compact li .histmsg { grid-column: 1 / -1; } }
+/* R18. Sources: the same labelled fields on every row */
+.srcbox .srcbody { padding: 10px 14px 14px; }
+.srcrow { grid-template-columns: 160px minmax(180px, 1fr) minmax(0, 3fr) auto; align-items: center; }
+.srcnow > span { display: block; }
+.srcfields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.srcf { display: grid; gap: 3px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); min-width: 0; }
+.srcf input { width: 100%; box-sizing: border-box; text-transform: none; letter-spacing: 0; font-weight: 400; }
+.srcnone em { font-style: normal; text-transform: none; letter-spacing: 0; font-weight: 400; padding: 7px 0; opacity: .7; }
+.srcact { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
+.srcact .srcbr input { width: auto; }
+@media (max-width: 1100px) { .srcrow { grid-template-columns: 1fr; } .srcfields { grid-template-columns: 1fr 1fr; } .srcact { justify-content: flex-start; } }

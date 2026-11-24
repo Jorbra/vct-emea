@@ -34,14 +34,17 @@ test("links: a Liquipedia page from what people paste", () => {
   assert.equal(parseLp("https://example.com/x"), "");
 });
 
-test("sources: a Liquipedia link, even pasted in the vlr.gg box, for the EU Qualifier Playoffs only", () => {
+test("sources: a Liquipedia link, even pasted in the vlr.gg box; its matches read for the EU Qualifier Playoffs only", () => {
   const db = openDb(":memory:");
   assert.deepEqual(lpMatchPages(db).playoffs, ["VCT/2027/EMEA/Kickoff/Europe/Swiss_Stage", "VCT/2027/EMEA/Kickoff/Europe"]);
   const r = saveSource(db, { event: "playoffs", vlr: "https://liquipedia.net/valorant/VCT/2027/EMEA/Kickoff/Europe/Swiss_Stage" });
   assert.equal(r.ok, true, r.error);
   assert.equal(readSources(db).playoffs.lp, "VCT/2027/EMEA/Kickoff/Europe");
   assert.equal(readSources(db).playoffs.vlr, "");
-  assert.equal(saveSource(db, { event: "q1", lp: "https://liquipedia.net/valorant/VCT/2027/EMEA/Kickoff/Europe/Qualifier_1" }).ok, false);
+  // another event keeps its page as a link to open: nothing is read there
+  assert.equal(saveSource(db, { event: "q1", lp: "https://liquipedia.net/valorant/VCT/2027/EMEA/Kickoff/Europe/Qualifier_1" }).ok, true);
+  assert.equal(readSources(db).q1.lp, "VCT/2027/EMEA/Kickoff/Europe/Qualifier_1");
+  assert.equal(lpMatchPages(db).q1, undefined);
   assert.equal(saveSource(db, { event: "playoffs", lp: "off" }).ok, true);
   assert.equal(lpMatchPages(db).playoffs, undefined);
 });

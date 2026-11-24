@@ -1,6 +1,6 @@
 "use client";
 
-// The editor's "Sources" screen: paste an event's Toornament and vlr.gg links, the site follows them at the next round.
+// The editor's "Sources" screen: paste an event's Toornament, vlr.gg and Liquipedia links, the site follows them at the next round.
 import { useState } from "react";
 import { useT } from "./lang.jsx";
 import { EVENT_NAMES } from "../lib/paths.js";
@@ -19,24 +19,31 @@ function Row({ r, call, onDone }) {
     try { await call("/api/sources", { event: r.event, ...v }); onDone(tr("Saved: the site follows these links from the next round.")); } catch (err) { onDone(tr.server(err.message)); }
     setBusy(false);
   };
+  const field = (label, k, placeholder, extra = {}) => (
+    <label className="srcf">{label}<input value={v[k]} onChange={set(k)} placeholder={placeholder} {...extra} /></label>
+  );
   return (
     <form className="srcrow" onSubmit={save}>
       <b className="srcname">{tr(EVENT_NAMES[r.event] || r.event)}</b>
       <div className="srcnow">
-        {r.toornament ? <a href={r.toornament.link} target="_blank" rel="noopener noreferrer">Toornament</a> : <span className="muted">{r.qualifier ? tr("No Toornament") : ""}</span>}
-        {r.toornament && <small>{r.toornament.error ? `⚠️ ${r.toornament.error}` : r.toornament.at ? `${tr("read")} ${when(r.toornament.at, tr.lang)}` : tr("not read yet")}</small>}
-        {r.vlr ? <a href={r.vlr.link} target="_blank" rel="noopener noreferrer">vlr.gg{r.vlr.stage ? ` · ${r.vlr.stage}` : ""}</a> : <span className="muted">{tr("No vlr.gg")}</span>}
-        {r.vlr && <small>{r.vlr.at ? `${r.vlr.matches} ${tr("matches")} · ${tr("read")} ${when(r.vlr.at, tr.lang)}` : tr("not read yet")}</small>}
+        {r.toornament ? <span><a href={r.toornament.link} target="_blank" rel="noopener noreferrer">Toornament</a> <small>{r.toornament.error ? `⚠️ ${r.toornament.error}` : r.toornament.at ? `${tr("read")} ${when(r.toornament.at, tr.lang)}` : tr("not read yet")}</small></span>
+          : r.qualifier ? <span className="muted">{tr("No Toornament")}</span> : null}
+        {r.vlr ? <span><a href={r.vlr.link} target="_blank" rel="noopener noreferrer">vlr.gg{r.vlr.stage ? ` · ${r.vlr.stage}` : ""}</a> <small>{r.vlr.at ? `${r.vlr.matches} ${tr("matches")} · ${when(r.vlr.at, tr.lang)}` : tr("not read yet")}</small></span>
+          : <span className="muted">{tr("No vlr.gg")}</span>}
         {r.bracket && <small>📊 {tr("bracket from vlr.gg")}</small>}
-        {r.lp && <a href={r.lp.link} target="_blank" rel="noopener noreferrer">Liquipedia</a>}
-        {r.lp && <small>{r.lp.error ? `⚠️ ${r.lp.error}` : r.lp.at ? `${r.lp.matches} ${tr("matches")} · ${tr("read")} ${when(r.lp.at, tr.lang)}` : tr("not read yet")}</small>}
+        {r.lp ? <span><a href={r.lp.link} target="_blank" rel="noopener noreferrer">Liquipedia</a> <small>{r.lp.reference ? tr("link to open") : r.lp.error ? `⚠️ ${r.lp.error}` : r.lp.at ? `${r.lp.matches} ${tr("matches")} · ${when(r.lp.at, tr.lang)}` : tr("not read yet")}</small></span>
+          : <span className="muted">{tr("No Liquipedia")}</span>}
       </div>
-      {r.lp && <input value={v.lp} onChange={set("lp")} placeholder={tr("Liquipedia link (or off)")} aria-label={tr("Liquipedia link")} />}
-      {r.qualifier && <input value={v.toornament} onChange={set("toornament")} placeholder={tr("Toornament link (or off)")} aria-label={tr("Toornament link")} />}
-      <input value={v.vlr} onChange={set("vlr")} placeholder={tr("vlr.gg link (or off)")} aria-label={tr("vlr.gg link")} />
-      <input value={v.stage} onChange={set("stage")} placeholder={tr("vlr.gg stage, e.g. Qualifier #2")} aria-label={tr("vlr.gg stage")} className="srcstage" />
-      {r.qualifier && <label className="sw srcbr"><input type="checkbox" checked={v.bracket} onChange={set("bracket")} /> {tr("Bracket from vlr.gg")}</label>}
-      <button type="submit" className="btn pri small" disabled={busy}>{tr("Save")}</button>
+      <div className="srcfields">
+        {r.qualifier ? field("Toornament", "toornament", tr("Link (or off)")) : <span className="srcf srcnone">Toornament<em>{tr("Not for this event")}</em></span>}
+        {field("vlr.gg", "vlr", tr("Link (or off)"))}
+        {field(tr("vlr.gg stage"), "stage", tr("e.g. Qualifier #2"))}
+        {field("Liquipedia", "lp", tr("Link (or off)"))}
+      </div>
+      <div className="srcact">
+        {r.qualifier && <label className="srcbr"><input type="checkbox" checked={v.bracket} onChange={set("bracket")} /> {tr("Bracket from vlr.gg")}</label>}
+        <button type="submit" className="btn pri small" disabled={busy}>{tr("Save")}</button>
+      </div>
     </form>
   );
 }
@@ -45,10 +52,12 @@ export function SourcesEditor({ list, call, onDone }) {
   const tr = useT();
   return (
     <details className="einfo srcbox">
-      <summary><b>🔗 {tr("Sources: Toornament and vlr.gg links")}</b></summary>
-      <p className="hint">{tr("Paste a tournament's Toornament page or an event's vlr.gg page: the site follows it from the next round, without changing the code. Empty: back to the default. \"off\": stop following. On vlr.gg, one event often holds several qualifiers: write the words of the stage that are this one's (e.g. \"Qualifier #2\").")}</p>
-      <p className="hint">{tr("EU Qualifier Playoffs: Liquipedia is read too, as a second source. Its Swiss pairings, semifinals, scores and times fill what is still empty here; nothing an editor typed is changed.")}</p>
-      <div className="srclist">{list.map((r) => <Row key={r.event} r={r} call={call} onDone={onDone} />)}</div>
+      <summary><b>🔗 {tr("Sources: Toornament, vlr.gg and Liquipedia")}</b></summary>
+      <div className="srcbody">
+        <p className="hint">{tr("Paste a tournament's Toornament page or an event's vlr.gg page: the site follows it from the next round, without changing the code. Empty: back to the default. \"off\": stop following. On vlr.gg, one event often holds several qualifiers: write the words of the stage that are this one's (e.g. \"Qualifier #2\").")}</p>
+        <p className="hint">{tr("Liquipedia: the EU Qualifier Playoffs' Swiss pairings, semifinals, scores and times are read there as a second source and fill what is still empty (nothing an editor typed is changed). For the other events, the Liquipedia page is kept as a link to open.")}</p>
+        <div className="srclist">{list.map((r) => <Row key={r.event} r={r} call={call} onDone={onDone} />)}</div>
+      </div>
     </details>
   );
 }
