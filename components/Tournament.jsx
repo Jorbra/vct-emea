@@ -179,12 +179,14 @@ function SwissMatrix({ ranked, rec, swiss, byId }) {
                   if (!m) return <td key={n} className="rc" />;
                   const home = m.a === t.id;
                   const opp = byId[home ? m.b : m.a];
-                  const tag = (opp && (opp.tag || opp.name)) || "TBD";
+                  // the opponent's logo, its name on hover and for screen readers
+                  const name = (opp && opp.name) || "TBD";
+                  const tag = <span className="rcopp" title={name} aria-label={name}><Crest team={opp} /></span>;
                   const res = result(m);
-                  if (!res) return <td key={n} className="rc rp">{tr("vs")} {tag}</td>;
+                  if (!res) return <td key={n} className="rc rp"><span className="rcin">{tr("vs")} {tag}</span></td>;
                   return (
                     <td key={n} className={"rc " + (res.winner === t.id ? "rw" : "rl")}>
-                      <b>{home ? `${m.sa}-${m.sb}` : `${m.sb}-${m.sa}`}</b> {tag}
+                      <span className="rcin"><b>{home ? `${m.sa}-${m.sb}` : `${m.sb}-${m.sa}`}</b> {tag}</span>
                     </td>
                   );
                 })}

@@ -214,6 +214,8 @@ tr.p1 .place { background: var(--gold); color: #fff; }
 .rtbl td.rw { background: var(--win-bg); }
 .rtbl td.rl { background: var(--loss-bg); }
 .rtbl td.rp { color: var(--muted); }
+.rtbl td.rc .rcin { display: inline-flex; align-items: center; gap: 6px; vertical-align: middle; }
+.rtbl td.rc .rcopp .crest { width: 24px; height: 24px; border-radius: 6px; font-size: 11px; }
 .rtbl .rk .place { min-width: 20px; height: 20px; font-size: 12px; }
 .rtbl .pt { display: flex; align-items: center; gap: 8px; min-width: 150px; font-weight: 600; }
 .rtbl .crest { width: 22px; height: 22px; font-size: 10px; border-radius: 5px; flex: none; }
