@@ -3382,3 +3382,12 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .teampage.teamtint { background-image: radial-gradient(ellipse 80% 420px at 25% 0, color-mix(in srgb, var(--team) 20%, transparent), transparent); background-repeat: no-repeat; }
 .teamtint .crumbs a, .teamtint .pathlinks a { color: color-mix(in srgb, var(--team) 55%, var(--fg)); }
 .teamtint .parttabs button[aria-selected="true"], .teamtint .parttabs [aria-current] { box-shadow: inset 0 -2px 0 var(--team); }
+/* R18. The editor's Server panel */
+.srvsites { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 8px; margin: 8px 0 12px; }
+.srvsite { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 2px 8px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: var(--fg); text-decoration: none; }
+.srvsite span:not(.srvdot) { grid-column: 2 / 4; color: var(--muted); font-size: 13px; }
+.srvsite small { grid-row: 1; grid-column: 3; font-variant-numeric: tabular-nums; color: var(--muted); }
+.srvsite small.slow { color: #f2a63b; }
+.srvdot { grid-row: 1 / 3; width: 10px; height: 10px; border-radius: 50%; background: #2e9d5b; box-shadow: 0 0 0 3px color-mix(in srgb, #2e9d5b 25%, transparent); }
+.srvsite.down { border-color: #c8374a; }
+.srvsite.down .srvdot { background: #c8374a; box-shadow: 0 0 0 3px color-mix(in srgb, #c8374a 25%, transparent); }

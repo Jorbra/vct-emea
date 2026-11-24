@@ -1,5 +1,6 @@
 "use client";
 
+import ServerPanel from "./ServerPanel.jsx";
 import { localeOf } from "../lib/i18n.js";
 import { useEffect, useMemo, useState } from "react";
 import { useT } from "./lang.jsx";
@@ -79,6 +80,7 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
       {initial.admin && initial.admin.dayBoard && <DayBoard list={initial.admin.dayBoard} onOpen={onOpen} />}
       {initial.admin && initial.admin.checklist && initial.admin.checklist.length > 0 && <Checklist list={initial.admin.checklist} />}
       {initial.admin && initial.admin.health && <Health rows={initial.admin.health} />}
+      {initial.admin && <ServerPanel />}
       {initial.admin && initial.admin.sources && <SourcesEditor list={initial.admin.sources} call={call} onDone={onDone} />}
       {initial.admin && initial.admin.teamAliases && <TeamAliases aliases={initial.admin.teamAliases} call={call} onDone={onDone} />}
       {initial.admin && <QuickStreams initial={initial} call={call} onDone={onDone} />}

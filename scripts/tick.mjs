@@ -15,6 +15,9 @@ try {
   const { regularWork } = await import("../lib/notify.js");
   const { readTurn } = await import("../lib/readturn.js");
   await Promise.all([regularWork(), readTurn()]);
+  // a full round: for the health table and the editor's Server panel
+  const { noteWorked } = await import("../lib/health.js");
+  noteWorked("tick");
 } catch (e) {
   console.log(`[tick] ${e.message}`);
   process.exitCode = 1;

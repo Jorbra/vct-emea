@@ -5,6 +5,16 @@ import { removeHealthSub, saveHealthSub } from "../../../lib/social.js";
 
 export const dynamic = "force-dynamic";
 
+// GET, for anyone (the server's watch, the editor's Server panel): the site answers and reads its database.
+export async function GET() {
+  try {
+    getDb().prepare("SELECT 1").get();
+    return Response.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
+  } catch {
+    return Response.json({ ok: false }, { status: 503, headers: { "Cache-Control": "no-store" } });
+  }
+}
+
 // Editors only. POST { endpoint, keys }: this device gets the health alerts. DELETE { endpoint }: no longer.
 export async function POST(req) {
   const me = await currentEditor();

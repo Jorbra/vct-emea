@@ -120,3 +120,26 @@ test("team tint: a logo's colours worked out on the server, kept in the database
   assert.match(await logoPng(db, "/api/logos/RED.png"), /^data:image\/png;base64,/);
   assert.equal(await logoPng(db, ""), "");
 });
+
+test("server panel: the sites from STATUS_SITES (three by default), their answer and time; the backup keeps the last 14", async () => {
+  const { statusSites, pingSites, jobsInfo, DEFAULT_SITES } = await import("../lib/serverstatus.js");
+  const { toRemove, backupDir } = await import("../scripts/backup.mjs");
+  assert.deepEqual(statusSites("").map((s) => s.url), DEFAULT_SITES);
+  assert.deepEqual(statusSites("").map((s) => s.name), ["VCT EMEA", "Flashback", "Planning"]);
+  assert.deepEqual(statusSites("Mon site=https://a.test/, https://b.test").map((s) => [s.name, s.url]), [["Mon site", "https://a.test"], ["b", "https://b.test"]]);
+  assert.deepEqual(statusSites("pas-une-adresse"), []);
+  let t = 0;
+  const fetchImpl = async (url) => { t += 40; if (url.startsWith("https://b.test")) throw new Error("ECONNREFUSED"); return { status: url.startsWith("https://c.test") ? 502 : 200 }; };
+  const r = await pingSites(statusSites("https://a.test https://b.test https://c.test"), { fetchImpl, now: () => t });
+  assert.deepEqual(r.map((s) => s.ok), [true, false, false]);
+  assert.ok(r[0].ms >= 40);
+  assert.equal(r[1].error, "ECONNREFUSED");
+  const db = openDb(":memory:");
+  const { saveItem } = await import("../lib/lpstore.js");
+  saveItem("meta", "backup_last", { at: "2026-11-25T03:00:05Z", file: "vct-emea-2026-11-25.db", size: 1, kept: 14 }, db);
+  assert.equal(jobsInfo(db).backup.file, "vct-emea-2026-11-25.db");
+  const files = Array.from({ length: 16 }, (_, i) => `vct-emea-2026-11-${String(i + 1).padStart(2, "0")}.db`).concat(["autre.txt"]);
+  assert.deepEqual(toRemove(files), ["vct-emea-2026-11-02.db", "vct-emea-2026-11-01.db"]);
+  assert.equal(backupDir({}, (p) => p === "/app/data"), "/app/data/sauvegardes");
+  assert.equal(backupDir({ BACKUP_DIR: "/x" }), "/x");
+});
