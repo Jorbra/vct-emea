@@ -8,7 +8,37 @@ const ANNOUNCE = [["start", "Match starts"], ["result", "Results"], ["image", "R
 const TABS = [["settings", "Settings"], ["auto", "Automatic"], ["samples", "Examples"], ["announce", "Announcement"], ["pin", "Pinned message"], ["stats", "Statistics"], ["log", "Log"]];
 const KINDS = [["start", "Match start"], ["result", "Result"], ["reminder", "Reminder 15 min"], ["live", "Live score message"], ["poll", "Poll"], ["daily", "Evening summary"]];
 const AUTO = [["reminder", "Reminder 15 minutes before each match"], ["daily", "Evening summary at 10 pm (the day's results)"], ["weekly", "Prediction ranking every Monday at 10 am"], ["liveEdit", "One message per live match, updated as it goes"], ["polls", "A poll \"Who wins?\" before the final rounds"], ["fanRoles", "Fans' roles: /suivre gives the team's role, mentioned at its matches"], ["recap", "The recap of a qualifier as soon as it ends"], ["threadMaps", "In each match's thread: every map's result, then the series'"], ["oracle", "Oracle of the week: every Monday, the server's best predictor gets the role"], ["games", "Games of the day every morning at 9, with yesterday's best"], ["weekRecap", "The week's recap as a picture every Monday at 11"], ["pronoDm", "Private reminder to predict (for those who asked with /rappelprono)"], ["qualified", "A picture each time a team qualifies for the next event"], ["motd", "Prediction of the day at noon, with buttons, and its result once played"], ["teamWeek", "The team of the week every Monday at noon (the best player per role)"], ["tiers", "Bronze, Silver and Gold predictor roles on the server, by points (once a day)"], ["closeMatch", "A message when a live match goes to overtime or to its deciding map"]];
+// the automatic messages, by when they happen
+const AUTO_GROUPS = [
+  ["During the matches", ["reminder", "liveEdit", "threadMaps", "closeMatch", "polls"]],
+  ["Every day", ["daily", "games", "motd", "pronoDm", "tiers"]],
+  ["Every week", ["weekly", "oracle", "weekRecap", "teamWeek"]],
+  ["As the events go", ["recap", "qualified", "fanRoles"]],
+];
 const when = (iso) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+
+/** One option as a switch, its whole row clickable. */
+function Toggle({ checked, onChange, children, title, disabled = false }) {
+  return (
+    <label className={"btoggle" + (checked ? " on" : "")} title={title}>
+      <input type="checkbox" role="switch" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
+      <span className="btsw" aria-hidden="true" />
+      <span className="btlabel">{children}</span>
+    </label>
+  );
+}
+
+/** A group of switches with how many are on, and "all" / "none". */
+function Group({ title, on, total, onAll, children, wide = false }) {
+  const tr = useT();
+  return (
+    <fieldset className={"bgroup" + (wide ? " wide" : "")}>
+      <legend>{title} <small>{on}/{total}</small></legend>
+      {onAll && <span className="bgall"><button type="button" className="linkbtn" onClick={() => onAll(true)}>{tr("All")}</button> · <button type="button" className="linkbtn" onClick={() => onAll(false)}>{tr("None")}</button></span>}
+      <div className="bgitems">{children}</div>
+    </fieldset>
+  );
+}
 
 /** A Discord card as Discord draws it, roughly: for the pinned message's preview. */
 function EmbedPreview({ e }) {
@@ -34,6 +64,8 @@ export default function BotPanel() {
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState("start");
   const [sample, setSample] = useState(null);
+  const [saved, setSaved] = useState(""); // the settings as last saved, to tell what changed
+  const [cmdQ, setCmdQ] = useState("");
   useEffect(() => {
     if (tab !== "samples") return;
     setSample(null);
@@ -44,7 +76,12 @@ export default function BotPanel() {
     fetch(`/api/bot${guild ? `?guild=${guild}` : ""}`).then((r) => (r.ok ? r.json() : null)).then((j) => {
       if (!j) return;
       setD(j);
-      setS((cur) => (cur ? { ...cur, guild: j.guild || cur.guild } : { ...j.settings, guild: j.guild || j.settings.guild }));
+      setS((cur) => {
+        if (cur) return { ...cur, guild: j.guild || cur.guild };
+        const first = { ...j.settings, guild: j.guild || j.settings.guild };
+        setSaved(JSON.stringify(first));
+        return first;
+      });
     }).catch(() => { /* offline */ });
   }, []);
   useEffect(() => { if (open && !d) load(); }, [open, d, load]);
@@ -60,6 +97,8 @@ export default function BotPanel() {
     } catch (e) { setMsg({ ok: false, text: tr.server(e.message) }); } finally { setBusy(false); }
   };
   const set = (k, v) => setS((x) => ({ ...x, [k]: v }));
+  const dirty = !!s && !!saved && JSON.stringify(s) !== saved;
+  const save = () => call({ action: "save", ...s }, () => setSaved(JSON.stringify(s)));
   const pick = (label, key, list, none = true) => (
     <label className="f">{label}
       <select value={s[key] || ""} onChange={(e) => { set(key, e.target.value); if (key === "guild") load(e.target.value); }}>
@@ -76,11 +115,11 @@ export default function BotPanel() {
     <section>
       <details className="einfo botpanel" onToggle={(e) => setOpen(e.currentTarget.open)}>
         <summary><b>🤖 {tr("Discord bot")}</b>{d && <small> · {d.usage.total} {tr("Uses (30 days)").toLowerCase()}</small>}</summary>
-        {!d || !s ? <Skeleton lines={5} /> : (
-          <>
+        {!d || !s ? <div className="botbody"><Skeleton lines={5} /></div> : (
+          <div className="botbody">
             <div className="botstate">
-              {state(d.publicKey, tr("Public key on Vercel"), tr(d.publicKey ? "set" : "missing"))}
-              {state(d.token && !d.error, tr("Bot token on Vercel"), tr(d.token ? (d.error ? "refused" : "set") : "missing"))}
+              {state(d.publicKey, tr("Public key on the server"), tr(d.publicKey ? "set" : "missing"))}
+              {state(d.token && !d.error, tr("Bot token on the server"), tr(d.token ? (d.error ? "refused" : "set") : "missing"))}
               {state(missing === 0, tr("Commands on Discord"), missing == null ? tr("unknown") : missing === 0 ? tr("up to date") : tr("{n} to register", { n: missing }))}
               {missing > 0 && <button type="button" className="btn small pri" disabled={busy} onClick={() => call({ action: "register" }, () => load(s.guild))}>{tr("Register the commands with Discord")}</button>}
             </div>
@@ -91,7 +130,7 @@ export default function BotPanel() {
 
             {tab === "settings" && (
               <>
-                <p className="hint">{tr("The bot posts by itself once its token is on Vercel (DISCORD_BOT_TOKEN) and a channel is chosen; until then the webhook keeps posting.")}</p>
+                <p className="hint">{tr("The bot posts by itself once its token is set on the server (DISCORD_BOT_TOKEN) and a channel is chosen; until then the webhook keeps posting.")}</p>
                 <div className="botgrid">
                   {d.token && pick(tr("Server"), "guild", d.guilds, false)}
                   {d.token && pick(tr("Announcements channel"), "channel", d.channels)}
@@ -106,17 +145,25 @@ export default function BotPanel() {
                     <select value={s.lang} onChange={(e) => set("lang", e.target.value)}><option value="fr">Français</option><option value="en">English</option></select>
                   </label>
                 </div>
-                <fieldset><legend>{tr("What to post")}</legend>
-                  {ANNOUNCE.map(([k, l]) => <label key={k} className="chk"><input type="checkbox" checked={!!s.announce[k]} onChange={(e) => set("announce", { ...s.announce, [k]: e.target.checked })} /> {tr(l)}</label>)}
-                </fieldset>
-                <fieldset><legend>{tr("Events")}</legend>
-                  {Object.keys(s.events).map((e) => <label key={e} className="chk"><input type="checkbox" checked={s.events[e]} onChange={(x) => set("events", { ...s.events, [e]: x.target.checked })} /> {tr(d.events[e] || e)}</label>)}
-                </fieldset>
-                <fieldset><legend>{tr("Commands turned on")} <small>({d.commands.length - s.disabled.length}/{d.commands.length})</small></legend>
-                  {d.commands.map((c) => <label key={c.name} className="chk" title={c.description}><input type="checkbox" checked={!s.disabled.includes(c.name)} onChange={(e) => set("disabled", e.target.checked ? s.disabled.filter((x) => x !== c.name) : [...s.disabled, c.name])} /> /{c.name}</label>)}
-                </fieldset>
+                <div className="bgroups">
+                  <Group title={tr("What to post")} on={ANNOUNCE.filter(([k]) => s.announce[k]).length} total={ANNOUNCE.length}>
+                    {ANNOUNCE.map(([k, l]) => <Toggle key={k} checked={!!s.announce[k]} onChange={(v) => set("announce", { ...s.announce, [k]: v })}>{tr(l)}</Toggle>)}
+                  </Group>
+                  <Group title={tr("Events")} on={Object.values(s.events).filter(Boolean).length} total={Object.keys(s.events).length}
+                    onAll={(v) => set("events", Object.fromEntries(Object.keys(s.events).map((e) => [e, v])))}>
+                    {Object.keys(s.events).map((e) => <Toggle key={e} checked={!!s.events[e]} onChange={(v) => set("events", { ...s.events, [e]: v })}>{tr(d.events[e] || e)}</Toggle>)}
+                  </Group>
+                </div>
+                <Group wide title={tr("Commands turned on")} on={d.commands.length - s.disabled.length} total={d.commands.length}
+                  onAll={(v) => set("disabled", v ? [] : d.commands.map((c) => c.name))}>
+                  <input className="bcmdq" type="search" value={cmdQ} onChange={(e) => setCmdQ(e.target.value)} placeholder={tr("Find a command")} aria-label={tr("Find a command")} />
+                  {d.commands.filter((c) => !cmdQ.trim() || (c.name + " " + (c.description || "")).toLowerCase().includes(cmdQ.trim().toLowerCase())).map((c) => (
+                    <Toggle key={c.name} title={c.description} checked={!s.disabled.includes(c.name)} onChange={(v) => set("disabled", v ? s.disabled.filter((x) => x !== c.name) : [...s.disabled, c.name])}>
+                      <b>/{c.name}</b>{c.description ? <small>{c.description}</small> : null}
+                    </Toggle>
+                  ))}
+                </Group>
                 <div className="row" style={{ marginTop: 10 }}>
-                  <button type="button" className="btn pri" disabled={busy} onClick={() => call({ action: "save", ...s })}>{tr("Save the bot's settings")}</button>
                   <button type="button" className="btn" disabled={busy || !d.token} onClick={() => call({ action: "test" })}>{tr("Send a test message")}</button>
                   <button type="button" className="btn" disabled={busy || !d.token} onClick={() => call({ action: "register" }, () => load(s.guild))}>{tr("Register the commands with Discord")}</button>
                 </div>
@@ -126,9 +173,16 @@ export default function BotPanel() {
 
             {tab === "auto" && (
               <>
-                <fieldset><legend>{tr("Automatic")}</legend>
-                  {AUTO.map(([k, l]) => <label key={k} className="chk"><input type="checkbox" checked={!!s.auto[k]} onChange={(e) => set("auto", { ...s.auto, [k]: e.target.checked })} /> {tr(l)}</label>)}
-                </fieldset>
+                <div className="bgroups">
+                  {AUTO_GROUPS.map(([title, keys]) => {
+                    const list = AUTO.filter(([k]) => keys.includes(k));
+                    return (
+                      <Group key={title} title={tr(title)} on={list.filter(([k]) => s.auto[k]).length} total={list.length}>
+                        {list.map(([k, l]) => <Toggle key={k} checked={!!s.auto[k]} onChange={(v) => set("auto", { ...s.auto, [k]: v })}>{tr(l)}</Toggle>)}
+                      </Group>
+                    );
+                  })}
+                </div>
                 <div className="botgrid">
                   <label className="f">{tr("A thread for each match that starts")}
                     <select value={s.threads} onChange={(e) => set("threads", e.target.value)}>
@@ -139,7 +193,6 @@ export default function BotPanel() {
                   {d.token && pick(tr("Transfers channel (else the announcements one)"), "transferChannel", d.channels)}
                 </div>
                 <p className="hint">{tr("Reminders and the role follow the role setting of the Settings tab.")}</p>
-                <button type="button" className="btn pri" disabled={busy} onClick={() => call({ action: "save", ...s })}>{tr("Save the bot's settings")}</button>
               </>
             )}
 
@@ -240,8 +293,15 @@ export default function BotPanel() {
                 </div>
               </>
             )}
+            {(tab === "settings" || tab === "auto") && (
+              <div className={"bsavebar" + (dirty ? " dirty" : "")}>
+                <span>{dirty ? tr("Changes not saved yet") : tr("Everything is saved")}</span>
+                {dirty && <button type="button" className="btn" disabled={busy} onClick={() => setS(JSON.parse(saved))}>{tr("Undo the changes")}</button>}
+                <button type="button" className="btn pri" disabled={busy || !dirty} onClick={save}>{tr("Save the bot's settings")}</button>
+              </div>
+            )}
             {msg.text && <p className={msg.ok ? "okmsg" : "err"} role="status">{msg.text}</p>}
-          </>
+          </div>
         )}
       </details>
     </section>
