@@ -103,3 +103,20 @@ test("private leagues: created with a code, joined with it, their own ranking; F
   assert.equal(makeT("fr")("Friends' groups"), "Ligues privées");
   assert.equal(serverFr("You joined the group."), "Tu as rejoint la ligue.");
 });
+
+test("team tint: a logo's colours worked out on the server, kept in the database; logos made PNG for the share pictures", async () => {
+  const { teamTint, paletteOfImage, logoPng } = await import("../lib/teamtint.js");
+  const { default: sharp } = await import("sharp");
+  const red = await sharp({ create: { width: 40, height: 40, channels: 4, background: { r: 220, g: 30, b: 40, alpha: 1 } } }).png().toBuffer();
+  const p = await paletteOfImage(red);
+  assert.ok(p && p.primary[0] > 180 && p.primary[1] < 80, "red is found");
+  assert.equal(await paletteOfImage(Buffer.from("not an image")), null);
+  const db = openDb(":memory:");
+  db.prepare("INSERT INTO lp_logos (file, data) VALUES (?, ?)").run("RED.png", red);
+  const t = await teamTint(db, "/api/logos/RED.png");
+  assert.deepEqual(t.primary, p.primary);
+  assert.ok(db.prepare("SELECT 1 FROM lp_items WHERE kind = 'tcolor' AND key = ?").get("/api/logos/RED.png"), "kept in the database");
+  assert.equal(await teamTint(db, "https://evil.test/x.png"), null);
+  assert.match(await logoPng(db, "/api/logos/RED.png"), /^data:image\/png;base64,/);
+  assert.equal(await logoPng(db, ""), "");
+});

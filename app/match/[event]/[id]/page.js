@@ -85,7 +85,8 @@ export async function generateMetadata({ params }) {
   const score = m.sa != null && m.sb != null ? ` ${scoreLabel(m, tr)} ` : " vs ";
   const title = `${a}${score}${b} · VCT EMEA`;
   const description = [tr(EVENT_NAMES[event]), m.round.map(([k, v]) => tr(k, v)).join(" · "), m.bo ? `Bo${m.bo}` : "", e.times[id] ? new Date(e.times[id]).toUTCString().slice(0, 22) : ""].filter(Boolean).join(" · ");
-  const image = `/api/og/${event}/${id}`;
+  // the score in the address: a result shared again shows its new picture, not one a network kept from before
+  const image = `/api/og/${event}/${id}${m.sa != null && m.sb != null ? `?s=${m.sa}-${m.sb}` : ""}`;
   return {
     title, description,
     openGraph: { siteName: "VCT EMEA", type: "website", title, description, images: [{ url: image, width: 1200, height: 630 }] },

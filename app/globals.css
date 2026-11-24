@@ -3370,3 +3370,15 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .h2hseason h3 { font-size: 14px; margin: 12px 0 4px; }
 .cmplink { margin: 12px 0; }
 .cmplink .btn { text-decoration: none; }
+/* R18. Live match cards: the LIVE badge pulses, the card breathes; a team's page tinted with its logo's colour (worked out on the server) */
+.livebadge { animation: livering 2s ease-out infinite; }
+@keyframes livering { 0% { box-shadow: 0 0 0 0 rgba(255, 70, 85, .55); } 70% { box-shadow: 0 0 0 7px rgba(255, 70, 85, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 70, 85, 0); } }
+.mcard.live, .schm.live, .tnrow.live, .nighttile.live { animation: livecard 2.6s ease-in-out infinite; }
+@keyframes livecard { 50% { box-shadow: 0 0 0 1px var(--live, #ff4655), 0 0 18px -4px var(--live, #ff4655); } }
+.schs .bump, .livecard .bump, .lsscore .bump, .mcs.bump { display: inline-block; }
+@media (prefers-reduced-motion: reduce) {
+  .livebadge, .livebadge::before, .mcard.live, .schm.live, .tnrow.live, .nighttile.live, .bump { animation: none !important; }
+}
+.teampage.teamtint { background-image: radial-gradient(ellipse 80% 420px at 25% 0, color-mix(in srgb, var(--team) 20%, transparent), transparent); background-repeat: no-repeat; }
+.teamtint .crumbs a, .teamtint .pathlinks a { color: color-mix(in srgb, var(--team) 55%, var(--fg)); }
+.teamtint .parttabs button[aria-selected="true"], .teamtint .parttabs [aria-current] { box-shadow: inset 0 -2px 0 var(--team); }

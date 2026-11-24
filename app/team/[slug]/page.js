@@ -13,6 +13,7 @@ import { sharedPreview, teamPreview } from "../../../lib/preview.js";
 import { workSoon } from "../../../lib/readsoon.js";
 import { extraStats, readDetails, tournamentStats } from "../../../lib/tstats.js";
 import { teamPercentiles } from "../../../lib/radar25.js";
+import { teamTint } from "../../../lib/teamtint.js";
 
 // Always read the database on request: results change while the events run.
 import { publicState } from "../../../lib/publicstate.js";
@@ -51,8 +52,10 @@ export default async function Page({ params, searchParams }) {
   const tstats = p && tournamentStats(initial, entries).teams[key] ? { ...tournamentStats(initial, entries).teams[key], comps: extraStats(initial, entries).teamComps[key] || [], radar: teamPercentiles(tournamentStats(initial, entries), p.name) } : null;
   // each of its players' numbers, for the roster cards
   const rosterStats = p ? tournamentStats(initial, entries).players.filter((x) => x.team && x.team.toLowerCase() === p.name.toLowerCase()).map(({ slug, name, r, acs, kd, maps, agents }) => ({ slug, name, r, acs, kd, maps, agent: agents[0] ? agents[0].name : "" })) : [];
+  // the page's colours from the logo, worked out here and kept: tinted from the first paint
+  const palette = p && p.team && p.team.logo ? await teamTint(getDb(), p.team.logo) : null;
   const ld = p ? { "@context": "https://schema.org", "@type": "SportsTeam", name: p.name, sport: "VALORANT", ...(p.team && p.team.logo && /^https?:/.test(p.team.logo) ? { logo: p.team.logo } : {}), athlete: rosterStats.map((x) => ({ "@type": "Person", name: x.name })) } : null;
-  return <>{ld && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />}<TeamPage rosterStats={rosterStats} tstats={tstats} initial={p ? publicState(initial) : null} slug={key} lang={lang} lp={lp} org={orgOf(teamInfo, key)} outside={outside} vlr={linkVlr(vlrEntry, dir)} updating={!entry || lpNow || vlrNow} /></>;
+  return <>{ld && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />}<TeamPage palette={palette} rosterStats={rosterStats} tstats={tstats} initial={p ? publicState(initial) : null} slug={key} lang={lang} lp={lp} org={orgOf(teamInfo, key)} outside={outside} vlr={linkVlr(vlrEntry, dir)} updating={!entry || lpNow || vlrNow} /></>;
 }
 
 export async function generateMetadata({ params }) {

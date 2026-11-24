@@ -342,9 +342,10 @@ function OutsideTeam({ lp, org = [], outside, vlr, updating }) {
 
 /** The team's numbers in the tournaments, from vlr.gg's tables. */
 /** The team's header: a banner in the color of its logo, the logo over it, its key numbers and recent form. */
-function TeamHead({ team, children, stats = [], form = [], timeline = null, map = "" }) {
+function TeamHead({ team, children, stats = [], form = [], timeline = null, map = "", palette = null }) {
   const tr = useT();
-  const color = useTeamColor(team && team.logo);
+  const read = useTeamColor(palette ? "" : team && team.logo);
+  const color = palette ? `rgb(${palette.primary.join(", ")})` : read;
   return (
     <div className={"thead teamhero" + (color ? " tinted" : "")} style={color ? { "--team": color } : undefined}>
       <div className={"thband" + (map && mapSplash(map) ? " withmap" : "")} aria-hidden="true" style={map && mapSplash(map) ? { "--mapimg": `url(${mapSplash(map)})` } : undefined} />
@@ -393,7 +394,7 @@ function TeamTournament({ s }) {
   );
 }
 
-function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null, rosterStats = [] }) {
+function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null, rosterStats = [], palette = null }) {
   const [part, setPart] = useState("overview");
   const tr = useT();
   useAutoRefresh();
@@ -419,7 +420,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null, r
   ];
   const tot = p.events.reduce((o, e) => ({ w: o.w + e.w, l: o.l + e.l }), { w: 0, l: 0 });
   return (
-    <div className="wrap teampage tabbed" data-tab={part}>
+    <div className={"wrap teampage tabbed" + (palette ? " teamtint" : "")} data-tab={part} style={palette ? { "--team": `rgb(${palette.primary.join(", ")})`, "--team-2": palette.secondary ? `rgb(${palette.secondary.join(", ")})` : undefined } : undefined}>
       <div className="topbar">
         <h1 className="brandh"><a className="homelink" href="/" title={tr("Home")}><EmeaMark /></a><span>{p.name}</span></h1>
         <SearchBar /><div className="prefs"><ThemeSwitch /><LangSwitch /></div>
@@ -430,7 +431,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null, r
         <p className="pathlinks">{tr("Run")} : {p.events.filter((e) => e.matches.length).map((e, n) => <span key={e.event}>{n ? " · " : ""}<a href={`/parcours/${e.event}/${slug}`}>{tr(EVENT_NAMES[e.event])}</a></span>)}</p>
       )}
 
-      <TeamHead team={t} stats={headStats} form={form} timeline={<TeamTimeline rows={rows} name={t.name} />} map={tstats && tstats.byMap && tstats.byMap[0] ? tstats.byMap[0].map : ""}>
+      <TeamHead team={t} stats={headStats} form={form} timeline={<TeamTimeline rows={rows} name={t.name} />} map={tstats && tstats.byMap && tstats.byMap[0] ? tstats.byMap[0].map : ""} palette={palette}>
         <Crest team={t} />
         <div>
           <div className="tname">{p.name}{t.tag ? <span className="ttag">{t.tag}</span> : null}<FavStar slug={slug} /></div>

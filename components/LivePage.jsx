@@ -7,6 +7,7 @@ import { EmeaMark } from "./Brand.jsx";
 import SearchBar from "./SearchBar.jsx";
 import SiteNav from "./SiteNav.jsx";
 import { Crest } from "./Crest.jsx";
+import { Score } from "./visual.jsx";
 import { LiveBadge } from "./matchTime.jsx";
 import { useAutoRefresh } from "./autoRefresh.js";
 import { embedUrl } from "../lib/media.js";
@@ -45,7 +46,7 @@ function View({ live, next }) {
       <div className="livehead">{m.live ? <LiveBadge /> : <span className="livewhen">{formatMatchTime(m.at, tr.lang, true)}</span>}<span>{tr(EVENT_NAMES[m.event])} · {label(m)}</span></div>
       <div className="liveteams">
         <span><Crest team={m.a} />{(m.a && m.a.name) || tr("TBD")}</span>
-        <b>{m.score ? `${m.score.a} – ${m.score.b}` : "vs"}</b>
+        <b>{m.score ? <><Score value={m.score.a} /> – <Score value={m.score.b} /></> : "vs"}</b>
         <span><Crest team={m.b} />{(m.b && m.b.name) || tr("TBD")}</span>
       </div>
       {m.live && <TensionBadges t={tension(m.score, m.bo)} />}
@@ -90,7 +91,7 @@ function View({ live, next }) {
                 <span className="livebadge">{tr("LIVE")}</span>
                 <div className="lsteams">
                   <span><Crest team={current.a} />{(current.a && current.a.name) || tr("TBD")}</span>
-                  <b className="lsscore">{current.score ? `${current.score.a} : ${current.score.b}` : "vs"}</b>
+                  <b className="lsscore">{current.score ? <><Score value={current.score.a} /> : <Score value={current.score.b} /></> : "vs"}</b>
                   <span><Crest team={current.b} />{(current.b && current.b.name) || tr("TBD")}</span>
                 </div>
                 <div className="lsmeta">{tr(EVENT_NAMES[current.event])} · {label(current)}{current.bo ? ` · Bo${current.bo}` : ""}</div>

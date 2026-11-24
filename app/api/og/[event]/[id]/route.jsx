@@ -4,12 +4,15 @@ import { getDb, getState } from "../../../../../lib/db.js";
 import { eventData, matchesOf } from "../../../../../lib/matchlist.js";
 import { EVENT_NAMES } from "../../../../../lib/paths.js";
 import { TIME_EVENTS } from "../../../../../lib/schedule.js";
+import { logoPng, teamTint } from "../../../../../lib/teamtint.js";
 import ASSETS from "../../../../../lib/valorant-assets.json";
 
 export const dynamic = "force-dynamic";
 
-/** A team's logo, as the image needs it: only PNG and JPEG, straight from the database. */
-function logoOf(db, team) {
+/** A team's logo, as the image needs it: any logo the site has, made a PNG on the server; else a PNG / JPEG of the database. */
+async function logoOf(db, team) {
+  const png = await logoPng(db, team && team.logo);
+  if (png) return png;
   const m = /^\/api\/logos\/(.+\.(png|jpe?g))$/i.exec((team && team.logo) || "");
   if (!m) return "";
   const row = db.prepare("SELECT data FROM lp_logos WHERE file = ?").get(decodeURIComponent(m[1]));
@@ -47,10 +50,15 @@ export async function GET(_req, { params }) {
   const lastMap = maps.length ? String(maps[maps.length - 1].map || "").toLowerCase() : "";
   const mapKey = Object.keys(ASSETS.maps).find((k) => k.toLowerCase() === lastMap);
   const splash = mapKey ? ASSETS.maps[mapKey].splash : "";
+  // the winner's colour (the first team's before the result) tints the picture
+  const lead = done ? (m.win === "a" ? m.a : m.b) : m.a;
+  const tint = await teamTint(db, lead && lead.logo).catch(() => null);
+  const glow = tint && !tint.mono ? `rgba(${tint.primary.join(", ")}, 0.35)` : "rgba(201, 240, 60, 0.12)";
+  const [logoA, logoB] = await Promise.all([logoOf(db, m.a), logoOf(db, m.b)]);
   const round = m.round.map(([k, v]) => String(k).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ""))).join(" · ");
   return new ImageResponse(
     (
-      <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", background: "#0c0e13", padding: 56, fontFamily: "sans-serif", borderTop: `10px solid ${live ? "#ff4655" : "#c9f03c"}`, position: "relative" }}>
+      <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", background: "#0c0e13", backgroundImage: `radial-gradient(circle at ${done && m.win === "b" ? "80%" : "20%"} 45%, ${glow}, rgba(12,14,19,0) 60%)`, padding: 56, fontFamily: "sans-serif", borderTop: `10px solid ${live ? "#ff4655" : "#c9f03c"}`, position: "relative" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {splash ? <img src={splash} width={1200} height={675} style={{ position: "absolute", left: 0, top: -30, opacity: 0.3 }} alt="" /> : null}
         {splash ? <div style={{ display: "flex", position: "absolute", left: 0, top: 0, width: "100%", height: "100%", background: "linear-gradient(180deg, rgba(12,14,19,0.6), rgba(12,14,19,0.92))" }} /> : null}
@@ -59,17 +67,17 @@ export async function GET(_req, { params }) {
           <span style={{ color: live ? "#ff5a5f" : "#a0a09c" }}>{live ? "LIVE" : done ? "FINAL" : m.bo ? `Bo${m.bo}` : ""}</span>
         </div>
         <div style={{ display: "flex", flex: 1, alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-          <Side team={m.a} logo={logoOf(db, m.a)} lost={done && m.win === "b"} />
+          <Side team={m.a} logo={logoA} lost={done && m.win === "b"} />
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <div style={{ display: "flex", fontSize: middle.length > 6 ? 58 : 104, fontWeight: 800, color: done || live ? "#c9f03c" : "#6f6f6b", textAlign: "center" }}>{middle}</div>
             {done && m.note && m.note.kind !== "raw" && <div style={{ display: "flex", fontSize: 28, color: "#e9e9e6", marginTop: 8 }}>{`Vainqueur : ${(m.win === "a" ? m.a : m.b).name}`}</div>}
             {maps.length > 0 && <div style={{ display: "flex", gap: 10, marginTop: 10 }}>{maps.map((x, i) => <div key={i} style={{ display: "flex", fontSize: 24, color: "#e9e9e6", background: "#1d212c", borderRadius: 999, padding: "4px 14px" }}>{`${x.map || ""} ${x.a}–${x.b}`.trim()}</div>)}</div>}
           </div>
-          <Side team={m.b} logo={logoOf(db, m.b)} lost={done && m.win === "a"} />
+          <Side team={m.b} logo={logoB} lost={done && m.win === "a"} />
         </div>
         <div style={{ display: "flex", justifyContent: "center", color: "#a0a09c", fontSize: 30 }}>{[EVENT_NAMES[event], round].filter(Boolean).join(" · ")}</div>
       </div>
     ),
-    { width: 1200, height: 630, headers: { "Cache-Control": "public, max-age=120, s-maxage=120" } },
+    { width: 1200, height: 630, headers: { "Cache-Control": done ? "public, max-age=86400, s-maxage=86400" : "public, max-age=120, s-maxage=120" } },
   );
 }

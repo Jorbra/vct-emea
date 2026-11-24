@@ -202,7 +202,7 @@ export function Schedule({ items, Crest }) {
         <span className="schr">{label(m)}{m.bo ? <span className="bobadge">Bo{m.bo}</span> : null}</span>
         <span className="schteams">
           {side(m.a, m.win === "a", m.win === "b")}
-          <span className={"schs" + (live ? " lv" : "")}>{done ? scoreLabel(m, tr) : live && liveOf(m) ? `${liveOf(m).a} – ${liveOf(m).b}` : "vs"}</span>
+          <span className={"schs" + (live ? " lv" : "")}>{done ? scoreLabel(m, tr) : live && liveOf(m) ? <><Score value={liveOf(m).a} /> – <Score value={liveOf(m).b} /></> : "vs"}</span>
           {side(m.b, m.win === "b", m.win === "a")}
         </span>
       </div>
