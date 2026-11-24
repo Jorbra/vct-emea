@@ -804,6 +804,58 @@ function Seasons({ seasons, call, onDone }) {
   );
 }
 
+const AUTO_WHO = ["Toornament", "vlr.gg", "Liquipedia"];
+
+/**
+ * The change history, short: the same change made several times in a row shows once with its count, the background work's
+ * changes can be hidden, ten lines show at first, and a long line opens on a click.
+ */
+function History({ list, fmt, label }) {
+  const tr = useT();
+  const [shown, setShown] = useState(10);
+  const [who, setWho] = useState("all"); // "all" | "editors" | "auto"
+  const [open, setOpen] = useState(-1);
+  const rows = useMemo(() => {
+    const out = [];
+    for (const h of list) {
+      const auto = AUTO_WHO.includes(h.who);
+      if ((who === "editors" && auto) || (who === "auto" && !auto)) continue;
+      const last = out[out.length - 1];
+      if (last && last.who === h.who && last.message === h.message) { last.n += 1; last.first = h.at; continue; }
+      out.push({ ...h, n: 1, first: h.at, auto });
+    }
+    return out;
+  }, [list, who]);
+  return (
+    <section>
+      <details className="einfo histbox">
+        <summary><b>{tr("History")}</b> <span>{tr("{n} changes", { n: list.length })}</span></summary>
+        <div className="histbody">
+          {list.length === 0 ? <p className="note">{tr("No change yet.")}</p> : (
+            <>
+              <div className="histfilter" role="group" aria-label={tr("Show")}>
+                {[["all", tr("Everything")], ["editors", tr("Editors")], ["auto", tr("Automatic")]].map(([k, l]) => (
+                  <button key={k} type="button" className={"histchip" + (who === k ? " on" : "")} aria-pressed={who === k} onClick={() => { setWho(k); setShown(10); setOpen(-1); }}>{l}</button>
+                ))}
+              </div>
+              <ul className="ahhist compact">
+                {rows.slice(0, shown).map((h, i) => (
+                  <li key={i} className={(h.auto ? "auto" : "") + (open === i ? " open" : "")} onClick={() => setOpen(open === i ? -1 : i)}>
+                    <time title={h.n > 1 ? `${fmt(h.first)} → ${fmt(h.at)}` : undefined}>{fmt(h.at)}</time>
+                    <b>{h.who || tr("Main account")}</b>
+                    <span className="histmsg">{label(h.message)}{h.n > 1 && <em className="histn"> ×{h.n}</em>}</span>
+                  </li>
+                ))}
+              </ul>
+              {rows.length > shown && <button type="button" className="btn small" onClick={() => setShown(shown + 30)}>{tr("Show {n} more", { n: Math.min(30, rows.length - shown) })}</button>}
+            </>
+          )}
+        </div>
+      </details>
+    </section>
+  );
+}
+
 /** The change history, the database copy and, for the main account, the other editors' accounts. */
 function Manage({ admin, call, onDone }) {
   const tr = useT();
@@ -824,16 +876,7 @@ function Manage({ admin, call, onDone }) {
   const label = (m) => (m.startsWith("Undone: ") ? tr("Undone: {what}", { what: tr.server(m.slice(8)) }) : tr.server(m));
   return (
     <>
-      <section>
-        <h2>{tr("History")}</h2>
-        {admin.history.length === 0 ? <p className="note">{tr("No change yet.")}</p> : (
-          <ul className="ahhist">
-            {admin.history.map((h, i) => (
-              <li key={i}><time>{fmt(h.at)}</time><b>{h.who || tr("Main account")}</b><span>{label(h.message)}</span></li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <History list={admin.history} fmt={fmt} label={label} />
       <RosterDiffs list={admin.rosterDiffs || []} call={call} onDone={onDone} />
       <SyncStatus list={admin.sync || {}} />
       <FlagImport call={call} onDone={onDone} />

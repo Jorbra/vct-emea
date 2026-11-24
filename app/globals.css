@@ -3422,3 +3422,18 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .bsavebar.dirty span { color: var(--fg); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { .btsw, .btsw::after { transition: none; } }
 .btoggle { position: relative; }
+/* R18. The editor's history, short */
+.histbox .histbody { padding: 10px 14px 14px; }
+.histfilter { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.histchip { background: var(--bg); color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font: 600 12px var(--font-body); cursor: pointer; }
+.histchip.on { background: var(--lime); color: var(--lime-ink, #111); border-color: transparent; }
+.ahhist.compact { font-size: 13px; gap: 1px; }
+.ahhist.compact li { display: grid; grid-template-columns: 96px minmax(70px, auto) 1fr; gap: 10px; padding: 4px 10px; align-items: baseline; cursor: pointer; border-radius: 4px; }
+.ahhist.compact li.auto { background: transparent; }
+.ahhist.compact time { min-width: 0; font-size: 11px; }
+.ahhist.compact b { font-size: 12px; white-space: nowrap; }
+.ahhist.compact li.auto b { color: var(--muted); font-weight: 600; }
+.histmsg { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ahhist.compact li.open .histmsg { white-space: normal; overflow-wrap: anywhere; }
+.histn { font-style: normal; color: var(--muted); font-weight: 700; }
+@media (max-width: 640px) { .ahhist.compact li { grid-template-columns: 1fr auto; } .ahhist.compact li .histmsg { grid-column: 1 / -1; } }

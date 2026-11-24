@@ -143,3 +143,12 @@ test("server panel: this site only (its own health, asked inside the server), th
   assert.equal(backupDir({}, (p) => p === "/app/data"), "/app/data/sauvegardes");
   assert.equal(backupDir({ BACKUP_DIR: "/x" }), "/x");
 });
+
+test("the history's lines of the background work read in French", async () => {
+  const { serverFr } = await import("../lib/i18n.js");
+  assert.equal(serverFr("Toornament: naq2 updated (1)."), "Toornament : NA Qualifier 2 mis à jour (1 changement).");
+  assert.match(serverFr("Liquipedia: 39 teams and 168 players will be read again, the teams first (about 321 minutes for everything)."), /^Liquipedia : 39 équipes et 168 joueurs/);
+  assert.equal(serverFr("From Liquipedia (EU Qualifier Playoffs): Round 1: A – B; Time s1-m08"), "Depuis Liquipedia (EU Qualifier Playoffs) : Tour 1 : A – B ; Horaire s1-m08");
+  assert.match(serverFr("Sources of playoffs: Toornament default, vlr.gg 3233"), /^Sources de .+ : Toornament par défaut, vlr\.gg 3233$/);
+  assert.match(serverFr("Result from vlr.gg (match over, before Toornament): meq2 r32-8 2-0"), /^Résultat de vlr\.gg \(match terminé, avant Toornament\) : .+ r32-8 2-0$/);
+});
