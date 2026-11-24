@@ -15,11 +15,11 @@ export async function POST(req) {
   if (!b) return badRequest();
   const db = getDb();
   const event = String(b.event || "");
-  const r = saveSource(db, { event, toornament: b.toornament, vlr: b.vlr, stage: b.stage, bracket: !!b.bracket, by: me.who || "" });
+  const r = saveSource(db, { event, toornament: b.toornament, vlr: b.vlr, stage: b.stage, bracket: !!b.bracket, lp: b.lp, by: me.who || "" });
   if (!r.ok) return NextResponse.json({ error: r.error }, { status: r.status });
   // Toornament's next round reads the new tournament at once
   const meta = readItems("tsync_meta", db)[event];
   if (meta) saveItem("tsync_meta", event, { ...meta, hash: "", at: "" }, db);
-  try { recordAction(db, `Sources of ${event}: Toornament ${r.source ? r.source.toornament || "default" : "default"}, vlr.gg ${r.source ? r.source.vlr || "default" : "default"}`, me.who || ""); } catch { /* the history is a convenience */ }
+  try { recordAction(db, `Sources of ${event}: Toornament ${r.source ? r.source.toornament || "default" : "default"}, vlr.gg ${r.source ? r.source.vlr || "default" : "default"}, Liquipedia ${r.source ? r.source.lp || "default" : "default"}`, me.who || ""); } catch { /* the history is a convenience */ }
   return NextResponse.json({ ok: true, source: r.source });
 }

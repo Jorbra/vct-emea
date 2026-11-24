@@ -10,7 +10,7 @@ const when = (iso, lang) => (iso ? new Date(iso).toLocaleString(lang === "fr" ? 
 function Row({ r, call, onDone }) {
   const tr = useT();
   const s = r.set || {};
-  const [v, setV] = useState({ toornament: s.toornament || "", vlr: s.vlr || "", stage: s.stage || "", bracket: !!s.bracket });
+  const [v, setV] = useState({ toornament: s.toornament || "", vlr: s.vlr || "", stage: s.stage || "", bracket: !!s.bracket, lp: s.lp || "" });
   const [busy, setBusy] = useState(false);
   const set = (k) => (e) => setV((x) => ({ ...x, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value }));
   const save = async (e) => {
@@ -28,7 +28,10 @@ function Row({ r, call, onDone }) {
         {r.vlr ? <a href={r.vlr.link} target="_blank" rel="noopener noreferrer">vlr.gg{r.vlr.stage ? ` · ${r.vlr.stage}` : ""}</a> : <span className="muted">{tr("No vlr.gg")}</span>}
         {r.vlr && <small>{r.vlr.at ? `${r.vlr.matches} ${tr("matches")} · ${tr("read")} ${when(r.vlr.at, tr.lang)}` : tr("not read yet")}</small>}
         {r.bracket && <small>📊 {tr("bracket from vlr.gg")}</small>}
+        {r.lp && <a href={r.lp.link} target="_blank" rel="noopener noreferrer">Liquipedia</a>}
+        {r.lp && <small>{r.lp.error ? `⚠️ ${r.lp.error}` : r.lp.at ? `${r.lp.matches} ${tr("matches")} · ${tr("read")} ${when(r.lp.at, tr.lang)}` : tr("not read yet")}</small>}
       </div>
+      {r.lp && <input value={v.lp} onChange={set("lp")} placeholder={tr("Liquipedia link (or off)")} aria-label={tr("Liquipedia link")} />}
       {r.qualifier && <input value={v.toornament} onChange={set("toornament")} placeholder={tr("Toornament link (or off)")} aria-label={tr("Toornament link")} />}
       <input value={v.vlr} onChange={set("vlr")} placeholder={tr("vlr.gg link (or off)")} aria-label={tr("vlr.gg link")} />
       <input value={v.stage} onChange={set("stage")} placeholder={tr("vlr.gg stage, e.g. Qualifier #2")} aria-label={tr("vlr.gg stage")} className="srcstage" />
@@ -44,6 +47,7 @@ export function SourcesEditor({ list, call, onDone }) {
     <details className="einfo srcbox">
       <summary><b>🔗 {tr("Sources: Toornament and vlr.gg links")}</b></summary>
       <p className="hint">{tr("Paste a tournament's Toornament page or an event's vlr.gg page: the site follows it from the next round, without changing the code. Empty: back to the default. \"off\": stop following. On vlr.gg, one event often holds several qualifiers: write the words of the stage that are this one's (e.g. \"Qualifier #2\").")}</p>
+      <p className="hint">{tr("EU Qualifier Playoffs: Liquipedia is read too, as a second source. Its Swiss pairings, semifinals, scores and times fill what is still empty here; nothing an editor typed is changed.")}</p>
       <div className="srclist">{list.map((r) => <Row key={r.event} r={r} call={call} onDone={onDone} />)}</div>
     </details>
   );
