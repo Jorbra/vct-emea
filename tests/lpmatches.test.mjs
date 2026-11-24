@@ -66,6 +66,10 @@ test("names: Liquipedia's spelling finds the site's team", () => {
   assert.equal(teamOf(teams, "CGN Esports"), teams[13].id);
   assert.equal(teamOf(teams, "la Masia"), teams[15].id);
   assert.equal(teamOf(teams, "Fnatic"), "");
+  // well-known short forms, and the names editors tied to a team
+  assert.equal(teamOf(teams, "Natus Vincere Junior"), teams[4].id);
+  assert.equal(teamOf(teams, "UCAM Esports Club"), teams[0].id);
+  assert.equal(teamOf(teams, "MIR Gaming Pro", { "MIR Gaming Pro": { name: "MIR", tag: "" } }), teams[2].id);
 });
 
 test("Swiss stage: Liquipedia's pairings and scores fill the empty round; an editor's match stays", async () => {
