@@ -1196,7 +1196,7 @@ function AdminView({ initial, isAdmin, denied = "", start }) {
   const tr = useT();
   const router = useRouter();
   // Changes made elsewhere (another editor, another tab, the database) show up by themselves; nothing while typing.
-  useAutoRefresh(15000, !!isAdmin);
+  useAutoRefresh(60000, !!isAdmin); // every minute (each reload works out the whole editor again)
   // Every editor tab has its own address (/admin/qualifier-2, /admin/playoffs/matches, /admin/kickoff...); the back button follows.
   const [nav, setNav] = useState(start || { region: "eu", top: "q1", sub: "teams", kview: "teams" });
   const { region, top, sub, kview, ttop } = nav; // ttop: Türkiye stage ("trq1", "trq2"; none = its Qualifier Playoffs)
