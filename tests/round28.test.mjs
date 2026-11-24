@@ -121,19 +121,19 @@ test("team tint: a logo's colours worked out on the server, kept in the database
   assert.equal(await logoPng(db, ""), "");
 });
 
-test("server panel: the sites from STATUS_SITES (three by default), their answer and time; the backup keeps the last 14", async () => {
-  const { statusSites, pingSites, jobsInfo, DEFAULT_SITES } = await import("../lib/serverstatus.js");
+test("server panel: this site only (its own health, asked inside the server), the data disk, the jobs; the backup keeps the last 14", async () => {
+  const { pingSelf, selfHealthUrl, diskOf, dataDir, jobsInfo } = await import("../lib/serverstatus.js");
   const { toRemove, backupDir } = await import("../scripts/backup.mjs");
-  assert.deepEqual(statusSites("").map((s) => s.url), DEFAULT_SITES);
-  assert.deepEqual(statusSites("").map((s) => s.name), ["VCT EMEA", "Flashback", "Planning"]);
-  assert.deepEqual(statusSites("Mon site=https://a.test/, https://b.test").map((s) => [s.name, s.url]), [["Mon site", "https://a.test"], ["b", "https://b.test"]]);
-  assert.deepEqual(statusSites("pas-une-adresse"), []);
-  let t = 0;
-  const fetchImpl = async (url) => { t += 40; if (url.startsWith("https://b.test")) throw new Error("ECONNREFUSED"); return { status: url.startsWith("https://c.test") ? 502 : 200 }; };
-  const r = await pingSites(statusSites("https://a.test https://b.test https://c.test"), { fetchImpl, now: () => t });
-  assert.deepEqual(r.map((s) => s.ok), [true, false, false]);
-  assert.ok(r[0].ms >= 40);
-  assert.equal(r[1].error, "ECONNREFUSED");
+  assert.equal(selfHealthUrl({ PORT: "3000" }), "http://127.0.0.1:3000/api/health");
+  let asked = "";
+  const ok = await pingSelf({ url: selfHealthUrl({}), fetchImpl: async (u) => { asked = u; return { status: 200 }; } });
+  assert.equal(ok.ok, true);
+  assert.equal(asked, "http://127.0.0.1:3000/api/health");
+  const down = await pingSelf({ fetchImpl: async () => { throw new Error("ECONNREFUSED"); } });
+  assert.deepEqual([down.ok, down.error], [false, "ECONNREFUSED"]);
+  assert.deepEqual(diskOf("/x", () => ({ bavail: 10, bsize: 4096, blocks: 100 })), { dir: "/x", free: 40960, total: 409600 });
+  assert.equal(diskOf("/x", () => { throw new Error("no"); }), null);
+  assert.equal(dataDir({ TURSO_REPLICA_PATH: "/app/data/turso-copie.db" }), "/app/data");
   const db = openDb(":memory:");
   const { saveItem } = await import("../lib/lpstore.js");
   saveItem("meta", "backup_last", { at: "2026-11-25T03:00:05Z", file: "vct-emea-2026-11-25.db", size: 1, kept: 14 }, db);

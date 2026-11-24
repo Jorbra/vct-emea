@@ -35,10 +35,11 @@ export default function ServerPanel() {
     const t = setInterval(() => { if (!document.hidden) load(); }, 60000);
     return () => clearInterval(t);
   }, [open, load]);
-  const down = data ? data.sites.filter((s) => !s.ok).length : 0;
+  const down = data && !data.site.ok ? 1 : 0;
+  const diskLow = !!(data && data.disk && data.disk.total && data.disk.free / data.disk.total < 0.1);
   const tickLate = data && (!data.tick || Date.now() - new Date(data.tick.at).getTime() > 5 * 60000);
   const backupLate = data && (!data.backup || Date.now() - new Date(data.backup.at).getTime() > 30 * 3600000);
-  const bad = down + (tickLate ? 1 : 0) + (backupLate ? 1 : 0);
+  const bad = down + (tickLate ? 1 : 0) + (backupLate ? 1 : 0) + (diskLow ? 1 : 0);
   return (
     <section>
       <details className="einfo serverpanel" onToggle={(e) => setOpen(e.currentTarget.open)}>
@@ -47,14 +48,20 @@ export default function ServerPanel() {
         {!data ? <p className="note">{busy ? tr("Loading…") : ""}</p> : (
           <>
             <div className="srvsites">
-              {data.sites.map((s) => (
-                <a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer" className={"srvsite " + (s.ok ? "up" : "down")}>
+              <div className={"srvsite " + (data.site.ok ? "up" : "down")}>
+                <span className="srvdot" aria-hidden="true" />
+                <b>VCT EMEA</b>
+                <span>{data.site.ok ? tr("Online") : tr("Not answering")}{data.site.status ? ` · ${data.site.status}` : data.site.error ? ` · ${data.site.error}` : ""}</span>
+                <small className={data.site.ms > 2000 ? "slow" : ""}>{data.site.ms} ms</small>
+              </div>
+              {data.disk && (
+                <div className={"srvsite " + (diskLow ? "down" : "up")}>
                   <span className="srvdot" aria-hidden="true" />
-                  <b>{s.name}</b>
-                  <span>{s.ok ? tr("Online") : tr("Not answering")}{s.status ? ` · ${s.status}` : s.error ? ` · ${s.error}` : ""}</span>
-                  <small className={s.ms > 2000 ? "slow" : ""}>{s.ms} ms</small>
-                </a>
-              ))}
+                  <b>{tr("Data folder")}</b>
+                  <span>{tr("{free} GB free of {total} GB", { free: (data.disk.free / 1073741824).toFixed(1), total: (data.disk.total / 1073741824).toFixed(1) })}</span>
+                  <small>{data.disk.total ? Math.round((data.disk.free / data.disk.total) * 100) : 0} %</small>
+                </div>
+              )}
             </div>
             <div className="tablewrap"><table>
               <tbody>
