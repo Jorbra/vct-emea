@@ -1,9 +1,8 @@
-# Keeps the site's information fresh: about every 10 minutes (GitHub may run it much later), scripts/worker.mjs reads for a few minutes.
-# What a visitor asks for does not wait for this: the site reads it itself (lib/readsoon.js).
+# Reads Liquipedia and vlr.gg for a few minutes (scripts/worker.mjs). Started by hand only: on the server, the scheduled
+# task node scripts/tick.mjs does this work every minute from a local copy of the database, whereas this job read Turso
+# itself and counted against its monthly read quota.
 name: Read Liquipedia and vlr.gg
 on:
-  schedule:
-    - cron: "7,17,27,37,47,57 * * * *"
   workflow_dispatch: {}
 concurrency:
   group: worker
