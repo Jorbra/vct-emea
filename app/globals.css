@@ -3319,3 +3319,32 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 
 .lprefresh { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 14px; }
 .lprefresh .hint { flex-basis: 100%; margin: 2px 0 0; }
+/* R18. Tonight: the stream beside the night's matches */
+.tnsum { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--muted); margin: 4px 0 12px; }
+.tngrid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .tngrid { grid-template-columns: 1fr; } }
+.tnstage { position: sticky; top: calc(var(--topbar-h, 60px) + 8px); }
+@media (max-width: 900px) { .tnstage { position: static; } }
+.tnstage .liveplayer { margin: 0 0 8px; }
+.tnnow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.tnnowteams { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 16px; }
+.tnbig { font: 800 22px/1 var(--font-display, var(--font-body)); font-variant-numeric: tabular-nums; }
+.tnwait { display: grid; place-items: center; text-align: center; aspect-ratio: 16 / 9; background: var(--surface); border: 1px dashed var(--line); border-radius: 8px; padding: 16px; color: var(--muted); }
+.tnwait b { color: var(--fg); }
+.tnlist h2 { font-size: 15px; margin: 14px 0 6px; }
+.tnlist h2:first-child { margin-top: 0; }
+.tnrow { display: grid; grid-template-columns: 64px 1fr; gap: 4px 10px; padding: 10px; margin-bottom: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.tnrow.live { border-color: var(--live, #ff4655); }
+.tnrow.on { box-shadow: inset 0 0 0 1px var(--link); }
+.tnrow.over { opacity: .85; }
+.tnwhen { align-self: center; font-variant-numeric: tabular-nums; }
+.tnteams { display: grid; gap: 4px; min-width: 0; }
+.tnteam { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tnteam span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tnteam.w { font-weight: 700; }
+.tnteam.lo { color: var(--muted); }
+.tnscore { font-weight: 800; font-variant-numeric: tabular-nums; min-width: 1.2em; text-align: right; }
+.tnmeta { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; color: var(--muted); }
+.tnmeta .row { display: flex; gap: 6px; }
+.tnmeta .btn { text-decoration: none; }
+.tnmeta .btn.sm, .tnnow .btn.sm { padding: 3px 9px; font-size: 12px; }

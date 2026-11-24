@@ -130,7 +130,7 @@ export function NotificationBell() {
 // ---- R5. the command bar: Ctrl+K (or "/") to go anywhere
 
 const PAGES = [
-  ["/", "Home"], ["/live", "Live"], ["/soiree", "Match night"], ["/calendar", "Calendar"], ["/predictions", "Predictions"], ["/jeux", "Games of the day"],
+  ["/", "Home"], ["/live", "Live"], ["/ce-soir", "Tonight"], ["/calendar", "Calendar"], ["/predictions", "Predictions"], ["/jeux", "Games of the day"],
   ["/quiz", "Quiz of the week"], ["/fantasy", "Fantasy"], ["/tierlist", "Tier list"], ["/simulateur", "Qualification simulator"], ["/puissance", "Power ranking"],
   ["/stats", "Stats"], ["/rivalites", "Rivalries"], ["/palmares", "Hall of fame"], ["/pays", "Countries"], ["/compare", "Compare"], ["/transfers", "Transfers"],
   ["/lft", "LFT"], ["/news", "News"], ["/archives", "Archives of past seasons"], ["/moi", "My week"], ["/compte", "My account"],
