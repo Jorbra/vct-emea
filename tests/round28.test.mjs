@@ -51,3 +51,31 @@ test("match start alerts: the followers of a team are told when its match starts
   // long after its time, nothing more
   assert.equal(dueStarts(db, now + 3 * 3600e3).length, 0);
 });
+
+test("head to head over every season, recent form and pools from the site's details", async () => {
+  const { headToHeadAll, meetingsOf, recentForm, poolOf, archivedPlayed, playedOf } = await import("../lib/h2h.js");
+  const { archiveSeason, fillSeasons } = await import("../lib/seasons.js");
+  const { saveKickoffScore, setKickoffMatch } = await import("../lib/kactions.js");
+  const db = openDb(":memory:");
+  fillSeasons(db);
+  setKickoffMatch(db, { id: "u1-1", a: 1, b: 2 });
+  saveKickoffScore(db, { id: "u1-1", sa: 2, sb: 1 });
+  assert.equal(archiveSeason(db, { name: "Saison 2026" }).ok, true);
+  const archives = archivedPlayed(db);
+  assert.equal(archives.length, 1);
+  const [x] = archives[0].matches;
+  assert.ok(x && x.a.name && x.b.name, "the archive's match is read");
+  const A = x.a, B = x.b;
+  // this season they meet again and B wins
+  const cur = [{ event: "kickoff", id: "u2-1", at: "2027-01-20T18:00:00Z", a: B, b: A, sa: 2, sb: 0, win: "a" }];
+  const h = headToHeadAll(cur, archives, A, B);
+  assert.deepEqual([h.a, h.b], [1, 1]);
+  assert.deepEqual([h.mapsA, h.mapsB], [2, 3]);
+  assert.deepEqual(h.seasons.map((s) => s.slug), ["", "saison-2026"]);
+  assert.equal(meetingsOf(cur, A, B, "u2-1").length, 0);
+  assert.equal(headToHeadAll(cur, archives, A, B, { exceptId: "u2-1" }).seasons.length, 1);
+  const form = recentForm([...cur, ...archives[0].matches], A);
+  assert.deepEqual(form.map((m) => m.won), [false, true]);
+  assert.deepEqual(poolOf([{ map: "Bind", played: 3, w: 2, l: 1 }, { map: "Pearl", played: 1, w: 0, l: 0 }]), [{ map: "Bind", played: 3, won: 2 }]);
+  assert.deepEqual(playedOf({ nonsense: true }), []);
+});

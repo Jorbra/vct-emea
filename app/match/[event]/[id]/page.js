@@ -14,6 +14,8 @@ import { ratingsFor } from "../../../../lib/proba26.js";
 import { ratings as r8ratings } from "../../../../lib/r8data.js";
 
 import { publicState } from "../../../../lib/publicstate.js";
+import { archivedPlayed, headToHeadAll, playedOf } from "../../../../lib/h2h.js";
+import { keepFor } from "../../../../lib/keep.js";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +45,16 @@ function teamsRadar(m) {
   } catch { return null; }
 }
 
+/** Their meetings over every season, when the archives have some (this season's are on the match card already). */
+async function h2hAll(m, state) {
+  if (!(m.a && m.b && m.a.name && m.b.name)) return null;
+  try {
+    const archives = await keepFor("h2h:archives", 300000, () => archivedPlayed(getDb()));
+    const h = headToHeadAll(playedOf(state), archives, m.a, m.b, { exceptId: m.id });
+    return h.seasons.some((x) => x.slug) ? h : null;
+  } catch { return null; }
+}
+
 /** A match's own page (/match/kickoff/u1-1): what its window shows, at an address that can be shared. */
 export default async function Page({ params }) {
   workSoon();
@@ -57,7 +69,7 @@ export default async function Page({ params }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
-      <MatchPage e={e} id={id} state={data.state} radar={teamsRadar(m)} rating={(() => { try { return ratingsFor(r8ratings().rating, [m]); } catch { return null; } })()} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />
+      <MatchPage e={e} id={id} state={data.state} h2h={await h2hAll(m, data.state)} radar={teamsRadar(m)} rating={(() => { try { return ratingsFor(r8ratings().rating, [m]); } catch { return null; } })()} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />
     </>
   );
 }

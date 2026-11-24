@@ -8,6 +8,7 @@ import SiteNav from "./SiteNav.jsx";
 import { Crest } from "./Crest.jsx";
 import { EVENT_NAMES, teamHref } from "../lib/paths.js";
 import { PoolsCompare } from "./Round19.jsx";
+import { FormCompare, HeadToHeadAll, KeyPlayers } from "./Round28.jsx";
 
 function Top({ title }) {
   const tr = useT();
@@ -60,13 +61,16 @@ function TeamCompare({ teams, a, b, c }) {
             {bar(tr("Maps won"), c.a.mw, c.b.mw)}
             {bar(tr("Map rate"), c.a.mw + c.a.ml ? Math.round((c.a.mw / (c.a.mw + c.a.ml)) * 100) : 0, c.b.mw + c.b.ml ? Math.round((c.b.mw / (c.b.mw + c.b.ml)) * 100) : 0, (x) => `${x}%`)}
           </div>
-          {c.pools && (c.pools.a.length > 0 || c.pools.b.length > 0) && <PoolsCompare a={a} b={b} pools={c.pools} />}
-          <section>
+          {c.form && <FormCompare a={a} b={b} form={c.form} />}
+          {c.pools && (c.pools.a.length > 0 || c.pools.b.length > 0) && <PoolsCompare a={a} b={b} pools={c.pools} note={c.pools.own ? tr("From the site's match details.") : ""} />}
+          <KeyPlayers a={a} b={b} stars={c.stars} />
+          <HeadToHeadAll a={a} b={b} h={c.all} />
+          {!(c.all && c.all.seasons.length) && <section>
             <h2>{tr("Their meetings")}</h2>
             {c.meetings.length === 0 ? <p className="note">{tr("Never met on the site.")}</p> : (
               <ul className="weeklist">{c.meetings.map((m) => <li key={m.event + m.id} className={m.won === "a" ? "ok" : "ko"}><span>{m.won === "a" ? "🟢" : "🔴"}</span><a href={`/match/${m.event}/${m.id}`}>{a.name} {m.sa}–{m.sb} {b.name}</a><small>{tr(EVENT_NAMES[m.event] || m.event)}</small></li>)}</ul>
             )}
-          </section>
+          </section>}
         </>
       )}
       {(a === null || b === null) && <p className="err">{tr("Unknown team.")}</p>}

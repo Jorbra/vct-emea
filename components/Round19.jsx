@@ -6,7 +6,7 @@ import { Crest } from "./Crest.jsx";
 import { mapList } from "./Assets.jsx";
 
 /** Both teams' maps on one list: each one's win rate on either side, the map's picture behind. */
-export function PoolsCompare({ a, b, pools }) {
+export function PoolsCompare({ a, b, pools, note = "" }) {
   const tr = useT();
   const names = [...new Set([...pools.a, ...pools.b].map((m) => m.map))];
   const of = (list, map) => list.find((m) => m.map === map) || null;
@@ -30,7 +30,7 @@ export function PoolsCompare({ a, b, pools }) {
           {cell(r.b, "b")}
         </div>
       ))}
-      <p className="hint">{tr("From vlr.gg's tables of the site's events.")}</p>
+      <p className="hint">{note || tr("From vlr.gg's tables of the site's events.")}</p>
     </section>
   );
 }
