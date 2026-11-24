@@ -166,3 +166,14 @@ test("background task: a round still running (its lock, its process alive) makes
   fs.writeFileSync(lock, JSON.stringify({ pid: 2 ** 22 + 12345, at: Date.now() }));
   assert.equal(busy(lock), false); // its process is gone
 });
+
+test("read only: when Turso refuses, the copy is read and every save is refused (in French for the editors)", async () => {
+  const { readOnly, harden } = await import("../lib/db.js");
+  const { default: Database } = await import("libsql");
+  const { serverFr } = await import("../lib/i18n.js");
+  const db = readOnly(harden(new Database(":memory:")));
+  assert.equal(db.prepare("SELECT 1 AS x").get().x, 1);
+  assert.throws(() => db.prepare("CREATE TABLE t (a)").run(), /Saving is not possible/);
+  assert.throws(() => db.exec("DELETE FROM t"), /Saving is not possible/);
+  assert.match(serverFr("Saving is not possible for now: the database (Turso) does not answer. Try again later."), /^Enregistrement impossible/);
+});
