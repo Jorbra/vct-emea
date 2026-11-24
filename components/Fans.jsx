@@ -135,6 +135,7 @@ export function Groups({ token, group, named }) {
   const [name, setName] = useState("");
   const [msg, setMsg] = useState({ ok: true, text: "" });
   const [copied, setCopied] = useState("");
+  const [code, setCode] = useState("");
   useEffect(() => {
     if (!token) return;
     post("/api/groups", { token, action: "mine" }).then((j) => setMine(j.groups)).catch(() => { /* offline */ });
@@ -148,7 +149,7 @@ export function Groups({ token, group, named }) {
       if (after) after(j);
     } catch (e) { setMsg({ ok: false, text: tr.server(e.message) }); }
   };
-  const link = (code) => `${typeof window !== "undefined" ? window.location.origin : ""}/predictions?g=${code}`;
+  const link = (code) => `${typeof window !== "undefined" ? window.location.origin : ""}/ligue/${code}`;
   const copy = async (code) => {
     try { await navigator.clipboard.writeText(link(code)); setCopied(code); } catch { window.prompt(tr("Link"), link(code)); }
   };
@@ -158,7 +159,7 @@ export function Groups({ token, group, named }) {
       <h2>{tr("Friends' groups")}</h2>
       {group && (
         <div className="groupbox">
-          <h3>{group.name} <small>{tr("{n} members", { n: group.count })}</small></h3>
+          <h3>{group.name} <small>{tr("{n} members", { n: group.count })} · {tr("Code: {code}", { code: group.code })}</small></h3>
           {!inGroup && <button type="button" className="btn pri" disabled={!token} onClick={() => act({ action: "join", code: group.code }, () => window.location.reload())}>{tr("Join this group")}</button>}
           {!named && !inGroup && <p className="hint">{tr("Make a first prediction to get your name, then join the group.")}</p>}
           {inGroup && <div className="row"><button type="button" className="btn" onClick={() => copy(group.code)}>{copied === group.code ? tr("Link copied") : tr("Copy the invite link")}</button><button type="button" className="btn" onClick={() => act({ action: "leave", code: group.code }, () => window.location.assign("/predictions"))}>{tr("Leave the group")}</button></div>}
@@ -166,12 +167,16 @@ export function Groups({ token, group, named }) {
       )}
       {mine.length > 0 && (
         <ul className="grouplist">{mine.map((g) => (
-          <li key={g.code}><a href={`/predictions?g=${g.code}`}><b>{g.name}</b></a> <small>{tr("{n} members", { n: g.count })}</small> <button type="button" className="btn small" onClick={() => copy(g.code)}>{copied === g.code ? tr("Link copied") : tr("Copy the invite link")}</button></li>
+          <li key={g.code}><a href={`/ligue/${g.code}`}><b>{g.name}</b></a> <small>{tr("{n} members", { n: g.count })} · <code>{g.code}</code></small> <button type="button" className="btn small" onClick={() => copy(g.code)}>{copied === g.code ? tr("Link copied") : tr("Copy the invite link")}</button></li>
         ))}</ul>
       )}
       <form className="acctform" onSubmit={(e) => { e.preventDefault(); act({ action: "create", name }, (j) => { setName(""); copy(j.code); }); }}>
         <label className="f">{tr("New group")}<input value={name} onChange={(e) => setName(e.target.value)} maxLength={30} placeholder={tr("e.g. The Friday crew")} /></label>
         <button className="btn" type="submit" disabled={!token || name.trim().length < 2}>{tr("Create the group")}</button>
+      </form>
+      <form className="acctform" onSubmit={(e) => { e.preventDefault(); const c = code.trim().toLowerCase(); act({ action: "join", code: c }, () => window.location.assign(`/ligue/${c}`)); }}>
+        <label className="f">{tr("Join with a code")}<input value={code} onChange={(e) => setCode(e.target.value)} maxLength={8} placeholder={tr("League code")} autoCapitalize="none" spellCheck={false} /></label>
+        <button className="btn" type="submit" disabled={!token || code.trim().length !== 8}>{tr("Join")}</button>
       </form>
       <p className="hint">{tr("A group has its own ranking. Share its link: whoever opens it can join.")}</p>
       {msg.text && <p className={msg.ok ? "okmsg" : "err"} role="status">{msg.text}</p>}

@@ -76,3 +76,4 @@ export function HeadToHeadAll({ a, b, h, title }) {
     </section>
   );
 }
+

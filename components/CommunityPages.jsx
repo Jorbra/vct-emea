@@ -70,7 +70,7 @@ export const NewsArticle = ({ item, lang }) => <LangProvider lang={lang}><NewsAr
 
 const TOKEN_KEY = "vct-predictions";
 /** The visitor's secret token, created once in the browser. */
-function visitorToken() {
+export function visitorToken() {
   try {
     let t = localStorage.getItem(TOKEN_KEY);
     if (!t) {

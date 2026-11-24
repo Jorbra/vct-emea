@@ -79,3 +79,27 @@ test("head to head over every season, recent form and pools from the site's deta
   assert.deepEqual(poolOf([{ map: "Bind", played: 3, w: 2, l: 1 }, { map: "Pearl", played: 1, w: 0, l: 0 }]), [{ map: "Bind", played: 3, won: 2 }]);
   assert.deepEqual(playedOf({ nonsense: true }), []);
 });
+
+test("private leagues: created with a code, joined with it, their own ranking; French words", async () => {
+  const { createGroup, joinGroup, groupInfo, seasonRanking } = await import("../lib/fans.js");
+  const { savePrediction } = await import("../lib/community.js");
+  const { makeT, serverFr } = await import("../lib/i18n.js");
+  const db = openDb(":memory:");
+  setQualifierTeams(db, "meq1", "Alpha\nBeta\nGamma\nDelta");
+  const s = getState(db);
+  const [t1, t2, t3] = ["a", "b", "c"].map((c) => c.repeat(30));
+  for (const [t, n] of [[t1, "Ana"], [t2, "Bob"], [t3, "Cid"]]) assert.equal(savePrediction(db, s, { token: t, name: n, event: "meq1", id: "r64-1", pick: "Alpha" }).ok, true);
+  const g = createGroup(db, { token: t1, name: "Les potes" });
+  assert.equal(g.ok, true);
+  assert.match(g.code, /^[a-z0-9]{8}$/);
+  assert.equal(joinGroup(db, { token: t2, code: g.code }).ok, true);
+  assert.equal(joinGroup(db, { token: t2, code: "zzzzzzzz" }).ok, false);
+  const info = groupInfo(db, g.code);
+  assert.equal(info.hashes.length, 2);
+  const { saveQualifierScore } = await import("../lib/qactions.js");
+  saveQualifierScore(db, { event: "meq1", id: "r64-1", sa: 2, sb: 0 });
+  const names = seasonRanking(db, getState(db), { only: info.hashes }).map((r) => r.name).sort();
+  assert.deepEqual(names, ["Ana", "Bob"]); // Cid is not in the league
+  assert.equal(makeT("fr")("Friends' groups"), "Ligues privées");
+  assert.equal(serverFr("You joined the group."), "Tu as rejoint la ligue.");
+});
