@@ -3316,3 +3316,6 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .c25pick label { display: inline-flex; align-items: center; gap: 4px; font: 600 12px var(--font-body); color: var(--muted); }
 .c25pick select { width: auto; padding: 3px 6px; font-size: 12px; }
 @media (max-width: 560px) { .c25pick { display: flex; margin: 6px 0 0; } }
+
+.lprefresh { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 14px; }
+.lprefresh .hint { flex-basis: 100%; margin: 2px 0 0; }

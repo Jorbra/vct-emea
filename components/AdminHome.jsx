@@ -649,8 +649,26 @@ function RosterDiffs({ list, call, onDone }) {
       setErr(tr.server(e.message));
     }
   };
+  // everything at once: every team and player read again, or every roster that differs following Liquipedia
+  const [busy, setBusy] = useState("");
+  const all = async (action) => {
+    if (action === "follow" && !window.confirm(tr("Change every roster below to Liquipedia's? It can be undone."))) return;
+    setErr(""); setBusy(action);
+    try {
+      const j = await call("/api/lp-refresh", { action });
+      onDone(tr.server(j.message));
+    } catch (e) {
+      setErr(tr.server(e.message));
+    }
+    setBusy("");
+  };
   return (
     <section>
+      <div className="lprefresh">
+        <button type="button" className="btn pri" disabled={!!busy} onClick={() => all("read")}>🔄 {tr("Update everything from Liquipedia")}</button>
+        {list.length > 0 && <button type="button" className="btn" disabled={!!busy} onClick={() => all("follow")}>{tr("Follow Liquipedia for every roster")}</button>}
+        <p className="hint">{tr("Every team of the main events and its players is read again from Liquipedia (logo, roster, information), the teams first, one page a minute. Then follow the rosters that differ.")}</p>
+      </div>
       <h2>{tr("Roster differences")} <small>({list.length})</small></h2>
       {list.length === 0 ? <p className="note">{tr("Rosters match Liquipedia for the teams read so far.")}</p> : (
         <ul className="ahhist">
