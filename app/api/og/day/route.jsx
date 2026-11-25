@@ -1,24 +1,18 @@
 import { ImageResponse } from "next/og";
 import { getDb, getState } from "../../../../lib/db.js";
-import { allMatches } from "../../../../lib/matchlist.js";
-import { detailsOf } from "../../../../lib/tstats.js";
+import { dayMatches, dayRecapOf, parisDay } from "../../../../lib/dayrecap.js";
 
 export const dynamic = "force-dynamic";
-
-const parisDay = (t) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date(t));
 
 // GET ?d=2026-11-14: a day's results as a picture (the bot's evening summary): up to 10 results and the player of the day.
 export async function GET(req) {
   const asked = new URL(req.url).searchParams.get("d") || "";
   const day = /^\d{4}-\d{2}-\d{2}$/.test(asked) ? asked : parisDay(Date.now());
   const db = getDb();
-  const done = allMatches(getState(db)).filter((m) => m.a && m.b && m.sa != null && m.at && parisDay(m.at) === day);
-  // the player of the day: the best rating of the day's tables (2 maps at least)
-  let star = null;
-  for (const m of done) {
-    const d = detailsOf(db, m.event, m.id);
-    for (const r of (d && d.all) || []) if (r.r != null && (!star || r.r > star.r)) star = { name: r.name, r: r.r, acs: r.acs, vs: `${m.a.name} vs ${m.b.name}` };
-  }
+  const state = getState(db);
+  const done = dayMatches(state, day);
+  // the player of the day (best rating), the fans' MVP and the standout line (most kills on a map), as on /jour
+  const { star, fans, best } = await dayRecapOf(db, state, day);
   const row = (m) => (
     <div key={m.event + m.id} style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 30 }}>
       <div style={{ display: "flex", flex: 1, justifyContent: "flex-end", color: m.win === "a" ? "#ffffff" : "#8b8f99", fontWeight: m.win === "a" ? 800 : 500 }}>{m.a.name}</div>
@@ -42,6 +36,12 @@ export async function GET(req) {
             <div style={{ display: "flex", fontSize: 26, color: "#c9f03c", fontWeight: 800 }}>⭐ JOUEUR DU JOUR</div>
             <div style={{ display: "flex", fontSize: 34, fontWeight: 800 }}>{star.name}</div>
             <div style={{ display: "flex", fontSize: 26, color: "#8b8f99" }}>{`${Number(star.r).toFixed(2)} rating · ${star.acs ?? "–"} ACS · ${star.vs}`}</div>
+          </div>
+        )}
+        {(fans || best) && (
+          <div style={{ display: "flex", gap: 14, marginTop: 12 }}>
+            {fans && <div style={{ display: "flex", flex: 1, alignItems: "baseline", gap: 12, padding: "14px 20px", borderRadius: 16, background: "#1a1e28", fontSize: 24 }}><span style={{ display: "flex", color: "#c9f03c", fontWeight: 800 }}>MVP DES FANS</span><span style={{ display: "flex", fontWeight: 800, fontSize: 28 }}>{fans.name}</span><span style={{ display: "flex", color: "#8b8f99" }}>{`${fans.n} votes`}</span></div>}
+            {best && <div style={{ display: "flex", flex: 1, alignItems: "baseline", gap: 12, padding: "14px 20px", borderRadius: 16, background: "#1a1e28", fontSize: 24 }}><span style={{ display: "flex", color: "#ff4655", fontWeight: 800 }}>🔥</span><span style={{ display: "flex", fontWeight: 800, fontSize: 28 }}>{best.name}</span><span style={{ display: "flex", color: "#8b8f99" }}>{`${best.k} kills · ${best.map}`}</span></div>}
           </div>
         )}
         <div style={{ display: "flex", marginTop: 16, fontSize: 24, color: "#c9f03c", fontWeight: 800 }}>VCT EMEA · vct-emea.vercel.app</div>

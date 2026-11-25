@@ -3448,3 +3448,22 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .srcact { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
 .srcact .srcbr input { width: auto; }
 @media (max-width: 1100px) { .srcrow { grid-template-columns: 1fr; } .srcfields { grid-template-columns: 1fr 1fr; } .srcact { justify-content: flex-start; } }
+
+/* round 29: the day's recap page */
+.drnav { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; margin: 12px 0; }
+.drnav h2 { margin: 0; text-transform: capitalize; text-align: center; }
+.drnav > :last-child { justify-self: end; }
+.drcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 10px 0 18px; }
+.drcard { display: grid; gap: 3px; padding: 14px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); animation: drin .4s ease both; }
+.drcard:nth-child(2) { animation-delay: .06s; } .drcard:nth-child(3) { animation-delay: .12s; } .drcard:nth-child(4) { animation-delay: .18s; }
+.drcard small { color: var(--lime); font-weight: 700; }
+.drcard b { font-size: 20px; }
+.drcard em { font-style: normal; font-size: 12px; color: var(--muted); }
+@keyframes drin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .drcard { animation: none; } }
+.drlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.drlist a { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 10px; background: var(--surface); color: inherit; text-decoration: none; }
+.drlist a > span:first-child { text-align: right; }
+.drlist a .w { font-weight: 800; }
+.drlist a small { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size: 11px; }
+.drimg { width: 100%; max-width: 720px; height: auto; border-radius: 12px; display: block; }
