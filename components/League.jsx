@@ -50,6 +50,16 @@ function League({ league }) {
             )}
             <p className="hint">{tr("Points: 1 per right winner, +1 for the exact score, plus the points of Who qualifies? and of the next map.")}</p>
           </section>
+          <section>
+            <h2>{tr("League fantasy")}</h2>
+            {!(league.fantasy || []).length ? <p className="note">{tr("No member has a fantasy team yet.")}</p> : (
+              <div className="tablewrap"><table>
+                <thead><tr><th>#</th><th>{tr("Name")}</th><th>{tr("Season")}</th><th>{tr("This week")}</th></tr></thead>
+                <tbody>{league.fantasy.map((r, i) => <tr key={r.name}><td>{i + 1}</td><td><b>{r.name}</b></td><td>{r.season}</td><td>{r.week}</td></tr>)}</tbody>
+              </table></div>
+            )}
+            <p className="hint">{tr("5 players, 100 credits: they score with their real vlr.gg stats.")} <a href="/fantasy">{tr("Make my fantasy team")}</a></p>
+          </section>
           <p><a className="btn pri" href="/predictions">{tr("To the predictions")}</a></p>
         </>
       )}
