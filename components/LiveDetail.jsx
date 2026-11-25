@@ -7,8 +7,20 @@ import { useT } from "./lang.jsx";
 import { AgentIcon } from "./Assets.jsx";
 
 const HOW = { e: "Eliminations", b: "Spike exploded", d: "Spike defused", t: "Time ran out" };
-const ICON = { e: "", b: "✹", d: "✂", t: "⏱" };
 const short = (t) => (t && (t.tag || t.name)) || "";
+
+// How a round ended, drawn (the same in every browser, in the square's text colour): every enemy down (a skull), the spike
+// gone off (a burst), the spike defused (the spike with a cut through it), the time run out (a clock).
+const PATHS = {
+  e: <path fillRule="evenodd" d="M12 3a7 7 0 0 0-7 7c0 2.3 1.1 4.3 2.8 5.6V19c0 .6.4 1 1 1h1.2v-2.2h1.5V20h3v-2.2h1.5V20h1.2c.6 0 1-.4 1-1v-3.4A7 7 0 0 0 12 3zm-3 7.2a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4zm6 0a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4zM12 14l-1.2 2h2.4z" />,
+  b: <path d="M12 1.5l2 5.6 5.4-2.6-2.6 5.4 5.7 2.1-5.7 2.1 2.6 5.4-5.4-2.6-2 5.6-2-5.6-5.4 2.6 2.6-5.4-5.7-2.1 5.7-2.1-2.6-5.4 5.4 2.6z" />,
+  d: <><path d="M12 2l5 4.5v8L12 22l-5-7.5v-8z" opacity=".95" /><path d="M4 17L20 5" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" fill="none" className="rcut" /></>,
+  t: <><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" strokeWidth="2.4" /><path d="M12 8.5V13l3 2" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /><path d="M9 2.5h6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></>,
+};
+export function RoundIcon({ how }) {
+  const p = PATHS[how];
+  return p ? <svg className="ricon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">{p}</svg> : null;
+}
 
 /** A map's rounds: one square per round, in the colour of the team that won it, halves and overtime set apart. */
 export function RoundStrip({ rnd, a, b }) {
@@ -22,7 +34,7 @@ export function RoundStrip({ rnd, a, b }) {
         return (
           <li key={i} className={`rsq-${r[0]}` + (i === 12 || (i >= 24 && i % 2 === 0) ? " rsq-half" : "")}
             title={tr("Round {n}: {team} ({side}), {how}", { n: i + 1, team: short(team) || r[0].toUpperCase(), side, how: tr(HOW[r[2]] || HOW.e) })}>
-            <span aria-hidden="true">{ICON[r[2]] || ""}</span>
+            <RoundIcon how={r[2] || "e"} />
           </li>
         );
       })}
@@ -109,7 +121,7 @@ export default function LiveDetail({ detail, a, b, compact = false }) {
       )}
       <RoundStrip rnd={shown.rnd} a={a} b={b} />
       {(shown.rnd || []).length > 0 && (
-        <p className="ldkey"><span className="rkey-a">■</span> {short(a)} <span className="rkey-b">■</span> {short(b)} · ✹ {tr("Spike exploded")} · ✂ {tr("Spike defused")} · ⏱ {tr("Time ran out")}</p>
+        <p className="ldkey"><span className="rkey-a">■</span> {short(a)} <span className="rkey-b">■</span> {short(b)} · <RoundIcon how="e" /> {tr("Eliminations")} · <RoundIcon how="b" /> {tr("Spike exploded")} · <RoundIcon how="d" /> {tr("Spike defused")} · <RoundIcon how="t" /> {tr("Time ran out")}</p>
       )}
       {((detail.players.map || []).length > 0 || (detail.players.all || []).length > 0) && (
         <>
