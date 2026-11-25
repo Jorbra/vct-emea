@@ -3498,3 +3498,8 @@ html[data-period="masters"] { --accent: #9b6bff; --period: linear-gradient(90deg
 html[data-period="stage"] { --accent: #ff4655; --period: linear-gradient(90deg, #ff4655, #ff8a5b); }
 html[data-period="champions"] { --accent: #f5c542; --period: linear-gradient(90deg, #f5c542, #ff4655, #f5c542); }
 html[data-period]:not([data-period="offseason"]) body::before { content: ""; position: fixed; inset: 0 0 auto 0; height: 3px; background: var(--period); z-index: 1000; pointer-events: none; }
+
+/* round 29: the veto's tiles carry the map seen from above */
+.veto li { position: relative; padding-inline-end: 44px; }
+.veto .vmini { position: absolute; inset-inline-end: 6px; top: 50%; width: 34px; height: 34px; transform: translateY(-50%); background: var(--mini) center / contain no-repeat; filter: drop-shadow(0 1px 2px rgba(0,0,0,.8)); opacity: .9; }
+.veto li.vban .vmini { opacity: .5; }

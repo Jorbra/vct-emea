@@ -4,7 +4,7 @@
 // the home page's spotlight, the agents' duel.
 import { useEffect, useState } from "react";
 import { useT } from "./lang.jsx";
-import { AgentIcon, AgentList, agentInfo, mapList, mapSplash } from "./Assets.jsx";
+import { AgentIcon, AgentList, agentInfo, mapInfo, mapList, mapSplash } from "./Assets.jsx";
 import { readTheme, setTeamTheme } from "./visual.jsx";
 
 const TIER_COLORS = { S: "#ff5c7a", A: "#ffb347", B: "#c9f03c", C: "#6fb8ff" };
@@ -84,6 +84,8 @@ export function Veto({ list }) {
           <li key={i} className={"v" + v.act} style={mapList(v.map) ? { "--mapimg": `url(${mapList(v.map)})` } : undefined}>
             <small>{v.who ? `${v.who} ${word[v.act]}` : word[v.act]}</small>
             <b>{v.map}</b>
+            {/* the map seen from above, small in the corner */}
+            {(mapInfo(v.map) || {}).icon ? <span className="vmini" aria-hidden="true" style={{ "--mini": `url(${mapInfo(v.map).icon})` }} /> : null}
           </li>
         ))}
       </ol>
