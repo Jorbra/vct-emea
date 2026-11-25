@@ -56,3 +56,15 @@ test("quiz of the day: one go per day, the streak of right answers in a row", as
   assert.equal(answerDailyQuiz(db, state, { token, answers }, now).ok, false); // once a day
   assert.equal(myDailyQuiz(db, token, now).today.length, quiz.length);
 });
+
+test("match day home: countdown before the first match, live once one started, the recap when all are over", async () => {
+  const { matchDayState } = await import("../lib/matchday.js");
+  const t = (h) => new Date(Date.UTC(2026, 10, 24, h)).toISOString();
+  const now = Date.UTC(2026, 10, 24, 15);
+  assert.equal(matchDayState([], now), null);
+  const before = matchDayState([{ at: t(17), sa: null }, { at: t(19), sa: null }], now);
+  assert.equal(before.kind, "before");
+  assert.equal(before.left, 2 * 3600e3);
+  assert.equal(matchDayState([{ at: t(14), sa: null }, { at: t(19), sa: null }], now).kind, "live");
+  assert.equal(matchDayState([{ at: t(12), sa: 2 }, { at: t(14), sa: 0 }], now).kind, "over");
+});

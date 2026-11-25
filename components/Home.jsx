@@ -23,6 +23,7 @@ import { MatchStrip } from "./matchTime.jsx";
 import { MatchModalProvider } from "./MatchModal.jsx";
 import HomeNext from "./HomeNext.jsx";
 import FeaturedMatch from "./FeaturedMatch.jsx";
+import MatchDay from "./MatchDay.jsx";
 import { Spotlight, ThemeSuggest } from "./Round13.jsx";
 import { InForm, Records } from "./Round21.jsx";
 import { HomeHero } from "./Round22.jsx";
@@ -221,6 +222,7 @@ function HomeView({ initial, spot = [], form = [], podium = [], elo = {} }) {
       {matchEvents.some((e) => e.items.some((m) => e.live[m.id] && m.sa == null)) && <div className="livesweep" aria-hidden="true" />}
       <Stories events={matchEvents} />
       <HomeCustomize />
+      <MatchDay events={matchEvents} />
       <div data-block="hero"><HomeHero events={matchEvents} /><div className="h22install"><InstallButton /></div></div>
       <div data-block="today" className="mobonly"><TodayCarousel events={matchEvents} /></div>
       <div className="homehead" data-block="live">
