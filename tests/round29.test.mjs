@@ -33,3 +33,26 @@ test("day recap: results in order, player of the day, standout line, closest map
   assert.equal(r.closest.map, "Bind"); // 2 rounds apart like Lotus, but longer
   assert.equal(r.fans.name, "kai");
 });
+
+test("quiz of the day: one go per day, the streak of right answers in a row", async () => {
+  const { streaks, answerDailyQuiz, myDailyQuiz, dailyQuiz } = await import("../lib/dailyquiz.js");
+  assert.deepEqual(streaks([[true, true, false], [true, true]]), { streak: 2, best: 2 });
+  assert.deepEqual(streaks([[true, true, true], [true, false]]), { streak: 0, best: 4 });
+  const db = openDb(":memory:");
+  const at = (d) => new Date(Date.UTC(2026, 10, d, 18)).toISOString();
+  // the playoffs' Swiss matches, as the state keeps them: teams by id, the time apart
+  const teams = Array.from({ length: 16 }, (_, i) => ({ id: `t${i}`, name: `Team ${i}` }));
+  const matches = Array.from({ length: 8 }, (_, i) => ({ id: `r1m${i}`, stage: "swiss", round: 1, a: `t${2 * i}`, b: `t${2 * i + 1}`, sa: 2, sb: 1, bo: 3 }));
+  const times = Object.fromEntries(matches.map((m, i) => [m.id, at(18 + (i % 5))]));
+  const state = { teams, matches, times: { playoffs: times }, qualifiers: {}, regional: {}, kickoff: { teams: [], matches: [] }, extra: {} };
+  const now = Date.UTC(2026, 10, 24, 12);
+  const quiz = dailyQuiz(state, "2026-11-24");
+  assert.equal(quiz.length, 3);
+  const token = "t".repeat(30);
+  const answers = Object.fromEntries(quiz.map((q) => [q.id, q.answer]));
+  const r = answerDailyQuiz(db, state, { token, answers }, now);
+  assert.equal(r.ok, true);
+  assert.equal(r.streak, quiz.length);
+  assert.equal(answerDailyQuiz(db, state, { token, answers }, now).ok, false); // once a day
+  assert.equal(myDailyQuiz(db, token, now).today.length, quiz.length);
+});

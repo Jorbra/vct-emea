@@ -3467,3 +3467,8 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .drlist a .w { font-weight: 800; }
 .drlist a small { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size: 11px; }
 .drimg { width: 100%; max-width: 720px; height: auto; border-radius: 12px; display: block; }
+
+/* round 29: the quiz of the day */
+.dquiz { margin: 6px 0 22px; padding: 14px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
+.dqhead { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.dqhead h2 { margin: 0; flex: 1; }

@@ -10,6 +10,7 @@ import { Crest } from "./Crest.jsx";
 import { useFavorites } from "./favorites.js";
 import { deviceToken } from "./account.js";
 import { fanToken } from "./Fans.jsx";
+import DailyQuiz from "./DailyQuiz.jsx";
 
 function Top({ title }) {
   const tr = useT();
@@ -65,7 +66,7 @@ export const PowerPage = ({ rows, lang }) => <LangProvider lang={lang}><Power ro
 
 // ---- the quiz of the week
 
-function Quiz({ questions, ranking, players, week }) {
+function Quiz({ questions, ranking, players, week, daily }) {
   const tr = useT();
   const [picked, setPicked] = useState({});
   const [done, setDone] = useState(null);
@@ -92,7 +93,9 @@ function Quiz({ questions, ranking, players, week }) {
   const res = done ? Object.fromEntries(done.result.map((r) => [r.id, r])) : {};
   return (
     <div className="wrap teampage">
-      <Top title={tr("Quiz of the week")} />
+      <Top title={tr("Quiz")} />
+      {daily && <DailyQuiz questions={daily.questions} ranking={daily.ranking} />}
+      <h2>{tr("Quiz of the week")}</h2>
       <p className="note">{tr("5 questions on last week's matches, one go per week. A new quiz every Monday.")}</p>
       {questions.length === 0 ? <p className="note">{tr("No quiz this week: no match was played in the last 4 weeks.")}</p> : (
         <>
