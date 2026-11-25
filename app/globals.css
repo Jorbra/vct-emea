@@ -3591,3 +3591,20 @@ html[data-theme="light"] .tstreak.W { color: #a54b00; } html[data-theme="light"]
 .keybox dl > div { display: grid; grid-template-columns: 80px 1fr; align-items: center; gap: 10px; }
 .keybox dt, .keybox dd { margin: 0; }
 .keybox kbd { display: inline-block; min-width: 28px; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--line); border-bottom-width: 3px; background: var(--bg); font: 700 13px var(--font-body); text-align: center; }
+@media (max-width: 640px) {
+  /* streaks above the ranking: one row that scrolls sideways, so the ranking stays close */
+  .streaklist { display: flex; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
+  .streaklist::-webkit-scrollbar { display: none; }
+  .streaklist li { flex: none; }
+}
+
+/* sober motion: the sections' rise is shorter and lighter, and off on phones (a short screen left too much half-faded) */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .wrap > section, .wrap > div > section, .wrap > .bento { animation-range: entry 0% entry 18%; }
+  }
+  @media (max-width: 640px) {
+    .wrap > section, .wrap > div > section, .wrap > .bento { animation: none; }
+  }
+}
+@keyframes rv22 { from { opacity: .35; transform: translateY(12px); } to { opacity: 1; transform: none; } }

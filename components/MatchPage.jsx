@@ -29,7 +29,7 @@ function View({ e, id, state, radar = null, rating = null, h2h = null }) {
       <MatchCard e={e} m={m} state={state} />
       <WinChance m={m} rating={rating} />
       {h2h && <HeadToHeadAll a={m.a} b={m.b} h={h2h} />}
-      {m.a && m.b && m.a.name && m.b.name && <p className="cmplink"><a className="btn" href={`/equipes?a=${teamSlug(m.a.name)}&b=${teamSlug(m.b.name)}`}>{tr("Compare the two teams")}</a></p>}
+      {m.a && m.b && m.a.name && m.b.name && <p className="cmplink"><a className="btn" href={`/equipes?a=${teamSlug(m.a.name)}&b=${teamSlug(m.b.name)}`}>{tr("Full comparison, every season")} →</a></p>}
       {radar && <Radar a={radar.a} b={radar.b} nameA={m.a.name} nameB={m.b.name} title={tr("The two teams face to face")} note={tr("Percentile among the teams with 3 maps at least")} />}
     </div>
   );

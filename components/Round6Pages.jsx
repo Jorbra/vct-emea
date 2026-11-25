@@ -39,6 +39,19 @@ function Power({ rows, streaks }) {
     <div className="wrap teampage">
       <Top title={tr("Power ranking")} />
       <p className="note">{tr("Every finished series of the season, in date order: beating a strong team earns more, and a 2–0 more than a 2–1. The arrow: places won or lost in 7 days.")}</p>
+      {streaks && (streaks.hot.length > 0 || streaks.cold.length > 0) && (
+        <section className="streaks">
+          <h2>{tr("Running streaks")}</h2>
+          <div className="streakcols">
+            {[["hot", "🔥", "Series won in a row"], ["cold", "🧊", "Series lost in a row"]].map(([k, icon, title]) => streaks[k].length > 0 && (
+              <div key={k}>
+                <h3>{icon} {tr(title)}</h3>
+                <ol className="streaklist">{streaks[k].map((t) => <li key={t.slug}><Crest team={t} /><a href={`/team/${t.slug}`}>{t.name}</a><b className={k}>{t.n}</b></li>)}</ol>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
       {rows.length === 0 ? <p className="note">{tr("Not enough results yet: 3 series per team at least.")}</p> : (
         <ol className="powerlist">
           {shown.map((t) => (
@@ -57,19 +70,7 @@ function Power({ rows, streaks }) {
           ))}
         </ol>
       )}
-      {streaks && (streaks.hot.length > 0 || streaks.cold.length > 0) && (
-        <section className="streaks">
-          <h2>{tr("Running streaks")}</h2>
-          <div className="streakcols">
-            {[["hot", "🔥", "Series won in a row"], ["cold", "🧊", "Series lost in a row"]].map(([k, icon, title]) => streaks[k].length > 0 && (
-              <div key={k}>
-                <h3>{icon} {tr(title)}</h3>
-                <ol className="streaklist">{streaks[k].map((t) => <li key={t.slug}><Crest team={t} /><a href={`/team/${t.slug}`}>{t.name}</a><b className={k}>{t.n}</b></li>)}</ol>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      
       {rows.length > 30 && <p><button type="button" className="btn" onClick={() => setAll(!all)}>{all ? tr("Show the top 30") : tr("Show all {n} teams", { n: rows.length })}</button></p>}
     </div>
   );
