@@ -123,7 +123,7 @@ Avant / après :
 
 ## Comment la mettre en ligne
 
-1. Regarder la branche : `git log main..grosse-maj-nuit` (7 commits) et les captures.
+1. Regarder la branche : `git log main..grosse-maj-nuit` (un commit par lot) et les captures.
 2. Fusionner puis pousser :
 
 ```powershell
