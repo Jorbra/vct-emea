@@ -3491,3 +3491,10 @@ html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff
 .mdlist li.done a { opacity: .75; }
 @keyframes mdblink { 50% { opacity: .3; } }
 @media (prefers-reduced-motion: reduce) { .mdlist li.on .mdh { animation: none; } }
+
+/* round 29: the season's period gives the site its colour (a band on top, the accent of a few blocks); the visitor's own colours win */
+html[data-period="kickoff"] { --accent: #c9f03c; --period: linear-gradient(90deg, #c9f03c, #2fd3b5); }
+html[data-period="masters"] { --accent: #9b6bff; --period: linear-gradient(90deg, #9b6bff, #f5c542); }
+html[data-period="stage"] { --accent: #ff4655; --period: linear-gradient(90deg, #ff4655, #ff8a5b); }
+html[data-period="champions"] { --accent: #f5c542; --period: linear-gradient(90deg, #f5c542, #ff4655, #f5c542); }
+html[data-period]:not([data-period="offseason"]) body::before { content: ""; position: fixed; inset: 0 0 auto 0; height: 3px; background: var(--period); z-index: 1000; pointer-events: none; }

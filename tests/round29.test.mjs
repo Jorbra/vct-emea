@@ -68,3 +68,15 @@ test("match day home: countdown before the first match, live once one started, t
   assert.equal(matchDayState([{ at: t(14), sa: null }, { at: t(19), sa: null }], now).kind, "live");
   assert.equal(matchDayState([{ at: t(12), sa: 2 }, { at: t(14), sa: 0 }], now).kind, "over");
 });
+
+test("season period: Kickoff in January, Masters in March and June, Champions in September, off-season in November", async () => {
+  const { periodOf } = await import("../lib/period.js");
+  const at = (m, d) => Date.UTC(2027, m - 1, d, 12);
+  assert.equal(periodOf(at(1, 20), ""), "kickoff");
+  assert.equal(periodOf(at(3, 5), ""), "masters");
+  assert.equal(periodOf(at(6, 10), ""), "masters");
+  assert.equal(periodOf(at(4, 15), ""), "stage");
+  assert.equal(periodOf(at(9, 20), ""), "champions");
+  assert.equal(periodOf(at(11, 25), ""), "offseason");
+  assert.equal(periodOf(at(11, 25), "champions"), "champions"); // forced on the server
+});
