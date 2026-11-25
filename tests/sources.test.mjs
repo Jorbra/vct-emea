@@ -4,7 +4,14 @@ import assert from "node:assert/strict";
 import { openDb } from "../lib/db.js";
 import { mergeToornament, mergeVlr, parseToornament, parseVlr, readSources, saveSource } from "../lib/sources.js";
 import { TOORNAMENT, toornamentIds } from "../lib/toornament.js";
-import { VLR_BRACKETS, VLR_EVENTS, vlrSources } from "../lib/vlrmatch.js";
+import { VLR_BRACKETS, VLR_EVENTS, stageMatches, vlrSources } from "../lib/vlrmatch.js";
+
+test("stage words: an event of its own keeps its matches when an old filter fits none; a shared one still sorts", () => {
+  const all = [{ stage: "Round 1 (0-0) Swiss Stage" }, { stage: "Round 2 (1-0) Swiss Stage" }];
+  assert.equal(stageMatches(all, /playoffs/i, false).length, 2);
+  assert.equal(stageMatches(all, /playoffs/i, true).length, 0);
+  assert.equal(stageMatches([...all, { stage: "Playoffs Grand Final" }], /playoffs/i, false).length, 1);
+});
 
 test("links: Toornament and vlr.gg numbers from the pages people paste", () => {
   assert.equal(parseToornament("https://play.toornament.com/en_GB/tournaments/2585088541901830143/stages/2609739073737267199"), "2585088541901830143");

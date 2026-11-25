@@ -274,6 +274,13 @@ img { max-width: 100%; }
 .srow .ssc { font: 700 14px var(--font-display); min-width: 16px; text-align: center; font-variant-numeric: tabular-nums; }
 .srow .crest { width: 20px; height: 20px; font-size: 9px; border-radius: 5px; }
 .sitem .medit { margin: 0 8px 8px; }
+.srow .ssc.lv { color: #e5484d; }
+.livemap { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: var(--muted); padding: 0 8px 5px; }
+.mrow .livemap { padding: 0; }
+.livemap b { color: #e5484d; font-variant-numeric: tabular-nums; }
+.lmdot { width: 6px; height: 6px; border-radius: 50%; background: #e5484d; animation: lmpulse 1.4s ease-in-out infinite; }
+@keyframes lmpulse { 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) { .lmdot { animation: none; } }
 .rtbl tr.out td:nth-child(2) { opacity: .6; }
 
 /* Team logos and player flags */

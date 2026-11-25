@@ -98,6 +98,19 @@ function PrizeName({ id, name, team }) {
   );
 }
 
+/** The map being played and its score, from vlr.gg's page read (null when none is going on). */
+export function mapNow(ls) {
+  const maps = ((ls && ls.maps) || []).filter((x) => x && x.a != null && x.b != null);
+  const last = maps[maps.length - 1];
+  return last && !last.done ? last : null;
+}
+
+function LiveMap({ ls }) {
+  const cur = mapNow(ls);
+  if (!cur) return null;
+  return <div className="livemap"><span className="lmdot" />{cur.map && !/^tbd$/i.test(cur.map) ? cur.map : ""} <b>{cur.a} – {cur.b}</b></div>;
+}
+
 function MatchRow({ m, label, name }) {
   const res = result(m);
   const ls = useLiveScore(m.id, !!res); // maps won so far while the match is being played
@@ -113,12 +126,14 @@ function MatchRow({ m, label, name }) {
         <span className={"sc" + (res || ls ? "" : " vs") + (ls ? " lv" : "")}>{res ? `${m.sa} – ${m.sb}` : ls ? `${ls.a} – ${ls.b}` : "vs"}</span>
         <span className={"tn r" + (wb ? " w" : res ? " lo" : "")}>{name(m.b)}</span>
       </div>
+      {ls && <LiveMap ls={ls} />}
     </div>
   );
 }
 
 /** One compact line of the Swiss "Detailed Results" boxes. `m` is null for a slot not played or drawn yet. */
 function SeriesRow({ m, byId, name }) {
+  const ls = useLiveScore(m ? m.id : "", !m || !!result(m)); // maps won so far, and the map being played
   if (!m) {
     return (
       <div className="sitem">
@@ -140,11 +155,12 @@ function SeriesRow({ m, byId, name }) {
       <div className="srow">
         <span className={"stn l" + cls(m.a)}>{name(m.a)}</span>
         <Crest team={byId[m.a]} />
-        <span className="ssc">{res ? m.sa : "–"}</span>
-        <span className="ssc">{res ? m.sb : "–"}</span>
+        <span className={"ssc" + (ls ? " lv" : "")}>{res ? m.sa : ls ? ls.a ?? 0 : "–"}</span>
+        <span className={"ssc" + (ls ? " lv" : "")}>{res ? m.sb : ls ? ls.b ?? 0 : "–"}</span>
         <Crest team={byId[m.b]} />
         <span className={"stn" + cls(m.b)}>{name(m.b)}</span>
       </div>
+      {ls && <LiveMap ls={ls} />}
     </div>
   );
 }
