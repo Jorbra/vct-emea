@@ -114,7 +114,11 @@ const hostOf = (url) => { try { return new URL(url).hostname.replace(/^www./, ""
 function TeamLinks({ lp }) {
   const links = lp ? lp.links.filter((l) => https(l.url) && l.type !== "VLR") : [];
   if (!links.length) return null;
-  return <div className="tlinks">{links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer">{l.type === "Website" ? hostOf(l.url) : l.type}</a>)}</div>;
+  // several accounts of one kind (three X accounts): each says whose it is
+  const count = links.reduce((n, l) => ({ ...n, [l.type]: (n[l.type] || 0) + 1 }), {});
+  const handle = (url) => { try { const seg = new URL(url).pathname.split("/").filter(Boolean)[0] || ""; return seg ? ` @${seg.replace(/^@/, "")}` : ""; } catch { return ""; } };
+  const label = (l) => (l.type === "Website" ? hostOf(l.url) : count[l.type] > 1 ? `${l.type}${handle(l.url)}` : l.type);
+  return <div className="tlinks">{links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer">{label(l)}</a>)}</div>;
 }
 
 /** Players or staff from Liquipedia: flag, ID (linked to its page here), real name, role, join date. */
@@ -394,7 +398,7 @@ function TeamTournament({ s }) {
   );
 }
 
-function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null, rosterStats = [], palette = null }) {
+function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null, rosterStats = [], palette = null, streak = null }) {
   const [part, setPart] = useState("overview");
   const tr = useT();
   useAutoRefresh();
@@ -435,7 +439,7 @@ function TeamView({ initial, slug, lp, org = [], vlr, updating, tstats = null, r
         <Crest team={t} />
         <div>
           <div className="tname">{p.name}{t.tag ? <span className="ttag">{t.tag}</span> : null}<FavStar slug={slug} /></div>
-          <div className="tsub">{tr("{w} wins, {l} losses", tot)} · {tr("{n} events", { n: p.events.length })}</div>
+          <div className="tsub">{tr("{w} wins, {l} losses", tot)} · {tr(p.events.length === 1 ? "{n} event" : "{n} events", { n: p.events.length })}{streak && streak.n >= 2 && <span className={"tstreak " + streak.kind}>{streak.kind === "W" ? "🔥 " : "🧊 "}{tr(streak.kind === "W" ? "{n} wins in a row" : "{n} losses in a row", { n: streak.n })}</span>}</div>
           <TeamLinks lp={lp} />
           <p><AlertsButton /> <TeamCalendar slug={slug} /> <TeamThemeButton team={t} /> <WallpaperButton team={t} slug={slug} /></p>
         </div>

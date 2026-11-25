@@ -17,6 +17,7 @@ import { teamTint } from "../../../lib/teamtint.js";
 
 // Always read the database on request: results change while the events run.
 import { publicState } from "../../../lib/publicstate.js";
+import { streakOf } from "../../../lib/streaks.js";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ export default async function Page({ params, searchParams }) {
   // the page's colours from the logo, worked out here and kept: tinted from the first paint
   const palette = p && p.team && p.team.logo ? await teamTint(getDb(), p.team.logo) : null;
   const ld = p ? { "@context": "https://schema.org", "@type": "SportsTeam", name: p.name, sport: "VALORANT", ...(p.team && p.team.logo && /^https?:/.test(p.team.logo) ? { logo: p.team.logo } : {}), athlete: rosterStats.map((x) => ({ "@type": "Person", name: x.name })) } : null;
-  return <>{ld && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />}<TeamPage palette={palette} rosterStats={rosterStats} tstats={tstats} initial={p ? publicState(initial) : null} slug={key} lang={lang} lp={lp} org={orgOf(teamInfo, key)} outside={outside} vlr={linkVlr(vlrEntry, dir)} updating={!entry || lpNow || vlrNow} /></>;
+  return <>{ld && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />}<TeamPage streak={p ? streakOf(initial, key) : null} palette={palette} rosterStats={rosterStats} tstats={tstats} initial={p ? publicState(initial) : null} slug={key} lang={lang} lp={lp} org={orgOf(teamInfo, key)} outside={outside} vlr={linkVlr(vlrEntry, dir)} updating={!entry || lpNow || vlrNow} /></>;
 }
 
 export async function generateMetadata({ params }) {

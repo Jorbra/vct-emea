@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
 import SiteNav from "./SiteNav.jsx";
 import { ThemeSwitch } from "./theme.jsx";
@@ -37,10 +37,18 @@ function Agenda({ days }) {
   const [openDays, setOpenDays] = useState({});
   const today = dayKey(new Date());
   const fmtChip = new Intl.DateTimeFormat(localeOf(tr.lang), { weekday: "short", day: "numeric" });
+  // the strip of days opens on today (or the next day with matches), not on the 1st of the month
+  const strip = useRef(null);
+  const soon = (days.find(([k]) => k >= today) || [])[0] || "";
+  useEffect(() => {
+    const el = strip.current && soon ? strip.current.querySelector(`[href="#d-${soon}"]`) : null;
+    if (el) strip.current.scrollLeft = el.offsetLeft - strip.current.offsetLeft - 8;
+  }, [soon]);
   if (!days.length) return <p className="note">{tr("No match this month.")}</p>;
   return (
     <>
-    <nav className="daystrip" aria-label={tr("Days")}>
+    {soon && soon !== days[0][0] && <p className="caljump"><a className="btn sm" href={`#d-${soon}`}>{soon === today ? tr("Go to today") : tr("Go to the next match day")} ↓</a></p>}
+    <nav className="daystrip" aria-label={tr("Days")} ref={strip}>
       {days.map(([k, list]) => (
         <a key={k} href={`#d-${k}`} className={"daychip" + (k === today ? " today" : "") + (list.some((m) => m.sa == null && m.live) ? " live" : "")}>
           <b>{fmtChip.format(new Date(list[0].at))}</b><small>{tr("{n} matches", { n: list.length })}</small>
