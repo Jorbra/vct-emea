@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "./lang.jsx";
 import { Crest } from "./Crest.jsx";
+import LiveDetail from "./LiveDetail.jsx";
 import { LiveBadge } from "./matchTime.jsx";
 import { formatMatchTime } from "../lib/schedule.js";
 import { EVENT_NAMES, teamHref } from "../lib/paths.js";
@@ -249,6 +250,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
             <RoundChart rounds={live.rounds} a={(m.a && (m.a.tag || m.a.name)) || "A"} b={(m.b && (m.b.tag || m.b.name)) || "B"} />
             <p className="row"><a className="btn small" href={`/ecran/${e.event}/${m.id}`}>📱 {tr("Second screen")}</a></p>
             <div className="mmlivemaps">{live.maps.map((x) => <span key={x.map} data-map={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>
+            {live.detail && <LiveDetail detail={live.detail} a={m.a} b={m.b} />}
             {(live.feed || []).length > 0 && (
               <ol className="mmfeed" aria-label={tr("Match feed")}>
                 {[...live.feed].reverse().map((f, i) => (
@@ -259,7 +261,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
                 ))}
               </ol>
             )}
-            <p className="hint">{tr("Scores from vlr.gg, read every few minutes.")}</p>
+            {!live.detail && <p className="hint">{tr("Scores from vlr.gg, read every minute.")}</p>}
           </div>
         )}
         {page && <PartTabs value={tab} onChange={setTab} label={tr("Match")} items={[["summary", tr("Summary")], ["maps", tr("Maps")], ["stats", tr("Stats")], ["pronos", tr("Predictions")], ["comments", tr("Comments")]]} />}

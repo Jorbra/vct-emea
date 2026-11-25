@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import MatchPage from "../../../../components/MatchPage";
-import { getDb, getState } from "../../../../lib/db.js";
+import { getDb, getState, liveDetail } from "../../../../lib/db.js";
 import { LANG_COOKIE, makeT, normLang } from "../../../../lib/i18n.js";
 import { eventData, matchesOf } from "../../../../lib/matchlist.js";
 import { EVENT_NAMES, siteHref } from "../../../../lib/paths.js";
@@ -30,6 +30,11 @@ function load(event, id) {
     times: (state.times && state.times[event]) || {}, live: (state.live && state.live[event]) || {},
     extra: (state.extra && state.extra[event]) || {}, stream: (state.info && state.info[event] && state.info[event].stream) || "",
   };
+  // being played: what vlr.gg tells of it (the map being played, its rounds, the players)
+  if (e.live[id]) {
+    const detail = liveDetail(getDb(), event, id);
+    if (detail) e.live = { ...e.live, [id]: { ...(typeof e.live[id] === "object" ? e.live[id] : {}), detail } };
+  }
   if (e.extra[id] && e.extra[id].hasDetails) e.extra = { ...e.extra, [id]: { ...e.extra[id], details: detailsOf(getDb(), event, id) } };
   return { state, e, m };
 }

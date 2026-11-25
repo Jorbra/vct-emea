@@ -3656,3 +3656,44 @@ img[data-lumfix] { background-color: #2b2b2e; border-radius: 6px; padding: 2px; 
   .unsavedbar .btn { min-height: 36px; padding: 6px 12px; }
   .unsavedbox .row .btn { flex: 1 1 140px; min-height: 44px; }
 }
+
+/* Live details from vlr.gg (components/LiveDetail.jsx): the map being played, its rounds, the players */
+.livedetail { --ra: var(--lime); --rb: #5aa9ff; margin: 10px 0; display: grid; gap: 8px; }
+:root[data-theme="light"] .livedetail { --rb: #1f6fd1; }
+.livedetail.compact { margin: 6px 0 2px; gap: 4px; }
+.ldmaps, .ldscope { display: flex; flex-wrap: wrap; gap: 6px; }
+.ldhead { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.ldhead b { font-size: 15px; }
+.ldscore { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 18px; }
+.livedetail.compact .ldscore { font-size: 15px; }
+.ldscore .lead { color: var(--lime-text); }
+.ldnow { font-size: 12px; padding: 1px 8px; border-radius: 999px; border: 1px solid #ff5a5f; color: var(--fg); }
+.ldnow.done { border-color: var(--line); color: var(--muted); }
+.ldhalves { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; font-size: 13px; color: var(--muted); }
+.ldkey { margin: 0; font-size: 12px; color: var(--muted); }
+.ldkey .rkey-a { color: var(--ra); }
+.ldkey .rkey-b { color: var(--rb); }
+.rstrip { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 3px; }
+.rstrip li { clip-path: none; flex: none; width: 18px; min-width: 0; max-width: 18px; height: 18px; padding: 0; margin: 0; border-radius: 4px; display: grid; place-items: center; font-size: 11px; line-height: 1; color: #111; }
+.rstrip li.rsq-a { background: var(--ra); }
+.rstrip li.rsq-b { background: var(--rb); color: #fff; }
+.rstrip li.rsq-half { margin-left: 7px; }
+.lptable th, .lptable caption { text-transform: none; letter-spacing: 0; }
+.lptable th[scope="row"] .agicon, .lptable th[scope="row"] .agtxt { flex: none; font-size: 11px; color: var(--muted); }
+.lplayers { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+.lptable { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.lptable caption { text-align: left; font-weight: 700; padding: 2px 0 4px; }
+.lptable th, .lptable td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.lptable thead th { color: var(--muted); font-weight: 600; font-size: 12px; }
+.lptable th[scope="row"], .lptable thead th:first-child { text-align: left; }
+.lptable th[scope="row"] { display: flex; align-items: center; gap: 6px; font-weight: 500; max-width: 150px; overflow: hidden; }
+.lptable th[scope="row"] span { overflow: hidden; text-overflow: ellipsis; }
+.lptable th[scope="row"] img { border-radius: 4px; flex: none; }
+.lptable td.up { color: var(--lime-text); }
+.lptable td.down { color: #e0646c; }
+:root[data-theme="light"] .lptable td.down { color: #b3261e; }
+.liveside .lplayers { grid-template-columns: 1fr; }
+@media (max-width: 640px) {
+  .rstrip li { width: 16px; max-width: 16px; height: 16px; font-size: 10px; }
+  .lptable .lpopt { display: none; }
+}

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import LivePage from "../../components/LivePage";
-import { getDb, getState } from "../../lib/db.js";
+import { getDb, getState, liveDetail } from "../../lib/db.js";
 import { LANG_COOKIE, normLang } from "../../lib/i18n.js";
 import { allMatches } from "../../lib/matchlist.js";
 import { workSoon } from "../../lib/readsoon.js";
@@ -16,7 +16,7 @@ export default async function Page() {
   const slim = (m) => {
     const s = m.live ? (state.live[m.event] || {})[m.id] || null : null;
     // the page shows the maps, not the feed
-    return { event: m.event, id: m.id, round: m.round, at: m.at, live: m.live, a: m.a, b: m.b, bo: m.bo, stream: streamOf(m), score: s ? { a: s.a, b: s.b, maps: s.maps || [], feed: (s.feed || []).slice(-8), rounds: (s.rounds || []).slice(-1) } : null };
+    return { event: m.event, id: m.id, round: m.round, at: m.at, live: m.live, a: m.a, b: m.b, bo: m.bo, stream: streamOf(m), score: s ? { a: s.a, b: s.b, maps: s.maps || [], feed: (s.feed || []).slice(-8), rounds: (s.rounds || []).slice(-1), detail: liveDetail(getDb(), m.event, m.id) } : null };
   };
   const all = allMatches(state);
   const live = all.filter((m) => m.live).map(slim);
