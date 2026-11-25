@@ -86,8 +86,7 @@ export default function SearchBar() {
   useEffect(() => {
     const onDown = (e) => { if (box.current && !box.current.contains(e.target)) setOpen(false); };
     const onKey = (e) => {
-      const k = (e.ctrlKey || e.metaKey) && !e.altKey && String(e.key).toLowerCase() === "k"; // Ctrl+K / Cmd+K, even while typing elsewhere
-      if (!k && (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey || typing())) return;
+      if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey || typing()) return;
       e.preventDefault();
       input.current && input.current.focus();
     };

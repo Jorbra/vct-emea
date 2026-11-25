@@ -156,7 +156,7 @@ export function CommandPalette() {
   }, []);
   useEffect(() => { if (open) { setQ(""); setI(0); setTimeout(() => input.current && input.current.focus(), 10); } }, [open]);
   useEffect(() => {
-    if (q.trim().length < 2) { setFound(null); return undefined; }
+    if (q.trim().length < 1) { setFound(null); return undefined; }
     const c = new AbortController();
     const t = setTimeout(() => fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: c.signal }).then((r) => r.json()).then(setFound).catch(() => {}), 150);
     return () => { clearTimeout(t); c.abort(); };
@@ -168,6 +168,7 @@ export function CommandPalette() {
       ...(found.teams || []).slice(0, 5).map((x) => ({ href: x.href || x.url, label: x.name || x.label, kind: tr("Team") })),
       ...(found.players || []).slice(0, 5).map((x) => ({ href: x.href || x.url, label: x.name || x.label, kind: tr("Player") })),
       ...(found.events || []).slice(0, 4).map((x) => ({ href: x.href || x.url, label: x.name || x.label, kind: tr("Event") })),
+      ...(found.matches || []).slice(0, 4).map((x) => ({ href: x.href, label: x.name, kind: tr("Match") })),
     ].filter((x) => x.href && x.label) : [];
     return [...more, ...pages].slice(0, 14);
   }, [q, found, tr]);
