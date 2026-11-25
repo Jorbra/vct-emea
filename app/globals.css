@@ -20,8 +20,8 @@
   --zone-top: #3d7bd9;
   --zone-adv: #3da05a;
   --zone-out: #c44a4a;
-  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
-  --font-body: "Barlow", system-ui, sans-serif;
+  --font-display: var(--ff-barlow-cond, "Barlow Condensed"), "Arial Narrow", sans-serif;
+  --font-body: var(--ff-barlow, "Barlow"), system-ui, sans-serif;
   color-scheme: dark;
 }
 @media (prefers-color-scheme: light) {
@@ -3503,3 +3503,50 @@ html[data-period]:not([data-period="offseason"]) body::before { content: ""; pos
 .veto li { position: relative; padding-inline-end: 44px; }
 .veto .vmini { position: absolute; inset-inline-end: 6px; top: 50%; width: 34px; height: 34px; transform: translateY(-50%); background: var(--mini) center / contain no-repeat; filter: drop-shadow(0 1px 2px rgba(0,0,0,.8)); opacity: .9; }
 .veto li.vban .vmini { opacity: .5; }
+
+/* ===== night update: phones first =====
+   Touch targets of 40 px at least, text never under 11 px, a compact header (brand and settings on one row, the search
+   under them), a smaller stream placeholder on Tonight, tables that keep their first column in view. */
+.langsel { display: none; }
+@media (max-width: 640px) {
+  .topbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+  .topbar h1 { font-size: clamp(20px, 6vw, 26px); min-width: 0; }
+  .topbar h1 > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topbar .searchbar { grid-column: 1 / -1; order: 3; flex: none; min-width: 0; width: 100%; height: 42px; }
+  .topbar .prefs { order: 2; gap: 6px; }
+  .langsw { display: none; }
+  .langsel { display: inline-block; appearance: none; height: 40px; padding: 0 26px 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E") right 9px center no-repeat; color: var(--fg); font: 700 14px var(--font-body); }
+  .prefs .themesw, .prefs > button { min-width: 40px; min-height: 40px; }
+  .crumbs { font-size: 13px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+  .crumbs::-webkit-scrollbar { display: none; }
+}
+@media (pointer: coarse), (max-width: 640px) {
+  .btn { min-height: 40px; padding-block: 8px; }
+  .btn.sm, .btn.small { min-height: 36px; padding: 6px 12px; font-size: 13px; }
+  .favstar.small { min-width: 36px; min-height: 36px; font-size: 18px; }
+  .sortbtn { padding: 8px 2px; }
+  .accdot { width: 32px; height: 32px; }
+  .sw input[type="checkbox"] { width: 22px; height: 22px; }
+  .livebadge, .mtbadge { font-size: 11px; padding: 3px 6px; }
+  .nttop { font-size: 12.5px; }
+  .tablewrap { -webkit-overflow-scrolling: touch; }
+  .tablewrap th:first-child, .tablewrap td:first-child { position: sticky; inset-inline-start: 0; background: var(--bg); z-index: 1; }
+  input, select, textarea { font-size: 16px; } /* no zoom on iPhone when a field is touched */
+}
+@media (max-width: 640px) {
+  .tngrid { grid-template-columns: 1fr; }
+  .tnstage { position: static; }
+  .tnwait { aspect-ratio: auto; padding: 18px 14px; }
+  .tnrow { grid-template-columns: 52px 1fr; padding: 10px 10px; }
+  .tnwhen .livebadge { padding: 3px 5px; }
+  .tnteam span { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+}
+@media (max-width: 640px) {
+  /* Tonight: the live badge or the time on its own line above the teams, so it never covers a crest */
+  .tnrow { grid-template-columns: 1fr; }
+  .tnwhen { justify-self: start; }
+  /* home: the qualifiers' recaps in one row that scrolls sideways instead of a wall of buttons */
+  .recaplinks { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 8px; padding-bottom: 4px; scroll-snap-type: x proximity; scrollbar-width: none; }
+  .recaplinks::-webkit-scrollbar { display: none; }
+  .recaplinks > * { flex: none; scroll-snap-align: start; }
+}

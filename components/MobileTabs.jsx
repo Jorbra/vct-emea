@@ -6,9 +6,9 @@ import { useT } from "./lang.jsx";
 import { useLiveCount } from "./visual.jsx";
 
 const MORE = [
-  ["/ce-soir", "Tonight", "📺"], ["/moi", "My week", "🗓️"], ["/jeux", "Games of the day", "🎮"], ["/fantasy", "Fantasy", "⭐"], ["/quiz", "Quiz of the week", "❓"],
-  ["/tierlist", "Tier list", "🔠"], ["/simulateur", "Qualification simulator", "🎲"], ["/puissance", "Power ranking", "⚡"], ["/stats", "Stats", "📊"], ["/agent", "Agents", "🦸"], ["/rivalites", "Rivalries", "⚔️"],
-  ["/saison", "The season's feed", "🗞️"], ["/palmares", "Hall of fame", "🏆"], ["/equipes", "Compare teams", "⚖️"], ["/compare", "Compare", "👥"], ["/pays", "Countries", "🌍"], ["/transfers", "Transfers", "🔁"],
+  ["/ce-soir", "Tonight", "📺"], ["/jour", "Day recap", "📋"], ["/moi", "My week", "🗓️"], ["/jeux", "Games of the day", "🎮"], ["/fantasy", "Fantasy", "⭐"], ["/quiz", "Quiz", "❓"],
+  ["/tierlist", "Tier list", "🔠"], ["/simulateur", "Qualification simulator", "🎲"], ["/puissance", "Power ranking", "⚡"], ["/stats", "Stats", "📊"], ["/agent", "Agents", "🦸"], ["/map", "Maps", "🗺️"], ["/rivalites", "Rivalries", "⚔️"],
+  ["/saison", "The season's feed", "🗞️"], ["/palmares", "Hall of fame", "🏆"], ["/equipes", "Compare teams", "⚖️"], ["/compare", "Compare players", "👥"], ["/pays", "Countries", "🌍"], ["/transfers", "Transfers", "🔁"],
   ["/lft", "LFT", "🔎"], ["/news", "News", "📰"], ["/format", "How the events work", "📘"], ["/archives", "Archives of past seasons", "🗄️"], ["/compte", "My account", "⚙️"], ["/about", "About", "ℹ️"],
 ];
 

@@ -10,6 +10,7 @@ import { countdownText } from "./matchTime.jsx";
 import { Score, useTeamColor } from "./visual.jsx";
 
 // the last rounds weigh more: a final is the match of the day before a round of 256
+const PARIS_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" });
 const WEIGHT = (id) => (/^gf|^third/.test(id) ? 6 : /^sf/.test(id) ? 5 : /^qf/.test(id) ? 4 : /^r16/.test(id) ? 3 : /^r32/.test(id) ? 2 : 1);
 
 /**
@@ -34,7 +35,9 @@ export default function FeaturedMatch({ events }) {
     const live = all.filter((m) => m.live).sort((x, y) => WEIGHT(y.id) - WEIGHT(x.id));
     if (live.length) return { m: live[0], kind: "live" };
     const next = all.filter((m) => m.sa == null && m.at && new Date(m.at).getTime() > now).sort((x, y) => x.at.localeCompare(y.at) || WEIGHT(y.id) - WEIGHT(x.id));
-    if (next.length) return { m: next[0], kind: "next" };
+    // a match today: the match day block above already counts down to it, so this one shows the latest result instead
+    const today = (t) => PARIS_DAY.format(new Date(t)) === PARIS_DAY.format(new Date(now));
+    if (next.length && !today(next[0].at)) return { m: next[0], kind: "next" };
     const done = all.filter((m) => m.sa != null).sort((x, y) => (y.at || "").localeCompare(x.at || ""));
     return done.length ? { m: done[0], kind: "done" } : null;
   }, [all, now == null ? 0 : Math.floor(now / 30000)]); // eslint-disable-line react-hooks/exhaustive-deps

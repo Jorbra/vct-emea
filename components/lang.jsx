@@ -23,13 +23,19 @@ export function LangSwitch() {
     pushAccount({ prefs: { lang: l } });
     router.refresh();
   };
+  // the buttons on a wide screen, a list on phones (CSS shows one of the two)
   return (
-    <div className="langsw" role="group" aria-label={tr("Language")}>
-      {LANGS.map((l) => (
-        <button key={l} type="button" aria-pressed={tr.lang === l} className={tr.lang === l ? "on" : ""} onClick={() => pick(l)}>
-          {l.toUpperCase()}
-        </button>
-      ))}
-    </div>
+    <>
+      <div className="langsw" role="group" aria-label={tr("Language")}>
+        {LANGS.map((l) => (
+          <button key={l} type="button" aria-pressed={tr.lang === l} className={tr.lang === l ? "on" : ""} onClick={() => pick(l)}>
+            {l.toUpperCase()}
+          </button>
+        ))}
+      </div>
+      <select className="langsel" aria-label={tr("Language")} value={tr.lang} onChange={(e) => pick(e.target.value)}>
+        {LANGS.map((l) => <option key={l} value={l}>{l.toUpperCase()}</option>)}
+      </select>
+    </>
   );
 }

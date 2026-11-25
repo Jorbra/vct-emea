@@ -3,6 +3,11 @@ import "./globals.css";
 import { LANG_COOKIE, isRtl, makeT, normLang } from "../lib/i18n.js";
 import { THEME_COOKIE, normTheme } from "../lib/theme.js";
 import { periodOf } from "../lib/period.js";
+import { Barlow, Barlow_Condensed } from "next/font/google";
+
+// the site's fonts, served by the site itself (fetched once at build time): no request to Google on each page
+const barlow = Barlow({ weight: ["400", "500", "600"], subsets: ["latin", "latin-ext"], display: "swap", variable: "--ff-barlow" });
+const barlowCond = Barlow_Condensed({ weight: ["600", "700", "800"], subsets: ["latin", "latin-ext"], display: "swap", variable: "--ff-barlow-cond" });
 import { isAdmin } from "../lib/session.js";
 import EditorAccess from "../components/EditorAccess";
 import MatchAlerts from "../components/MatchAlerts";
@@ -52,15 +57,9 @@ export default async function RootLayout({ children }) {
   try { const { getState } = await import("../lib/db.js"); welcomeTeams = (getState(getDb()).kickoff.teams || []).filter((t) => t && t.name).map((t) => ({ name: t.name, logo: t.logo || "", tag: t.tag || "" })); } catch { /* none */ }
   try { banner = activeBanner(getDb()); } catch { /* no database yet: no banner */ }
   return (
-    <html lang={lang} dir={isRtl(lang) ? "rtl" : "ltr"} data-theme={theme} data-period={periodOf()} suppressHydrationWarning>
+    <html lang={lang} dir={isRtl(lang) ? "rtl" : "ltr"} data-theme={theme} data-period={periodOf()} className={`${barlow.variable} ${barlowCond.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: HEAD_SCRIPT }} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700;800&display=swap"
-        />
       </head>
       <body>
         <a className="skip" href="#content">{makeT(lang)("Go to the content")}</a>
