@@ -1,9 +1,10 @@
 import { cookies, headers } from "next/headers";
 import "./globals.css";
 import { LANG_COOKIE, isRtl, makeT, normLang } from "../lib/i18n.js";
-import { THEME_COOKIE, normTheme } from "../lib/theme.js";
+import { THEME_SCRIPT } from "../lib/theme.js";
 import { periodOf } from "../lib/period.js";
 import KeyHelp from "../components/KeyHelp";
+import LogoContrast from "../components/LogoContrast";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 
 // the site's fonts, served by the site itself (fetched once at build time): no request to Google on each page
@@ -46,21 +47,20 @@ export async function generateMetadata() {
 
 export const viewport = {
   width: "device-width", initialScale: 1,
-  themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#121212" }, { media: "(prefers-color-scheme: light)", color: "#f5f4f2" }],
+  // themeColor: set by THEME_SCRIPT (lib/theme.js), which knows the chosen theme
 };
 
 export default async function RootLayout({ children }) {
   const jar = await cookies();
   const lang = normLang(jar.get(LANG_COOKIE)?.value);
-  const theme = normTheme(jar.get(THEME_COOKIE)?.value);
   let banner = null;
   let welcomeTeams = [];
   try { const { getState } = await import("../lib/db.js"); welcomeTeams = (getState(getDb()).kickoff.teams || []).filter((t) => t && t.name).map((t) => ({ name: t.name, logo: t.logo || "", tag: t.tag || "" })); } catch { /* none */ }
   try { banner = activeBanner(getDb()); } catch { /* no database yet: no banner */ }
   return (
-    <html lang={lang} dir={isRtl(lang) ? "rtl" : "ltr"} data-theme={theme} data-period={periodOf()} className={`${barlow.variable} ${barlowCond.variable}`} suppressHydrationWarning>
+    <html lang={lang} dir={isRtl(lang) ? "rtl" : "ltr"} data-period={periodOf()} className={`${barlow.variable} ${barlowCond.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: HEAD_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT + ";" + HEAD_SCRIPT }} />
       </head>
       <body>
         <a className="skip" href="#content">{makeT(lang)("Go to the content")}</a>
@@ -70,7 +70,7 @@ export default async function RootLayout({ children }) {
         <LangProvider lang={lang}><SiteFooter /><BackToTop /></LangProvider>
         <EditorAccess lang={lang} isAdmin={await isAdmin()} />
         <MatchAlerts />
-        <LangProvider lang={lang}><MobileTabs /><ResultToast /><CloseAlerts /><Motion /><MatchNightTheme /><TeamTheme /><CommandPalette /><KeyHelp /></LangProvider>
+        <LangProvider lang={lang}><MobileTabs /><ResultToast /><CloseAlerts /><Motion /><MatchNightTheme /><TeamTheme /><CommandPalette /><KeyHelp /><LogoContrast /></LangProvider>
         <AccountSync />
         <script dangerouslySetInnerHTML={{ __html: OFFLINE_SCRIPT }} />
       </body>

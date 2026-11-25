@@ -30,7 +30,7 @@ function Door({ onIn }) {
     setErr("");
     setBusy(true);
     try {
-      const theme = document.documentElement.dataset.theme;
+      const theme = document.documentElement.dataset.themeMode;
       const j = await post({ action: mode, name, password, token: deviceToken(), favorites: deviceFavorites(), prefs: { lang: tr.lang, ...(theme ? { theme } : {}), players: readPlayers() } });
       applyAccount(j.account);
       setPassword("");
