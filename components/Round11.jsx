@@ -265,7 +265,7 @@ export function RosterCards({ list }) {
       <SectionHead icon="👥" title={tr("The players")} />
       <div className="rcards">{list.sort((a, b) => (b.r || 0) - (a.r || 0)).map((p) => (
         <a key={p.slug} href={`/player/${p.slug}`} className={"rcard" + (agentInfo(p.agent) ? " withagent" : "")} style={agentInfo(p.agent) ? { "--agc": agentInfo(p.agent).color, "--agimg": `url(${agentInfo(p.agent).portrait})` } : undefined}>
-          <span className="rcav" aria-hidden="true">{p.name.charAt(0).toUpperCase()}</span>
+          {!agentInfo(p.agent) && <span className="rcav" aria-hidden="true">{p.name.charAt(0).toUpperCase()}</span>}
           <b>{p.name}</b>
           {p.agent ? <span className="rcagent">{agentInfo(p.agent) ? agentInfo(p.agent).name : p.agent}</span> : null}
           <div className="rcnums"><span><b>{p.r != null ? p.r.toFixed(2) : "–"}</b>R</span><span><b>{p.acs ?? "–"}</b>ACS</span><span><b>{p.kd != null ? Number(p.kd).toFixed(2) : "–"}</b>K/D</span></div>
