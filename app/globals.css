@@ -3633,3 +3633,26 @@ img[data-lumfix] { background-color: #2b2b2e; border-radius: 6px; padding: 2px; 
 /* Light theme: reds and blues that were made for the dark background */
 :root[data-theme="light"] :is(.frisestate.live, .infnums em.down) { color: #b3261e; }
 :is(.calday.has.h3, .calday.has.h4) small { color: var(--fg); }
+
+/* Editor: unsaved changes (components/UnsavedGuard.jsx) */
+.unsavedroot { display: contents; }
+[data-dirty] { position: relative; outline: 2px dashed #e0912b; outline-offset: 3px; border-radius: 6px; }
+[data-dirty]::after { content: "● " attr(data-dirty); position: absolute; top: -11px; inset-inline-end: 10px; z-index: 2; padding: 2px 9px; border-radius: 999px; background: #e0912b; color: #1d1203; font: 700 12px/1.4 var(--font-body); white-space: nowrap; pointer-events: none; }
+[data-dirty] :is(.btn.pri, button.pri) { box-shadow: 0 0 0 3px color-mix(in srgb, #e0912b 55%, transparent); animation: unsavedpulse 1.6s ease-in-out infinite; }
+@keyframes unsavedpulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, #e0912b 25%, transparent); } }
+@media (prefers-reduced-motion: reduce) { [data-dirty] :is(.btn.pri, button.pri) { animation: none; } }
+.unsavedbar { position: fixed; z-index: 120; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 24px); padding: 8px 8px 8px 14px; border-radius: 999px; background: #2a1d0b; color: #ffe2b8; border: 1px solid #e0912b; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); font: 700 14px var(--font-body); }
+.unsavedbar .btn { background: #e0912b; color: #1d1203; border-color: #e0912b; }
+.unsaveddot { width: 9px; height: 9px; border-radius: 50%; background: #e0912b; flex: none; }
+.unsavedask { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 16px; background: rgba(0, 0, 0, .55); }
+.unsavedbox { width: min(420px, 100%); padding: 18px; border-radius: 12px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); box-shadow: 0 16px 40px rgba(0, 0, 0, .4); }
+.unsavedbox p { margin: 0 0 14px; font-size: 16px; font-weight: 600; }
+.unsavedbox .row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.unsavedbar > span:not(.unsaveddot) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 640px) {
+  /* the editor has no bottom tab bar; on a phone the mark goes to the bottom edge, next to the Save button */
+  [data-dirty]::after { top: auto; bottom: -11px; }
+  .unsavedbar { font-size: 13px; gap: 8px; padding: 6px 6px 6px 12px; }
+  .unsavedbar .btn { min-height: 36px; padding: 6px 12px; }
+  .unsavedbox .row .btn { flex: 1 1 140px; min-height: 44px; }
+}

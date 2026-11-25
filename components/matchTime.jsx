@@ -221,7 +221,7 @@ export function Schedule({ items, Crest }) {
     <section>
       <h2>{tr("Schedule")}</h2>
       {long && (
-        <div className="schfilters">
+        <div className="schfilters" data-nodirty>
           <select aria-label={tr("Day")} value={dayF} onChange={(e) => setDayF(e.target.value)}>
             <option value="">{tr("All days")}</option>
             {days.map((d) => <option key={d.k} value={d.k}>{dayName(d.items[0].at)}</option>)}

@@ -230,7 +230,7 @@ function Journal({ admin, call, onDone }) {
     <section>
       <details className="einfo">
         <summary><b>🗂 {tr("Journal of changes")}</b></summary>
-        <div className="row" style={{ margin: "8px 0" }}>
+        <div className="row" data-nodirty style={{ margin: "8px 0" }}>
           <select value={who} onChange={(e) => setWho(e.target.value)} aria-label={tr("Editor")}><option value="">{tr("Everyone")}</option>{people.map((p) => <option key={p} value={p}>{p}</option>)}</select>
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("Event, team, word…")} aria-label={tr("Search")} />
         </div>
@@ -458,8 +458,8 @@ function MobilePreview() {
       <details className="einfo" onToggle={(e) => setOpen(e.currentTarget.open)}>
         <summary><b>📱 {tr("Phone preview")}</b></summary>
         <div className="row" style={{ margin: "8px 0" }}>
-          <select value={path} onChange={(e) => { setPath(e.target.value); setCustom(""); }} aria-label={tr("Page")}>{PREVIEW_PAGES.map(([p, l]) => <option key={p} value={p}>{tr(l)}</option>)}</select>
-          <input value={custom} onChange={(e) => setCustom(e.target.value)} placeholder="/team/fnatic" aria-label={tr("Other page")} />
+          <select data-nodirty value={path} onChange={(e) => { setPath(e.target.value); setCustom(""); }} aria-label={tr("Page")}>{PREVIEW_PAGES.map(([p, l]) => <option key={p} value={p}>{tr(l)}</option>)}</select>
+          <input data-nodirty value={custom} onChange={(e) => setCustom(e.target.value)} placeholder="/team/fnatic" aria-label={tr("Other page")} />
           <button type="button" className="btn" onClick={() => setN(n + 1)}>🔄 {tr("Reload")}</button>
         </div>
         {open && <div className="phoneframe"><iframe title={tr("Phone preview")} src={src} width="375" height="720" /></div>}
@@ -566,7 +566,7 @@ function VisitorAccounts({ count, roles, call, onDone }) {
       <summary><b>{tr("Visitors' accounts")}</b> <small>({count})</small></summary>
       <p className="hint">{tr("Someone has lost their password: write their exact name and give them a new one. It is shown only once. Ask them to change it afterwards.")}</p>
       <div className="row">
-        <input aria-label={tr("Name")} placeholder={tr("Name")} value={name} autoCapitalize="none" spellCheck={false} onChange={(e) => { setName(e.target.value); setSure(false); }} />
+        <input data-nodirty aria-label={tr("Name")} placeholder={tr("Name")} value={name} autoCapitalize="none" spellCheck={false} onChange={(e) => { setName(e.target.value); setSure(false); }} />
         <button type="button" className="btn" disabled={!name.trim()} onClick={reset}>{tr("New password")}</button>
         <button type="button" className={"btn" + (sure ? " danger" : "")} disabled={!name.trim()} onClick={() => (sure ? remove() : setSure(true))}>{sure ? tr("Confirm: delete") : tr("Delete the account")}</button>
       </div>

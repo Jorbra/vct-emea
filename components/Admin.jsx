@@ -13,6 +13,7 @@ import { buildKickoff, kickPlacedElsewhere } from "../lib/kickoff.js";
 import { buildRegional, isOpening, placedElsewhere } from "../lib/regional.js";
 import { adminHref, adminNavForEvent, eventForAdmin, parseAdminPath, siteHrefForAdmin } from "../lib/paths.js";
 import AdminHome from "./AdminHome.jsx";
+import UnsavedGuard from "./UnsavedGuard.jsx";
 import { INFO_DEFAULTS, INFO_TIERS, TYPE_LABEL } from "../lib/einfo.js";
 import { formatDates } from "../lib/status.js";
 import { BulkSchedule, ExtraEdit, MatchTimes, RoundTimes, TimeEdit, useMatchTimes } from "./matchTime.jsx";
@@ -1111,7 +1112,7 @@ export default function Admin(props) {
   return (
     <LangProvider lang={props.lang}>
       <KnownNames.Provider value={known}>
-        <AdminView {...props} />
+        <UnsavedGuard><AdminView {...props} /></UnsavedGuard>
       </KnownNames.Provider>
     </LangProvider>
   );
@@ -1323,7 +1324,7 @@ function AdminView({ initial, isAdmin, denied = "", start }) {
       </header>
       <nav className="evnav" aria-label={tr("Circuit")}>
       <div className="nav1" role="tablist" aria-label={tr("Circuit")}>
-        <button type="button" className="navhome" title={tr("Editor home")} aria-label={tr("Editor home")} aria-current={home ? "page" : undefined} onClick={goHome}>
+        <button type="button" className="navhome" data-guard-leave title={tr("Editor home")} aria-label={tr("Editor home")} aria-current={home ? "page" : undefined} onClick={goHome}>
           <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h5v-6h3v6h5V9.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" /></svg>
         </button>
         <button role="tab" aria-selected={!home && region !== "gc"} onClick={() => setRegion(region === "gc" ? lastVct : region)}>VCT EMEA</button>
