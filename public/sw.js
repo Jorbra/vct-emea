@@ -2,7 +2,29 @@
 const CACHE = "vct-v2";
 const OFFLINE = `<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hors ligne · VCT EMEA</title>
 <body style="font-family:system-ui;background:#121212;color:#eee;display:grid;place-items:center;min-height:100vh;margin:0;text-align:center;padding:16px">
-<div><h1>Hors ligne</h1><p>Pas de réseau, et cette page n'a pas encore été ouverte sur cet appareil.</p><p><a style="color:#ff4655" href="/">Accueil</a></p></div></body></html>`;
+<div><h1>Hors ligne</h1><p>Pas de réseau, et cette page n'a pas encore été ouverte sur cet appareil.</p><p>Le programme de la semaine reste consultable :</p><p><a style="color:#ff4655;font-weight:700" href="/calendar">Calendrier</a> · <a style="color:#ff4655" href="/ce-soir">Ce soir</a> · <a style="color:#ff4655" href="/">Accueil</a></p></div></body></html>`;
+
+// kept ahead of time, so that the week's programme opens without network even if it was never visited on this device
+const WEEK_PAGES = ["/calendar", "/ce-soir", "/"];
+
+/** Fetches the week's pages and the built files they need into the cache (the page asks at most once an hour). */
+async function warm() {
+  const cache = await caches.open(CACHE);
+  for (const path of WEEK_PAGES) {
+    try {
+      const res = await fetch(path, { credentials: "same-origin" });
+      if (!res.ok) continue;
+      const html = await res.clone().text();
+      await cache.put(new Request(path), res);
+      const files = [...new Set(html.match(/\/_next\/static\/[^"'\s)]+/g) || [])].slice(0, 80);
+      for (const f of files) if (!(await cache.match(f))) { try { const r = await fetch(f); if (r.ok) await cache.put(f, r); } catch { /* next time */ } }
+    } catch { /* offline now: next time */ }
+  }
+}
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "warm" && !["localhost", "127.0.0.1"].includes(self.location.hostname)) event.waitUntil(warm());
+});
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => {

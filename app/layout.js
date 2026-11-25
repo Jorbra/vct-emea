@@ -11,7 +11,7 @@ import MobileTabs from "../components/MobileTabs";
 import { LangProvider } from "../components/lang.jsx";
 import { ResultToast, TeamTheme } from "../components/visual.jsx";
 import { SiteBanner } from "../components/Round6Bits.jsx";
-import { HEAD_SCRIPT } from "../lib/headscripts.js";
+import { HEAD_SCRIPT, OFFLINE_SCRIPT } from "../lib/headscripts.js";
 import { CommandPalette } from "../components/Round8Bits.jsx";
 import { SiteFooter } from "../components/Round9.jsx";
 import { BackToTop } from "../components/Round14.jsx";
@@ -72,6 +72,7 @@ export default async function RootLayout({ children }) {
         <MatchAlerts />
         <LangProvider lang={lang}><MobileTabs /><ResultToast /><CloseAlerts /><Motion /><MatchNightTheme /><TeamTheme /><CommandPalette /></LangProvider>
         <AccountSync />
+        <script dangerouslySetInnerHTML={{ __html: OFFLINE_SCRIPT }} />
       </body>
     </html>
   );
