@@ -1024,8 +1024,7 @@ td.cmpw { color: var(--win, #6fcf6f); font-weight: 700; }
 .mmlinks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .mmlinks .btn { text-decoration: none; }
 .mcl.w .tn { font-weight: 700; }
-.mcl.lo .tn { color: color-mix(in srgb, var(--fg) 62%, transparent); }
-.mcl.lo .crest { opacity: .6; }
+.mcl.lo { opacity: .55; }
 .mcbadge.done { font-weight: 600; color: var(--muted); }
 /* team pages */
 .team .name a { color: inherit; text-decoration: none; }
@@ -1671,7 +1670,11 @@ h2 { letter-spacing: .03em; }
 /* one bar per team: its color when known, nothing otherwise; the winner by its score and name */
 .mcl.w { border-left: 0; padding-left: 0; margin-left: 0; }
 .mcl.w .tn { color: var(--fg); font-weight: 700; }
-.mcl.lo .tn { opacity: 1; }
+.mcl.lo .tn { opacity: .55; }
+/* preview "perdant" (lib/apercu.js): the loser readable */
+html[data-ft~="perdant"] .mcl.lo { opacity: 1; }
+html[data-ft~="perdant"] .mcl.lo .tn { opacity: 1; color: color-mix(in srgb, var(--fg) 62%, transparent); }
+html[data-ft~="perdant"] .mcl.lo .crest { opacity: .6; }
 .teamtick { background: transparent; }
 @media (max-width: 1099px) { .sitenav .navbrand { display: none; } }
 /* room between the left menu and the page */
@@ -2471,8 +2474,11 @@ a.bt small { color: var(--muted); }
 a.agicon { text-decoration: none; color: inherit; }
 a.agicon:hover img { transform: scale(1.12); }
 .agicon img { transition: transform .15s ease; }
-.rcard.withagent { position: relative; overflow: hidden; padding-top: 92px; background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 30%, transparent) 0%, var(--surface) 78%), var(--agimg, none) center 10% / 170% auto no-repeat, var(--surface); }
+.rcard.withagent { position: relative; overflow: hidden; background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 30%, transparent) 0%, var(--surface) 78%), var(--agimg, none) center 10% / 170% auto no-repeat, var(--surface); }
 .rcard.withagent > * { position: relative; }
+/* preview "cartes" (lib/apercu.js): the agent in full, no initial over it */
+html[data-ft~="cartes"] .rcard.withagent { padding-top: 92px; }
+html[data-ft~="cartes"] .rcard.withagent .rcav { display: none; }
 .rcagent { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--agc); }
 .maphero { position: relative; }
 .maphero .minimap { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); height: 82%; max-height: 180px; width: auto; filter: drop-shadow(0 4px 14px rgba(0,0,0,.6)); opacity: .95; }
@@ -3683,7 +3689,12 @@ img[data-lumfix] { background-color: #2b2b2e; border-radius: 6px; padding: 2px; 
 .ldkey { margin: 0; font-size: 12px; color: var(--muted); }
 .ldkey .rkey-a { color: var(--ra); }
 .ldkey .rkey-b { color: var(--rb); }
-.ricon { width: 12px; height: 12px; display: block; }
+.ricon { width: 12px; height: 12px; display: none; }
+.ldkey-new { display: none; }
+/* preview "pictos" (lib/apercu.js): the drawn icons instead of the symbols */
+html[data-ft~="pictos"] .rstrip .ricon { display: block; }
+html[data-ft~="pictos"] .ricon-old, html[data-ft~="pictos"] .ldkey-old { display: none; }
+html[data-ft~="pictos"] .ldkey-new { display: inline; }
 .ldkey .ricon { display: inline-block; vertical-align: -2px; width: 13px; height: 13px; color: var(--fg); }
 .rstrip li.rsq-a .rcut { stroke: var(--ra); }
 .rstrip li.rsq-b .rcut { stroke: var(--rb); }
@@ -3712,3 +3723,12 @@ img[data-lumfix] { background-color: #2b2b2e; border-radius: 6px; padding: 2px; 
   .rstrip li { width: 16px; max-width: 16px; height: 16px; font-size: 10px; }
   .lptable .lpopt { display: none; }
 }
+
+/* the editor's new things in preview (components/AdminHome.jsx) */
+.apercu { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.apercu li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.apercu li div { display: grid; gap: 2px; min-width: 0; }
+.apercu li small { color: var(--muted); }
+.apstate { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, #f5a623 18%, transparent); color: #f5a623; white-space: nowrap; }
+.apstate.on { background: color-mix(in srgb, var(--lime) 18%, transparent); color: var(--lime); }
+@media (max-width: 640px) { .apercu li { grid-template-columns: minmax(0, 1fr) auto; } .apercu li .btn { grid-column: 1 / -1; justify-self: start; } }

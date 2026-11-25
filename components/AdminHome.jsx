@@ -70,6 +70,7 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
   return (
     <div className="adhome">
       <p className="guidelink"><a className="btn" href="/admin/nouveautes">{tr("What's new and how it works")}</a></p>
+      {initial.admin && <ApercuPanel main={me === ""} call={call} onDone={onDone} />}
       {initial.admin && <EditorKpis initial={initial} />}
       {initial.admin && <EditorSearch initial={initial} onOpen={onOpen} />}
       {initial.admin && <SlashToSearch />}
@@ -195,6 +196,37 @@ function QuickLive({ initial, call, onDone }) {
 }
 
 /** What is missing before an event starts (or while it runs). */
+/** The new things shown to the editors first (lib/apercu.js), each with its switch to open it to everyone. */
+function ApercuPanel({ main, call, onDone }) {
+  const tr = useT();
+  const [list, setList] = useState(null);
+  useEffect(() => { fetch("/api/apercu").then((r) => (r.ok ? r.json() : null)).then((j) => setList(j ? j.list : [])).catch(() => setList([])); }, []);
+  if (!list || !list.length) return null;
+  const waiting = list.filter((x) => !x.public).length;
+  const flip = async (x) => {
+    try {
+      const j = await call("/api/apercu", { name: x.name, public: !x.public });
+      setList((l) => l.map((y) => (y.name === x.name ? { ...y, public: !x.public } : y)));
+      onDone(tr.server(j.message));
+    } catch (e) { onDone(tr.server(e.message)); }
+  };
+  return (
+    <section>
+      <details className="einfo" open={waiting > 0}>
+        <summary><b>🧪 {tr("New things in preview")}</b> {waiting > 0 && <small>{tr("{n} waiting", { n: waiting })}</small>}</summary>
+        <ul className="apercu">{list.map((x) => (
+          <li key={x.name}>
+            <div><b>{x.title}</b><small>{x.text}</small></div>
+            <span className={"apstate" + (x.public ? " on" : "")}>{x.public ? tr("Everyone") : tr("Editors only")}</span>
+            {main && <button type="button" className={"btn small" + (x.public ? "" : " pri")} onClick={() => flip(x)}>{x.public ? tr("Back to preview") : tr("Open to everyone")}</button>}
+          </li>
+        ))}</ul>
+        <p className="hint">{tr("A new thing in preview is seen only by the main account and the editors who are signed in. Open it to everyone once it looks right: no new deployment needed, and it can be put back.")}{!main && " " + tr("Only the main account can open a new thing to everyone.")}</p>
+      </details>
+    </section>
+  );
+}
+
 function Checklist({ list }) {
   const tr = useT();
   return (

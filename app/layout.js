@@ -27,6 +27,7 @@ import { Motion } from "../components/Round22.jsx";
 import { MatchNightTheme } from "../components/Season17.jsx";
 import { LiveTeamBanner, Welcome } from "../components/Round11.jsx";
 import { getDb } from "../lib/db.js";
+import { shownApercu } from "../lib/apercu.js";
 import { activeBanner } from "../lib/round6.js";
 
 export async function generateMetadata() {
@@ -57,8 +58,12 @@ export default async function RootLayout({ children }) {
   let welcomeTeams = [];
   try { const { getState } = await import("../lib/db.js"); welcomeTeams = (getState(getDb()).kickoff.teams || []).filter((t) => t && t.name).map((t) => ({ name: t.name, logo: t.logo || "", tag: t.tag || "" })); } catch { /* none */ }
   try { banner = activeBanner(getDb()); } catch { /* no database yet: no banner */ }
+  const admin = await isAdmin();
+  // the new things this visitor sees: all of them for an editor (preview), those opened to everyone otherwise
+  let ft = [];
+  try { ft = shownApercu(getDb(), admin); } catch { /* no database yet: none */ }
   return (
-    <html lang={lang} dir={isRtl(lang) ? "rtl" : "ltr"} data-period={periodOf()} className={`${barlow.variable} ${barlowCond.variable}`} suppressHydrationWarning>
+    <html lang={lang} dir={isRtl(lang) ? "rtl" : "ltr"} data-period={periodOf()} data-ft={ft.join(" ")} className={`${barlow.variable} ${barlowCond.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT + ";" + HEAD_SCRIPT }} />
       </head>
@@ -68,7 +73,7 @@ export default async function RootLayout({ children }) {
         <LangProvider lang={lang}><LiveTeamBanner /><Welcome teams={welcomeTeams} /></LangProvider>
         <div id="content" tabIndex={-1}>{children}</div>
         <LangProvider lang={lang}><SiteFooter /><BackToTop /></LangProvider>
-        <EditorAccess lang={lang} isAdmin={await isAdmin()} />
+        <EditorAccess lang={lang} isAdmin={admin} />
         <MatchAlerts />
         <LangProvider lang={lang}><MobileTabs /><ResultToast /><CloseAlerts /><Motion /><MatchNightTheme /><TeamTheme /><CommandPalette /><KeyHelp /><LogoContrast /></LangProvider>
         <AccountSync />
