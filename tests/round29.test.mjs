@@ -80,3 +80,14 @@ test("season period: Kickoff in January, Masters in March and June, Champions in
   assert.equal(periodOf(at(11, 25), ""), "offseason");
   assert.equal(periodOf(at(11, 25), "champions"), "champions"); // forced on the server
 });
+
+test("streaks: the series won or lost in a row up to the latest result, and the longest run of wins", async () => {
+  const { teamStreaks } = await import("../lib/streaks.js");
+  const A = { name: "Alpha" }, B = { name: "Beta" }, C = { name: "Gamma" };
+  const m = (d, a, b, win) => ({ a, b, win, at: `2026-11-${String(d).padStart(2, "0")}T18:00:00Z` });
+  const s = teamStreaks([m(1, A, B, "b"), m(2, A, C, "a"), m(3, A, B, "a"), m(4, C, A, "b"), m(5, B, C, "a")]);
+  const of = (slug) => s.find((x) => x.slug === slug);
+  assert.deepEqual([of("alpha").kind, of("alpha").n, of("alpha").best], ["W", 3, 3]);
+  assert.deepEqual([of("gamma").kind, of("gamma").n], ["L", 3]);
+  assert.equal(s[0].slug, "alpha"); // the longest winning streak first
+});

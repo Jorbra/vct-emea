@@ -28,7 +28,7 @@ function Top({ title }) {
 
 // ---- the power ranking
 
-function Power({ rows }) {
+function Power({ rows, streaks }) {
   const tr = useT();
   const fav = useFavorites();
   const [all, setAll] = useState(false);
@@ -57,12 +57,25 @@ function Power({ rows }) {
           ))}
         </ol>
       )}
+      {streaks && (streaks.hot.length > 0 || streaks.cold.length > 0) && (
+        <section className="streaks">
+          <h2>{tr("Running streaks")}</h2>
+          <div className="streakcols">
+            {[["hot", "🔥", "Series won in a row"], ["cold", "🧊", "Series lost in a row"]].map(([k, icon, title]) => streaks[k].length > 0 && (
+              <div key={k}>
+                <h3>{icon} {tr(title)}</h3>
+                <ol className="streaklist">{streaks[k].map((t) => <li key={t.slug}><Crest team={t} /><a href={`/team/${t.slug}`}>{t.name}</a><b className={k}>{t.n}</b></li>)}</ol>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
       {rows.length > 30 && <p><button type="button" className="btn" onClick={() => setAll(!all)}>{all ? tr("Show the top 30") : tr("Show all {n} teams", { n: rows.length })}</button></p>}
     </div>
   );
 }
 
-export const PowerPage = ({ rows, lang }) => <LangProvider lang={lang}><Power rows={rows} /></LangProvider>;
+export const PowerPage = ({ rows, streaks, lang }) => <LangProvider lang={lang}><Power rows={rows} streaks={streaks} /></LangProvider>;
 
 // ---- the quiz of the week
 
