@@ -55,14 +55,14 @@ export default function SearchBar() {
 
   useEffect(() => {
     const text = q.trim();
-    if (text.length < 2) { setRes(null); return undefined; }
+    if (text.length < 1) { setRes(null); return undefined; }
     const ctl = new AbortController();
     const t = setTimeout(() => {
       fetch(`/api/search?q=${encodeURIComponent(text)}`, { signal: ctl.signal })
         .then((r) => (r.ok ? r.json() : null))
         .then((j) => { if (j) { setRes(j); setCur(0); } })
         .catch(() => { /* typed further, or offline: the list stays as it was */ });
-    }, 150);
+    }, text.length === 1 ? 60 : 150);
     return () => { clearTimeout(t); ctl.abort(); };
   }, [q]);
 
@@ -86,7 +86,8 @@ export default function SearchBar() {
   useEffect(() => {
     const onDown = (e) => { if (box.current && !box.current.contains(e.target)) setOpen(false); };
     const onKey = (e) => {
-      if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey || typing()) return;
+      const k = (e.ctrlKey || e.metaKey) && !e.altKey && String(e.key).toLowerCase() === "k"; // Ctrl+K / Cmd+K, even while typing elsewhere
+      if (!k && (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey || typing())) return;
       e.preventDefault();
       input.current && input.current.focus();
     };
@@ -110,7 +111,7 @@ export default function SearchBar() {
     else if (e.key === "Enter") { e.preventDefault(); go(flat[cur]); }
   };
 
-  const shown = open && q.trim().length >= 2 && res;
+  const shown = open && q.trim().length >= 1 && res;
   let n = -1;
   return (
     <div className="searchbar" ref={box} role="search">

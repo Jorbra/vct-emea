@@ -1741,7 +1741,10 @@ test("search: tournaments, teams and people; the site's own first, and every res
   const lists = { teams: [["Team Vitality", "VIT", "1/11/v.png"], ["LOUD", "LOUD", "8/8b/l.png"]], players: { players: [["Jamppi", "fi"], ["aspas", "br"]], staff: [["Coachy", "fr"]] } };
   const items = searchIndex(initial, info, lists);
   const s = (q) => searchAll(items, q);
-  assert.deepEqual(s("k"), { events: [], teams: [], players: [], matches: [], maps: [], agents: [] }); // too short
+  assert.deepEqual(s(""), { events: [], teams: [], players: [], matches: [], maps: [], agents: [] }); // nothing typed
+  assert.equal(s("k").events[0].name, "EMEA Kickoff"); // one letter: what plays on the site and has a word starting with it
+  assert.equal(s("k").teams[0].name, "Karmine Corp");
+  assert.ok(s("k").players.every((p) => p.href.startsWith("/player/")));
   assert.equal(s("kickoff").events[0].href, "/vctemea/kickoff/overview");
   assert.ok(s("turquie").events.some((e) => e.name === "Türkiye Qualifier Playoffs")); // by another word
   assert.equal(s("champions").events.length, 1); // once, though two results name it
