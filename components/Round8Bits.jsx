@@ -146,7 +146,9 @@ export function CommandPalette() {
   useEffect(() => {
     const onKey = (e) => {
       const typing = /^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || "") || (e.target && e.target.isContentEditable);
-      if ((e.key === "k" && (e.ctrlKey || e.metaKey)) || (e.key === "/" && !typing)) { e.preventDefault(); setOpen(true); }
+      // "/" belongs to the page's search bar when there is one; Ctrl+K (Cmd+K) always opens this palette
+      const bar = document.querySelector(".searchbar input");
+      if ((e.key === "k" && (e.ctrlKey || e.metaKey)) || (e.key === "/" && !typing && !bar)) { e.preventDefault(); setOpen(true); }
       if (e.key === "Escape") setOpen(false);
     };
     const onOpen = () => setOpen(true);

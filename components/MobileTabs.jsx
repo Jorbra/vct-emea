@@ -9,7 +9,7 @@ const MORE = [
   ["/ce-soir", "Tonight", "📺"], ["/jour", "Day recap", "📋"], ["/moi", "My week", "🗓️"], ["/jeux", "Games of the day", "🎮"], ["/fantasy", "Fantasy", "⭐"], ["/quiz", "Quiz", "❓"],
   ["/tierlist", "Tier list", "🔠"], ["/simulateur", "Qualification simulator", "🎲"], ["/puissance", "Power ranking", "⚡"], ["/stats", "Stats", "📊"], ["/agent", "Agents", "🦸"], ["/map", "Maps", "🗺️"], ["/rivalites", "Rivalries", "⚔️"],
   ["/saison", "The season's feed", "🗞️"], ["/palmares", "Hall of fame", "🏆"], ["/equipes", "Compare teams", "⚖️"], ["/compare", "Compare players", "👥"], ["/pays", "Countries", "🌍"], ["/transfers", "Transfers", "🔁"],
-  ["/lft", "LFT", "🔎"], ["/news", "News", "📰"], ["/format", "How the events work", "📘"], ["/archives", "Archives of past seasons", "🗄️"], ["/compte", "My account", "⚙️"], ["/about", "About", "ℹ️"],
+  ["/lft", "LFT", "🔎"], ["/news", "News", "📰"], ["/format", "How the events work", "📘"], ["/lexique", "Glossary", "📖"], ["/archives", "Archives of past seasons", "🗄️"], ["/compte", "My account", "⚙️"], ["/about", "About", "ℹ️"],
 ];
 
 /** On phones: the main pages in a bar at the bottom of the screen, the live count in red, the rest under "More". */

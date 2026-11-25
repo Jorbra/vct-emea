@@ -18,7 +18,7 @@ export default function sitemap() {
     ...siteTeams(state).map((t) => teamHref(t.name)).filter(Boolean),
     ...allMatches(state).filter((m) => m.a && m.b && m.a.name && m.b.name).map((m) => `/match/${m.event}/${m.id}`),
     ...listNews(db).map((n) => `/news/${n.id}`),
-    "/agent", "/agent/duel", "/map", "/jeux", "/fantasy", "/quiz", "/tierlist", "/puissance",
+    "/agent", "/agent/duel", "/map", "/jeux", "/fantasy", "/quiz", "/tierlist", "/puissance", "/jour", "/ce-soir", "/lexique", "/equipes", "/format",
     ...Object.keys(ASSETS.agents).map((k) => `/agent/${k}`),
     ...Object.entries(ASSETS.maps).filter(([, v]) => v.icon).map(([k]) => `/map/${k.toLowerCase()}`),
   ];

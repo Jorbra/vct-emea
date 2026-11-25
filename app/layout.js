@@ -3,6 +3,7 @@ import "./globals.css";
 import { LANG_COOKIE, isRtl, makeT, normLang } from "../lib/i18n.js";
 import { THEME_COOKIE, normTheme } from "../lib/theme.js";
 import { periodOf } from "../lib/period.js";
+import KeyHelp from "../components/KeyHelp";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 
 // the site's fonts, served by the site itself (fetched once at build time): no request to Google on each page
@@ -69,7 +70,7 @@ export default async function RootLayout({ children }) {
         <LangProvider lang={lang}><SiteFooter /><BackToTop /></LangProvider>
         <EditorAccess lang={lang} isAdmin={await isAdmin()} />
         <MatchAlerts />
-        <LangProvider lang={lang}><MobileTabs /><ResultToast /><CloseAlerts /><Motion /><MatchNightTheme /><TeamTheme /><CommandPalette /></LangProvider>
+        <LangProvider lang={lang}><MobileTabs /><ResultToast /><CloseAlerts /><Motion /><MatchNightTheme /><TeamTheme /><CommandPalette /><KeyHelp /></LangProvider>
         <AccountSync />
         <script dangerouslySetInnerHTML={{ __html: OFFLINE_SCRIPT }} />
       </body>
