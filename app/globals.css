@@ -4055,3 +4055,12 @@ html[data-ft~="stories2"] .storyhint { opacity: .55; font-size: 11px; }
 html[data-ft~="stories2"] .storyring { background: conic-gradient(from 210deg, #ff4655, #c9f03c, #ff4655); }
 html[data-ft~="stories2"] .story.seen .storyring { background: var(--line); }
 @media (prefers-reduced-motion: reduce) { .storyart { animation: none !important; } }
+
+/* Editor, Discord bot, "Server" tab (components/BotServer.jsx) */
+.botserver { display: grid; gap: 8px; }
+.botserver .bsgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px 12px; }
+.botserver .bsmany { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; display: flex; flex-wrap: wrap; gap: 4px 14px; max-height: 160px; overflow: auto; }
+.botserver .bsmany legend { font-size: 12px; color: var(--muted); padding: 0 4px; }
+.botserver input[type="number"] { width: 64px; }
+.botserver label.sw { display: flex; align-items: center; gap: 8px; margin: 2px 0; text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--fg); }
+.botserver h3.sub { margin: 14px 0 2px; }

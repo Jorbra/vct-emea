@@ -12,6 +12,18 @@ export function register() {
     process.env.TZ = process.env.SITE_TZ || "Europe/Paris";
     process.env.SITE_TZ_SET = "1";
   }
+  // the Discord bot's live connection (lib/botgateway.js): moderation log, welcome and goodbye, anti-flood. Only on a server
+  // with the bot's token; DISCORD_GATEWAY=off turns it off.
+  if (process.env.NEXT_RUNTIME === "nodejs" && process.env.DISCORD_BOT_TOKEN && process.env.DISCORD_GATEWAY !== "off") {
+    setTimeout(async () => {
+      try {
+        const { gatewayWanted, startGateway } = await import("./lib/botgateway.js");
+        if (!gatewayWanted()) return;
+        const { getDb } = await import("./lib/db.js");
+        startGateway({ getDb });
+      } catch (e) { console.log(`[gateway] not started: ${e.message}`); }
+    }, 8000).unref?.();
+  }
   // on a server that keeps running: a few seconds after it starts, it opens its heaviest pages itself, so that their
   // season-wide numbers are ready (lib/keep.js) before the first visitor comes
   if (process.env.NEXT_RUNTIME === "nodejs" && process.env.BACKGROUND_WORK === "external") {

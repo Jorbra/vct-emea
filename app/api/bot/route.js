@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getDb } from "../../../lib/db.js";
 import { BOT_RIGHTS } from "../../../lib/botmod.js";
+import { botServer, saveBotServer, syncAutomod } from "../../../lib/botserver.js";
+import { gatewayState } from "../../../lib/botgateway.js";
 import { APP_ID, botGuilds, botReady, discord, guildChannels, guildRoles, postMessage, registerCommands } from "../../../lib/botapi.js";
 import { botLog, botSettings, botUsage, cancelScheduled, logBot, saveBotSettings, scheduleAnnouncement, scheduledList } from "../../../lib/botstore.js";
 import { botTest, pinnedEmbed, updatePinned } from "../../../lib/botnotify.js";
@@ -43,6 +45,8 @@ export async function GET(req) {
     pinPreview: pinnedEmbed(getState(db), settings.lang), registered: null, log: botLog(db), scheduled: scheduledList(db),
     // the link that gives the bot the rights its server commands need (lib/botmod.js), on a server it is already in too
     invite: `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot%20applications.commands&permissions=${BOT_RIGHTS}`,
+    // the server settings (moderation log, welcome, AutoMod, tickets) and the live connection's state (lib/botgateway.js)
+    server: botServer(db), gateway: gatewayState(),
     token: botReady(), publicKey: /^[0-9a-f]{64}$/i.test(process.env.DISCORD_PUBLIC_KEY || ""), guilds: [], channels: [], roles: [], error: "",
   };
   if (out.token) {
@@ -116,6 +120,18 @@ export async function POST(req) {
       return NextResponse.json({ ok: true, message: done ? "Pinned message updated." : "Choose the pinned message's channel first." });
     } catch (e) {
       return NextResponse.json({ error: `Discord: ${e.message}` }, { status: 502 });
+    }
+  }
+  // the server settings: saved, then Discord's AutoMod rules put in line with them
+  if (b.action === "server") {
+    const next = saveBotServer(db, b.server || {});
+    const guild = (await import("../../../lib/botstore.js")).botSettings(db).guild;
+    if (!botReady() || !guild) return NextResponse.json({ ok: true, message: "Réglages du serveur enregistrés (les règles AutoMod seront posées une fois le bot et le serveur choisis).", server: next });
+    try {
+      const r = await syncAutomod(discord, guild, next);
+      return NextResponse.json({ ok: true, message: `Réglages du serveur enregistrés. AutoMod : ${r.made} règle(s) créée(s), ${r.changed} mise(s) à jour, ${r.removed} retirée(s).`, server: next });
+    } catch (e) {
+      return NextResponse.json({ ok: true, message: `Réglages enregistrés, mais Discord refuse les règles AutoMod : ${e.message} (le bot a-t-il le droit « Gérer le serveur » ?)`, server: next });
     }
   }
   if (b.action === "register") {

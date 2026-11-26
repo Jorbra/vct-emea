@@ -33,11 +33,20 @@ import { motmSeason } from "../../../lib/fans.js";
 import { ratings as r8ratings } from "../../../lib/r8data.js";
 import { winChance } from "../../../lib/proba26.js";
 import { MOD_NAMES, closeTicket, openTicket, runModCommand } from "../../../lib/botmod.js";
-import { discord } from "../../../lib/botapi.js";
+import { MOD2_NAMES, claimTicket, handleButton, runMod2Command } from "../../../lib/botmod2.js";
+import { botServer, postLog } from "../../../lib/botserver.js";
+import { discord, postFile } from "../../../lib/botapi.js";
 import { logBot } from "../../../lib/botstore.js";
 
 // the server commands whose answer everyone in the channel sees; the others answer the moderator alone
 const MOD_PUBLIC = ["serveur", "membre", "lenteur", "verrouiller", "deverrouiller"];
+
+/** What the server commands need: the server settings, and a way to write in the moderation log channel. */
+function serverDeps(db, settings, now) {
+  const server = botServer(db);
+  const notify = (text) => postLog(discord, server, { kind: "bot", title: "🛡️ Action du bot", lines: [text], at: now });
+  return { db, discord, lang: settings.lang, logBot, now, server, notify, postFile };
+}
 
 /** A server command or ticket button: "thinking…" at once (Discord waits 3 s at most), the answer once Discord has done it. */
 function later(i, visible, work) {
@@ -131,11 +140,24 @@ export async function POST(req) {
   // a prediction button
   if (i.type === 3) {
     const [kind, event, id, side] = String((i.data && i.data.custom_id) || "").split("|");
+    // role buttons, poll votes, giveaway entries (lib/botmod2.js)
+    if (["rb", "pv", "gv"].includes(kind)) {
+      if (!tokenSet() || !i.guild_id) return ephemeral({ content: L("Indisponible ici.", "Not available here.") });
+      if (kind === "rb") return later(i, false, async () => { const r = await handleButton(i, serverDeps(db, settings, now)); return r.data; });
+      return NextResponse.json(await handleButton(i, serverDeps(db, settings, now)));
+    }
     // a ticket's buttons: tk|open|<staff role> on the panel, tk|close in the ticket
     if (kind === "tk") {
       if (!tokenSet() || !i.guild_id) return ephemeral({ content: L("Les tickets ne marchent pas ici (bot non configuré).", "Tickets do not work here (bot not set up).") });
-      const deps = { db, discord, lang: settings.lang, logBot, now };
+      const deps = serverDeps(db, settings, now);
       if (event === "open") return later(i, false, () => openTicket({ ...deps, guild: i.guild_id, channel: i.channel_id, user, role: String(id || "").replace(/\D/g, "") }));
+      // a subject picked in the panel's list: tk|cat|<staff role>, the subject's number in the values
+      if (event === "cat") {
+        const k = Number(((i.data && i.data.values) || [])[0]);
+        const category = deps.server.tickets.categories[k] || "";
+        return later(i, false, () => openTicket({ ...deps, guild: i.guild_id, channel: i.channel_id, user, role: String(id || "").replace(/\D/g, ""), category }));
+      }
+      if (event === "claim") return later(i, false, () => claimTicket({ ...deps, guild: i.guild_id, thread: i.channel_id, user, permissions: i.member && i.member.permissions }));
       if (event === "close") return later(i, false, () => closeTicket({ ...deps, guild: i.guild_id, thread: i.channel_id, user, permissions: i.member && i.member.permissions }));
       return ephemeral({ content: "?" });
     }
@@ -188,7 +210,12 @@ export async function POST(req) {
   if (MOD_NAMES.includes(name)) {
     if (!tokenSet()) return ephemeral({ content: L("Cette commande a besoin du jeton du bot (réglages du serveur du site).", "This command needs the bot's token (the site's server settings).") });
     countUse(db, name, user.id, now);
-    return later(i, MOD_PUBLIC.includes(name), () => runModCommand(i, { db, discord, lang: settings.lang, logBot, now }));
+    return later(i, MOD_PUBLIC.includes(name), () => runModCommand(i, serverDeps(db, settings, now)));
+  }
+  if (MOD2_NAMES.includes(name)) {
+    if (!tokenSet()) return ephemeral({ content: L("Cette commande a besoin du jeton du bot (réglages du serveur du site).", "This command needs the bot's token (the site's server settings).") });
+    countUse(db, name, user.id, now);
+    return later(i, ["ajouter", "retirer", "renommer", "priorite"].includes(name), () => runMod2Command(i, serverDeps(db, settings, now)));
   }
   countUse(db, name, user.id, now);
   noteGuildUser(db, i.guild_id, user.id, now);
