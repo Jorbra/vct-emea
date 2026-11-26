@@ -33,3 +33,11 @@ test("live: map point, match point, the first half and a run of rounds", async (
   assert.deepEqual(roundStreak(rnd), { side: "a", n: 3 });
   assert.equal(roundStreak(["ate", "bte"]), null);
 });
+
+test("match page: the time left before a match, and the result as text to paste", async () => {
+  const { timeLeft, resultText } = await import("../lib/maj40.js");
+  const now = Date.parse("2026-11-26T12:00:00Z");
+  assert.deepEqual(timeLeft("2026-11-26T14:15:30Z", now), { d: 0, h: 2, m: 15 });
+  assert.equal(timeLeft("2026-11-26T11:00:00Z", now), null);
+  assert.equal(resultText({ a: "UCAM", b: "La masia", sa: 2, sb: 0, event: "EU", maps: [{ map: "Bind", a: 13, b: 9 }], url: "https://x/m" }), "UCAM 2–0 La masia · EU · Bind 13–9 · https://x/m");
+});

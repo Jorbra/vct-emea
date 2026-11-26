@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useT } from "./lang.jsx";
 import { Crest } from "./Crest.jsx";
 import LiveDetail from "./LiveDetail.jsx";
+import { CopyResult, ShareMatch, TimeLeft, useLiveTitle } from "./Maj40Bits.jsx";
 import { LiveBadge } from "./matchTime.jsx";
 import { formatMatchTime } from "../lib/schedule.js";
 import { EVENT_NAMES, teamHref } from "../lib/paths.js";
@@ -218,6 +219,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
     return <div className={"mmteam " + side + (won ? " w" : m.win ? " lo" : "")}>{href ? <a href={href}>{inner}</a> : inner}</div>;
   };
   const score = done ? scoreLabel(m, tr, ":") : live ? `${live.a} : ${live.b}` : "vs";
+  useLiveTitle(page ? live : null, name(m.a), name(m.b));
   const frieze = (ex.maps.some((x) => x.a != null) ? ex.maps : ((details && details.maps) || [])).filter((x) => x.a != null && x.b != null);
   const colorA = useTeamColor(m.a && m.a.logo);
   const colorB = useTeamColor(m.b && m.b.logo);
@@ -229,8 +231,8 @@ function MatchModal({ e, m, state, onClose, page = false }) {
           <a href={e.href}>{tr(EVENT_NAMES[e.event] || "")}</a>
           <span>{label}{m.bo ? ` · Bo${m.bo}` : ""}</span>
         </div>
-        <div className="mmstate">{live ? <LiveBadge /> : done ? <span className="evstate done">{tr("Finished")}</span> : <span className="evstate">{tr("Upcoming")}</span>}{when && <span className="mmwhen">{when}</span>}</div>
-        <div className={"mmvs" + (page && frieze.length && mapSplash(frieze[frieze.length - 1].map) ? " withmap" : "")} style={{ ...(colorA ? { "--ta": colorA } : {}), ...(colorB ? { "--tb": colorB } : {}), ...(page && frieze.length && mapSplash(frieze[frieze.length - 1].map) ? { "--mapbg": `url(${mapSplash(frieze[frieze.length - 1].map)})` } : {}) }}>
+        <div className="mmstate">{live ? <LiveBadge /> : done ? <span className="evstate done">{tr("Finished")}</span> : <span className="evstate">{tr("Upcoming")}</span>}{when && <span className="mmwhen">{when}</span>}{at && !done && !live && <TimeLeft at={at} />}</div>
+        <div aria-live={live ? "polite" : undefined} className={"mmvs" + (page && frieze.length && mapSplash(frieze[frieze.length - 1].map) ? " withmap" : "")} style={{ ...(colorA ? { "--ta": colorA } : {}), ...(colorB ? { "--tb": colorB } : {}), ...(page && frieze.length && mapSplash(frieze[frieze.length - 1].map) ? { "--mapbg": `url(${mapSplash(frieze[frieze.length - 1].map)})` } : {}) }}>
           {team(m.a, "a")}
           <Score className={"mmscore" + (live ? " lv" : "")} value={score} />
           {team(m.b, "b")}
@@ -341,7 +343,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
           {m.a && m.b && m.a.name && m.b.name && <a className="btn" href={`/api/og/story/${e.event}/${m.id}`} target="_blank" rel="noopener noreferrer" download={`story-${m.id}.png`}>📱 {tr("Story 9:16")}</a>}
           {google && <a className="btn" href={google} target="_blank" rel="noopener noreferrer">{tr("Add to Google Calendar")}</a>}
           {google && icsUrl && <a className="btn" href={icsUrl} download={`match-${m.id}.ics`}>{tr("Add to my calendar (.ics)")}</a>}
-          {page ? <CopyLink href={`/match/${e.event}/${m.id}`} /> : <a className="btn" href={`/match/${e.event}/${m.id}`}>{tr("Match page")}</a>}
+          {page && <ShareMatch href={`/match/${e.event}/${m.id}`} title={title} />}{page && done && <CopyResult href={`/match/${e.event}/${m.id}`} a={name(m.a)} b={name(m.b)} sa={m.sa} sb={m.sb} event={tr(EVENT_NAMES[e.event] || "")} maps={frieze} />}{page ? <CopyLink href={`/match/${e.event}/${m.id}`} /> : <a className="btn" href={`/match/${e.event}/${m.id}`}>{tr("Match page")}</a>}
         </div>
     </Shell>
   );

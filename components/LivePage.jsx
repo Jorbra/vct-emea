@@ -20,6 +20,7 @@ import { MyStreams } from "./MyStreams.jsx";
 import { GlobalFeed, TensionBadges } from "./LiveMore.jsx";
 import { tension } from "../lib/livemore.js";
 import LiveDetail from "./LiveDetail.jsx";
+import { useWakeLock } from "./Maj40Bits.jsx";
 
 // the tense matches first (overtime, then a deciding map), the others as they come
 const weight = (m) => { const t = tension(m.score, m.bo); return t.ot ? 2 : t.decider ? 1 : 0; };
@@ -36,6 +37,7 @@ function View({ live, next }) {
   const withStream = live.filter((m) => m.stream);
   const current = withStream.find((m) => `${m.event}:${m.id}` === watch) || withStream[0];
   const src = current && host ? embedUrl(current.stream, host) : "";
+  useWakeLock(!!src); // a stream playing here: the screen stays on (preview "ecran")
   const keyOf = (m) => `${m.event}:${m.id}`;
   // several at once: those ticked, else the first four with a stream that can play here
   const playable = withStream.filter((m) => host && embedUrl(m.stream, host));

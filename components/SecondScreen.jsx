@@ -3,6 +3,7 @@
 // The second screen: on a phone beside the stream, a match's score, the map being played round by round and the live chat.
 import { useEffect, useState } from "react";
 import { LangProvider, useT } from "./lang.jsx";
+import { useWakeLock } from "./Maj40Bits.jsx";
 import { Crest } from "./Crest.jsx";
 import { Comments } from "./Fans.jsx";
 import { RoundChart, TensionBadges } from "./LiveMore.jsx";
@@ -10,6 +11,7 @@ import { mapList } from "./Assets.jsx";
 
 function View({ initial, event, id }) {
   const tr = useT();
+  useWakeLock(true); // a second screen beside the stream: it stays on (preview "ecran")
   const [d, setD] = useState(initial);
   useEffect(() => {
     let on = true;

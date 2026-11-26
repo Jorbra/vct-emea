@@ -3956,3 +3956,8 @@ html[data-ft~="direct2"] .rstrip li.rsq-last { animation: rsqlast 1.6s ease-out 
 }
 .aplink { display: inline-block; margin-top: 4px; font-size: 12px; }
 .apvisitor { display: flex; gap: 8px; align-items: center; margin: 8px 0; font-size: 13px; }
+
+/* preview "match2" (lib/apercu.js): the time left, share and copy the result on the match page */
+.mmrel, .m2only { display: none !important; }
+html[data-ft~="match2"] .mmrel { display: inline-block !important; margin-left: 8px; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+html[data-ft~="match2"] .m2only { display: inline-flex !important; }
