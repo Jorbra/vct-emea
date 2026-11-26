@@ -13,7 +13,9 @@ export function readableLogo(logo) {
   const s = String(logo || "");
   if (s.startsWith("/")) return s;
   const t = /^https:\/\/play\.toornament\.com\/media\/file\/(\d{5,25})\//.exec(s);
-  return t ? `/api/tlogo?id=${t[1]}` : "";
+  if (t) return `/api/tlogo?id=${t[1]}`;
+  const v = /^https:\/\/owcdn\.net\/img\/([\w-]{4,40}\.(?:png|jpe?g|webp))$/i.exec(s);
+  return v ? `/api/vlogo?f=${v[1]}` : "";
 }
 
 function readPalette(src) {
