@@ -68,7 +68,10 @@ export default function UnsavedGuard({ children }) {
   // a save went through: the form it was made from now holds the saved values
   const saved = useCallback(() => {
     const r = root.current;
-    const unit = unitOf(lastActive.current, r) || (lastActive.current && lastActive.current.closest && lastActive.current.closest(UNIT));
+    // the changed form that holds the button pressed (a Save button sits in a smaller block than its fields when the form has no
+    // fieldset: the banner, for one); else the button's own block
+    const act = lastActive.current;
+    const unit = dirtyRef.current.find((u) => u.isConnected && act && u.contains(act)) || unitOf(act, r) || (act && act.closest && act.closest(UNIT));
     if (!unit || !unit.isConnected) { setTimeout(check, 0); return; }
     const at = Date.now();
     const settle = () => {
