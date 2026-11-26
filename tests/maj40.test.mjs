@@ -76,7 +76,7 @@ test("every text of the new parts of the site has its French", async () => {
   const fr = makeT("fr");
   // texts that read the same in French
   const same = new Set(["Discord", "Ctrl+S", "Rounds"]);
-  const files = ["components/EditorFollow.jsx", "components/Maj40Bits.jsx", "components/LiveDetail.jsx", "components/KeyHelp.jsx", "components/NotFoundView.jsx"];
+  const files = ["components/EditorFollow.jsx", "components/Maj40Bits.jsx", "components/LiveDetail.jsx", "components/KeyHelp.jsx", "components/NotFoundView.jsx", "components/LiveMore.jsx"];
   const missing = [];
   for (const f of files) {
     const src = fs.readFileSync(new URL(`../${f}`, import.meta.url), "utf8");
@@ -86,4 +86,13 @@ test("every text of the new parts of the site has its French", async () => {
     }
   }
   assert.deepEqual(missing, []);
+});
+
+test("a live mark with no time counts from vlr.gg's last read of it; with neither, it stays", async () => {
+  const { dropForgottenLive } = await import("../lib/matchlist.js");
+  const now = Date.parse("2026-11-26T12:00:00Z");
+  const state = { times: {}, live: { trq1: { old: { a: 0, b: 0 }, recent: { a: 0, b: 0 }, hand: { a: 0, b: 0 } } } };
+  const reads = { "trq1:old": "2026-11-11T15:38:09Z", "trq1:recent": "2026-11-26T11:00:00Z" };
+  assert.deepEqual(dropForgottenLive(state, now, reads).map((x) => x.id), ["old"]);
+  assert.deepEqual(Object.keys(state.live.trq1).sort(), ["hand", "recent"]);
 });

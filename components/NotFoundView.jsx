@@ -44,9 +44,17 @@ function Suggest() {
   useEffect(() => {
     const q = wordsOfPath(window.location.pathname);
     if (q.length < 2) return;
-    fetch(`/api/search?q=${encodeURIComponent(q)}`).then((r) => (r.ok ? r.json() : null)).then((j) => {
-      if (j) setList([...(j.teams || []), ...(j.players || []), ...(j.events || []), ...(j.matches || [])].filter((x) => x.href).slice(0, 5));
-    }).catch(() => {});
+    // the whole address first, then its longest words one by one (a word mistyped or added leaves the others)
+    const tries = [q, ...q.split(" ").filter((w) => w.length >= 3).sort((x, y) => y.length - x.length)].filter((x, i, l) => l.indexOf(x) === i).slice(0, 3);
+    let on = true;
+    (async () => {
+      for (const t of tries) {
+        const j = await fetch(`/api/search?q=${encodeURIComponent(t)}`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+        const found = j ? [...(j.teams || []), ...(j.players || []), ...(j.events || []), ...(j.matches || [])].filter((x) => x.href).slice(0, 5) : [];
+        if (found.length) { if (on) setList(found); return; }
+      }
+    })();
+    return () => { on = false; };
   }, []);
   if (!list.length) return null;
   return (
