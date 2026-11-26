@@ -75,7 +75,7 @@ En plus, sans être compté :
 - chaque tournée vlr.gg laisse un résumé (celui qu'affiche le n° 31) ;
 - un test vérifie que chaque texte des nouveaux éléments a sa traduction française. C'est lui qui a trouvé l'oubli du n° 22.
 
-Il y a 44 lignes « Journal: » réparties sur 10 commits : certains changements ont deux lignes.
+Il y a 44 lignes « Journal: » réparties sur 9 commits, plus un commit pour cette proposition : certains changements ont deux lignes.
 
 ## Vérifié
 
