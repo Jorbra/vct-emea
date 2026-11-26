@@ -1,4 +1,5 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { breadcrumbLd } from "../../../../lib/maj40.js";
 import { notFound } from "next/navigation";
 import MatchPage from "../../../../components/MatchPage";
 import { getDb, getState, liveDetail } from "../../../../lib/db.js";
@@ -74,9 +75,17 @@ export default async function Page({ params }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd([["VCT EMEA", "/"], [EVENT_NAMES[event], e.href], [name, `/match/${event}/${id}`]], await siteOrigin())).replace(/</g, "\\u003c") }} />
       <MatchPage e={e} id={id} state={data.state} h2h={await h2hAll(m, data.state)} radar={teamsRadar(m)} rating={(() => { try { return ratingsFor(r8ratings().rating, [m]); } catch { return null; } })()} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />
     </>
   );
+}
+
+/** The site's address as the visitor reached it (behind the host's proxy too). */
+async function siteOrigin() {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") || h.get("host") || "localhost";
+  return `${h.get("x-forwarded-proto") || (host.startsWith("localhost") ? "http" : "https")}://${host}`;
 }
 
 export async function generateMetadata({ params }) {
@@ -94,6 +103,8 @@ export async function generateMetadata({ params }) {
   const image = `/api/og/${event}/${id}${m.sa != null && m.sb != null ? `?s=${m.sa}-${m.sb}` : ""}`;
   return {
     title, description,
+    // one address per match for search engines, whatever was added to it (?maj=1, a share tag…)
+    alternates: { canonical: `/match/${event}/${id}` },
     openGraph: { siteName: "VCT EMEA", type: "website", title, description, images: [{ url: image, width: 1200, height: 630 }] },
     twitter: { card: "summary_large_image", title, description, images: [image] },
   };

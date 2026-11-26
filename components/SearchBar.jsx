@@ -9,6 +9,17 @@ import { typing } from "./autoRefresh.js";
 const logoUrl = (f) => `/api/lp-img?f=${encodeURIComponent(f)}`;
 const MAX_SHOWN = 10;
 
+// the last results opened from the bar, on this device (preview "recherche", lib/apercu.js)
+const RECENT = "vct-recent-search";
+const readRecent = () => { try { return JSON.parse(localStorage.getItem(RECENT) || "[]").slice(0, 5); } catch { return []; } };
+const keepRecent = (r) => {
+  if (!r || !r.href) return;
+  try {
+    const item = { name: r.name, href: r.href, type: r.type || "", sub: r.sub || "" };
+    localStorage.setItem(RECENT, JSON.stringify([item, ...readRecent().filter((x) => x.href !== r.href)].slice(0, 5)));
+  } catch { /* private browsing: nothing kept */ }
+};
+
 /** Adds what Liquipedia and vlr.gg found to each group, without showing anything twice. */
 function addLive(own, live) {
   if (!own && !live) return null;
@@ -50,6 +61,7 @@ export default function SearchBar() {
   const [open, setOpen] = useState(false);
   const [cur, setCur] = useState(0);
   const [asking, setAsking] = useState(false);
+  const [recent, setRecent] = useState([]);
   const box = useRef(null);
   const input = useRef(null);
 
@@ -99,6 +111,7 @@ export default function SearchBar() {
   const flat = groups.flatMap(([, l]) => l);
   const go = (r) => {
     if (!r || !r.href) return;
+    keepRecent(r);
     window.location.assign(openHref(r.href));
   };
   const onKey = (e) => {
@@ -117,7 +130,17 @@ export default function SearchBar() {
       <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M16.5 16.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
       <input ref={input} type="search" value={q} placeholder={tr("Search: team, player, match, agent, map")} aria-label={tr("Search: team, player, match, agent, map")}
         role="combobox" aria-expanded={!!shown} aria-controls="searchres" autoComplete="off" spellCheck="false"
-        onChange={(e) => { setQ(e.target.value); setOpen(true); }} onFocus={() => setOpen(true)} onKeyDown={onKey} />
+        onChange={(e) => { setQ(e.target.value); setOpen(true); }} onFocus={() => { setOpen(true); setRecent(readRecent()); }} onKeyDown={onKey} />
+      {open && !q.trim() && recent.length > 0 && (
+        <div className="searchres recentbox" role="listbox" aria-label={tr("Recent searches")}>
+          <div className="searchh">{tr("Recent searches")} <button type="button" className="linkbtn" onClick={() => { try { localStorage.removeItem(RECENT); } catch { /* none */ } setRecent([]); }}>{tr("Clear")}</button></div>
+          {recent.map((r) => (
+            <a key={r.href} className="searchitem" role="option" aria-selected="false" href={openHref(r.href)} onClick={() => keepRecent(r)}>
+              <span className="searchpic" aria-hidden="true">🕘</span><span className="searchname">{r.name}</span>{r.sub && <span className="searchsub">{r.sub}</span>}
+            </a>
+          ))}
+        </div>
+      )}
       {shown && (
         <div className="searchres" id="searchres" role="listbox">
           {!flat.length && !asking && <p className="searchnone">{tr("No result.")}</p>}
@@ -129,7 +152,7 @@ export default function SearchBar() {
                 const i = n;
                 return (
                   <a key={r.type + r.name} className={"searchitem" + (i === cur ? " on" : "")} role="option" aria-selected={i === cur} href={openHref(r.href) || undefined}
-                    onMouseEnter={() => setCur(i)}>
+                    onMouseEnter={() => setCur(i)} onClick={() => keepRecent(r)}>
                     <span className="searchpic"><Pic r={r} /></span>
                     <span className="searchname">{r.name}</span>
                     {r.sub && <span className="searchsub">{r.sub}</span>}

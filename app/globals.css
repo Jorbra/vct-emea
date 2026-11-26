@@ -3961,3 +3961,17 @@ html[data-ft~="direct2"] .rstrip li.rsq-last { animation: rsqlast 1.6s ease-out 
 .mmrel, .m2only { display: none !important; }
 html[data-ft~="match2"] .mmrel { display: inline-block !important; margin-left: 8px; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
 html[data-ft~="match2"] .m2only { display: inline-flex !important; }
+
+/* preview "recherche" (lib/apercu.js): recent searches, and the pages that look like a 404's address */
+.recentbox, .nfsuggest { display: none; }
+html[data-ft~="recherche"] .recentbox { display: block; }
+html[data-ft~="recherche"] .nfsuggest { display: block; margin: 18px auto 0; max-width: 420px; text-align: left; }
+.recentbox .searchh { display: flex; justify-content: space-between; align-items: center; }
+.recentbox .linkbtn { font-size: 12px; }
+.nfsuggest h3 { font-size: 15px; margin: 0 0 6px; }
+.nfsuggest ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.nfsuggest small { color: var(--muted); }
+/* preview "rss": the feed's link on /news */
+.rsslink { display: none; margin: -4px 0 12px; font-size: 13px; }
+html[data-ft~="rss"] .rsslink { display: block; }
+.rsslink a::before { content: "◉ "; color: #f26522; }

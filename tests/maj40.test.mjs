@@ -41,3 +41,23 @@ test("match page: the time left before a match, and the result as text to paste"
   assert.equal(timeLeft("2026-11-26T11:00:00Z", now), null);
   assert.equal(resultText({ a: "UCAM", b: "La masia", sa: 2, sb: 0, event: "EU", maps: [{ map: "Bind", a: 13, b: 9 }], url: "https://x/m" }), "UCAM 2–0 La masia · EU · Bind 13–9 · https://x/m");
 });
+
+test("404: the words of an address not found, to suggest pages that look like it", async () => {
+  const { wordsOfPath } = await import("../lib/maj40.js");
+  assert.equal(wordsOfPath("/team/team-vitalty/"), "team vitalty");
+  assert.equal(wordsOfPath("/player/Kipper%20man"), "Kipper man");
+  assert.equal(wordsOfPath("/fnatic"), "fnatic");
+  assert.equal(wordsOfPath("/"), "");
+});
+
+test("news feed (RSS) and breadcrumb for search engines", async () => {
+  const { rssFeed, breadcrumbLd } = await import("../lib/maj40.js");
+  const feed = rssFeed([{ id: 3, title: "Playoffs <ce soir> & demain", body: "Texte", at: "2026-11-26T10:00:00Z" }], "https://site");
+  assert.match(feed, /^<\?xml/);
+  assert.match(feed, /<title>Playoffs &lt;ce soir&gt; &amp; demain<\/title>/);
+  assert.match(feed, /<link>https:\/\/site\/news\/3<\/link>/);
+  assert.match(feed, /<pubDate>Thu, 26 Nov 2026 10:00:00 GMT<\/pubDate>/);
+  const ld = breadcrumbLd([["Accueil", "/"], ["Kickoff", "/kickoff"]], "https://site");
+  assert.equal(ld.itemListElement[1].item, "https://site/kickoff");
+  assert.equal(ld.itemListElement[1].position, 2);
+});

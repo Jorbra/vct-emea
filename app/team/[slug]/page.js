@@ -64,7 +64,8 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   const key = String(slug || "").toLowerCase();
   const p = teamProfile(getState(getDb()), key);
-  if (p) return sharedPreview(teamPreview(p, normLang((await cookies()).get(LANG_COOKIE)?.value)));
+  // one address per team for search engines (the ?maj=1 of the search bar left out)
+  if (p) return { ...sharedPreview(teamPreview(p, normLang((await cookies()).get(LANG_COOKIE)?.value))), alternates: { canonical: `/team/${key}` } };
   const known = lpData().dir.teams[key];
   return { title: known ? `${known.name} · VCT EMEA` : "VCT EMEA" };
 }

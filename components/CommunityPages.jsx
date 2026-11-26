@@ -38,6 +38,7 @@ function NewsListView({ news }) {
   return (
     <div className="wrap">
       <Top title={tr("News")} crumbs={[[tr("News")]]} />
+      <p className="rsslink"><a href="/news/rss.xml">{tr("Subscribe (RSS)")}</a></p>
       {news.length === 0 ? <p className="note">{tr("No news yet.")}</p> : (
         <div className="newslist">
           {news.map((n) => (

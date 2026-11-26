@@ -100,5 +100,5 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   const p = load(slug);
   if (!p) return { title: "VCT EMEA" };
-  return sharedPreview({ title: [p.name, p.team, "VCT EMEA"].filter(Boolean).join(" · "), description: [p.realName, p.team].filter(Boolean).join(" · "), image: p.teamOnSite && p.teamLogo ? p.teamLogo : "/brand/emea-icon.png" });
+  return { alternates: { canonical: `/player/${encodeURIComponent(String(slug))}` }, ...sharedPreview({ title: [p.name, p.team, "VCT EMEA"].filter(Boolean).join(" · "), description: [p.realName, p.team].filter(Boolean).join(" · "), image: p.teamOnSite && p.teamLogo ? p.teamLogo : "/brand/emea-icon.png" }) };
 }

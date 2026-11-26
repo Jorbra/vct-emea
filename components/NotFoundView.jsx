@@ -7,6 +7,8 @@ import { EmeaMark } from "./Brand.jsx";
 import SearchBar from "./SearchBar.jsx";
 import { siteHref } from "../lib/paths.js";
 import { LostAgent } from "./Round14.jsx";
+import { useEffect, useState } from "react";
+import { wordsOfPath } from "../lib/maj40.js";
 
 function View() {
   const tr = useT();
@@ -29,7 +31,28 @@ function View() {
           <a className="btn" href={siteHref("playoffs")}>EU Qualifier Playoffs</a>
           <a className="btn" href={siteHref("gc")}>Game Changers EMEA</a>
         </div>
+        <Suggest />
       </div>
+    </div>
+  );
+}
+
+/** The pages that look like the address asked for: its words searched like in the bar (preview "recherche"). */
+function Suggest() {
+  const tr = useT();
+  const [list, setList] = useState([]);
+  useEffect(() => {
+    const q = wordsOfPath(window.location.pathname);
+    if (q.length < 2) return;
+    fetch(`/api/search?q=${encodeURIComponent(q)}`).then((r) => (r.ok ? r.json() : null)).then((j) => {
+      if (j) setList([...(j.teams || []), ...(j.players || []), ...(j.events || []), ...(j.matches || [])].filter((x) => x.href).slice(0, 5));
+    }).catch(() => {});
+  }, []);
+  if (!list.length) return null;
+  return (
+    <div className="nfsuggest">
+      <h3>{tr("Maybe you were looking for")}</h3>
+      <ul>{list.map((x) => <li key={x.href}><a href={x.href}>{x.name}</a>{x.sub && <small> · {x.sub}</small>}</li>)}</ul>
     </div>
   );
 }
