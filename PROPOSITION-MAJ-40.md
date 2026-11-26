@@ -1,4 +1,4 @@
-# Proposition : grande mise à jour (42 changements + 8 de performance + bot et stories)
+# Proposition : grande mise à jour (42 changements + 8 de performance + bot de serveur complet + stories)
 
 Branche : `maj-40`, partie de `main` à jour (6aa6c96), poussée seule sur GitHub. **Rien n'est en ligne.**
 
@@ -75,7 +75,7 @@ En plus, sans être compté :
 - chaque tournée vlr.gg laisse un résumé (celui qu'affiche le n° 31) ;
 - un test vérifie que chaque texte des nouveaux éléments a sa traduction française. C'est lui qui a trouvé l'oubli du n° 22.
 
-Il y a 61 lignes « Journal: » en tout (44 pour les 42 changements, 9 pour la performance, 5 pour le bot, 3 pour les stories), réparties sur les commits de la branche : certains changements ont deux lignes.
+Il y a 71 lignes « Journal: » en tout (44 pour les 42 changements, 9 pour la performance, 15 pour le bot, 3 pour les stories), réparties sur les commits de la branche : certains changements ont deux lignes.
 
 ## Performance : pour un site plus fluide (8 changements de plus)
 
@@ -139,6 +139,80 @@ Les requêtes et les images comptent ce qui est chargé à l'ouverture de la pag
 - **Vérifié** : 6 tests avec un faux Discord. Ils couvrent les permissions, l'ordre des rôles, l'avertissement et son message privé, l'exclusion, l'expulsion refusée au-dessus de son rôle, le bannissement avec sa raison dans le journal, `/purge`, le verrouillage qui garde les autres règles du salon, les rôles et les tickets (un à la fois, fil privé, fermeture).
 - **Pas vérifié** : un vrai serveur Discord. Je n'ai pas le jeton du bot et je ne l'ai pas demandé. Après la mise en ligne, il faut cliquer sur « Donner ces droits au bot », placer le rôle du bot au-dessus des membres à modérer, puis enregistrer les commandes.
 
+## Bot Discord : le bot de serveur complet (deuxième lot)
+
+18 commandes de plus, soit **36 commandes de serveur en tout**, plus ce que le bot fait tout seul sur le serveur. Il a maintenant 86 commandes ; Discord en accepte 100.
+
+### Nouvelles commandes
+
+- **Dossier de modération** :
+  - `/sanctions` montre tout l'historique d'un membre : avertissements, exclusions, expulsions, bans et notes, chacun avec son numéro.
+  - `/note` ajoute une note privée de l'équipe.
+  - `/retirer-avertissement <numéro>` et `/effacer-avertissements` retirent des avertissements.
+  - Les 18 premières commandes écrivent aussi dans ce dossier.
+- **Pseudo et vocal** : `/pseudo` (vide pour remettre à zéro), `/deplacer` vers un autre salon vocal, `/couper` ou rendre le micro, `/deconnecter` du vocal.
+- **Tickets** :
+  - `/ajouter` et `/retirer` un membre du ticket ; l'auteur du ticket ne peut pas être retiré.
+  - `/renommer` le ticket, et `/priorite` (basse, normale, haute, urgente), affichée par une pastille de couleur dans son nom.
+  - `/prendre`, ou le bouton « Je m'en occupe » posé dans chaque ticket, pour qu'un membre de l'équipe le prenne en charge.
+- **Vie du serveur** :
+  - `/rolesboutons` : jusqu'à 5 rôles que les membres prennent ou rendent d'un clic. Un rôle qui donne des pouvoirs (administration, modération, gestion des salons ou des messages) est refusé, à la création comme à chaque clic.
+  - `/embed` : message mis en forme, avec titre, couleur et image.
+  - `/sondage` : 2 à 5 choix à boutons, résultats en barres, un vote par membre (qu'il peut changer), fermé tout seul à la fin avec le gagnant.
+  - `/tirage` : bouton « Participer », tirage au sort et annonce des gagnants à la fin.
+  - `/rappelmoi` : un message privé plus tard (dans le salon si les messages privés sont fermés). Le nom `/rappel` était déjà pris par le rappel de match.
+
+### Ce que le bot fait tout seul (réglé dans l'éditeur, onglet « Serveur » du bot)
+
+- **Journal de modération** dans le salon choisi, avec chaque catégorie activable : messages modifiés (avant/après) et supprimés (avec leur texte), arrivées (avec l'âge du compte) et départs, bans, exclusions, pseudos, rôles, modération automatique, actions faites avec le bot.
+- **Bienvenue et au revoir** : salon et texte au choix (`{membre}`, `{pseudo}`, `{serveur}`, `{nombre}`), et un rôle donné à l'arrivée.
+- **Modération automatique** :
+  - Invitations vers d'autres serveurs, mots interdits (avec `*`), mentions de masse et spam : ce sont des règles **AutoMod de Discord**. Le bot les crée ou les met à jour sur le serveur quand on enregistre, sans toucher aux autres règles. Discord bloque le message avant qu'il soit vu et prévient le salon du journal.
+  - **Anti-flood** (trop de messages en peu de temps), fait par le bot : ses messages sont supprimés.
+  - Action en plus au choix : rien, ou exclure l'auteur X minutes. On peut aussi ajouter un avertissement à son dossier.
+  - Rôles et salons exemptés au choix.
+- **Tickets** : le rôle de l'équipe, les sujets proposés à l'ouverture (une liste dans le panneau s'il y en a plusieurs), la fermeture automatique après X jours sans réponse, et la transcription du ticket gardée et envoyée en fichier dans le salon du journal à la fermeture.
+
+### Sécurité (comme pour les 18 premières)
+
+- Chaque commande n'est visible que par les membres qui ont la permission, et le bot la revérifie.
+- Jamais d'action sur un membre de rang égal ou supérieur.
+- Chaque action est écrite dans le journal d'audit du serveur Discord (qui, pourquoi), dans le journal du bot de l'éditeur et dans le salon du journal.
+- Le texte des messages n'est gardé qu'en mémoire (les 5 000 derniers), jamais dans la base. Les transcriptions de tickets sont gardées dans la base avec le ticket.
+
+### Testé
+
+- 11 tests avec le faux Discord :
+  - dossier, notes et retrait d'avertissements ;
+  - pseudo et vocal, refusés au-dessus de son rang ou sans la permission ;
+  - tickets : sujet, ajout et retrait de membre, priorité, renommage, prise en charge, transcription envoyée au journal, fermeture automatique ;
+  - rôles à boutons : rôle à pouvoirs refusé, prise et rendu d'un rôle, refus si le rôle a reçu des pouvoirs entre-temps ;
+  - sondages, tirages et rappels, du vote à la fermeture par la tâche de fond ;
+  - règles AutoMod construites et synchronisées sans toucher aux autres ;
+  - événements du serveur : bienvenue et rôle, au revoir, message modifié puis supprimé avec son texte, pseudo et rôles, autre serveur ignoré, catégorie de journal coupée ;
+  - anti-flood, avec les rôles exemptés.
+- 1 test de la connexion permanente avec un faux WebSocket : identification, prêt, reconnexion sans les intents privilégiés après le code 4014, pas de boucle si le jeton est refusé.
+- L'onglet « Serveur » de l'éditeur, vérifié dans l'éditeur local : affichage, et enregistrement des réglages.
+- 316 tests passent et le build passe.
+
+### Pas testé
+
+- **Un vrai serveur Discord** : pas de jeton, pas de vrai serveur, comme demandé.
+- **La vraie connexion permanente**, en particulier sur le serveur Coolify. Elle demande Node 22 ou plus (WebSocket intégré) : la version de Node du serveur n'est réglée nulle part dans le projet. Si elle est plus ancienne, l'onglet « Serveur » l'indique, et seuls le journal, la bienvenue et l'anti-flood restent éteints. Les commandes, les tickets et les règles AutoMod marchent sans elle.
+- **Pendant une mise en ligne**, deux serveurs du site peuvent être connectés quelques secondes. Les événements sont dédoublonnés, mais un message de flood pourrait être traité deux fois.
+- **Le fichier de transcription** (envoi multipart) : testé avec un faux envoi seulement.
+
+### Ce que l'utilisateur doit faire sur Discord après la mise en ligne
+
+1. **Portail développeur Discord** (discord.com/developers/applications → l'application du bot → onglet **Bot** → *Privileged Gateway Intents*) : activer **Server Members Intent** (arrivées, départs, pseudos, rôles, bienvenue) et **Message Content Intent** (texte des messages modifiés ou supprimés, anti-flood). Sans eux, le bot marche quand même : ces parties restent éteintes, et l'onglet « Serveur » le dit.
+2. **Droits du bot** : dans l'éditeur, panneau du bot, cliquer « Donner ces droits au bot » et valider pour le serveur. Le lien ajoute maintenant « Gérer le serveur » (pour les règles AutoMod), « Gérer les pseudos », « Rendre muet » et « Déplacer des membres ».
+3. **Rôle du bot** : dans les réglages du serveur Discord, le placer **au-dessus** des rôles des membres à modérer, du rôle d'arrivée et des rôles à boutons.
+4. **Commandes** : dans le panneau du bot, cliquer « Enregistrer les commandes auprès de Discord » : 36 commandes sont à enregistrer.
+5. **Onglet « Serveur »** : choisir le salon du journal, la bienvenue, les règles de modération automatique et les tickets, puis enregistrer : les règles AutoMod sont posées à ce moment-là.
+6. **Tickets** : taper `/ticketpanneau` dans le salon voulu. Les membres ont alors le choix du sujet.
+
+Capture : [onglet « Serveur » du bot dans l'éditeur](docs/captures/maj40-bot-onglet-serveur.jpg).
+
 ## Stories plus belles (aperçu « Nouvelles stories »)
 
 - **En fond** : la dernière carte jouée, floutée et teintée aux couleurs du vainqueur, au lieu du fond noir uni.
@@ -151,7 +225,7 @@ Les requêtes et les images comptent ce qui est chargé à l'ouverture de la pag
 
 ## Vérifié
 
-- **Tests** : 304 tests passent, dont 10 nouveaux dans `tests/maj40.test.mjs` et 3 dans `tests/perf.test.mjs` (empreinte, langues, adresses des logos). Ils couvrent les balles de carte et de match, la mi-temps, les séries de rounds, les vieux « en direct », le décodage vlr.gg, le flux RSS, le fil d'Ariane, l'adresse du site, l'heure restante, le texte du résultat, les mots d'une adresse 404 et les traductions. Le build passe.
+- **Tests** : 316 tests passent, dont 10 nouveaux dans `tests/maj40.test.mjs` et 3 dans `tests/perf.test.mjs` (empreinte, langues, adresses des logos). Ils couvrent les balles de carte et de match, la mi-temps, les séries de rounds, les vieux « en direct », le décodage vlr.gg, le flux RSS, le fil d'Ariane, l'adresse du site, l'heure restante, le texte du résultat, les mots d'une adresse 404 et les traductions. Le build passe.
 - **Navigateur intégré, sur une copie locale de la base** (jamais la vraie, pas de secret) :
   - **Côté visiteurs** : les nouveautés y ont été ouvertes, et un match « en cours » rempli avec les données lues sur vlr.gg. Vérifiés sur ordinateur en sombre et sur téléphone en clair : page du match (titre d'onglet, balle de match, mi-temps, série, étoile), /live, accueil (1 en direct au lieu de 33), 404 avec suggestions, recherches récentes, page Actualités et lien RSS, barre de lecture, flux RSS, robots.txt, plan du site et en-têtes.
   - **Côté éditeur** : connexion avec un mot de passe de test jetable. Vérifiés : liste des « en direct » oubliés (un retiré : 32 → 31), « sans stream », Lecture de vlr.gg, liens « Voir », « Voir comme un visiteur » (la nouveauté en aperçu disparaît, les autres restent), compteur « 36 / 200 », Ctrl+S, puis la correction n° 36 après rebuild.
