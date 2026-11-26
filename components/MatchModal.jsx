@@ -23,6 +23,7 @@ import { MatchComps, Veto } from "./Round13.jsx";
 import { MvpCard } from "./Round15.jsx";
 import { RoundChart, TensionBadges } from "./LiveMore.jsx";
 import { tension } from "../lib/livemore.js";
+import { matchSummary } from "../lib/matchsummary.js";
 import { mapList, mapSplash } from "./Assets.jsx";
 
 export { EVENT_NAMES };
@@ -287,6 +288,17 @@ function MatchModal({ e, m, state, onClose, page = false }) {
             </tbody>
           </table>
         )}
+        {done && (() => {
+          // the match in three sentences (preview "resume", lib/apercu.js)
+          // the score as shown: a score typed as such (note "raw") wins; a forfeit or a bare win has no summary
+          const n = m.note;
+          if (n && n.kind !== "raw") return null;
+          const sa = n ? Number(n.a) : m.sa;
+          const sb = n ? Number(n.b) : m.sb;
+          if (!Number.isFinite(sa) || !Number.isFinite(sb)) return null;
+          const lines = matchSummary({ a: name(m.a), b: name(m.b), sa, sb, bo: m.bo }, frieze, autoMvp, tr.lang === "fr" ? "fr" : "en");
+          return lines.length ? <div className="mmsummary" data-part="summary">{lines.map((l, i) => <p key={i}>{l}.</p>)}</div> : null;
+        })()}
         <div className="mmcols">
         <div className="mmmain">
         {ex.mvp && <p className="mmmvp" data-part="summary stats"><b>MVP</b> {who(ex.mvp)}</p>}

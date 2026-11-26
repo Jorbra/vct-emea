@@ -3770,3 +3770,9 @@ html[data-ft~="photos"] .phead { width: 72px; height: 72px; border-radius: 50%; 
 html[data-ft~="photos"] .rcphoto { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--agc, var(--line)); margin-bottom: 2px; }
 html[data-ft~="photos"] .rcav.hasphoto { display: none; }
 html[data-ft~="photos"][data-ft~="cartes"] .rcard.withagent:has(.rcphoto) { padding-top: 40px; }
+
+/* preview "resume" (lib/apercu.js): a finished match in three sentences, at the top of its page */
+.mmsummary { display: none; }
+html[data-ft~="resume"] .mmsummary { display: grid; gap: 2px; margin: 10px 0 12px; padding: 10px 14px; border-left: 3px solid var(--lime); background: var(--surface); border-radius: 0 8px 8px 0; font-size: 14px; }
+.mmsummary p { margin: 0; }
+.mmsummary p:first-child { font-weight: 700; }
