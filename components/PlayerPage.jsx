@@ -248,6 +248,29 @@ function View({ p, fiche = false }) {
   const ag = hero && hero.agent ? agentInfo(hero.agent) : null;
   const [part, setPart] = useState("overview");
   const agentStyle = ag ? { "--agc": ag.color, ...(ag.portrait ? { "--agimg": `url(${ag.portrait})` } : {}) } : undefined;
+  // the numbers and banners under the card: above the columns on the former page, at the top of the main column on the sheet
+  // (so the identity card on the side starts level with them, as on Liquipedia)
+  const top = (
+    <>
+      <div data-part="overview"><PlayerHero p={p} /></div>
+      {(p.teamRows || []).length > 0 && <div data-part="overview"><NextMatchBanner rows={p.teamRows} name={p.team} live={p.teamLive || {}} /></div>}
+      {p.tour && p.ranges && <div data-part="stats"><PlayerRadar stats={p.tour} ranges={p.ranges} /></div>}
+      {p.lp && <div data-part="history"><CareerTimeline history={p.lp.history} /></div>}
+      {p.lpState === "pending" && <p className="note lpwait" role="status">{tr("Looking for this information…")}</p>}
+      {p.updating && <p className="note lpwait" role="status">{tr("Updating this information…")}</p>}
+      {p.lpState === "none" && !p.onSite && !p.teamOnSite && !p.vlr && !p.updating && !p.lines.length && <p className="note">{tr("No information found for now.")}</p>}
+      {p.totals && (
+        <div className="pstatbar" data-part="overview">
+          <div><b>{p.totals.acs}</b><span>ACS</span></div>
+          <div><b>{p.totals.kd}</b><span>K/D</span></div>
+          <div><b>{p.totals.k}/{p.totals.d}/{p.totals.a}</b><span>K/D/A</span></div>
+          <div><b>{p.mvps.length}</b><span>MVP</span></div>
+          <div><b>{p.totals.matches}</b><span>{tr("Matches")}</span></div>
+        </div>
+      )}
+      {!p.totals && p.mvps.length > 0 && <div className="pstatbar"><div><b>{p.mvps.length}</b><span>MVP</span></div></div>}
+    </>
+  );
   return (
     <div className={"wrap teampage playerpage" + (fiche ? " tabbed fiche" : "")} data-tab={fiche ? part : undefined} style={agentStyle}>
       <div className="topbar">
@@ -275,25 +298,10 @@ function View({ p, fiche = false }) {
           <div className="tlinks"><a href={`/compare?a=${encodeURIComponent(p.name)}`}>{tr("Compare")}</a>{links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer">{l.type} ↗</a>)}</div>
         </div>
       </div>}
-      <div data-part="overview"><PlayerHero p={p} /></div>
-      {(p.teamRows || []).length > 0 && <div data-part="overview"><NextMatchBanner rows={p.teamRows} name={p.team} live={p.teamLive || {}} /></div>}
-      {p.tour && p.ranges && <div data-part="stats"><PlayerRadar stats={p.tour} ranges={p.ranges} /></div>}
-      {p.lp && <div data-part="history"><CareerTimeline history={p.lp.history} /></div>}
-      {p.lpState === "pending" && <p className="note lpwait" role="status">{tr("Looking for this information…")}</p>}
-      {p.updating && <p className="note lpwait" role="status">{tr("Updating this information…")}</p>}
-      {p.lpState === "none" && !p.onSite && !p.teamOnSite && !p.vlr && !p.updating && !p.lines.length && <p className="note">{tr("No information found for now.")}</p>}
-      {p.totals && (
-        <div className="pstatbar" data-part="overview">
-          <div><b>{p.totals.acs}</b><span>ACS</span></div>
-          <div><b>{p.totals.kd}</b><span>K/D</span></div>
-          <div><b>{p.totals.k}/{p.totals.d}/{p.totals.a}</b><span>K/D/A</span></div>
-          <div><b>{p.mvps.length}</b><span>MVP</span></div>
-          <div><b>{p.totals.matches}</b><span>{tr("Matches")}</span></div>
-        </div>
-      )}
-      {!p.totals && p.mvps.length > 0 && <div className="pstatbar"><div><b>{p.mvps.length}</b><span>MVP</span></div></div>}
+      {!fiche && top}
       <div className={lp ? "cols" : undefined}>
         <main>
+          {fiche && top}
           {p.tour && <div data-part="stats"><Tournament t={p.tour} /></div>}
           <div data-part="stats"><VlrStats vlr={p.vlr} /></div>
           {p.lines.length > 0 && (
