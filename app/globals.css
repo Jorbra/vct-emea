@@ -3029,7 +3029,8 @@ html[data-ft~="cartes"] .rcard.withagent .rcav { display: none; }
 @media (max-width: 640px) { .friselane { grid-template-columns: 1fr; } .friselabel { align-self: start; } }
 
 /* ---- match night: while a big match is live */
-html[data-matchnight="1"] body { background-image: radial-gradient(1200px 400px at 50% -120px, color-mix(in srgb, #ff4655 18%, transparent), transparent 70%); background-attachment: fixed; }
+/* the red glow of a match night: on a layer of its own that stays put, rather than a fixed background the phone redrew at every scroll */
+html[data-matchnight="1"] body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(1200px 400px at 50% -120px, color-mix(in srgb, #ff4655 18%, transparent), transparent 70%); }
 html[data-matchnight="1"] .topbar { box-shadow: 0 2px 0 0 color-mix(in srgb, #ff4655 55%, transparent); }
 .nightband { position: sticky; top: 0; z-index: 70; display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: linear-gradient(90deg, #ff4655, #ff7a2f, #ff4655); background-size: 200% 100%; animation: nightflow 6s linear infinite; color: #fff; }
 .nightband a { flex: 1; color: #fff; text-decoration: none; font-size: 14px; text-align: center; }
@@ -4011,3 +4012,7 @@ html[data-ft~="confort"] .readbar { display: block; position: fixed; top: 0; lef
 .charcount { position: fixed; z-index: 70; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--surface-2); color: var(--muted); pointer-events: none; font-variant-numeric: tabular-nums; }
 .charcount.near { color: #e0a33c; }
 .charcount.full { color: #ff5a5f; font-weight: 700; }
+
+/* Smoother long pages: a qualifier's bracket draws only the boxes near the screen (512 of them on a 512-team qualifier); the
+   lines between boxes stay outside this, so they are always drawn */
+.qcell .qbox { content-visibility: auto; contain-intrinsic-size: auto 56px; }

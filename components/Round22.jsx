@@ -41,10 +41,12 @@ export function CountUp({ value, ms = 1100 }) {
 export function HomeHero({ events = [] }) {
   const tr = useT();
   const shots = useMemo(() => POOL.map((m) => ({ map: m, src: mapSplash(m) })).filter((x) => x.src), []);
-  const [i, setI] = useState(0);
+  // the slides shown so far (i: the one on screen); the one before is kept only once the show has moved
+  const [step, setStep] = useState(0);
+  const i = shots.length ? step % shots.length : 0;
   useEffect(() => {
     if (shots.length < 2 || calm()) return undefined;
-    const t = setInterval(() => { if (!document.hidden) setI((k) => (k + 1) % shots.length); }, 6000);
+    const t = setInterval(() => { if (!document.hidden) setStep((k) => k + 1); }, 6000);
     return () => clearInterval(t);
   }, [shots.length]);
   const n = useMemo(() => {
@@ -64,7 +66,12 @@ export function HomeHero({ events = [] }) {
   return (
     <section className="hero22" aria-label="VCT EMEA">
       <div className="h22art" aria-hidden="true">
-        {shots.map((s, k) => <img key={s.map} src={s.src} alt="" loading={k === 0 ? "eager" : "lazy"} decoding="async" className={k === i ? "on" : ""} />)}
+        {/* only the map shown, the one fading out and the next one: the twelve pictures stacked here were all loaded at
+            once (1.1 MB on a phone), each one now comes when its turn is near */}
+        {shots.map((s, k) => {
+          const near = k === i || k === (i + 1) % shots.length || (step > 0 && k === (i - 1 + shots.length) % shots.length);
+          return near ? <img key={s.map} src={s.src} alt="" loading={k === i ? "eager" : "lazy"} decoding="async" fetchPriority={k === 0 && i === 0 ? "high" : "low"} className={k === i ? "on" : ""} /> : null;
+        })}
       </div>
       <div className="h22shade" aria-hidden="true" />
       <div className="h22body">
