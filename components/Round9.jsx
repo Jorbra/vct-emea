@@ -259,6 +259,7 @@ export function MissingLogos({ list, onOpen }) {
           </div>
         ))}
         <p className="hint">{tr("They show the default logo for now. In the event's teams, give each a short tag and upload its logo.")}</p>
+        <p className="hint">{tr("The site also looks for them by itself on vlr.gg, a few each minute: this list gets shorter on its own. A logo you upload always comes first.")}</p>
       </details>
     </section>
   );
