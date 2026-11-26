@@ -19,3 +19,17 @@ test("a live mark left behind (12 h after its time, no news from vlr.gg) is no l
   assert.deepEqual(dropForgottenLive(state, now), [{ event: "q1", id: "old", at: "2026-11-25T10:00:00Z" }]);
   assert.deepEqual(Object.keys(state.live.q1).sort(), ["fresh", "notime", "read"]);
 });
+
+test("live: map point, match point, the first half and a run of rounds", async () => {
+  const { mapPoint, seriesPoint, halfTime, roundStreak } = await import("../lib/livemore.js");
+  assert.deepEqual([mapPoint({ a: 12, b: 7 }), mapPoint({ a: 11, b: 12 }), mapPoint({ a: 12, b: 12 }), mapPoint({ a: 14, b: 13 }), mapPoint({ a: 13, b: 7, done: true }), mapPoint({ a: 10, b: 3 })], ["a", "b", "", "a", "", ""]);
+  const maps = [{ map: "Bind", a: 13, b: 9, done: true }, { map: "Lotus", a: 7, b: 12, done: false }];
+  assert.deepEqual(seriesPoint(maps, 3), { side: "b", match: false });
+  assert.deepEqual(seriesPoint([{ map: "Bind", a: 13, b: 9, done: true }, { map: "Lotus", a: 12, b: 7, done: false }], 3), { side: "a", match: true });
+  assert.equal(seriesPoint([{ map: "Bind", a: 3, b: 2 }], 3), null);
+  const rnd = [..."aaaabbbbbbbb"].map((s) => `${s}te`).concat(["ate", "ace", "acd"]);
+  assert.deepEqual(halfTime(rnd), { a: 4, b: 8 });
+  assert.equal(halfTime(rnd.slice(0, 11)), null);
+  assert.deepEqual(roundStreak(rnd), { side: "a", n: 3 });
+  assert.equal(roundStreak(["ate", "bte"]), null);
+});

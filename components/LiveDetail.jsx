@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { useT } from "./lang.jsx";
 import { AgentIcon } from "./Assets.jsx";
+import { halfTime, roundStreak, seriesPoint } from "../lib/livemore.js";
 
 const HOW = { e: "Eliminations", b: "Spike exploded", d: "Spike defused", t: "Time ran out" };
 const short = (t) => (t && (t.tag || t.name)) || "";
@@ -26,28 +27,59 @@ export function RoundIcon({ how }) {
 }
 
 /** A map's rounds: one square per round, in the colour of the team that won it, halves and overtime set apart. */
-export function RoundStrip({ rnd, a, b }) {
+export function RoundStrip({ rnd, a, b, live = false }) {
   const tr = useT();
   if (!(rnd || []).length) return null;
+  const wa = rnd.filter((r) => r[0] === "a").length;
   return (
-    <ol className="rstrip" aria-label={tr("Rounds")}>
+    <>
+    {/* for screen readers: the rounds in one sentence rather than one square at a time */}
+    <p className="sr-only">{tr("Rounds won: {a} {wa}, {b} {wb}", { a: short(a) || "A", wa, b: short(b) || "B", wb: rnd.length - wa })}</p>
+    <ol className="rstrip" aria-label={tr("Rounds")} aria-hidden="true">
       {rnd.map((r, i) => {
         const team = r[0] === "a" ? a : b;
         const side = r[1] === "c" ? tr("defence") : tr("attack");
         return (
-          <li key={i} className={`rsq-${r[0]}` + (i === 12 || (i >= 24 && i % 2 === 0) ? " rsq-half" : "")}
+          <li key={i} className={`rsq-${r[0]}` + (i === 12 || (i >= 24 && i % 2 === 0) ? " rsq-half" : "") + (i >= 24 ? " rsq-ot" : "") + (live && i === rnd.length - 1 ? " rsq-last" : "")}
             title={tr("Round {n}: {team} ({side}), {how}", { n: i + 1, team: short(team) || r[0].toUpperCase(), side, how: tr(HOW[r[2]] || HOW.e) })}>
             <span className="ricon-old" aria-hidden="true">{OLD[r[2]] || ""}</span>
             <RoundIcon how={r[2] || "e"} />
           </li>
         );
       })}
+      {rnd.length > 24 && <li className="rsq-otlabel" aria-hidden="true">{tr("OT")}</li>}
     </ol>
+    </>
+  );
+}
+
+/** Map point, match point (preview "direct2"): the team one round from taking the map, or the series. */
+function PointBadge({ maps, bo, a, b }) {
+  const tr = useT();
+  const p = seriesPoint(maps, bo);
+  if (!p) return null;
+  const team = short(p.side === "a" ? a : b) || p.side.toUpperCase();
+  return <span className={"ldpoint" + (p.match ? " match" : "")}>{p.match ? tr("Match point · {team}", { team }) : tr("Map point · {team}", { team })}</span>;
+}
+
+/** The first half's score and a run of rounds won (preview "direct2"). */
+function MapNotes({ rnd, a, b, live }) {
+  const tr = useT();
+  const half = halfTime(rnd);
+  const run = live ? roundStreak(rnd) : null;
+  if (!half && !run) return null;
+  return (
+    <p className="ldmore">
+      {half && <span>{tr("Half time: {a}–{b}", { a: half.a, b: half.b })}</span>}
+      {run && <span>{tr("{team} won the last {n} rounds", { team: short(run.side === "a" ? a : b) || run.side.toUpperCase(), n: run.n })}</span>}
+    </p>
   );
 }
 
 function Players({ rows, a, b }) {
   const tr = useT();
+  // the best combat score of all ten (preview "direct2"): a star beside the name
+  const top = rows.reduce((best, p) => (p.acs != null && (!best || p.acs > best.acs) ? p : best), null);
   const sides = [["a", a], ["b", b]].map(([s, t]) => [t, rows.filter((p) => p.side === s).sort((x, y) => (y.acs || 0) - (x.acs || 0))]).filter(([, l]) => l.length);
   if (!sides.length) return null;
   return (
@@ -55,13 +87,13 @@ function Players({ rows, a, b }) {
       {sides.map(([t, list], i) => (
         <table key={i} className="lptable">
           <caption>{(t && t.name) || ""}</caption>
-          <thead><tr><th scope="col">{tr("Player")}</th><th scope="col" title={tr("Kills / deaths / assists")}>K/D/A</th><th scope="col">+/–</th><th scope="col" title={tr("Average combat score")}>ACS</th><th scope="col" className="lpopt" title={tr("Rating")}>R</th></tr></thead>
+          <thead><tr><th scope="col">{tr("Player")}</th><th scope="col"><abbr title={tr("Kills / deaths / assists")}>K/D/A</abbr></th><th scope="col"><abbr title={tr("Kills minus deaths")}>+/–</abbr></th><th scope="col"><abbr title={tr("Average combat score")}>ACS</abbr></th><th scope="col" className="lpopt"><abbr title={tr("Rating")}>R</abbr></th></tr></thead>
           <tbody>
             {list.map((p) => {
               const pm = p.k != null && p.d != null ? p.k - p.d : null;
               return (
-                <tr key={p.name}>
-                  <th scope="row">{p.agent && <AgentIcon name={p.agent} size={20} />}<span>{p.name}</span></th>
+                <tr key={p.name} className={top && p.name === top.name ? "lptop" : undefined}>
+                  <th scope="row">{p.agent && <AgentIcon name={p.agent} size={20} />}<span>{p.name}</span>{top && p.name === top.name && <span className="lpstar" title={tr("Best combat score")}>★</span>}</th>
                   <td>{p.k ?? "–"}/{p.d ?? "–"}/{p.a ?? "–"}</td>
                   <td className={pm > 0 ? "up" : pm < 0 ? "down" : ""}>{pm == null ? "–" : pm > 0 ? `+${pm}` : pm}</td>
                   <td>{p.acs ?? "–"}</td>
@@ -80,7 +112,7 @@ function Players({ rows, a, b }) {
  * The match being played, in detail. detail: liveDetail() (lib/db.js). compact: only the map being played and its rounds
  * (the cards of /live).
  */
-export default function LiveDetail({ detail, a, b, compact = false }) {
+export default function LiveDetail({ detail, a, b, bo = 0, compact = false }) {
   const tr = useT();
   const maps = (detail && detail.maps) || [];
   const [pick, setPick] = useState("");
@@ -94,13 +126,14 @@ export default function LiveDetail({ detail, a, b, compact = false }) {
       <b>{shown.map}</b>
       <span className="ldscore"><span className={shown.a > shown.b ? "lead" : ""}>{shown.a}</span>–<span className={shown.b > shown.a ? "lead" : ""}>{shown.b}</span></span>
       {playing ? <span className="ldnow">{tr("Being played")}</span> : shown.done ? <span className="ldnow done">{tr("Finished")}</span> : null}
+      {playing && <PointBadge maps={maps} bo={bo} a={a} b={b} />}
     </div>
   );
   if (compact) {
     return (
       <div className="livedetail compact">
         {head}
-        <RoundStrip rnd={shown.rnd} a={a} b={b} />
+        <RoundStrip rnd={shown.rnd} a={a} b={b} live={playing} />
       </div>
     );
   }
@@ -123,7 +156,8 @@ export default function LiveDetail({ detail, a, b, compact = false }) {
           <span>{short(b)} : {tr("{t} on attack, {ct} on defence", { t: halves.t[1], ct: halves.ct[1] })}</span>
         </p>
       )}
-      <RoundStrip rnd={shown.rnd} a={a} b={b} />
+      <RoundStrip rnd={shown.rnd} a={a} b={b} live={playing} />
+      <MapNotes rnd={shown.rnd} a={a} b={b} live={playing} />
       {(shown.rnd || []).length > 0 && (
         <p className="ldkey"><span className="rkey-a">■</span> {short(a)} <span className="rkey-b">■</span> {short(b)}<span className="ldkey-new"> · <RoundIcon how="e" /> {tr("Eliminations")} · <RoundIcon how="b" /> {tr("Spike exploded")} · <RoundIcon how="d" /> {tr("Spike defused")} · <RoundIcon how="t" /> {tr("Time ran out")}</span><span className="ldkey-old"> · ✹ {tr("Spike exploded")} · ✂ {tr("Spike defused")} · ⏱ {tr("Time ran out")}</span></p>
       )}

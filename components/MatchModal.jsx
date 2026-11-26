@@ -251,7 +251,7 @@ function MatchModal({ e, m, state, onClose, page = false }) {
             <RoundChart rounds={live.rounds} a={(m.a && (m.a.tag || m.a.name)) || "A"} b={(m.b && (m.b.tag || m.b.name)) || "B"} />
             <p className="row"><a className="btn small" href={`/ecran/${e.event}/${m.id}`}>📱 {tr("Second screen")}</a></p>
             <div className="mmlivemaps">{live.maps.map((x) => <span key={x.map} data-map={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>
-            {live.detail && <LiveDetail detail={live.detail} a={m.a} b={m.b} />}
+            {live.detail && <LiveDetail detail={live.detail} a={m.a} b={m.b} bo={m.bo} />}
             {(live.feed || []).length > 0 && (
               <ol className="mmfeed" aria-label={tr("Match feed")}>
                 {[...live.feed].reverse().map((f, i) => (

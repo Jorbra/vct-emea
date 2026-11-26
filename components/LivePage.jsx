@@ -52,7 +52,7 @@ function View({ live, next }) {
       </div>
       {m.live && <TensionBadges t={tension(m.score, m.bo)} />}
       {m.score && (m.score.maps || []).length > 0 && <div className="livemaps">{m.score.maps.map((x) => <span key={x.map} data-map={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>}
-      {m.score && m.score.detail && <LiveDetail compact detail={m.score.detail} a={m.a} b={m.b} />}
+      {m.score && m.score.detail && <LiveDetail compact detail={m.score.detail} a={m.a} b={m.b} bo={m.bo} />}
       <div className="row">
         {m.stream && m.live && !multi && <button type="button" className={"btn" + (on ? " pri" : "")} onClick={() => setWatch(`${m.event}:${m.id}`)}>{on ? tr("Playing here") : tr("Watch here")}</button>}
         {m.stream && m.live && multi && host && embedUrl(m.stream, host) && <label className="sw"><input type="checkbox" checked={screens.some((s) => keyOf(s) === keyOf(m))} onChange={() => tick(m)} /> {tr("On screen")}</label>}
@@ -98,7 +98,7 @@ function View({ live, next }) {
                 </div>
                 <div className="lsmeta">{tr(EVENT_NAMES[current.event])} · {label(current)}{current.bo ? ` · Bo${current.bo}` : ""}</div>
                 {current.score && (current.score.maps || []).length > 0 && <div className="livemaps">{current.score.maps.map((x) => <span key={x.map} className={x.done ? "done" : "now"}><b>{x.map}</b> {x.a}–{x.b}</span>)}</div>}
-                {current.score && current.score.detail && <LiveDetail detail={current.score.detail} a={current.a} b={current.b} />}
+                {current.score && current.score.detail && <LiveDetail detail={current.score.detail} a={current.a} b={current.b} bo={current.bo} />}
                 {current.score && (current.score.feed || []).length > 0 && (
                   <ol className="lsfeed">{[...current.score.feed].reverse().map((f, i) => (
                     <li key={i}><small>{new Date(f.at).toLocaleTimeString(tr.lang === "fr" ? "fr-FR" : undefined, { hour: "2-digit", minute: "2-digit" })}</small> {f.kind === "start" ? tr("{map} starts", { map: f.map }) : `${f.map} : ${(f.a > f.b ? current.a : current.b || {}).name || ""} ${Math.max(f.a, f.b)}–${Math.min(f.a, f.b)}`}</li>

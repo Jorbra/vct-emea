@@ -281,6 +281,22 @@ function QuickLive({ initial, call, onDone }) {
 }
 
 /** What is missing before an event starts (or while it runs). */
+/** "See the site as a visitor": this browser hides the new things still in preview (cookie read by app/layout.js), until switched back. */
+function VisitorView() {
+  const tr = useT();
+  const [on, setOn] = useState(false);
+  useEffect(() => { setOn(/(?:^|;\s*)vct-visitor-view=1/.test(document.cookie)); }, []);
+  const flip = () => {
+    document.cookie = on ? "vct-visitor-view=; path=/; max-age=0; samesite=lax" : "vct-visitor-view=1; path=/; max-age=86400; samesite=lax";
+    window.location.reload();
+  };
+  return (
+    <label className="sw apvisitor">
+      <input type="checkbox" checked={on} onChange={flip} /> {tr("See the site as a visitor (the new things in preview are hidden in this browser, for a day at most)")}
+    </label>
+  );
+}
+
 /** The new things shown to the editors first (lib/apercu.js), each with its switch to open it to everyone. */
 function ApercuPanel({ main, call, onDone }) {
   const tr = useT();
@@ -301,11 +317,12 @@ function ApercuPanel({ main, call, onDone }) {
         <summary><b>🧪 {tr("New things in preview")}</b> {waiting > 0 && <small>{tr("{n} waiting", { n: waiting })}</small>}</summary>
         <ul className="apercu">{list.map((x) => (
           <li key={x.name}>
-            <div><b>{x.title}</b><small>{x.text}</small></div>
+            <div><b>{x.title}</b><small>{x.text}</small>{x.href && <a className="aplink" href={x.href} target="_blank" rel="noopener">{tr("See it")} ↗</a>}</div>
             <span className={"apstate" + (x.public ? " on" : "")}>{x.public ? tr("Everyone") : tr("Editors only")}</span>
             {main && <button type="button" className={"btn small" + (x.public ? "" : " pri")} onClick={() => flip(x)}>{x.public ? tr("Back to preview") : tr("Open to everyone")}</button>}
           </li>
         ))}</ul>
+        <VisitorView />
         <p className="hint">{tr("A new thing in preview is seen only by the main account and the editors who are signed in. Open it to everyone once it looks right: no new deployment needed, and it can be put back.")}{!main && " " + tr("Only the main account can open a new thing to everyone.")}</p>
       </details>
     </section>

@@ -63,7 +63,9 @@ export default async function RootLayout({ children }) {
   const admin = await isAdmin();
   // the new things this visitor sees: all of them for an editor (preview), those opened to everyone otherwise
   let ft = [];
-  try { ft = shownApercu(getDb(), admin); } catch { /* no database yet: none */ }
+  // an editor who asked to see the site as a visitor (editor, "New things in preview") gets only what is open to everyone
+  const asVisitor = jar.get("vct-visitor-view")?.value === "1";
+  try { ft = shownApercu(getDb(), admin && !asVisitor); } catch { /* no database yet: none */ }
   return (
     <html lang={lang} dir={isRtl(lang) ? "rtl" : "ltr"} data-period={periodOf()} data-ft={ft.join(" ")} className={`${barlow.variable} ${barlowCond.variable}`} suppressHydrationWarning>
       <head>
