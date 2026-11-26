@@ -76,7 +76,7 @@ test("every text of the new parts of the site has its French", async () => {
   const fr = makeT("fr");
   // texts that read the same in French
   const same = new Set(["Discord", "Ctrl+S", "Rounds"]);
-  const files = ["components/EditorFollow.jsx", "components/Maj40Bits.jsx", "components/LiveDetail.jsx", "components/KeyHelp.jsx", "components/NotFoundView.jsx", "components/LiveMore.jsx"];
+  const files = ["components/EditorFollow.jsx", "components/Maj40Bits.jsx", "components/LiveDetail.jsx", "components/KeyHelp.jsx", "components/NotFoundView.jsx", "components/LiveMore.jsx", "components/Stories.jsx"];
   const missing = [];
   for (const f of files) {
     const src = fs.readFileSync(new URL(`../${f}`, import.meta.url), "utf8");

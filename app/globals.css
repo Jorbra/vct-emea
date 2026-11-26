@@ -4016,3 +4016,42 @@ html[data-ft~="confort"] .readbar { display: block; position: fixed; top: 0; lef
 /* Smoother long pages: a qualifier's bracket draws only the boxes near the screen (512 of them on a 512-team qualifier); the
    lines between boxes stay outside this, so they are always drawn */
 .qcell .qbox { content-visibility: auto; contain-intrinsic-size: auto 56px; }
+
+/* preview "stories2" (lib/apercu.js): stories with the last map's art behind, tinted with the winner's colour, maps as cards,
+   a bar that fills while the story plays, and a gradient ring for the ones not seen yet */
+.st2, .storyart, .storyglow, .storybars i b { display: none; }
+html[data-ft~="stories2"] .st1 { display: none; }
+html[data-ft~="stories2"] .st2 { display: revert; }
+html[data-ft~="stories2"] .storyview { background: #0b0b0e; backdrop-filter: none; overflow: hidden; touch-action: none; user-select: none; }
+html[data-ft~="stories2"] .storyart { display: block; position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(14px) brightness(.45) saturate(1.2); transform: scale(1.08); animation: storyzoom 9s ease-out both; }
+html[data-ft~="stories2"] .storyglow { display: block; position: absolute; inset: 0; background:
+  radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--stc, #ff4655) 55%, transparent), transparent 65%),
+  linear-gradient(to bottom, rgba(0, 0, 0, .25), rgba(0, 0, 0, .1) 40%, rgba(0, 0, 0, .75)); }
+@keyframes storyzoom { from { transform: scale(1.18); } to { transform: scale(1.08); } }
+html[data-ft~="stories2"] .storybars { z-index: 3; }
+html[data-ft~="stories2"] .storybars i { position: relative; overflow: hidden; }
+html[data-ft~="stories2"] .storyview.auto .storybars i.now { background: rgba(255, 255, 255, .25); }
+html[data-ft~="stories2"] .storyview.auto .storybars i b { display: block; position: absolute; inset: 0; background: #fff; transform-origin: 0 50%; animation: storybar linear forwards; }
+html[data-ft~="stories2"] .storyview.held .storybars i b { animation-play-state: paused; }
+@keyframes storybar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+html[data-ft~="stories2"] .storybody { gap: 18px; width: min(92vw, 460px); }
+html[data-ft~="stories2"] .storyev { letter-spacing: .08em; text-transform: uppercase; font-size: 12px; opacity: .85; }
+html[data-ft~="stories2"] .storyteams > div { opacity: .55; }
+html[data-ft~="stories2"] .storyteams > div.w { opacity: 1; }
+html[data-ft~="stories2"] .storyteams .crest { width: 84px; height: 84px; border-radius: 18px; background: rgba(255, 255, 255, .08); box-shadow: 0 10px 30px rgba(0, 0, 0, .35); }
+html[data-ft~="stories2"] .storyteams > div.w .crest { box-shadow: 0 0 0 3px var(--stc, #c9f03c), 0 10px 30px rgba(0, 0, 0, .35); }
+html[data-ft~="stories2"] .storywin { font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: var(--stc, #c9f03c); color: #111; }
+html[data-ft~="stories2"] .storyscore { font-size: 64px; color: #fff; text-shadow: 0 4px 24px rgba(0, 0, 0, .5); }
+html[data-ft~="stories2"] .storycards { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; width: 100%; }
+html[data-ft~="stories2"] .storycards span { position: relative; display: grid; gap: 2px; padding: 10px 8px; border-radius: 10px; background-size: cover; background-position: center; background-color: rgba(255, 255, 255, .08); overflow: hidden; text-align: left; isolation: isolate; }
+html[data-ft~="stories2"] .storycards span::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to top, rgba(0, 0, 0, .85), rgba(0, 0, 0, .35)); }
+html[data-ft~="stories2"] .storycards small { font-size: 10px; opacity: .75; text-transform: uppercase; letter-spacing: .06em; }
+html[data-ft~="stories2"] .storycards b { font: 800 16px var(--font-display); }
+html[data-ft~="stories2"] .storycards em { font-style: normal; font-weight: 700; font-variant-numeric: tabular-nums; }
+/* the maps the series winner took carry its colour; the others are dimmed */
+html[data-ft~="stories2"] .storycards span.won { box-shadow: inset 0 -3px 0 var(--stc, #c9f03c); }
+html[data-ft~="stories2"] .storycards span.lost { opacity: .6; }
+html[data-ft~="stories2"] .storyhint { opacity: .55; font-size: 11px; }
+html[data-ft~="stories2"] .storyring { background: conic-gradient(from 210deg, #ff4655, #c9f03c, #ff4655); }
+html[data-ft~="stories2"] .story.seen .storyring { background: var(--line); }
+@media (prefers-reduced-motion: reduce) { .storyart { animation: none !important; } }
