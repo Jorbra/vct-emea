@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LANG_COOKIE } from "../lib/i18n.js";
+import { LANG_COOKIE, WITH_PAGE } from "../lib/i18n.js";
 import { applyTheme } from "../lib/theme.js";
 import { accountName, applyAccount, forgetAccount } from "./account.js";
 
@@ -22,7 +22,7 @@ export default function AccountSync() {
       if (theme && document.documentElement.dataset.themeMode !== theme) applyTheme(theme);
       if (lang && read(LANG_COOKIE) !== lang) {
         put(LANG_COOKIE, lang);
-        router.refresh();
+        if (WITH_PAGE.includes(lang)) window.location.reload(); else router.refresh();
       }
     }).catch(() => { /* offline */ });
   }, [router]);

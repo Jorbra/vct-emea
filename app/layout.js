@@ -1,9 +1,9 @@
 import { cookies, headers } from "next/headers";
 import "./globals.css";
-import { LANG_COOKIE, isRtl, makeT, normLang } from "../lib/i18n.js";
+import { LANG_COOKIE, WITH_PAGE, isRtl, makeT, normLang } from "../lib/i18n.js";
+import { AR as AR_WORDS, TR as TR_WORDS } from "../lib/i18n-more.js";
 import { THEME_SCRIPT } from "../lib/theme.js";
 import { periodOf } from "../lib/period.js";
-import KeyHelp from "../components/KeyHelp";
 import LogoContrast from "../components/LogoContrast";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 
@@ -12,23 +12,18 @@ const barlow = Barlow({ weight: ["400", "500", "600"], subsets: ["latin", "latin
 const barlowCond = Barlow_Condensed({ weight: ["600", "700", "800"], subsets: ["latin", "latin-ext"], display: "swap", variable: "--ff-barlow-cond" });
 import { isAdmin } from "../lib/session.js";
 import EditorAccess from "../components/EditorAccess";
-import MatchAlerts from "../components/MatchAlerts";
 import AccountSync from "../components/AccountSync";
 import MobileTabs from "../components/MobileTabs";
 import { LangProvider } from "../components/lang.jsx";
-import { ResultToast, TeamTheme } from "../components/visual.jsx";
+import { TeamTheme } from "../components/visual.jsx";
 import { SiteBanner } from "../components/Round6Bits.jsx";
 import { HEAD_SCRIPT, OFFLINE_SCRIPT } from "../lib/headscripts.js";
-import { CommandPalette } from "../components/Round8Bits.jsx";
 import { SiteFooter } from "../components/Round9.jsx";
 import { BackToTop } from "../components/Round14.jsx";
-import { CloseAlerts } from "../components/LiveMore.jsx";
 import { Motion } from "../components/Round22.jsx";
-import { MatchNightTheme } from "../components/Season17.jsx";
-import { LiveTeamBanner, Welcome } from "../components/Round11.jsx";
 import { getDb } from "../lib/db.js";
 import { shownApercu } from "../lib/apercu.js";
-import UpdateNotice from "../components/UpdateNotice.jsx";
+import { LazyCloseAlerts, LazyCommandPalette, LazyKeyHelp, LazyLiveTeamBanner, LazyMatchAlerts, LazyMatchNightTheme, LazyResultToast, LazyUpdateNotice, LazyWelcome } from "../components/LazyLayout.jsx";
 import ScoreFlash from "../components/ScoreFlash.jsx";
 import { activeBanner } from "../lib/round6.js";
 
@@ -70,17 +65,19 @@ export default async function RootLayout({ children }) {
     <html lang={lang} dir={isRtl(lang) ? "rtl" : "ltr"} data-period={periodOf()} data-ft={ft.join(" ")} className={`${barlow.variable} ${barlowCond.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT + ";" + HEAD_SCRIPT }} />
+        {/* Turkish or Arabic: their words come with the page, before the scripts read them (lib/i18n-extra-browser.js) */}
+        {WITH_PAGE.includes(lang) && <script dangerouslySetInnerHTML={{ __html: `window.__vctDict=${JSON.stringify({ lang, d: lang === "tr" ? TR_WORDS : AR_WORDS }).replace(/</g, "\\u003c")};` }} />}
       </head>
       <body>
         <a className="skip" href="#content">{makeT(lang)("Go to the content")}</a>
         {banner && <LangProvider lang={lang}><SiteBanner banner={banner} /></LangProvider>}
-        <LangProvider lang={lang}><LiveTeamBanner /><Welcome teams={welcomeTeams} /></LangProvider>
+        <LangProvider lang={lang}><LazyLiveTeamBanner /><LazyWelcome teams={welcomeTeams} /></LangProvider>
         <div id="content" tabIndex={-1}>{children}</div>
         <LangProvider lang={lang}><SiteFooter /><BackToTop /></LangProvider>
         <EditorAccess lang={lang} isAdmin={admin} />
-        {admin && <LangProvider lang={lang}><UpdateNotice /></LangProvider>}
-        <MatchAlerts />
-        <LangProvider lang={lang}><MobileTabs /><ResultToast /><CloseAlerts /><Motion /><MatchNightTheme /><TeamTheme /><CommandPalette /><KeyHelp /><LogoContrast /></LangProvider>
+        {admin && <LangProvider lang={lang}><LazyUpdateNotice /></LangProvider>}
+        <LazyMatchAlerts />
+        <LangProvider lang={lang}><MobileTabs /><LazyResultToast /><LazyCloseAlerts /><Motion /><LazyMatchNightTheme /><TeamTheme /><LazyCommandPalette /><LazyKeyHelp /><LogoContrast /></LangProvider>
         <ScoreFlash />
         <AccountSync />
         <script dangerouslySetInnerHTML={{ __html: OFFLINE_SCRIPT }} />

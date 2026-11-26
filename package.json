@@ -22,5 +22,11 @@
   },
   "engines": {
     "node": ">=20.9"
+  },
+  "imports": {
+    "#extra-dicts": {
+      "browser": "./lib/i18n-extra-browser.js",
+      "default": "./lib/i18n-more.js"
+    }
   }
 }

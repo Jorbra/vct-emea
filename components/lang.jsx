@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { LANG_COOKIE, LANGS, makeT } from "../lib/i18n.js";
+import { LANG_COOKIE, LANGS, WITH_PAGE, makeT } from "../lib/i18n.js";
 import { pushAccount } from "./account.js";
 
 const Ctx = createContext(makeT("fr"));
@@ -21,7 +21,8 @@ export function LangSwitch() {
   const pick = (l) => {
     document.cookie = `${LANG_COOKIE}=${l}; path=/; max-age=31536000; samesite=lax`;
     pushAccount({ prefs: { lang: l } });
-    router.refresh();
+    // Turkish and Arabic come with the page (not in the scripts): the page is loaded again for them
+    if (WITH_PAGE.includes(l)) window.location.reload(); else router.refresh();
   };
   // the buttons on a wide screen, a list on phones (CSS shows one of the two)
   return (
