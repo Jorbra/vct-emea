@@ -192,31 +192,62 @@ function FicheHead({ p, hero, team, links, ag }) {
   );
 }
 
-/** The identity card at the side of the player sheet (preview "fiche"), from Liquipedia: one line per thing known. */
-function FicheBox({ p }) {
+// a link's short mark in the card's icon row (no brand logos: the network's initials)
+const LINK_MARK = { VLR: "VLR", Instagram: "IG", TikTok: "TT", X: "X", Twitter: "X", Twitch: "TW", YouTube: "YT", VK: "VK", Kick: "K", Facebook: "FB", Discord: "DC", Bluesky: "BS", Threads: "TH" };
+
+/** The identity card at the side of the player sheet (preview "fiche"), laid out as Liquipedia's: the team's logo and the name,
+ * the photo, one line per thing known, the links, the teams with their dates. */
+function FicheBox({ p, team }) {
   const tr = useT();
   const { lp } = p;
+  const [broken, setBroken] = useState(false);
   if (!lp) return null;
   const present = (s) => s.replace(/Present$/, tr("Present"));
   const age = ageOf(lp.born);
   const rows = [
     [tr("Name"), lp.name],
     [tr("Alternate names"), lp.altIds],
+    [tr("Nationality"), lp.nationality.length ? <span className="fnat">{lp.nationality.map((n, i) => <span key={i}><Flag cc={n.cc} /> {countryName(n, tr.lang)}</span>)}</span> : ""],
     [tr("Born"), lp.born ? `${dayText(lp.born, tr.lang)}${age != null ? ` (${tr("{n} years old", { n: age })})` : ""}` : ""],
-    [tr("Nationality"), lp.nationality.map((n) => countryName(n, tr.lang)).join(", ")],
     [tr("Status"), lp.status ? tr(lp.status) : ""],
     [tr("Role"), lp.roles ? tr(lp.roles) : ""],
-    [tr("Team"), p.team || lp.team],
     [tr("Years active"), lp.years ? present(lp.years) : ""],
+    [tr("Team"), p.team ? <a href={teamHref(p.team)}>{p.team}</a> : lp.team],
     [tr("Approx. winnings"), lp.winnings ? moneyText(lp.winnings, tr.lang) : ""],
   ].filter(([, v]) => v);
   return (
-    <div className="info fbox">
-      <h3>{tr("Player information")}</h3>
+    <div className="fbox">
+      <div className="fboxtitle">
+        {p.team && (p.teamOnSite ? <Crest team={team} /> : p.teamLogo ? <span className="thlogo"><LpImg f={p.teamLogo} /></span> : null)}
+        <span>{p.name}</span>
+      </div>
+      {p.photo && !broken && <img className="fboxphoto" src={p.photo} alt="" loading="lazy" onError={() => setBroken(true)} />}
+      <div className="fboxhead">{tr("Player information")}</div>
       <dl>
         {rows.map(([k, v]) => <Fragment key={k}><dt>{k}</dt><dd>{v}</dd></Fragment>)}
-        {(lp.signature || []).length > 0 && <><dt>{tr("Signature agents")}</dt><dd className="fsig">{lp.signature.map((a) => <span key={a} title={a}><AgentIcon name={a} size={22} /></span>)}</dd></>}
+        {(lp.signature || []).length > 0 && <><dt>{tr("Signature agents")}</dt><dd className="fsig">{lp.signature.map((a) => <span key={a} title={a}><AgentIcon name={a} size={24} /></span>)}</dd></>}
       </dl>
+      {(lp.links || []).length > 0 && (
+        <>
+          <div className="fboxhead">{tr("Links")}</div>
+          <div className="fboxlinks">
+            {lp.links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" title={l.type} aria-label={l.type}>{LINK_MARK[l.type] || String(l.type).slice(0, 2).toUpperCase()}</a>)}
+          </div>
+        </>
+      )}
+      {lp.history.length > 0 && (
+        <>
+          <div className="fboxhead">{tr("Team history")}</div>
+          <ul className="fboxhist">
+            {lp.history.map((h, i) => (
+              <li key={i}>
+                <span className="fhdate">{present(periodText(h.period, tr.lang))}</span>
+                <span><Named href={h.href}>{h.team}</Named>{h.note ? <i> ({tr(h.note)})</i> : null}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }
@@ -341,7 +372,7 @@ function View({ p, fiche = false }) {
             </p>
           )}
         </main>
-        {lp && (fiche ? <aside><FicheBox p={p} /><PlayerSide p={p} historyOnly /></aside> : <PlayerSide p={p} />)}
+        {lp && (fiche ? <aside><FicheBox p={p} team={team} /></aside> : <PlayerSide p={p} />)}
       </div>
     </div>
   );

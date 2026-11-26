@@ -1417,12 +1417,14 @@ test("player information: the right page for a nickname, and who to read next", 
   const now = Date.parse("2026-11-04T12:00:00Z");
   const ago = (days) => new Date(now - days * 864e5).toISOString();
   assert.equal(playerDue(undefined, now), true);
-  assert.equal(playerDue({ page: "A", fetched: ago(13) }, now), false);
-  assert.equal(playerDue({ page: "A", fetched: ago(14) }, now), true);
+  assert.equal(playerDue({ page: "A", born: "", fetched: ago(13) }, now), false);
+  assert.equal(playerDue({ page: "A", born: "", fetched: ago(14) }, now), true);
+  // read before the sheet's fields were kept: due at once, whatever its age
+  assert.equal(playerDue({ page: "A", fetched: ago(1) }, now), true);
   assert.equal(playerDue({ page: "", fetched: ago(6) }, now), false);
   assert.equal(playerDue({ page: "", fetched: ago(7) }, now), true);
   const list = [{ name: "Old" }, { name: "New" }, { name: "Recent" }];
-  const info = { old: { page: "Old", fetched: ago(20) }, recent: { page: "Recent", fetched: ago(1) } };
+  const info = { old: { page: "Old", born: "", fetched: ago(20) }, recent: { page: "Recent", born: "", fetched: ago(1) } };
   assert.equal(nextPlayer(list, info, {}, now).name, "New"); // never read comes first
   assert.equal(nextPlayer(list, info, { new: now - 1000 }, now).name, "Old"); // a network error waits a little
   assert.equal(nextPlayer([{ name: "Recent" }], info, {}, now), undefined);
