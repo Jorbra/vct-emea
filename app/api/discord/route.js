@@ -32,6 +32,23 @@ import { styleAnswer } from "../../../lib/botstyle.js";
 import { motmSeason } from "../../../lib/fans.js";
 import { ratings as r8ratings } from "../../../lib/r8data.js";
 import { winChance } from "../../../lib/proba26.js";
+import { MOD_NAMES, closeTicket, openTicket, runModCommand } from "../../../lib/botmod.js";
+import { discord } from "../../../lib/botapi.js";
+import { logBot } from "../../../lib/botstore.js";
+
+// the server commands whose answer everyone in the channel sees; the others answer the moderator alone
+const MOD_PUBLIC = ["serveur", "membre", "lenteur", "verrouiller", "deverrouiller"];
+
+/** A server command or ticket button: "thinking…" at once (Discord waits 3 s at most), the answer once Discord has done it. */
+function later(i, visible, work) {
+  after(async () => {
+    let out;
+    try { out = await work(); } catch (e) { out = { content: `❌ ${e.message}` }; }
+    const { public: _shown, ...payload } = out || { content: "?" };
+    await editOriginal(i.application_id, i.token, payload).catch((e) => console.log(`[bot] answer: ${e.message}`));
+  });
+  return NextResponse.json({ type: 5, data: visible ? {} : { flags: 64 } });
+}
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -114,6 +131,14 @@ export async function POST(req) {
   // a prediction button
   if (i.type === 3) {
     const [kind, event, id, side] = String((i.data && i.data.custom_id) || "").split("|");
+    // a ticket's buttons: tk|open|<staff role> on the panel, tk|close in the ticket
+    if (kind === "tk") {
+      if (!tokenSet() || !i.guild_id) return ephemeral({ content: L("Les tickets ne marchent pas ici (bot non configuré).", "Tickets do not work here (bot not set up).") });
+      const deps = { db, discord, lang: settings.lang, logBot, now };
+      if (event === "open") return later(i, false, () => openTicket({ ...deps, guild: i.guild_id, channel: i.channel_id, user, role: String(id || "").replace(/\D/g, "") }));
+      if (event === "close") return later(i, false, () => closeTicket({ ...deps, guild: i.guild_id, thread: i.channel_id, user, permissions: i.member && i.member.permissions }));
+      return ephemeral({ content: "?" });
+    }
     // follow a team from an answer's button
     if (kind === "f") {
       const t = findTeam(ctx.teams(), event);
@@ -159,6 +184,12 @@ export async function POST(req) {
   if (i.type !== 2 || !i.data) return ephemeral({ content: "?" });
   const name = i.data.name;
   if (settings.disabled.includes(name)) return ephemeral({ content: L("Cette commande est désactivée sur ce serveur.", "This command is turned off here.") });
+  // moderation, server management and tickets (lib/botmod.js)
+  if (MOD_NAMES.includes(name)) {
+    if (!tokenSet()) return ephemeral({ content: L("Cette commande a besoin du jeton du bot (réglages du serveur du site).", "This command needs the bot's token (the site's server settings).") });
+    countUse(db, name, user.id, now);
+    return later(i, MOD_PUBLIC.includes(name), () => runModCommand(i, { db, discord, lang: settings.lang, logBot, now }));
+  }
   countUse(db, name, user.id, now);
   noteGuildUser(db, i.guild_id, user.id, now);
   ctx.guild = i.guild_id || "";

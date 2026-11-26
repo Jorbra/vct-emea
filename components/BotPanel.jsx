@@ -123,6 +123,9 @@ export default function BotPanel() {
               {state(missing === 0, tr("Commands on Discord"), missing == null ? tr("unknown") : missing === 0 ? tr("up to date") : tr("{n} to register", { n: missing }))}
               {missing > 0 && <button type="button" className="btn small pri" disabled={busy} onClick={() => call({ action: "register" }, () => load(s.guild))}>{tr("Register the commands with Discord")}</button>}
             </div>
+            {d.invite && (
+              <p className="note">🛡️ {tr("Moderation, server and ticket commands: the bot needs the rights to kick, ban, time out, delete messages, manage channels, roles and threads. Its role must also sit above the members it acts on.")} <a href={d.invite} target="_blank" rel="noopener noreferrer">{tr("Give the bot these rights")} ↗</a></p>
+            )}
             {d.error && <p className="err">{tr.server(d.error)}</p>}
             <div className="tabs sub" role="tablist" aria-label={tr("Discord bot")}>
               {TABS.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => { setTab(k); setMsg({ ok: true, text: "" }); }}>{tr(l)}</button>)}
