@@ -4004,3 +4004,10 @@ html[data-ft~="confort"] .readbar { display: block; position: fixed; top: 0; lef
 
 /* lighter pages: what is below the screen is drawn when it comes near (long news lists, the footer) */
 .newslist .newsitem, .sitefoot { content-visibility: auto; contain-intrinsic-size: auto 140px; }
+
+/* Editor: Ctrl+S in the unsaved bar, and the length of a limited field while typing (components/UnsavedGuard.jsx) */
+.unsavedkey { font-size: 11px; padding: 1px 6px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); }
+@media (max-width: 640px) { .unsavedkey { display: none; } }
+.charcount { position: fixed; z-index: 70; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--surface-2); color: var(--muted); pointer-events: none; font-variant-numeric: tabular-nums; }
+.charcount.near { color: #e0a33c; }
+.charcount.full { color: #ff5a5f; font-weight: 700; }

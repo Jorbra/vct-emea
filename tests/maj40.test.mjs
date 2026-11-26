@@ -61,3 +61,29 @@ test("news feed (RSS) and breadcrumb for search engines", async () => {
   assert.equal(ld.itemListElement[1].item, "https://site/kickoff");
   assert.equal(ld.itemListElement[1].position, 2);
 });
+
+test("robots.txt and the sitemap: the production address when set, else the address asked for", async () => {
+  const { siteBase } = await import("../lib/maj40.js");
+  assert.equal(siteBase("vct.example", "other.host", "https"), "https://vct.example");
+  assert.equal(siteBase("", "vct.sslip.io", "https"), "https://vct.sslip.io");
+  assert.equal(siteBase(undefined, "localhost:3210", null), "http://localhost:3210");
+  assert.equal(siteBase("", "", ""), "https://vct-emea.vercel.app");
+});
+
+test("every text of the new parts of the site has its French", async () => {
+  const fs = await import("node:fs");
+  const { makeT } = await import("../lib/i18n.js");
+  const fr = makeT("fr");
+  // texts that read the same in French
+  const same = new Set(["Discord", "Ctrl+S", "Rounds"]);
+  const files = ["components/EditorFollow.jsx", "components/Maj40Bits.jsx", "components/LiveDetail.jsx", "components/KeyHelp.jsx", "components/NotFoundView.jsx"];
+  const missing = [];
+  for (const f of files) {
+    const src = fs.readFileSync(new URL(`../${f}`, import.meta.url), "utf8");
+    for (const m of src.matchAll(/\btr\("([^"]+)"/g)) {
+      const key = m[1];
+      if (!same.has(key) && fr(key) === key) missing.push(`${f}: ${key}`);
+    }
+  }
+  assert.deepEqual(missing, []);
+});

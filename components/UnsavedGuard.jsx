@@ -188,6 +188,45 @@ export default function UnsavedGuard({ children }) {
     return () => document.removeEventListener("keydown", key);
   }, [ask]);
 
+  // Ctrl+S (Cmd+S on a Mac): saves the form being changed, with its own main button; elsewhere the browser does as usual
+  useEffect(() => {
+    const onKey = (e) => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey || String(e.key).toLowerCase() !== "s") return;
+      const r = root.current;
+      const list = dirtyRef.current.filter((u) => u.isConnected);
+      if (!r || !list.length) return;
+      const mine = unitOf(document.activeElement, r) || unitOf(lastActive.current, r);
+      const unit = list.find((u) => u === mine || (mine && (u.contains(mine) || mine.contains(u)))) || list[0];
+      const btn = unit.querySelector("button.pri:not([disabled]), button[type=submit]:not([disabled])");
+      if (!btn) return;
+      e.preventDefault();
+      lastActive.current = btn;
+      btn.click();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  // a field with a length limit: "42 / 120" beside it while it is being typed in
+  const [count, setCount] = useState(null);
+  useEffect(() => {
+    const r = root.current;
+    if (!r) return undefined;
+    const at = (el) => {
+      const max = el && el.maxLength;
+      if (!el || !(max > 0) || max > 20000 || !/^(INPUT|TEXTAREA)$/.test(el.tagName) || el.closest("[data-nodirty]")) { setCount(null); return; }
+      const box = el.getBoundingClientRect();
+      setCount({ n: el.value.length, max, top: box.bottom + 2, right: Math.max(4, window.innerWidth - box.right) });
+    };
+    const onIn = (e) => at(e.target);
+    const off = () => setCount(null);
+    r.addEventListener("focusin", onIn);
+    r.addEventListener("input", onIn);
+    r.addEventListener("focusout", off);
+    window.addEventListener("scroll", off, { passive: true });
+    return () => { r.removeEventListener("focusin", onIn); r.removeEventListener("input", onIn); r.removeEventListener("focusout", off); window.removeEventListener("scroll", off); };
+  }, []);
+
   const live = dirty.filter((u) => u.isConnected);
   const show = () => {
     const u = live[0];
@@ -207,8 +246,10 @@ export default function UnsavedGuard({ children }) {
           <span className="unsaveddot" aria-hidden="true" />
           <span>{live.length > 1 ? tr("Unsaved changes in {n} forms", { n: live.length }) : tr("Unsaved changes")}</span>
           <button type="button" className="btn sm" onClick={show}>{tr("Show")}</button>
+          <kbd className="unsavedkey" title={tr("Saves the form being changed")}>Ctrl+S</kbd>
         </div>
       )}
+      {count && <div className={"charcount" + (count.n >= count.max ? " full" : count.n >= count.max * 0.9 ? " near" : "")} style={{ top: count.top, right: count.right }} aria-hidden="true">{count.n} / {count.max}</div>}
       {ask && (
         <div className="unsavedask" role="presentation" onClick={() => { ask.stay(); setAsk(null); }}>
           <div className="unsavedbox" role="alertdialog" aria-modal="true" aria-labelledby="unsaved-q" onClick={(e) => e.stopPropagation()}>
