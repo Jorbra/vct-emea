@@ -29,6 +29,7 @@ import { LiveTeamBanner, Welcome } from "../components/Round11.jsx";
 import { getDb } from "../lib/db.js";
 import { shownApercu } from "../lib/apercu.js";
 import UpdateNotice from "../components/UpdateNotice.jsx";
+import ScoreFlash from "../components/ScoreFlash.jsx";
 import { activeBanner } from "../lib/round6.js";
 
 export async function generateMetadata() {
@@ -78,6 +79,7 @@ export default async function RootLayout({ children }) {
         {admin && <LangProvider lang={lang}><UpdateNotice /></LangProvider>}
         <MatchAlerts />
         <LangProvider lang={lang}><MobileTabs /><ResultToast /><CloseAlerts /><Motion /><MatchNightTheme /><TeamTheme /><CommandPalette /><KeyHelp /><LogoContrast /></LangProvider>
+        <ScoreFlash />
         <AccountSync />
         <script dangerouslySetInnerHTML={{ __html: OFFLINE_SCRIPT }} />
       </body>

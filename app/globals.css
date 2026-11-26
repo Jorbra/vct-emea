@@ -3749,3 +3749,7 @@ html[data-ft~="pictos"] .ldkey-new { display: inline; }
 .updwho { font-size: 11px; color: var(--muted); }
 @media (max-width: 640px) { .updnote { bottom: 76px; } }
 @media (prefers-reduced-motion: reduce) { .updnote { animation: none; } }
+
+/* preview "flash" (lib/apercu.js): a score that changes on screen flashes for a moment (components/ScoreFlash.jsx) */
+@keyframes scoreflash { 0% { background: color-mix(in srgb, var(--lime) 55%, transparent); color: var(--fg); } 100% { background: transparent; } }
+html[data-ft~="flash"] .scoreflash { animation: scoreflash 1.3s ease-out; border-radius: 4px; }
