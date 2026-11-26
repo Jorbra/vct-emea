@@ -55,11 +55,25 @@ function NewsListView({ news }) {
 }
 export const NewsList = ({ news, lang }) => <LangProvider lang={lang}><NewsListView news={news} /></LangProvider>;
 
+/** How far the article is read: a thin bar at the top of the screen (preview "confort"). */
+function ReadBar() {
+  const [p, setP] = useState(0);
+  useEffect(() => {
+    const on = () => { const h = document.documentElement; const max = h.scrollHeight - h.clientHeight; setP(max > 0 ? Math.min(1, h.scrollTop / max) : 1); };
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
+    return () => { window.removeEventListener("scroll", on); window.removeEventListener("resize", on); };
+  }, []);
+  return <div className="readbar" style={{ transform: `scaleX(${p})` }} aria-hidden="true" />;
+}
+
 function NewsArticleView({ item }) {
   const tr = useT();
   return (
     <div className="wrap">
       <Top title={item.title} crumbs={[[tr("News"), "/news"], [item.title]]} />
+      <ReadBar />
       <article className="newsbody">
         <small>{dateOf(tr, item.at)}{item.who ? ` · ${item.who}` : ""}</small>
         <p>{item.body}</p>

@@ -19,7 +19,7 @@ export function Crest({ team }) {
   if (logo && !broken) {
     return (
       <div className="crest logo">
-        <img ref={ref} src={logo} alt="" loading="lazy" onError={() => setBroken(true)} />
+        <img ref={ref} src={logo} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} />
       </div>
     );
   }
@@ -27,7 +27,7 @@ export function Crest({ team }) {
   // No logo (or a broken one): the site's default logo, the team's initials for screen readers
   return (
     <div className="crest logo deflogo" title={team.name}>
-      <img src={DEFAULT_LOGO} alt={initialsOf(team)} loading="lazy" />
+      <img src={DEFAULT_LOGO} alt={initialsOf(team)} loading="lazy" decoding="async" />
     </div>
   );
 }

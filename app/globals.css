@@ -3975,3 +3975,32 @@ html[data-ft~="recherche"] .nfsuggest { display: block; margin: 18px auto 0; max
 .rsslink { display: none; margin: -4px 0 12px; font-size: 13px; }
 html[data-ft~="rss"] .rsslink { display: block; }
 .rsslink a::before { content: "◉ "; color: #f26522; }
+
+/* preview "impression" (lib/apercu.js): a printed page keeps only its content, dark on white */
+@media print {
+  html[data-ft~="impression"] { background: #fff !important; color: #000 !important; }
+  html[data-ft~="impression"] body { background: #fff !important; }
+  html[data-ft~="impression"] :is(.sitenav, .searchbar, .prefs, .mtabs, .sitefoot, .totop, .skip, .sitebanner, .liveteam, .updnote, .closealerts, .rtoast, .keyhelp, .unsavedbar, .row .btn, .ldscope, .ldmaps, iframe) { display: none !important; }
+  html[data-ft~="impression"] :is(.wrap, .mmcard, section, table) { box-shadow: none !important; }
+  html[data-ft~="impression"] a { color: #000 !important; text-decoration: none; }
+  html[data-ft~="impression"] :is(table, .mmvs, .livedetail, .bwrap) { break-inside: avoid; }
+}
+
+/* preview "confort" (lib/apercu.js): wide tables show a shadow where there is more to scroll, thin themed scrollbars, the
+   site's colour for selected text, and a reading bar on a news article */
+html[data-ft~="confort"] :is(.tablewrap, .bwrap, .lpscroll, .kbscroll) {
+  background:
+    linear-gradient(to right, var(--surface), var(--surface)) left / 24px 100% no-repeat local,
+    linear-gradient(to left, var(--surface), var(--surface)) right / 24px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, .35), transparent) left / 12px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, .35), transparent) right / 12px 100% no-repeat scroll;
+  background-color: var(--surface);
+}
+html[data-ft~="confort"] { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--fg) 30%, transparent) transparent; }
+html[data-ft~="confort"] ::selection { background: color-mix(in srgb, var(--lime) 55%, transparent); color: var(--fg); }
+.readbar { display: none; }
+html[data-ft~="confort"] .readbar { display: block; position: fixed; top: 0; left: 0; height: 3px; background: var(--lime); z-index: 60; transform-origin: 0 50%; pointer-events: none; width: 100%; }
+@media print { .readbar { display: none !important; } }
+
+/* lighter pages: what is below the screen is drawn when it comes near (long news lists, the footer) */
+.newslist .newsitem, .sitefoot { content-visibility: auto; contain-intrinsic-size: auto 140px; }

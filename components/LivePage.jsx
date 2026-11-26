@@ -71,6 +71,8 @@ function View({ live, next }) {
         <div className="prefs"><ThemeSwitch /><LangSwitch /></div>
       </div>
       <SiteNav />
+      {/* the stream player opens sooner: its connection is made while the page loads */}
+      {withStream.length > 0 && <link rel="preconnect" href="https://player.twitch.tv" />}
       {live.length === 0 ? <><EmptyState text={tr("No match is being played right now.")} /><MyStreams live={live} host={host} /></> : (
         <>
           {playable.length > 1 && (
