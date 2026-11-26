@@ -1,4 +1,4 @@
-# Proposition : grande mise à jour (42 changements)
+# Proposition : grande mise à jour (42 changements + 8 de performance)
 
 Branche : `maj-40`, partie de `main` à jour (6aa6c96), poussée seule sur GitHub. **Rien n'est en ligne.**
 
@@ -75,11 +75,56 @@ En plus, sans être compté :
 - chaque tournée vlr.gg laisse un résumé (celui qu'affiche le n° 31) ;
 - un test vérifie que chaque texte des nouveaux éléments a sa traduction française. C'est lui qui a trouvé l'oubli du n° 22.
 
-Il y a 44 lignes « Journal: » réparties sur 9 commits, plus un commit pour cette proposition : certains changements ont deux lignes.
+Il y a 53 lignes « Journal: » en tout (44 pour les 42 changements, 9 pour la performance), réparties sur les commits de la branche : certains changements ont deux lignes.
+
+## Performance : pour un site plus fluide (8 changements de plus)
+
+J'ai d'abord mesuré, puis corrigé les postes les plus coûteux. Toutes les mesures ont été faites en local, sur la copie de la base, en taille téléphone (375 px), avant et après, avec les mêmes pages.
+
+### Ce qui coûtait le plus
+
+- **Les images** : 1,5 Mo sur l'accueil et 2,7 Mo sur le tableau d'un qualifier.
+  - Sur l'accueil, le diaporama du bandeau chargeait ses 12 fonds de cartes d'un coup, alors qu'un seul est visible.
+  - Les logos d'équipes étaient des PNG de 8 à 48 Ko, affichés entre 22 et 72 px.
+- **Les rafraîchissements automatiques** : chaque page retéléchargeait tout son contenu (67 à 72 Ko compressés) toutes les 60 s, et toutes les 20 s pendant un match, même quand rien n'avait changé.
+- **Le JavaScript commun à toutes les pages** : le morceau le plus lourd (70 Ko compressés) contenait le français, le turc et l'arabe, que chaque visiteur téléchargeait.
+- **Les comptes à rebours** : la bande des prochains matchs était redessinée en entier chaque seconde, et cinq minuteries tournaient en parallèle, même onglet caché.
+- **Le tableau d'un qualifier** : 512 cases et 8 300 éléments dessinés d'un coup, même hors de l'écran.
+
+### Ce qui change
+
+43. **Diaporama de l'accueil** : seule l'image affichée et la suivante sont chargées.
+44. **Logos d'équipes en WebP**, à la taille de l'écran, par l'outil d'images intégré au site. Si l'outil échoue, le fichier d'origine est affiché.
+45. **Tableau d'un qualifier** : seules les cases proches de l'écran sont dessinées, et leurs logos chargés à l'approche. Les traits entre les cases restent toujours dessinés.
+46. **Soir de match** : le halo rouge est sur un calque fixe, et non plus un fond fixe que le téléphone redessinait à chaque défilement.
+47. **Rafraîchissement intelligent** : la page demande une empreinte du site (33 octets). Elle ne se recharge que si l'empreinte a changé, et de toute façon toutes les 5 min. L'éditeur se recharge comme avant.
+48. **Une seule horloge par page**, à l'arrêt quand l'onglet est caché. Dans la bande des prochains matchs, seul le compte à rebours de chaque carte est redessiné chaque seconde.
+49. **Le turc et l'arabe** ne sont plus dans les scripts : la page n'apporte que la langue choisie. Passer en turc ou en arabe recharge la page une fois.
+50. **Widgets chargés après la page** : palette Ctrl+K, aide « ? », bienvenue, alertes et note de mise à jour.
+
+### Avant / après
+
+| Mesure (téléphone, copie locale) | Avant | Après |
+|---|---|---|
+| Accueil : images chargées | 1 530 Ko (23 images) | 103 Ko (2 images) |
+| Accueil : requêtes | 58 | 37 |
+| Accueil : chargement complet | 539 ms | 399 ms |
+| Qualifier 2 : images au chargement | 2 721 Ko (211 images) | 60 Ko (2 images) |
+| Qualifier 2 : requêtes | 251 | 40 |
+| Qualifier 2 : mise en page complète | 20,1 ms | 0,4 ms |
+| Qualifier 2 : chargement complet | 1 499 ms | 637 ms |
+| Page d'un match : images / requêtes | 205 Ko / 77 | 3 Ko / 38 |
+| Logo le plus lourd (Los Alfas) | 48,7 Ko (PNG) | 5,4 Ko (WebP) |
+| JavaScript commun à toutes les pages (compressé) | 70,3 Ko | 53,0 Ko |
+| JavaScript au premier chargement : accueil / équipe / match / direct | 259 / 257 / 246 / 240 Ko | 243 / 242 / 231 / 225 Ko |
+| Page d'un match en direct pendant 50 s sans changement | 2 rechargements de 68 Ko | 3 vérifications de 33 octets, 0 rechargement |
+| Le même match après une nouvelle lecture vlr.gg | — | 1 rechargement, score à jour au tour suivant (≤ 20 s) |
+
+Les requêtes et les images comptent ce qui est chargé à l'ouverture de la page. Les logos du tableau arrivent ensuite, au fil du défilement, à 1 à 5 Ko chacun.
 
 ## Vérifié
 
-- **Tests** : 295 tests passent, dont 10 nouveaux dans `tests/maj40.test.mjs`. Ils couvrent les balles de carte et de match, la mi-temps, les séries de rounds, les vieux « en direct », le décodage vlr.gg, le flux RSS, le fil d'Ariane, l'adresse du site, l'heure restante, le texte du résultat, les mots d'une adresse 404 et les traductions. Le build passe.
+- **Tests** : 298 tests passent, dont 10 nouveaux dans `tests/maj40.test.mjs` et 3 dans `tests/perf.test.mjs` (empreinte, langues, adresses des logos). Ils couvrent les balles de carte et de match, la mi-temps, les séries de rounds, les vieux « en direct », le décodage vlr.gg, le flux RSS, le fil d'Ariane, l'adresse du site, l'heure restante, le texte du résultat, les mots d'une adresse 404 et les traductions. Le build passe.
 - **Navigateur intégré, sur une copie locale de la base** (jamais la vraie, pas de secret) :
   - **Côté visiteurs** : les nouveautés y ont été ouvertes, et un match « en cours » rempli avec les données lues sur vlr.gg. Vérifiés sur ordinateur en sombre et sur téléphone en clair : page du match (titre d'onglet, balle de match, mi-temps, série, étoile), /live, accueil (1 en direct au lieu de 33), 404 avec suggestions, recherches récentes, page Actualités et lien RSS, barre de lecture, flux RSS, robots.txt, plan du site et en-têtes.
   - **Côté éditeur** : connexion avec un mot de passe de test jetable. Vérifiés : liste des « en direct » oubliés (un retiré : 32 → 31), « sans stream », Lecture de vlr.gg, liens « Voir », « Voir comme un visiteur » (la nouveauté en aperçu disparaît, les autres restent), compteur « 36 / 200 », Ctrl+S, puis la correction n° 36 après rebuild.
@@ -92,6 +137,15 @@ Il y a 44 lignes « Journal: » réparties sur 9 commits, plus un commit pour ce
 - [Éditeur : compteur de caractères et Ctrl+S](docs/captures/maj40-editeur-compteur-ctrls.jpg)
 
 ## Ce qui n'a pas été vérifié
+
+**Performance :**
+- **Le temps de réponse du serveur** n'a pas bougé dans mes mesures (accueil environ 0,25 s, match environ 0,6 s). En local, le site relit toute sa base à chaque page, ce que le serveur en ligne évite déjà grâce à son cache de 10 s. Les écarts mesurés relèvent du bruit.
+- **Le poids du HTML** reste de 79 à 86 Ko compressés pour l'accueil, un match ou une équipe : ces pages embarquent tout l'état du site (333 Ko). C'est le plus gros gain encore possible, mais il demande de revoir page par page ce que chacune utilise. Je ne l'ai pas fait ici pour ne rien casser.
+- **La fluidité image par image sur un vrai téléphone** : le navigateur intégré était masqué, ce qui ralentit ses animations. J'ai mesuré le temps de mise en page à la place (20,1 → 0,4 ms sur le tableau).
+- **L'outil d'images sur le serveur** : il garde ses copies dans `.next/cache/images` et a besoin du module `sharp`, normalement installé avec Next.js. À vérifier après la mise en ligne : les logos s'affichent, sinon le fichier d'origine prend le relais.
+- **Le turc et l'arabe** : vérifiés en turc sur l'accueil. Les mots déjà non traduits avant (« More », « Go to the content ») le restent.
+
+**Le reste :**
 
 - **Le partage du téléphone (n° 9) et l'écran qui reste allumé (n° 20)** : le navigateur intégré ne les propose pas. Ils sont branchés mais pas vus. Sans eux, le bouton ne s'affiche pas et l'écran se met en veille comme avant.
 - **L'impression (n° 15)** : pas d'aperçu avant impression avec le navigateur intégré ; seules les règles ont été relues.
