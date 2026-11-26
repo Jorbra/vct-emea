@@ -24,3 +24,10 @@ test("vlr pairing: a longer name on vlr.gg with the same other team", () => {
   const items = [{ id: "s1-m01", a: { name: "UCAM Esports" }, b: { name: "CGN ESPORTS" } }, { id: "s1-m02", a: { name: "Mandatory" }, b: { name: "Barça eSports" } }];
   assert.deepEqual(findSiteMatch(items, "UCAM Esports Club", "CGN Esports", roundKey("Round 1 (0-0)")), { id: "s1-m01", swap: false });
 });
+
+test("vlr pairing: a list kept before the round was understood gets it again from its stage", async () => {
+  const { roundOf } = await import("../lib/vlrmatch.js");
+  assert.equal(roundOf({ round: "", stage: "Round 1 (0-0) Swiss Stage" }), "s1");
+  assert.equal(roundOf({ round: "r512", stage: "Round of 512 Qualifier #2" }), "r512");
+  assert.equal(roundOf({ round: "", stage: "Round of 64 North Africa #1" }), "r64");
+});
