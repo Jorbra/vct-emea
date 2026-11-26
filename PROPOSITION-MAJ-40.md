@@ -1,4 +1,4 @@
-# Proposition : grande mise à jour (42 changements + 8 de performance)
+# Proposition : grande mise à jour (42 changements + 8 de performance + bot et stories)
 
 Branche : `maj-40`, partie de `main` à jour (6aa6c96), poussée seule sur GitHub. **Rien n'est en ligne.**
 
@@ -75,7 +75,7 @@ En plus, sans être compté :
 - chaque tournée vlr.gg laisse un résumé (celui qu'affiche le n° 31) ;
 - un test vérifie que chaque texte des nouveaux éléments a sa traduction française. C'est lui qui a trouvé l'oubli du n° 22.
 
-Il y a 53 lignes « Journal: » en tout (44 pour les 42 changements, 9 pour la performance), réparties sur les commits de la branche : certains changements ont deux lignes.
+Il y a 61 lignes « Journal: » en tout (44 pour les 42 changements, 9 pour la performance, 5 pour le bot, 3 pour les stories), réparties sur les commits de la branche : certains changements ont deux lignes.
 
 ## Performance : pour un site plus fluide (8 changements de plus)
 
@@ -122,9 +122,36 @@ J'ai d'abord mesuré, puis corrigé les postes les plus coûteux. Toutes les mes
 
 Les requêtes et les images comptent ce qui est chargé à l'ouverture de la page. Les logos du tableau arrivent ensuite, au fil du défilement, à 1 à 5 Ko chacun.
 
+## Bot Discord : modération, serveur et tickets
+
+18 commandes de plus. Discord ne montre chacune qu'aux membres qui ont la permission correspondante, et le bot la revérifie lui-même.
+
+- **Modération** : `/avertir` (gardé dans le dossier du membre, qui reçoit un message privé), `/avertissements`, `/exclure` (1 min à 1 semaine, ou lever), `/expulser`, `/bannir` (en effaçant ou non ses messages récents), `/debannir`, `/purge` (2 à 100 messages, d'un membre si tu veux), `/lenteur` (mode lent), `/verrouiller` et `/deverrouiller` (le salon).
+- **Serveur** : `/roledonner`, `/roleretirer`, `/annonce` (message mis en forme dans un salon, avec un rôle à prévenir), `/serveur` et `/membre` (cartes d'infos).
+- **Tickets** : `/ticketpanneau` pose un bouton « Ouvrir un ticket » dans un salon, avec en option le rôle de l'équipe qui répond.
+  - Chaque ticket est un **fil privé** entre le membre et l'équipe, un seul ouvert à la fois par membre.
+  - On le ferme avec `/fermer` ou le bouton, uniquement si on est son auteur ou dans l'équipe.
+  - `/ticket` ouvre aussi un ticket sans passer par le bouton.
+- **Sécurité** :
+  - Un modérateur ne peut jamais agir sur un membre dont le rôle est égal ou supérieur au sien, ni donner un rôle au-dessus du sien. Discord, lui, ne vérifie que le rôle du bot.
+  - Chaque action est écrite dans le journal d'audit du serveur Discord (qui, pourquoi) et dans le journal du bot de l'éditeur.
+- **Éditeur** : un lien « Donner ces droits au bot » dans le panneau du bot. Les 18 commandes apparaissent dans « à enregistrer » : il suffit de cliquer sur « Enregistrer les commandes auprès de Discord ».
+- **Vérifié** : 6 tests avec un faux Discord. Ils couvrent les permissions, l'ordre des rôles, l'avertissement et son message privé, l'exclusion, l'expulsion refusée au-dessus de son rôle, le bannissement avec sa raison dans le journal, `/purge`, le verrouillage qui garde les autres règles du salon, les rôles et les tickets (un à la fois, fil privé, fermeture).
+- **Pas vérifié** : un vrai serveur Discord. Je n'ai pas le jeton du bot et je ne l'ai pas demandé. Après la mise en ligne, il faut cliquer sur « Donner ces droits au bot », placer le rôle du bot au-dessus des membres à modérer, puis enregistrer les commandes.
+
+## Stories plus belles (aperçu « Nouvelles stories »)
+
+- **En fond** : la dernière carte jouée, floutée et teintée aux couleurs du vainqueur, au lieu du fond noir uni.
+- **Les cartes du match en vignettes** avec leur image. Celles gagnées par le vainqueur sont soulignées à sa couleur, les autres atténuées.
+- **« Victoire »** sous le gagnant, son logo entouré, et « il y a 2 h ».
+- **Lecture automatique** : 6 s par story, une barre qui se remplit, appui long pour mettre en pause, glisser pour passer, vers le bas pour fermer.
+- **Anneau en dégradé** pour les stories pas encore vues.
+- **Vérifié** sur la copie locale (trois résultats remis dans les dernières 24 h), sur téléphone en sombre et sur ordinateur en clair. La lecture automatique enchaîne les trois stories puis se ferme.
+- **Capture** : [stories, téléphone](docs/captures/maj40-stories-telephone.jpg).
+
 ## Vérifié
 
-- **Tests** : 298 tests passent, dont 10 nouveaux dans `tests/maj40.test.mjs` et 3 dans `tests/perf.test.mjs` (empreinte, langues, adresses des logos). Ils couvrent les balles de carte et de match, la mi-temps, les séries de rounds, les vieux « en direct », le décodage vlr.gg, le flux RSS, le fil d'Ariane, l'adresse du site, l'heure restante, le texte du résultat, les mots d'une adresse 404 et les traductions. Le build passe.
+- **Tests** : 304 tests passent, dont 10 nouveaux dans `tests/maj40.test.mjs` et 3 dans `tests/perf.test.mjs` (empreinte, langues, adresses des logos). Ils couvrent les balles de carte et de match, la mi-temps, les séries de rounds, les vieux « en direct », le décodage vlr.gg, le flux RSS, le fil d'Ariane, l'adresse du site, l'heure restante, le texte du résultat, les mots d'une adresse 404 et les traductions. Le build passe.
 - **Navigateur intégré, sur une copie locale de la base** (jamais la vraie, pas de secret) :
   - **Côté visiteurs** : les nouveautés y ont été ouvertes, et un match « en cours » rempli avec les données lues sur vlr.gg. Vérifiés sur ordinateur en sombre et sur téléphone en clair : page du match (titre d'onglet, balle de match, mi-temps, série, étoile), /live, accueil (1 en direct au lieu de 33), 404 avec suggestions, recherches récentes, page Actualités et lien RSS, barre de lecture, flux RSS, robots.txt, plan du site et en-têtes.
   - **Côté éditeur** : connexion avec un mot de passe de test jetable. Vérifiés : liste des « en direct » oubliés (un retiré : 32 → 31), « sans stream », Lecture de vlr.gg, liens « Voir », « Voir comme un visiteur » (la nouveauté en aperçu disparaît, les autres restent), compteur « 36 / 200 », Ctrl+S, puis la correction n° 36 après rebuild.
