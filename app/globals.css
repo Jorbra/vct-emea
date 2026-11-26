@@ -3805,3 +3805,47 @@ html[data-ft~="resume"] .mmsummary { display: grid; gap: 2px; margin: 10px 0 12p
   .fphotobox { width: 104px; height: 104px; }
   .fhead.withagent::after { width: 70%; opacity: .14; }
 }
+
+/* the editor's home, in sections (components/AdminHome.jsx): a side menu on a computer, a scrolling bar on a phone */
+.adnew .adtop { display: grid; gap: 12px; margin-bottom: 16px; }
+.adtools { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 360px); gap: 10px; align-items: start; }
+.adtools .edsearch { margin: 0; }
+.adfind { display: flex; align-items: center; gap: 8px; padding: 0 12px; height: 42px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.adfind:focus-within { border-color: var(--lime); }
+.adfind span { color: var(--muted); font-size: 18px; }
+.adfind input { flex: 1; min-width: 0; border: 0; background: none; color: var(--fg); font: 500 15px var(--font-body); outline: none; }
+.adlayout { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 24px; align-items: start; }
+.adnav { position: sticky; top: 12px; display: grid; gap: 4px; padding: 8px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.adnav button, .adnav .adnlink { appearance: none; display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: 0; border-radius: 8px; background: none; color: var(--fg); font: 600 14px var(--font-body); text-align: left; text-decoration: none; cursor: pointer; }
+.adnav button:hover, .adnav .adnlink:hover { background: var(--surface-2, color-mix(in srgb, var(--fg) 6%, transparent)); }
+.adnav button.on { background: color-mix(in srgb, var(--lime) 16%, transparent); color: var(--lime); }
+.adnav .adnlink { font-weight: 500; font-size: 13px; color: var(--muted); }
+.adnav .adnlink:first-of-type { margin-top: 8px; border-top: 1px solid var(--line); border-radius: 0 0 8px 8px; padding-top: 14px; }
+.adnicon { width: 22px; text-align: center; font-size: 16px; }
+.adnlabel { flex: 1; }
+.adnbadge { min-width: 22px; padding: 1px 7px; border-radius: 999px; background: #e5484d; color: #fff; font-size: 12px; font-weight: 700; text-align: center; }
+.adpanels { display: grid; gap: 14px; min-width: 0; }
+.adcat { margin: 0 0 2px; font: 800 26px var(--font-display); display: flex; align-items: center; gap: 10px; }
+.adpanel { min-width: 0; }
+.adpanel > section, .adpanel > div > section { margin: 0; }
+.adnew .adpanel .einfo { margin-bottom: 0; border-radius: 12px; }
+.adnew .adpanel .einfo summary { padding: 14px 16px; font-size: 15px; }
+.adnew .adpanel .einfo summary:hover { background: color-mix(in srgb, var(--fg) 4%, transparent); }
+.adnew .adpanel > section > h2:first-child { font-size: 20px; margin-top: 0; }
+.adnew .evgrid { gap: 10px; }
+@media (max-width: 900px) {
+  .adtools { grid-template-columns: 1fr; }
+  .adlayout { grid-template-columns: 1fr; gap: 12px; }
+  .adnav { top: 0; z-index: 25; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 8px; margin: 0 -16px; border-radius: 0; border-left: 0; border-right: 0; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(8px); }
+  .adnav::-webkit-scrollbar { display: none; }
+  .adnav button, .adnav .adnlink { flex: none; width: auto; padding: 9px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); white-space: nowrap; }
+  .adnav .adnlink:first-of-type { margin-top: 0; border-top: 1px solid var(--line); border-radius: 999px; padding-top: 9px; }
+  .adcat { font-size: 22px; }
+  .adnew .adpanel .einfo summary { padding: 14px; min-height: 48px; }
+}
+@media (max-width: 900px) {
+  .adnew .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .adnew .kpis > * { padding: 8px 10px; }
+  .adnew .kpis b { font-size: 20px; }
+  .adnew .kpis small, .adnew .kpis span { font-size: 11px; }
+}

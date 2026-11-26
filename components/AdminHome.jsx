@@ -2,7 +2,7 @@
 
 import ServerPanel from "./ServerPanel.jsx";
 import { localeOf } from "../lib/i18n.js";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useT } from "./lang.jsx";
 import { LiveBadge } from "./matchTime.jsx";
 import { EVENT_NAMES } from "../lib/paths.js";
@@ -30,6 +30,24 @@ const GROUPS = [
 /** The editor's home page: what needs doing now, the next matches, and where each event stands. */
 export default function AdminHome({ initial, onOpen, call, onDone }) {
   const tr = useT();
+  const SECTIONS = ["today", "matches", "teams", "content", "discord", "follow", "settings"];
+  const [cat, setCat] = useState("today");
+  const [find, setFind] = useState("");
+  const [classic, setClassicState] = useState(false);
+  useEffect(() => {
+    try {
+      const h = window.location.hash.replace("#", "");
+      const saved = localStorage.getItem("vct-editor-section") || "";
+      if (SECTIONS.includes(h)) setCat(h); else if (SECTIONS.includes(saved)) setCat(saved);
+      if (localStorage.getItem("vct-editor-classic") === "1") setClassicState(true);
+    } catch { /* private window: the defaults */ }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const pick = (k) => {
+    setCat(k);
+    try { localStorage.setItem("vct-editor-section", k); window.history.replaceState(null, "", `#${k}`); } catch { /* not kept */ }
+    if (typeof window !== "undefined" && window.innerWidth < 900) document.querySelector(".adpanels")?.scrollIntoView({ block: "start" });
+  };
+  const setClassic = (on) => { setClassicState(on); try { localStorage.setItem("vct-editor-classic", on ? "1" : "0"); } catch { /* not kept */ } };
   const [now, setNow] = useState(null); // the editor's clock, known once on the client
   useEffect(() => {
     setNow(Date.now());
@@ -67,85 +85,148 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
     );
   };
   const todo = agenda.live.length + agenda.late.length;
-  return (
-    <div className="adhome">
-      <p className="guidelink"><a className="btn" href="/admin/nouveautes">{tr("What's new and how it works")}</a></p>
-      {initial.admin && <ApercuPanel main={me === ""} call={call} onDone={onDone} />}
-      {initial.admin && <EditorKpis initial={initial} />}
-      {initial.admin && <EditorSearch initial={initial} onOpen={onOpen} />}
-      {initial.admin && <SlashToSearch />}
-      {initial.admin && initial.admin.r14 && <MissingPictures missing={initial.admin.r14.missing} />}
-      {initial.admin && <ControlRoom initial={initial} call={call} onDone={onDone} />}
-      {initial.admin && <ActivityFeed />}
-      {initial.admin && <QuickLive initial={initial} call={call} onDone={onDone} />}
-      {initial.admin && initial.admin.dayBoard && <DayBoard list={initial.admin.dayBoard} onOpen={onOpen} />}
-      {initial.admin && initial.admin.checklist && initial.admin.checklist.length > 0 && <Checklist list={initial.admin.checklist} />}
-      {initial.admin && initial.admin.health && <Health rows={initial.admin.health} />}
-      {initial.admin && <ServerPanel />}
-      {initial.admin && initial.admin.sources && <SourcesEditor list={initial.admin.sources} call={call} onDone={onDone} />}
-      {initial.admin && initial.admin.teamAliases && <TeamAliases aliases={initial.admin.teamAliases} call={call} onDone={onDone} />}
-      {initial.admin && <QuickStreams initial={initial} call={call} onDone={onDone} />}
-      {initial.admin && initial.admin.resultsText && <ResultsText text={initial.admin.resultsText} />}
-      {initial.admin && initial.admin.syncLog && <SyncLog list={initial.admin.syncLog} />}
-      {initial.admin && initial.admin.scheduled && <ScheduledNews list={initial.admin.scheduled} call={call} onDone={onDone} />}
-      {initial.admin && <BotPanel />}
-      {initial.admin && initial.admin.r14 && <VlrTables data={initial.admin.r14.vlr} call={call} onDone={onDone} />}
-      {initial.admin && initial.admin.r14 && <GamesToday games={initial.admin.r14.games} />}
-      {initial.admin && initial.admin.r14 && <MetaDraft text={initial.admin.r14.meta} />}
-      {initial.admin && <SharePictures initial={initial} now={now} />}
-      {initial.admin && initial.admin.steps && <Journal admin={initial.admin} call={call} onDone={onDone} />}
-      {initial.admin && <BannerEditor banner={initial.admin.banner} call={call} onDone={onDone} />}
-      {initial.admin && initial.admin.visits && <Visits v={initial.admin.visits} activity={initial.admin.activity} />}
-      {initial.admin && <BulkScores list={openMatches(initial)} call={call} onDone={onDone} />}
-      {initial.admin && <MissingLogos list={missingLogos(initial)} onOpen={onOpen} />}
-      {initial.admin && <Exports />}
-      {initial.admin && initial.admin.polls && <PollsEditor polls={initial.admin.polls} call={call} onDone={onDone} />}
-      {initial.admin && initial.admin.schedScores && <ScheduledScores list={initial.admin.schedScores} initial={initial} call={call} onDone={onDone} />}
-      {initial.admin && <MobilePreview />}
-      {initial.admin && initial.admin.comments && <CommentsMod list={initial.admin.comments} call={call} onDone={onDone} />}
-      <section>
-        <h2>{tr("To do")}</h2>
-        {todo === 0 && <p className="note">{now == null ? " " : tr("Nothing waiting: no match is live or waiting for its score.")}</p>}
-        {agenda.live.length > 0 && <div className="ahlist">{agenda.live.map((m) => row(m, <LiveBadge />))}</div>}
-        {agenda.late.length > 0 && (
-          <>
-            <h3 className="sub">{tr("Waiting for their score")} <small>({agenda.late.length})</small></h3>
-            <div className="ahlist">{agenda.late.map((m) => row(m))}</div>
-          </>
-        )}
-      </section>
-      {agenda.next.length > 0 && (
-        <section>
-          <h2>{tr("Upcoming matches")}</h2>
-          <div className="ahlist">{agenda.next.map((m) => row(m))}</div>
-        </section>
+  const A = initial.admin;
+  const todoSection = (
+    <section>
+      <h2>{tr("To do")}</h2>
+      {todo === 0 && <p className="note">{now == null ? " " : tr("Nothing waiting: no match is live or waiting for its score.")}</p>}
+      {agenda.live.length > 0 && <div className="ahlist">{agenda.live.map((m) => row(m, <LiveBadge />))}</div>}
+      {agenda.late.length > 0 && (
+        <>
+          <h3 className="sub">{tr("Waiting for their score")} <small>({agenda.late.length})</small></h3>
+          <div className="ahlist">{agenda.late.map((m) => row(m))}</div>
+        </>
       )}
-      <section>
-        <h2>{tr("Events")}</h2>
-        {GROUPS.map(([title, events]) => (
-          <div className="evgroup" key={title}>
-            <h3>{title}</h3>
-            <div className="evgrid">
-              {events.map((e) => {
-                const st = status[e];
-                const c = counts[e] || { ready: 0, played: 0 };
-                return (
-                  <button type="button" key={e} className={"evcard " + st.state} onClick={() => onOpen(e, false)}>
-                    <span className="evtop">
-                      <span className={"evstate " + st.state}>{tr(st.state === "done" ? "Finished" : st.state === "live" ? "Live" : "Upcoming")}</span>
-                      <span className="evcount">{st.of ? `${st.teams}/${st.of}` : st.teams} {tr("teams")}</span>
-                    </span>
-                    <span className="evtitle">{tr(EVENT_NAMES[e])}</span>
-                    <span className="evdates">{formatDates(initial.info && initial.info[e], tr.lang) || tr("Dates to be announced")}</span>
-                    <span className="evmeta">{tr("{p} of {n} matches played", { p: c.played, n: c.ready })}</span>
-                  </button>
-                );
-              })}
-            </div>
+    </section>
+  );
+  const nextSection = agenda.next.length > 0 ? (
+    <section>
+      <h2>{tr("Upcoming matches")}</h2>
+      <div className="ahlist">{agenda.next.map((m) => row(m))}</div>
+    </section>
+  ) : null;
+  const eventsSection = (
+    <section>
+      <h2>{tr("Events")}</h2>
+      {GROUPS.map(([title, events]) => (
+        <div className="evgroup" key={title}>
+          <h3>{title}</h3>
+          <div className="evgrid">
+            {events.map((e) => {
+              const st = status[e];
+              const c = counts[e] || { ready: 0, played: 0 };
+              return (
+                <button type="button" key={e} className={"evcard " + st.state} onClick={() => onOpen(e, false)}>
+                  <span className="evtop">
+                    <span className={"evstate " + st.state}>{tr(st.state === "done" ? "Finished" : st.state === "live" ? "Live" : "Upcoming")}</span>
+                    <span className="evcount">{st.of ? `${st.teams}/${st.of}` : st.teams} {tr("teams")}</span>
+                  </span>
+                  <span className="evtitle">{tr(EVENT_NAMES[e])}</span>
+                  <span className="evdates">{formatDates(initial.info && initial.info[e], tr.lang) || tr("Dates to be announced")}</span>
+                  <span className="evmeta">{tr("{p} of {n} matches played", { p: c.played, n: c.ready })}</span>
+                </button>
+              );
+            })}
           </div>
-        ))}
-      </section>
-      {initial.admin && <Manage admin={initial.admin} call={call} onDone={onDone} />}
+        </div>
+      ))}
+    </section>
+  );
+
+  // every panel of the editor's home, in its section; `words` helps "Find a setting"
+  const logosMissing = A ? missingLogos(initial) : [];
+  const panels = A ? [
+    { cat: "today", words: "to do live score waiting à faire en direct score en attente", node: todoSection },
+    { cat: "today", words: "quick live score phone score rapide direct téléphone", node: <QuickLive initial={initial} call={call} onDone={onDone} /> },
+    { cat: "today", words: "day board matches today matchs du jour tableau aujourd'hui", node: A.dayBoard ? <DayBoard list={A.dayBoard} onOpen={onOpen} /> : null },
+    { cat: "today", words: "control room regie régie mode régie soirée", node: <ControlRoom initial={initial} call={call} onDone={onDone} /> },
+    { cat: "today", words: "checklist missing before events à compléter manque avant tournoi", node: A.checklist && A.checklist.length > 0 ? <Checklist list={A.checklist} /> : null },
+    { cat: "today", words: "upcoming matches next prochains matchs à venir", node: nextSection },
+    { cat: "today", words: "events tournaments tournois événements qualifiers", node: eventsSection },
+    { cat: "matches", words: "many scores bulk plusieurs scores d'un coup saisie", node: <BulkScores list={openMatches(initial)} call={call} onDone={onDone} /> },
+    { cat: "matches", words: "scheduled scores vod later scores programmés vod plus tard", node: A.schedScores ? <ScheduledScores list={A.schedScores} initial={initial} call={call} onDone={onDone} /> : null },
+    { cat: "matches", words: "streams twitch youtube links streams liens twitch youtube", node: <QuickStreams initial={initial} call={call} onDone={onDone} /> },
+    { cat: "matches", words: "results text copy texte des résultats copier", node: A.resultsText ? <ResultsText text={A.resultsText} /> : null },
+    { cat: "matches", words: "sources toornament vlr links sources liens toornament vlr", node: A.sources ? <SourcesEditor list={A.sources} call={call} onDone={onDone} /> : null },
+    { cat: "matches", words: "vlr tables stats read again tableaux vlr stats relire", node: A.r14 ? <VlrTables data={A.r14.vlr} call={call} onDone={onDone} /> : null },
+    { cat: "matches", words: "sync log toornament journal synchronisation toornament", node: A.syncLog ? <SyncLog list={A.syncLog} /> : null },
+    { cat: "teams", words: "logos missing teams logos manquants équipes logo", node: <MissingLogos list={logosMissing} onOpen={onOpen} /> },
+    { cat: "teams", words: "pictures players photos missing photos joueurs images manquantes", node: A.r14 ? <MissingPictures missing={A.r14.missing} /> : null },
+    { cat: "teams", words: "aliases names teams alias noms équipes", node: A.teamAliases ? <TeamAliases aliases={A.teamAliases} call={call} onDone={onDone} /> : null },
+    { cat: "content", words: "news scheduled announcements actualités annonces programmées news", node: A.scheduled ? <ScheduledNews list={A.scheduled} call={call} onDone={onDone} /> : null },
+    { cat: "content", words: "banner top of the site bannière haut du site", node: <BannerEditor banner={A.banner} call={call} onDone={onDone} /> },
+    { cat: "content", words: "polls votes sondages votes", node: A.polls ? <PollsEditor polls={A.polls} call={call} onDone={onDone} /> : null },
+    { cat: "content", words: "comments moderation commentaires modération", node: A.comments ? <CommentsMod list={A.comments} call={call} onDone={onDone} /> : null },
+    { cat: "content", words: "pictures share social images partage réseaux", node: <SharePictures initial={initial} now={now} /> },
+    { cat: "content", words: "meta draft text méta brouillon texte", node: A.r14 ? <MetaDraft text={A.r14.meta} /> : null },
+    { cat: "content", words: "games today quiz jeux du jour quiz", node: A.r14 ? <GamesToday games={A.r14.games} /> : null },
+    { cat: "discord", words: "discord bot announcements commands discord bot annonces commandes salon", node: <BotPanel /> },
+    { cat: "follow", words: "activity live feed activité en direct fil", node: <ActivityFeed /> },
+    { cat: "follow", words: "visits views audience visites pages vues audience", node: A.visits ? <Visits v={A.visits} activity={A.activity} /> : null },
+    { cat: "follow", words: "health sources problems santé sources problèmes", node: A.health ? <Health rows={A.health} /> : null },
+    { cat: "follow", words: "server memory disk serveur mémoire disque", node: <ServerPanel /> },
+    { cat: "follow", words: "journal history undo changes journal historique annuler changements", node: A.steps ? <Journal admin={A} call={call} onDone={onDone} /> : null },
+    { cat: "settings", words: "preview new things editors everyone aperçu nouveautés éditeurs tout le monde", node: <ApercuPanel main={me === ""} call={call} onDone={onDone} /> },
+    { cat: "settings", words: "accounts editors passwords manage seasons comptes compte éditeurs éditeur mot de passe mots de passe gérer saisons", node: <Manage admin={A} call={call} onDone={onDone} /> },
+    { cat: "settings", words: "exports download data exports télécharger données", node: <Exports /> },
+    { cat: "settings", words: "phone preview mobile aperçu téléphone mobile", node: <MobilePreview /> },
+  ].filter((p) => p.node) : [];
+
+  const CATS = [
+    ["today", "🏠", tr("Today"), todo],
+    ["matches", "⚔️", tr("Matches and scores"), 0],
+    ["teams", "👥", tr("Teams and players"), logosMissing.reduce((s, x) => s + x.teams.length, 0)],
+    ["content", "📰", tr("Content"), (A && A.comments ? A.comments.length : 0)],
+    ["discord", "💬", "Discord", 0],
+    ["follow", "📈", tr("Follow-up"), 0],
+    ["settings", "⚙️", tr("Settings"), 0],
+  ];
+
+  if (classic || !A) {
+    return (
+      <div className="adhome">
+        <p className="guidelink"><a className="btn" href="/admin/nouveautes">{tr("What's new and how it works")}</a>{A && <button type="button" className="btn" onClick={() => setClassic(false)}>✨ {tr("New layout")}</button>}</p>
+        {A && <EditorKpis initial={initial} />}
+        {A && <EditorSearch initial={initial} onOpen={onOpen} />}
+        {A && <SlashToSearch />}
+        {panels.filter((p) => p.cat !== "today" || ![todoSection, nextSection, eventsSection].includes(p.node)).map((p, i) => <Fragment key={i}>{p.node}</Fragment>)}
+        {todoSection}
+        {nextSection}
+        {eventsSection}
+      </div>
+    );
+  }
+
+  const plain = (x) => String(x).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const q = plain(find.trim());
+  const shown = q ? panels.filter((p) => plain(p.words).includes(q) || plain(CATS.find((c) => c[0] === p.cat)[2]).includes(q)) : panels.filter((p) => p.cat === cat);
+  const current = CATS.find((c) => c[0] === cat) || CATS[0];
+  return (
+    <div className="adhome adnew">
+      <div className="adtop">
+        <EditorKpis initial={initial} />
+        <div className="adtools">
+          <EditorSearch initial={initial} onOpen={onOpen} />
+          <SlashToSearch />
+          <label className="adfind"><span aria-hidden="true">⌕</span><input type="search" value={find} onChange={(ev) => setFind(ev.target.value)} placeholder={tr("Find a setting: logo, banner, Discord, score…")} aria-label={tr("Find a setting")} /></label>
+        </div>
+      </div>
+      <div className="adlayout">
+        <nav className="adnav" aria-label={tr("Editor sections")}>
+          {CATS.map(([k, icon, label, n]) => (
+            <button key={k} type="button" className={!q && cat === k ? "on" : ""} aria-current={!q && cat === k ? "page" : undefined} onClick={() => { setFind(""); pick(k); }}>
+              <span className="adnicon" aria-hidden="true">{icon}</span><span className="adnlabel">{label}</span>{n > 0 && <span className="adnbadge">{n}</span>}
+            </button>
+          ))}
+          <a className="adnlink" href="/admin/nouveautes">📘 {tr("What's new and how it works")}</a>
+          <button type="button" className="adnlink" onClick={() => setClassic(true)}>↺ {tr("Former layout")}</button>
+        </nav>
+        <div className="adpanels">
+          <h2 className="adcat">{q ? tr("Search results") : <><span aria-hidden="true">{current[1]}</span> {current[2]}</>}</h2>
+          {shown.length === 0 && <p className="note">{tr("Nothing found. Try another word, or browse the sections.")}</p>}
+          {shown.map((p, i) => <div className="adpanel" key={`${p.cat}-${i}`}>{p.node}</div>)}
+        </div>
+      </div>
     </div>
   );
 }
