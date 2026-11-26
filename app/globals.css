@@ -3923,3 +3923,7 @@ html[data-ft~="resume"] .mmsummary { display: grid; gap: 2px; margin: 10px 0 12p
 .adm .qadmin > section[data-q="scores"], .adm .qadmin > section[data-q="quick"] { padding-left: 8px; padding-right: 8px; overflow-x: auto; }
 .adm .qadmin > section[data-q="scores"] > h2, .adm .qadmin > section[data-q="scores"] > .hint, .adm .qadmin > section[data-q="quick"] > h2 { padding-left: 10px; }
 .adm .qadmin > section[data-q="scores"] .mrowa { justify-content: start; }
+
+.vlrnone { margin-top: 12px; }
+.vlrnone summary { cursor: pointer; font-weight: 700; }
+.vlrnone summary small { color: var(--muted); margin-left: 4px; }

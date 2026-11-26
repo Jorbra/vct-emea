@@ -134,6 +134,15 @@ export function VlrTables({ data, call, onDone }) {
           })}</ul>
         </>
       )}
+      {(data.without || []).length > 0 && (
+        <details className="vlrnone">
+          <summary>{tr("No table on vlr.gg")} <small>{data.withoutCount}</small></summary>
+          <p className="hint">{tr("vlr.gg has no table for these: a forfeit, or a round it does not list. Nothing to read; their score stays as it is.")}</p>
+          <ul className="vlrmiss">{data.without.map((m) => (
+            <li key={`${m.event}:${m.id}`}><a href={`/match/${m.event}/${m.id}`}>{m.a} vs {m.b}</a> <small>{tr(EVENT_NAMES[m.event] || m.event)} · {m.why === "nostats" ? tr("table unavailable on vlr.gg") : tr("not listed on vlr.gg")}</small></li>
+          ))}</ul>
+        </details>
+      )}
       <p className="hint">{tr("Tables come from vlr.gg a few pages at a time; a match without one may simply not be on vlr.gg yet.")}</p>
     </section>
   );
