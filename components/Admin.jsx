@@ -978,7 +978,7 @@ function QuickScores({ event, todo, name, onChange }) {
     }
   }
   return (
-    <section>
+    <section data-q="quick">
       <h2>{tr("Quick scores")} <small>{wait.length}</small></h2>
       <p className="hint">{tr("One click per result; the winner goes through at once. Undo brings the last one back.")}</p>
       <input className="quickfind" type="search" placeholder={tr("Find a team")} aria-label={tr("Find a team")} value={q} onChange={(e) => setQ(e.target.value)} />
@@ -1037,10 +1037,18 @@ function QualifierAdmin({ event, data, onChange }) {
   }
   const rounds = [...roundsFor(size), THIRD];
   const todo = bracket.matches.filter((m) => m.a && m.b && !m.bye);
+  // one part at a time (the 256 teams alone made a page without end); the part shown is kept for the next visit
+  const [qtab, setQtabState] = useState("teams");
+  useEffect(() => { try { const k = localStorage.getItem("vct-qadmin-tab"); if (k) setQtabState(k); } catch { /* the default */ } }, []);
+  const setQtab = (k) => { setQtabState(k); try { localStorage.setItem("vct-qadmin-tab", k); } catch { /* not kept */ } };
+  const QTABS = [["teams", tr("Teams"), `${count}/${size}`], ["quick", tr("Quick scores"), todo.length ? String(todo.length) : ""], ["scores", tr("Scores"), ""], ["format", tr("Format"), ""], ["reset", tr("Reset"), ""]];
   return (
-    <div className="qadmin">
+    <div className="qadmin qtabbed" data-qtab={qtab}>
       <SaveNote note={msg} />
-      <section>
+      <div className="nav4 qtabs" role="tablist" aria-label={tr("Qualifier")}>
+        {QTABS.map(([k, l, n]) => <button key={k} type="button" role="tab" aria-selected={qtab === k} onClick={() => setQtab(k)}>{l}{n ? <small> {n}</small> : null}</button>)}
+      </div>
+      <section data-q="teams">
         <h2>{tr("Teams")} <small>{count}/{size}</small></h2>
         <p className="hint">{tr("The logo is found by itself in public/logos from the short tag only (for example VIT.png); no tag, no logo.")}</p>
         <div className="slotgrid">
@@ -1063,7 +1071,7 @@ function QualifierAdmin({ event, data, onChange }) {
           </div>
         </details>
       </section>
-      <section>
+      <section data-q="format">
         <h2>{tr("Format")}</h2>
         <div className="bogrid">
           {rounds.map((r) => (
@@ -1080,7 +1088,7 @@ function QualifierAdmin({ event, data, onChange }) {
         </div>
       </section>
       <QuickScores event={event} todo={todo} name={name} onChange={onChange} />
-      <section>
+      <section data-q="scores">
         <h2>{tr("Scores")}</h2>
         {todo.length === 0 && <p className="hint">{tr("No match to play yet. Matches appear here once both teams are known.")}</p>}
         {rounds.map((r) => {
@@ -1096,7 +1104,7 @@ function QualifierAdmin({ event, data, onChange }) {
           );
         })}
       </section>
-      <section>
+      <section data-q="reset">
         <div className="toolbar">
           <button className="btn danger" disabled={busy} onClick={() => (sure ? (setSure(false), run("/api/q/reset", {})) : (setSure(true), setTimeout(() => setSure(false), 5000)))}>
             {sure ? tr("Confirm: erase this Qualifier") : tr("Reset this Qualifier")}

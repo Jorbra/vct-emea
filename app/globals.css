@@ -3867,3 +3867,59 @@ html[data-ft~="resume"] .mmsummary { display: grid; gap: 2px; margin: 10px 0 12p
 .fboxhist li { display: grid; grid-template-columns: minmax(0, 48%) minmax(0, 1fr); gap: 10px; }
 .fhdate { color: var(--muted); font-style: italic; font-variant-numeric: tabular-nums; }
 .fboxhist i { color: var(--muted); }
+
+/* ---- the editor, refreshed (all its pages, not only its home) ---- */
+/* the qualifier's parts, one at a time (components/Admin.jsx QualifierAdmin) */
+.qtabbed[data-qtab] > section[data-q] { display: none; }
+.qtabbed[data-qtab="teams"] > section[data-q="teams"], .qtabbed[data-qtab="quick"] > section[data-q="quick"], .qtabbed[data-qtab="scores"] > section[data-q="scores"],
+.qtabbed[data-qtab="format"] > section[data-q="format"], .qtabbed[data-qtab="reset"] > section[data-q="reset"] { display: block; }
+.qtabs button small { color: var(--muted); font-weight: 700; margin-left: 2px; }
+.qtabs button[aria-selected="true"] small { color: var(--lime); }
+
+/* the header and the navigation: one card, three levels that read as one path */
+.admhead { padding: 4px 0 6px; }
+.adm .evnav { border-radius: 14px; box-shadow: 0 1px 0 rgba(0, 0, 0, .25); }
+.adm .nav1 { padding: 0 8px; }
+.adm .nav1 button { padding: 13px 16px; }
+.adm .nav2 { padding: 2px 10px 0; }
+.adm .nav2 button { color: var(--fg); opacity: .7; }
+.adm .nav2 button:hover, .adm .nav2 button[aria-selected="true"] { opacity: 1; }
+.adm .nav3 { background: color-mix(in srgb, var(--fg) 3%, transparent); padding: 10px 14px; }
+.adm .nav3 button { padding: 7px 15px; }
+.adm .nav4 { gap: 2px; padding: 4px; margin-bottom: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.adm .nav4 button { border-radius: 8px; padding: 9px 16px; box-shadow: none; }
+.adm .nav4 button:hover { background: color-mix(in srgb, var(--fg) 6%, transparent); }
+.adm .nav4 button[aria-selected="true"] { background: var(--lime); color: var(--lime-ink); box-shadow: none; }
+
+/* the parts of a page: cards with breathing room */
+.adm .einfo { border-radius: 12px; }
+.adm .einfo summary { padding: 13px 16px; font-size: 15px; }
+.adm .einfo summary:hover { background: color-mix(in srgb, var(--fg) 4%, transparent); }
+.adm .einfo[open] summary { border-bottom: 1px solid var(--line); }
+.adm .einfo > :not(summary) { padding-left: 16px; padding-right: 16px; }
+.adm .einfo > :last-child:not(summary) { padding-bottom: 14px; }
+.adm .qadmin > section { padding: 16px 18px; margin: 0 0 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.adm .qadmin > section > h2:first-child { margin-top: 0; font-size: 22px; }
+
+/* fields and buttons: taller, rounder, a clear focus */
+.adm input, .adm select, .adm textarea { border-radius: 8px; min-height: 40px; transition: border-color .15s, box-shadow .15s; }
+.adm input:hover, .adm select:hover, .adm textarea:hover { border-color: color-mix(in srgb, var(--fg) 30%, var(--line)); }
+.adm input:focus-visible, .adm select:focus-visible, .adm textarea:focus-visible { outline: none; border-color: var(--lime); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lime) 25%, transparent); }
+.adm .btn { border-radius: 8px; min-height: 38px; }
+.adm .btn.small { min-height: 32px; }
+.adm .tform, .adm .slotpair { border-radius: 12px; }
+
+@media (max-width: 760px) {
+  .adm .admhead { align-items: flex-start; }
+  .adm .admlinks { width: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
+  .adm .admlinks .btn { flex: 1 1 auto; }
+  .adm .nav1 button { padding: 12px; font-size: 14px; }
+  .adm .nav4 { overflow-x: auto; flex-wrap: nowrap; }
+  .adm .qadmin > section { padding: 14px 12px; }
+  .adm input, .adm select { min-height: 44px; font-size: 16px; }
+  .adm .btn { min-height: 44px; }
+}
+/* the score rows are a wide grid: their part keeps little side room and scrolls sideways when narrower than a row */
+.adm .qadmin > section[data-q="scores"], .adm .qadmin > section[data-q="quick"] { padding-left: 8px; padding-right: 8px; overflow-x: auto; }
+.adm .qadmin > section[data-q="scores"] > h2, .adm .qadmin > section[data-q="scores"] > .hint, .adm .qadmin > section[data-q="quick"] > h2 { padding-left: 10px; }
+.adm .qadmin > section[data-q="scores"] .mrowa { justify-content: start; }

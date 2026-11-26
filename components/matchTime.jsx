@@ -550,7 +550,7 @@ export function RoundTimes({ items, call }) {
   const rounds = groupRounds(items, tr);
   if (!rounds.length) return null;
   return (
-    <details className="einfo roundtimes" open>
+    <details className="einfo roundtimes">
       <summary><b>{tr("Day and time of each round")}</b></summary>
       <p className="hint">{tr("Every match of the round gets this day and time. Leave it empty to remove them.")}</p>
       {rounds.map((r) => {
