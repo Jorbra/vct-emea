@@ -3741,13 +3741,13 @@ html[data-ft~="pictos"] .ldkey-new { display: inline; }
 .qualrow, .todaycar .tcrow, .othermaps > div, .informrow, .frisetrack { padding-top: 6px; margin-top: -6px; }
 
 /* the editors' update notice (components/UpdateNotice.jsx) */
-.updnote { position: fixed; z-index: 90; left: 16px; bottom: 16px; width: min(380px, calc(100vw - 32px)); display: grid; gap: 8px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--lime); border-radius: 10px; color: var(--fg); box-shadow: 0 10px 30px rgba(0, 0, 0, .45); animation: toastin .35s cubic-bezier(.2, .8, .2, 1); }
+.updnote { position: fixed; z-index: 90; right: 16px; top: 16px; width: min(380px, calc(100vw - 32px)); display: grid; gap: 8px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--lime); border-radius: 10px; color: var(--fg); box-shadow: 0 10px 30px rgba(0, 0, 0, .45); animation: toastin .35s cubic-bezier(.2, .8, .2, 1); }
 .updnote ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; max-height: 40vh; overflow: auto; font-size: 13px; }
 .updnote ul small { color: var(--lime); font-weight: 700; margin-right: 4px; }
 .updnote > span { font-size: 13px; color: var(--muted); }
 .updbtns { display: flex; gap: 8px; flex-wrap: wrap; }
 .updwho { font-size: 11px; color: var(--muted); }
-@media (max-width: 640px) { .updnote { bottom: 76px; } }
+@media (max-width: 640px) { .updnote { top: 8px; right: 8px; width: calc(100vw - 16px); } }
 @media (prefers-reduced-motion: reduce) { .updnote { animation: none; } }
 
 /* preview "flash" (lib/apercu.js): a score that changes on screen flashes for a moment (components/ScoreFlash.jsx) */
