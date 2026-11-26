@@ -18,6 +18,7 @@ import { sharedPreview } from "../../../lib/preview.js";
 import { requestDue, requestFetch, updateDue } from "../../../lib/teamfetch.js";
 import { siteTeams } from "../../../lib/teams.js";
 import { playerTournament, readDetails, tournamentStats } from "../../../lib/tstats.js";
+import { photoOf } from "../../../lib/playerphoto.js";
 import { allMatches } from "../../../lib/matchlist.js";
 
 export const dynamic = "force-dynamic";
@@ -68,6 +69,7 @@ function load(slug, update = false) {
       return Object.fromEntries(["r", "acs", "kd", "kast", "adr", "hs"].map((k) => [k, span(k)]));
     })(),
     lp, lpState: lp ? "ready" : entry ? "none" : "pending", vlr: linkVlr(vlrEntry, dir), updating: !!entry && (lpNow || vlrNow),
+    photo: photoOf(key, playerInfo, vlrInfo.players),
   };
 }
 

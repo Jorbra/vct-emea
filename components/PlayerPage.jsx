@@ -188,6 +188,7 @@ function View({ p }) {
       <SiteNav />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › {p.team ? <><a href={teamHref(p.team)}>{p.team}</a> › </> : null}<span>{p.name}</span></nav>
       <div className={"thead" + (hero ? " pcard" : "") + (ag ? " withagent" : "")} data-agent={hero ? (ag ? ag.name : hero.agent) : undefined}>
+        {p.photo && <img className="pphoto phead" src={p.photo} alt="" loading="lazy" onError={(ev) => { ev.currentTarget.style.display = "none"; }} />}
         {p.team ? (p.teamOnSite ? <Crest team={team} /> : <span className="thlogo"><LpImg f={p.teamLogo} /></span>) : null}
         <div>
           <div className="tname"><span className="pt"><Flag cc={p.cc} /><span>{p.name}</span><FollowStar slug={p.slug || teamSlug(p.name)} />{p.captain && <span className="tcapt" title={tr("Captain")}>C</span>}</span></div>

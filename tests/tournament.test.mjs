@@ -1546,7 +1546,7 @@ test("vlr.gg: reads a player's page and a team's, and what to read next", async 
   assert.deepEqual(p.results[0], { event: "VCT 26: EMEA Stage 2", stage: "Play-Ins · LR2", a: "FNATIC", b: "Joblife", sa: 0, sb: 2, win: false, date: "2026-08-14" });
   assert.equal(p.results[1].win, true);
   assert.equal(parseVlrTeam(html).results.length, 2);
-  assert.deepEqual(parseVlrPlayer("<p>nothing</p>"), { agents: [], totals: null, results: [], team: null });
+  assert.deepEqual(parseVlrPlayer("<p>nothing</p>"), { agents: [], totals: null, results: [], team: null, photo: "" });
 
   assert.equal(vlrId([{ url: "https://fnatic.com" }, { url: "https://www.vlr.gg/player/438" }], "player"), "438");
   assert.equal(vlrId([{ url: "https://www.vlr.gg/team/2593" }], "player"), "");

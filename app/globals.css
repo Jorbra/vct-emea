@@ -3762,3 +3762,11 @@ html[data-ft~="projection"] .projtoggle { display: flex; }
 .projmove.up { color: #3fb950; }
 .projmove.down { color: #e5484d; }
 .rtbl td.rproj { outline: 1px dashed color-mix(in srgb, var(--fg) 45%, transparent); outline-offset: -3px; }
+
+/* preview "photos" (lib/apercu.js): players' photos from Liquipedia or vlr.gg, on their page and on the roster cards */
+.pphoto { display: none; }
+html[data-ft~="photos"] .pphoto { display: block; object-fit: cover; object-position: center 20%; background: var(--surface-2, var(--line)); }
+html[data-ft~="photos"] .phead { width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--agc, var(--lime)); flex: none; }
+html[data-ft~="photos"] .rcphoto { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--agc, var(--line)); margin-bottom: 2px; }
+html[data-ft~="photos"] .rcav.hasphoto { display: none; }
+html[data-ft~="photos"][data-ft~="cartes"] .rcard.withagent:has(.rcphoto) { padding-top: 40px; }

@@ -17,6 +17,7 @@ import { teamTint } from "../../../lib/teamtint.js";
 
 // Always read the database on request: results change while the events run.
 import { publicState } from "../../../lib/publicstate.js";
+import { photoOf } from "../../../lib/playerphoto.js";
 import { streakOf } from "../../../lib/streaks.js";
 
 export const dynamic = "force-dynamic";
@@ -32,7 +33,7 @@ export default async function Page({ params, searchParams }) {
   const key = String(slug || "").toLowerCase();
   const initial = getState(getDb());
   const p = teamProfile(initial, key);
-  const { teamInfo, vlrInfo, searchFound, dir } = lpData();
+  const { teamInfo, playerInfo, vlrInfo, searchFound, dir } = lpData();
   const vlrEntry = vlrInfo.teams && vlrInfo.teams[key];
   const onVlr = teamVlrId(key, teamInfo, { players: vlrInfo.players || {} }, searchFound);
   const vlrNow = !!onVlr && update && updateDue(vlrEntry) && !vlrBlocked(vlrInfo);
@@ -52,7 +53,7 @@ export default async function Page({ params, searchParams }) {
   const entries = p ? readDetails(getDb()) : [];
   const tstats = p && tournamentStats(initial, entries).teams[key] ? { ...tournamentStats(initial, entries).teams[key], comps: extraStats(initial, entries).teamComps[key] || [], radar: teamPercentiles(tournamentStats(initial, entries), p.name) } : null;
   // each of its players' numbers, for the roster cards
-  const rosterStats = p ? tournamentStats(initial, entries).players.filter((x) => x.team && x.team.toLowerCase() === p.name.toLowerCase()).map(({ slug, name, r, acs, kd, maps, agents }) => ({ slug, name, r, acs, kd, maps, agent: agents[0] ? agents[0].name : "" })) : [];
+  const rosterStats = p ? tournamentStats(initial, entries).players.filter((x) => x.team && x.team.toLowerCase() === p.name.toLowerCase()).map(({ slug, name, r, acs, kd, maps, agents }) => ({ slug, name, r, acs, kd, maps, agent: agents[0] ? agents[0].name : "", photo: photoOf(slug, playerInfo, vlrInfo.players) })) : [];
   // the page's colours from the logo, worked out here and kept: tinted from the first paint
   const palette = p && p.team && p.team.logo ? await teamTint(getDb(), p.team.logo) : null;
   const ld = p ? { "@context": "https://schema.org", "@type": "SportsTeam", name: p.name, sport: "VALORANT", ...(p.team && p.team.logo && /^https?:/.test(p.team.logo) ? { logo: p.team.logo } : {}), athlete: rosterStats.map((x) => ({ "@type": "Person", name: x.name })) } : null;
