@@ -3776,3 +3776,32 @@ html[data-ft~="photos"][data-ft~="cartes"] .rcard.withagent:has(.rcphoto) { padd
 html[data-ft~="resume"] .mmsummary { display: grid; gap: 2px; margin: 10px 0 12px; padding: 10px 14px; border-left: 3px solid var(--lime); background: var(--surface); border-radius: 0 8px 8px 0; font-size: 14px; }
 .mmsummary p { margin: 0; }
 .mmsummary p:first-child { font-weight: 700; }
+
+/* preview "fiche" (lib/apercu.js): the player sheet, laid out like the player pages of Liquipedia and vlr.gg */
+.fhead { position: relative; overflow: hidden; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: center; padding: 18px 20px; margin-bottom: 14px; background: linear-gradient(120deg, var(--surface) 55%, color-mix(in srgb, var(--agc, var(--lime)) 14%, var(--surface)) 100%); border: 1px solid var(--line); border-radius: 12px; }
+.fhead.withagent::after { content: ""; position: absolute; inset: 0 0 0 auto; width: 46%; background: var(--agimg, none) right 20% / cover no-repeat; opacity: .22; mask-image: linear-gradient(90deg, transparent, #000 60%); -webkit-mask-image: linear-gradient(90deg, transparent, #000 60%); pointer-events: none; }
+.fhead > * { position: relative; z-index: 1; }
+.fphotobox { width: 132px; height: 132px; border-radius: 12px; overflow: hidden; background: var(--surface-2, var(--bg)); border: 2px solid var(--agc, var(--line)); display: grid; place-items: center; }
+.fphoto { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; display: block; }
+.finit { font: 800 56px var(--font-display); color: var(--muted); }
+.fid { display: grid; gap: 6px; min-width: 0; }
+.fname { display: flex; align-items: center; gap: 10px; font: 800 clamp(28px, 5vw, 42px)/1 var(--font-display); letter-spacing: .01em; }
+.freal { color: var(--muted); font-size: 15px; }
+.fmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 14px; }
+.fmeta > span { display: inline-flex; align-items: center; gap: 6px; }
+.fteam .crest, .fteam .thlogo img { width: 22px; height: 22px; }
+.fnums { display: flex; flex-wrap: wrap; gap: 6px 24px; margin-top: 4px; }
+.fnums div { display: grid; }
+.fnums b { font: 800 24px var(--font-display); color: var(--agc, var(--lime)); }
+.fnums span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.fhead .followhint { margin: 0; }
+.fbox dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 12px; margin: 0; font-size: 14px; }
+.fbox dt { color: var(--muted); }
+.fbox dd { margin: 0; overflow-wrap: anywhere; }
+.fsig { display: flex; gap: 4px; }
+.playerpage.fiche .cols { margin-top: 4px; }
+@media (max-width: 640px) {
+  .fhead { grid-template-columns: 1fr; justify-items: start; padding: 16px; }
+  .fphotobox { width: 104px; height: 104px; }
+  .fhead.withagent::after { width: 70%; opacity: .14; }
+}

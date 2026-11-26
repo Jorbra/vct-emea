@@ -1,6 +1,7 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
+import { PartTabs } from "./Round10.jsx";
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
 import SiteNav from "./SiteNav.jsx";
 import { ThemeSwitch } from "./theme.jsx";
@@ -74,14 +75,15 @@ function countryName(n, lang) {
 }
 
 /** The side column: the person's information and former teams, from Liquipedia. */
-function PlayerSide({ p }) {
+function PlayerSide({ p, historyOnly = false }) {
   const tr = useT();
   const { lp } = p;
   const otherTeam = lp.team && teamSlug(lp.team) !== p.teamSlug;
   const present = (s) => s.replace(/Present$/, tr("Present"));
+  const Box = historyOnly ? Fragment : "aside";
   return (
-    <aside>
-      <div className="info tinfo">
+    <Box>
+      {!historyOnly && <div className="info tinfo">
         <h3>{tr("Player information")}</h3>
         <dl>
           {lp.nationality.length > 0 && <><dt>{tr("Nationality:")}</dt><dd>{lp.nationality.map((n) => countryName(n, tr.lang)).join(", ")}</dd></>}
@@ -91,7 +93,7 @@ function PlayerSide({ p }) {
           {otherTeam && <><dt>{tr("Team on Liquipedia:")}</dt><dd>{lp.team}</dd></>}
           {lp.winnings && <><dt>{tr("Winnings:")}</dt><dd>{moneyText(lp.winnings, tr.lang)}</dd></>}
         </dl>
-      </div>
+      </div>}
       {lp.history.length > 0 && (
         <div className="info tinfo">
           <h3>{tr("Team history")}</h3>
@@ -105,7 +107,7 @@ function PlayerSide({ p }) {
           </ul>
         </div>
       )}
-    </aside>
+    </Box>
   );
 }
 
@@ -152,7 +154,74 @@ function Tournament({ t }) {
   );
 }
 
-function View({ p }) {
+/** Years old on a birth date (YYYY-MM-DD), or null. */
+function ageOf(born, now = new Date()) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(born || "");
+  if (!m) return null;
+  let age = now.getFullYear() - Number(m[1]);
+  if (now.getMonth() + 1 < Number(m[2]) || (now.getMonth() + 1 === Number(m[2]) && now.getDate() < Number(m[3]))) age -= 1;
+  return age >= 10 && age < 80 ? age : null;
+}
+
+/** The top of the player sheet (preview "fiche"), as player pages on Liquipedia and vlr.gg: photo, names, country, team, role, key numbers. */
+function FicheHead({ p, hero, team, links, ag }) {
+  const tr = useT();
+  const { lp } = p;
+  const [broken, setBroken] = useState(false);
+  const age = lp ? ageOf(lp.born) : null;
+  const country = lp && lp.nationality[0] ? countryName(lp.nationality[0], tr.lang) : "";
+  return (
+    <div className={"fhead" + (ag ? " withagent" : "")} data-agent={ag ? ag.name : undefined}>
+      <div className="fphotobox">
+        {p.photo && !broken ? <img className="fphoto" src={p.photo} alt="" onError={() => setBroken(true)} /> : <span className="finit" aria-hidden="true">{p.name.charAt(0).toUpperCase()}</span>}
+      </div>
+      <div className="fid">
+        <div className="fname"><span>{p.name}</span><FollowStar slug={p.slug || teamSlug(p.name)} />{p.captain && <span className="tcapt" title={tr("Captain")}>C</span>}</div>
+        {(p.realName || (lp && lp.name)) && <div className="freal">{p.realName || lp.name}</div>}
+        <div className="fmeta">
+          {(p.cc || country) && <span className="fcountry"><Flag cc={p.cc} /> {country || String(p.cc).toUpperCase()}</span>}
+          {p.team && <span className="fteam">{p.teamOnSite ? <Crest team={team} /> : <span className="thlogo"><LpImg f={p.teamLogo} /></span>}<a href={teamHref(p.team)}>{p.team}</a></span>}
+          {p.role && <span className="rolebadge">{tr(p.role)}</span>}
+          {age != null && <span>{tr("{n} years old", { n: age })}</span>}
+        </div>
+        {hero && <div className="fnums">{hero.nums.map(([label, value]) => <div key={label}><b>{value}</b><span>{label}</span></div>)}</div>}
+        <div className="tlinks"><a href={`/compare?a=${encodeURIComponent(p.name)}`}>{tr("Compare")}</a>{links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer">{l.type} ↗</a>)}</div>
+        <p className="hint followhint">{tr("Follow this player to be alerted when they become a free agent or sign with a team.")} <AlertsButton /></p>
+      </div>
+    </div>
+  );
+}
+
+/** The identity card at the side of the player sheet (preview "fiche"), from Liquipedia: one line per thing known. */
+function FicheBox({ p }) {
+  const tr = useT();
+  const { lp } = p;
+  if (!lp) return null;
+  const present = (s) => s.replace(/Present$/, tr("Present"));
+  const age = ageOf(lp.born);
+  const rows = [
+    [tr("Name"), lp.name],
+    [tr("Alternate names"), lp.altIds],
+    [tr("Born"), lp.born ? `${dayText(lp.born, tr.lang)}${age != null ? ` (${tr("{n} years old", { n: age })})` : ""}` : ""],
+    [tr("Nationality"), lp.nationality.map((n) => countryName(n, tr.lang)).join(", ")],
+    [tr("Status"), lp.status ? tr(lp.status) : ""],
+    [tr("Role"), lp.roles ? tr(lp.roles) : ""],
+    [tr("Team"), p.team || lp.team],
+    [tr("Years active"), lp.years ? present(lp.years) : ""],
+    [tr("Approx. winnings"), lp.winnings ? moneyText(lp.winnings, tr.lang) : ""],
+  ].filter(([, v]) => v);
+  return (
+    <div className="info fbox">
+      <h3>{tr("Player information")}</h3>
+      <dl>
+        {rows.map(([k, v]) => <Fragment key={k}><dt>{k}</dt><dd>{v}</dd></Fragment>)}
+        {(lp.signature || []).length > 0 && <><dt>{tr("Signature agents")}</dt><dd className="fsig">{lp.signature.map((a) => <span key={a} title={a}><AgentIcon name={a} size={22} /></span>)}</dd></>}
+      </dl>
+    </div>
+  );
+}
+
+function View({ p, fiche = false }) {
   const tr = useT();
   useAutoRefresh();
   const played = p.matches.filter((m) => m.sa != null && m.sb != null || m.at).sort((x, y) => (y.at || "").localeCompare(x.at || "")).slice(0, 15);
@@ -177,9 +246,10 @@ function View({ p }) {
   } : p.totals ? { agent: "", nums: [["ACS", p.totals.acs], ["K/D", p.totals.kd], ["Rating", p.totals.rating], [tr("Maps"), p.totals.maps]] } : null;
   // the main agent's portrait behind the card and its colour for the numbers
   const ag = hero && hero.agent ? agentInfo(hero.agent) : null;
+  const [part, setPart] = useState("overview");
   const agentStyle = ag ? { "--agc": ag.color, ...(ag.portrait ? { "--agimg": `url(${ag.portrait})` } : {}) } : undefined;
   return (
-    <div className="wrap teampage playerpage" style={agentStyle}>
+    <div className={"wrap teampage playerpage" + (fiche ? " tabbed fiche" : "")} data-tab={fiche ? part : undefined} style={agentStyle}>
       <div className="topbar">
         <h1 className="brandh"><a className="homelink" href="/" title={tr("Home")}><EmeaMark /></a><span>{p.name}</span></h1>
         <SearchBar />
@@ -187,7 +257,9 @@ function View({ p }) {
       </div>
       <SiteNav />
       <nav className="crumbs" aria-label={tr("Breadcrumb")}><a href="/">{tr("Home")}</a> › {p.team ? <><a href={teamHref(p.team)}>{p.team}</a> › </> : null}<span>{p.name}</span></nav>
-      <div className={"thead" + (hero ? " pcard" : "") + (ag ? " withagent" : "")} data-agent={hero ? (ag ? ag.name : hero.agent) : undefined}>
+      {fiche && <FicheHead p={p} hero={hero} team={team} links={links} ag={ag} />}
+      {fiche && <PartTabs value={part} onChange={setPart} label={tr("Player")} items={[["overview", tr("Overview")], ["stats", tr("Stats")], ["matches", tr("Matches")], ["history", tr("History")]]} />}
+      {!fiche && <div className={"thead" + (hero ? " pcard" : "") + (ag ? " withagent" : "")} data-agent={hero ? (ag ? ag.name : hero.agent) : undefined}>
         {p.photo && <img className="pphoto phead" src={p.photo} alt="" loading="lazy" onError={(ev) => { ev.currentTarget.style.display = "none"; }} />}
         {p.team ? (p.teamOnSite ? <Crest team={team} /> : <span className="thlogo"><LpImg f={p.teamLogo} /></span>) : null}
         <div>
@@ -202,16 +274,16 @@ function View({ p }) {
           )}
           <div className="tlinks"><a href={`/compare?a=${encodeURIComponent(p.name)}`}>{tr("Compare")}</a>{links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer">{l.type} ↗</a>)}</div>
         </div>
-      </div>
-      <PlayerHero p={p} />
-      {(p.teamRows || []).length > 0 && <NextMatchBanner rows={p.teamRows} name={p.team} live={p.teamLive || {}} />}
-      {p.tour && p.ranges && <PlayerRadar stats={p.tour} ranges={p.ranges} />}
-      {p.lp && <CareerTimeline history={p.lp.history} />}
+      </div>}
+      <div data-part="overview"><PlayerHero p={p} /></div>
+      {(p.teamRows || []).length > 0 && <div data-part="overview"><NextMatchBanner rows={p.teamRows} name={p.team} live={p.teamLive || {}} /></div>}
+      {p.tour && p.ranges && <div data-part="stats"><PlayerRadar stats={p.tour} ranges={p.ranges} /></div>}
+      {p.lp && <div data-part="history"><CareerTimeline history={p.lp.history} /></div>}
       {p.lpState === "pending" && <p className="note lpwait" role="status">{tr("Looking for this information…")}</p>}
       {p.updating && <p className="note lpwait" role="status">{tr("Updating this information…")}</p>}
       {p.lpState === "none" && !p.onSite && !p.teamOnSite && !p.vlr && !p.updating && !p.lines.length && <p className="note">{tr("No information found for now.")}</p>}
       {p.totals && (
-        <div className="pstatbar">
+        <div className="pstatbar" data-part="overview">
           <div><b>{p.totals.acs}</b><span>ACS</span></div>
           <div><b>{p.totals.kd}</b><span>K/D</span></div>
           <div><b>{p.totals.k}/{p.totals.d}/{p.totals.a}</b><span>K/D/A</span></div>
@@ -222,10 +294,10 @@ function View({ p }) {
       {!p.totals && p.mvps.length > 0 && <div className="pstatbar"><div><b>{p.mvps.length}</b><span>MVP</span></div></div>}
       <div className={lp ? "cols" : undefined}>
         <main>
-          {p.tour && <Tournament t={p.tour} />}
-          <VlrStats vlr={p.vlr} />
+          {p.tour && <div data-part="stats"><Tournament t={p.tour} /></div>}
+          <div data-part="stats"><VlrStats vlr={p.vlr} /></div>
           {p.lines.length > 0 && (
-            <section>
+            <section data-part="matches">
               <h2>{tr("Matches played")}</h2>
               <div className="tablewrap">
                 <table>
@@ -238,7 +310,7 @@ function View({ p }) {
             </section>
           )}
           {(p.onSite || p.teamOnSite) && (
-            <section>
+            <section data-part="matches">
               <h2>{tr("{team}'s matches", { team: p.team })}</h2>
               {played.length === 0 ? <p className="note">{tr("No match yet.")}</p> : (
                 <div className="tablewrap">
@@ -252,8 +324,8 @@ function View({ p }) {
               )}
             </section>
           )}
-          <VlrResults vlr={p.vlr} />
-          {lp && lp.results.length > 0 && <Achievements list={lp.results} />}
+          <div data-part="overview matches"><VlrResults vlr={p.vlr} /></div>
+          {lp && lp.results.length > 0 && <div data-part="history"><Achievements list={lp.results} /></div>}
           <VlrCredit vlr={p.vlr} />
           {lp && (
             <p className="note">
@@ -261,12 +333,12 @@ function View({ p }) {
             </p>
           )}
         </main>
-        {lp && <PlayerSide p={p} />}
+        {lp && (fiche ? <aside><FicheBox p={p} /><PlayerSide p={p} historyOnly /></aside> : <PlayerSide p={p} />)}
       </div>
     </div>
   );
 }
 
-export default function PlayerPage({ profile, lang }) {
-  return <LangProvider lang={lang}><View p={profile} /></LangProvider>;
+export default function PlayerPage({ profile, lang, fiche = false }) {
+  return <LangProvider lang={lang}><View p={profile} fiche={fiche} /></LangProvider>;
 }

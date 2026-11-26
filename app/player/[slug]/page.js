@@ -19,6 +19,8 @@ import { requestDue, requestFetch, updateDue } from "../../../lib/teamfetch.js";
 import { siteTeams } from "../../../lib/teams.js";
 import { playerTournament, readDetails, tournamentStats } from "../../../lib/tstats.js";
 import { photoOf } from "../../../lib/playerphoto.js";
+import { shownApercu } from "../../../lib/apercu.js";
+import { isAdmin } from "../../../lib/session.js";
 import { allMatches } from "../../../lib/matchlist.js";
 
 export const dynamic = "force-dynamic";
@@ -89,7 +91,7 @@ export default async function Page({ params, searchParams }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
-      <PlayerPage profile={profile} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />
+      <PlayerPage profile={profile} fiche={shownApercu(getDb(), await isAdmin()).includes("fiche")} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />
     </>
   );
 }
