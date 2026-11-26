@@ -28,6 +28,7 @@ import { MatchNightTheme } from "../components/Season17.jsx";
 import { LiveTeamBanner, Welcome } from "../components/Round11.jsx";
 import { getDb } from "../lib/db.js";
 import { shownApercu } from "../lib/apercu.js";
+import UpdateNotice from "../components/UpdateNotice.jsx";
 import { activeBanner } from "../lib/round6.js";
 
 export async function generateMetadata() {
@@ -74,6 +75,7 @@ export default async function RootLayout({ children }) {
         <div id="content" tabIndex={-1}>{children}</div>
         <LangProvider lang={lang}><SiteFooter /><BackToTop /></LangProvider>
         <EditorAccess lang={lang} isAdmin={admin} />
+        {admin && <LangProvider lang={lang}><UpdateNotice /></LangProvider>}
         <MatchAlerts />
         <LangProvider lang={lang}><MobileTabs /><ResultToast /><CloseAlerts /><Motion /><MatchNightTheme /><TeamTheme /><CommandPalette /><KeyHelp /><LogoContrast /></LangProvider>
         <AccountSync />
