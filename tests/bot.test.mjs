@@ -23,7 +23,8 @@ function played() {
 test("the commands Discord is given: names, options, autocomplete", () => {
   const names = COMMANDS.map((c) => c.name);
   for (const n of ["score", "prochain", "classement", "equipe", "joueur", "bracket", "match", "live", "top", "lft", "suivre", "pronostic", "lier"]) assert.ok(names.includes(n), n);
-  for (const c of COMMANDS) {
+  // the slash commands (the right-click menus, type 2 and 3, have a free name and no description)
+  for (const c of COMMANDS.filter((x) => !x.type)) {
     assert.match(c.name, /^[a-z0-9_-]{1,32}$/);
     assert.ok(c.description.length <= 100, c.name);
     for (const o of c.options || []) assert.ok(o.description.length <= 100 && /^[a-z0-9_-]{1,32}$/.test(o.name), `${c.name}.${o.name}`);

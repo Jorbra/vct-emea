@@ -84,12 +84,12 @@ test("moderation: warn (kept, told in private), time out, kick refused above one
   const d = fakeDiscord();
   const deps = { db, discord: d.fn, lang: "fr" };
   let r = await runModCommand(interaction("warn", { user: "t1", reason: "spam" }, { resolved: target("t1", ["vip"]) }), deps);
-  assert.match(r.content, /averti \(1 avertissement en tout\)/);
+  assert.match(r.content, /averti \(cas #\d+, 1 avertissement en cours\)/);
   assert.ok(d.calls.some((c) => c.path === "/channels/dm1/messages" && /spam/.test(c.body.content)));
   r = await runModCommand(interaction("warnings", { user: "t1" }, { resolved: target("t1", ["vip"]) }), deps);
   assert.match(r.content, /spam — <@m>/);
-  r = await runModCommand(interaction("timeout", { user: "t1", duration: 600, reason: "calme" }, { resolved: target("t1", ["vip"]) }), deps);
-  assert.match(r.content, /exclu pour 10 minutes/);
+  r = await runModCommand(interaction("timeout", { user: "t1", duration: "10m", reason: "calme" }, { resolved: target("t1", ["vip"]) }), deps);
+  assert.match(r.content, /exclu pour 10 min, jusqu'à .* \(cas #\d+\)/);
   const patch = d.calls.find((c) => c.method === "PATCH" && c.path === "/guilds/G/members/t1");
   assert.ok(patch.body.communication_disabled_until);
   assert.match(patch.reason, /modo \(m\) : calme/);

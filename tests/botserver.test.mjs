@@ -70,7 +70,8 @@ test("server settings: bounds kept, AutoMod rules built from them", () => {
   assert.deepEqual(s.automod.exemptRoles, ["123456"]);
   assert.equal(s.logs.messages, false);
   assert.equal(s.logs.automod, true);
-  assert.deepEqual(s.tickets.categories, ["Support", "Signalement", "Partenariat"]);
+  assert.deepEqual(s.tickets.categories.map((c) => c.name), ["Support", "Signalement", "Partenariat"]);
+  assert.deepEqual(cleanServer({ tickets: { categories: ["Aide", { name: "Partenariat", role: "123456789", form: false }] } }).tickets.categories, [{ name: "Aide", role: "", form: true }, { name: "Partenariat", role: "123456789", form: false }]);
   const rules = automodRules(s);
   assert.deepEqual(rules.map((r) => [r.name, r.trigger_type]), [["VCT · invitations", 1], ["VCT · mots interdits", 1], ["VCT · mentions de masse", 5], ["VCT · spam", 3]]);
   assert.deepEqual(rules[0].trigger_metadata.regex_patterns, [INVITE_REGEX]);
@@ -219,7 +220,8 @@ test("tickets: a subject picked, add and remove a member, rename, priority, clai
   assert.equal(r.content, "🔒 Ticket fermé.");
   assert.equal(files.length, 1);
   assert.equal(files[0][0], "900000001");
-  assert.match(files[0][3], /alice : mon souci/);
+  assert.match(files[0][2], /\.html$/);
+  assert.match(files[0][3], /<!doctype html>[\s\S]*alice[\s\S]*mon souci/);
   assert.match(db.prepare("SELECT transcript FROM bot_tickets WHERE thread = ?").get(thread).transcript, /mon souci/);
   // a ticket quiet for 25 days, with 3 days set: closed by the minute task
   r = await openTicket({ ...deps, guild: "G", channel: "C", user: { id: "c3", username: "Chloé" } });
@@ -261,7 +263,7 @@ test("polls, giveaways and reminders: votes counted (one per member), closed and
   const d = fakeDiscord();
   const t0 = Date.parse("2026-11-26T12:00:00Z");
   const deps = { db, discord: d.fn, lang: "fr", now: t0 };
-  let r = await runMod2Command(ix("poll", { question: "Qui gagne ?", choices: "Fnatic ; Vitality", duration: 3600 }), deps);
+  let r = await runMod2Command(ix("poll", { question: "Qui gagne ?", choices: "Fnatic ; Vitality", duration: "1h" }), deps);
   assert.match(r.content, /Sondage publié/);
   const poll = db.prepare("SELECT * FROM bot_polls ORDER BY id DESC").get();
   const vote = (user, k) => handleButton({ guild_id: "G", member: { user: { id: user } }, data: { custom_id: `pv|${poll.id}|${k}` } }, deps);
@@ -270,13 +272,13 @@ test("polls, giveaways and reminders: votes counted (one per member), closed and
   r = await vote("u1", 1); // changes their vote
   assert.equal(r.type, 7);
   assert.match(r.data.embeds[0].description, /Vitality\*\*\n`██████████` 100% · 2/);
-  r = await runMod2Command(ix("giveaway", { prize: "Un maillot", duration: 600, winners: 1 }), deps);
+  r = await runMod2Command(ix("giveaway", { prize: "Un maillot", duration: "10m", winners: 1 }), deps);
   const gw = db.prepare("SELECT * FROM bot_giveaways ORDER BY id DESC").get();
   const join = (user) => handleButton({ guild_id: "G", member: { user: { id: user } }, data: { custom_id: `gv|${gw.id}` } }, deps);
   await join("u1");
   r = await join("u2");
   assert.equal(r.data.components[0].components[0].label, "Participer (2)");
-  r = await runMod2Command(ix("remindme", { text: "regarder la finale", in: 600 }, { userId: "u9" }), deps);
+  r = await runMod2Command(ix("remindme", { text: "regarder la finale", in: "10m" }, { userId: "u9" }), deps);
   assert.match(r.content, /message privé/);
   const done = await botTimers({ db, discord: d.fn, server: cleanServer({}), now: t0 + 2 * 3600000, rand: () => 0 });
   assert.ok(done.includes(`poll:${poll.id}`) && done.includes(`giveaway:${gw.id}`) && done.some((x) => x.startsWith("memo:")));

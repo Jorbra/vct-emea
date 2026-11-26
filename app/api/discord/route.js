@@ -34,6 +34,9 @@ import { ratings as r8ratings } from "../../../lib/r8data.js";
 import { winChance } from "../../../lib/proba26.js";
 import { MOD_NAMES, closeTicket, openTicket, runModCommand } from "../../../lib/botmod.js";
 import { MOD2_NAMES, claimTicket, handleButton, runMod2Command } from "../../../lib/botmod2.js";
+import { MOD3_NAMES, closeForm, contextMenu, durationSuggestions, formValues, modalSubmit, rateTicket, reasonSuggestions, runMod3Command, takePending, ticketForm, verifyClick } from "../../../lib/botmod3.js";
+import { gatewayState } from "../../../lib/botgateway.js";
+import { reopenTicket } from "../../../lib/botmod.js";
 import { botServer, postLog } from "../../../lib/botserver.js";
 import { discord, postFile } from "../../../lib/botapi.js";
 import { logBot } from "../../../lib/botstore.js";
@@ -45,8 +48,23 @@ const MOD_PUBLIC = ["serverinfo", "userinfo", "slowmode", "lock", "unlock"];
 function serverDeps(db, settings, now) {
   const server = botServer(db);
   const notify = (text) => postLog(discord, server, { kind: "bot", title: "🛡️ Action du bot", lines: [text], at: now });
-  return { db, discord, lang: settings.lang, logBot, now, server, notify, postFile };
+  // the server's name, for the private messages: known from the live connection (lib/botgateway.js)
+  const guildName = gatewayState().guildName || "";
+  return { db, discord, lang: settings.lang, logBot, now, server, notify, postFile, guildName };
 }
+
+/** A button that changes the message it is on: "thinking…" on it at once (type 6), then the message replaced. */
+function laterUpdate(i, work) {
+  after(async () => {
+    let out;
+    try { out = await work(); } catch (e) { out = { content: `❌ ${e.message}` }; }
+    const { public: _shown, ...payload } = out || { content: "?" };
+    await editOriginal(i.application_id, i.token, { components: [], ...payload }).catch((e) => console.log(`[bot] answer: ${e.message}`));
+  });
+  return NextResponse.json({ type: 6 });
+}
+
+const SERVER_CMDS = [...MOD_NAMES, ...MOD2_NAMES, ...MOD3_NAMES];
 
 /** A server command or ticket button: "thinking…" at once (Discord waits 3 s at most), the answer once Discord has done it. */
 function later(i, visible, work) {
@@ -135,11 +153,50 @@ export async function POST(req) {
   const user = (i.member && i.member.user) || i.user || {};
 
   // suggestions while typing
-  if (i.type === 4) return NextResponse.json({ type: 8, data: { choices: autocomplete(i, ctx) } });
+  if (i.type === 4) {
+    // the server commands: the preset reasons (editor), readable durations
+    if (i.data && SERVER_CMDS.includes(i.data.name)) {
+      const focused = (i.data.options || []).find((o) => o.focused) || {};
+      const choices = focused.name === "reason" ? reasonSuggestions(focused.value, botServer(db).moderation.reasons) : ["duration", "in"].includes(focused.name) ? durationSuggestions(focused.value) : [];
+      return NextResponse.json({ type: 8, data: { choices } });
+    }
+    return NextResponse.json({ type: 8, data: { choices: autocomplete(i, ctx) } });
+  }
+
+  // a form sent back (Discord "modal"): a right-click menu's, a ticket's opening or closing form
+  if (i.type === 5) {
+    if (!tokenSet() || !i.guild_id) return ephemeral({ content: L("Indisponible ici.", "Not available here.") });
+    const deps = serverDeps(db, settings, now);
+    const [kind, what, a, b] = String((i.data && i.data.custom_id) || "").split("|");
+    if (kind === "md") return later(i, false, () => modalSubmit(i, deps));
+    if (kind === "tk" && what === "form") {
+      const cat = deps.server.tickets.categories[Number(a)] || {};
+      const v = formValues(i);
+      return later(i, false, () => openTicket({ ...deps, guild: i.guild_id, channel: i.channel_id, user, role: String(b || "").replace(/\D/g, ""), category: cat.name || "", catRole: cat.role || "", subject: v.subject, details: v.details }));
+    }
+    if (kind === "tk" && what === "closeform") return later(i, false, () => closeTicket({ ...deps, guild: i.guild_id, thread: i.channel_id, user, permissions: i.member && i.member.permissions, reason: formValues(i).reason }));
+    return ephemeral({ content: "?" });
+  }
 
   // a prediction button
   if (i.type === 3) {
     const [kind, event, id, side] = String((i.data && i.data.custom_id) || "").split("|");
+    // a ticket's rating, in a private message (no server here): tr|<thread>|<stars>
+    if (kind === "tr") return NextResponse.json(rateTicket(db, event, user.id, Number(id)));
+    // a ban or kick confirmed (or not) by the moderator who asked: cf|<number>|yes|no
+    if (kind === "cf") {
+      const payload = takePending(db, event, user.id, now);
+      if (!payload) return NextResponse.json({ type: 7, data: { content: L("Cette confirmation n'est plus valable (5 minutes, ou pas la tienne).", "This confirmation is no longer valid."), components: [] } });
+      if (id !== "yes") return NextResponse.json({ type: 7, data: { content: L("Annulé.", "Cancelled."), components: [] } });
+      const deps = { ...serverDeps(db, settings, now), confirmed: true };
+      const again = { ...i, guild_id: payload.guild_id, channel_id: payload.channel_id, member: payload.member, data: payload.data };
+      return laterUpdate(i, () => (MOD3_NAMES.includes(payload.data.name) ? runMod3Command(again, deps) : runModCommand(again, deps)));
+    }
+    // "J'accepte le règlement": the access role
+    if (kind === "vf") {
+      if (!tokenSet() || !i.guild_id) return ephemeral({ content: L("Indisponible ici.", "Not available here.") });
+      return later(i, false, () => verifyClick(i, serverDeps(db, settings, now)));
+    }
     // role buttons, poll votes, giveaway entries (lib/botmod2.js)
     if (["rb", "pv", "gv"].includes(kind)) {
       if (!tokenSet() || !i.guild_id) return ephemeral({ content: L("Indisponible ici.", "Not available here.") });
@@ -150,15 +207,20 @@ export async function POST(req) {
     if (kind === "tk") {
       if (!tokenSet() || !i.guild_id) return ephemeral({ content: L("Les tickets ne marchent pas ici (bot non configuré).", "Tickets do not work here (bot not set up).") });
       const deps = serverDeps(db, settings, now);
-      if (event === "open") return later(i, false, () => openTicket({ ...deps, guild: i.guild_id, channel: i.channel_id, user, role: String(id || "").replace(/\D/g, "") }));
-      // a subject picked in the panel's list: tk|cat|<staff role>, the subject's number in the values
-      if (event === "cat") {
-        const k = Number(((i.data && i.data.values) || [])[0]);
-        const category = deps.server.tickets.categories[k] || "";
-        return later(i, false, () => openTicket({ ...deps, guild: i.guild_id, channel: i.channel_id, user, role: String(id || "").replace(/\D/g, ""), category }));
+      // the panel's button (tk|open|<role>) or a subject picked in its list (tk|cat|<role>, the subject's number in the values):
+      // the subject's form first when it asks for one, else the ticket at once
+      if (event === "open" || event === "cat") {
+        const k = event === "cat" ? Number(((i.data && i.data.values) || [])[0]) : 0;
+        const cats = deps.server.tickets.categories;
+        const cat = (event === "cat" || cats.length === 1 ? cats[k] : null) || {};
+        const role = String(id || "").replace(/\D/g, "");
+        if (cat.form || (event === "open" && !cats.length)) return NextResponse.json(ticketForm(cat.name ? k : 0, role, cat.name || ""));
+        return later(i, false, () => openTicket({ ...deps, guild: i.guild_id, channel: i.channel_id, user, role, category: cat.name || "", catRole: cat.role || "" }));
       }
+      if (event === "reopen") return later(i, false, () => reopenTicket({ ...deps, guild: i.guild_id, thread: i.channel_id, user, permissions: i.member && i.member.permissions }));
       if (event === "claim") return later(i, false, () => claimTicket({ ...deps, guild: i.guild_id, thread: i.channel_id, user, permissions: i.member && i.member.permissions }));
-      if (event === "close") return later(i, false, () => closeTicket({ ...deps, guild: i.guild_id, thread: i.channel_id, user, permissions: i.member && i.member.permissions }));
+      // closing: a form asks the reason (it may stay empty)
+      if (event === "close") return NextResponse.json(closeForm());
       return ephemeral({ content: "?" });
     }
     // follow a team from an answer's button
@@ -206,6 +268,18 @@ export async function POST(req) {
   if (i.type !== 2 || !i.data) return ephemeral({ content: "?" });
   const name = i.data.name;
   if (settings.disabled.includes(name)) return ephemeral({ content: L("Cette commande est désactivée sur ce serveur.", "This command is turned off here.") });
+  // a right-click menu on a member or a message (lib/botmod3.js)
+  if (i.data.type === 2 || i.data.type === 3) {
+    if (!tokenSet() || !i.guild_id) return ephemeral({ content: L("Indisponible ici.", "Not available here.") });
+    countUse(db, name, user.id, now);
+    const r = contextMenu(i, serverDeps(db, settings, now));
+    return r.modal ? NextResponse.json(r.modal) : later(i, false, r.later);
+  }
+  if (MOD3_NAMES.includes(name)) {
+    if (!tokenSet()) return ephemeral({ content: L("Cette commande a besoin du jeton du bot (réglages du serveur du site).", "This command needs the bot's token.") });
+    countUse(db, name, user.id, now);
+    return later(i, name === "lockdown", () => runMod3Command(i, serverDeps(db, settings, now)));
+  }
   // moderation, server management and tickets (lib/botmod.js)
   if (MOD_NAMES.includes(name)) {
     if (!tokenSet()) return ephemeral({ content: L("Cette commande a besoin du jeton du bot (réglages du serveur du site).", "This command needs the bot's token (the site's server settings).") });
