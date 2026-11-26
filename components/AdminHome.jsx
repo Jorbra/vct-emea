@@ -1,6 +1,7 @@
 "use client";
 
 import ServerPanel from "./ServerPanel.jsx";
+import { ForgottenLive, LiveNoStream, VlrStatus } from "./EditorFollow.jsx";
 import { localeOf } from "../lib/i18n.js";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useT } from "./lang.jsx";
@@ -138,6 +139,8 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
   const panels = A ? [
     { cat: "today", words: "to do live score waiting à faire en direct score en attente", node: todoSection },
     { cat: "today", words: "quick live score phone score rapide direct téléphone", node: <QuickLive initial={initial} call={call} onDone={onDone} /> },
+    { cat: "today", words: "forgotten live stuck old en direct oubliés bloqués anciens", node: <ForgottenLive initial={initial} call={call} onDone={onDone} /> },
+    { cat: "today", words: "stream link missing live lien stream manquant direct", node: <LiveNoStream initial={initial} now={now} onOpen={onOpen} /> },
     { cat: "today", words: "day board matches today matchs du jour tableau aujourd'hui", node: A.dayBoard ? <DayBoard list={A.dayBoard} onOpen={onOpen} /> : null },
     { cat: "today", words: "control room regie régie mode régie soirée", node: <ControlRoom initial={initial} call={call} onDone={onDone} /> },
     { cat: "today", words: "checklist missing before events à compléter manque avant tournoi", node: A.checklist && A.checklist.length > 0 ? <Checklist list={A.checklist} /> : null },
@@ -165,6 +168,7 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
     { cat: "follow", words: "visits views audience visites pages vues audience", node: A.visits ? <Visits v={A.visits} activity={A.activity} /> : null },
     { cat: "follow", words: "health sources problems santé sources problèmes", node: A.health ? <Health rows={A.health} /> : null },
     { cat: "follow", words: "server memory disk serveur mémoire disque", node: <ServerPanel /> },
+    { cat: "follow", words: "vlr.gg reading round lists lecture tournée listes vlr", node: <VlrStatus /> },
     { cat: "follow", words: "journal history undo changes journal historique annuler changements", node: A.steps ? <Journal admin={A} call={call} onDone={onDone} /> : null },
     { cat: "settings", words: "preview new things editors everyone aperçu nouveautés éditeurs tout le monde", node: <ApercuPanel main={me === ""} call={call} onDone={onDone} /> },
     { cat: "settings", words: "accounts editors passwords manage seasons comptes compte éditeurs éditeur mot de passe mots de passe gérer saisons", node: <Manage admin={A} call={call} onDone={onDone} /> },
