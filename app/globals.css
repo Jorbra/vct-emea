@@ -4064,3 +4064,10 @@ html[data-ft~="stories2"] .story.seen .storyring { background: var(--line); }
 .botserver input[type="number"] { width: 64px; }
 .botserver label.sw { display: flex; align-items: center; gap: 8px; margin: 2px 0; text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--fg); }
 .botserver h3.sub { margin: 14px 0 2px; }
+.botserver .bsrules { flex-direction: column; flex-wrap: nowrap; max-height: none; }
+.botserver .bsrule { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 14px; }
+.botserver .bsrule input[type="text"] { width: auto; min-width: 120px; }
+.botserver .bspanel { flex-direction: column; flex-wrap: nowrap; max-height: none; }
+.botserver .bsrule select, .botserver .bsrule input { width: auto; flex: none; margin: 0; }
+.botserver .bsrule input[type="number"] { width: 64px; }
+.botserver .bsrule .sw { margin: 0; }

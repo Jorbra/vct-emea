@@ -3,6 +3,7 @@ import { getDb } from "../../../lib/db.js";
 import { BOT_RIGHTS } from "../../../lib/botmod.js";
 import { botServer, saveBotServer, syncAutomod } from "../../../lib/botserver.js";
 import { gatewayState } from "../../../lib/botgateway.js";
+import { ticketStats } from "../../../lib/botmod3.js";
 import { APP_ID, botGuilds, botReady, discord, guildChannels, guildRoles, postMessage, registerCommands } from "../../../lib/botapi.js";
 import { botLog, botSettings, botUsage, cancelScheduled, logBot, saveBotSettings, scheduleAnnouncement, scheduledList } from "../../../lib/botstore.js";
 import { botTest, pinnedEmbed, updatePinned } from "../../../lib/botnotify.js";
@@ -46,7 +47,7 @@ export async function GET(req) {
     // the link that gives the bot the rights its server commands need (lib/botmod.js), on a server it is already in too
     invite: `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot%20applications.commands&permissions=${BOT_RIGHTS}`,
     // the server settings (moderation log, welcome, AutoMod, tickets) and the live connection's state (lib/botgateway.js)
-    server: botServer(db), gateway: gatewayState(),
+    server: botServer(db), gateway: gatewayState(), ticketStats: ticketStats(db),
     token: botReady(), publicKey: /^[0-9a-f]{64}$/i.test(process.env.DISCORD_PUBLIC_KEY || ""), guilds: [], channels: [], roles: [], error: "",
   };
   if (out.token) {
