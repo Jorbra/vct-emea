@@ -3753,3 +3753,12 @@ html[data-ft~="pictos"] .ldkey-new { display: inline; }
 /* preview "flash" (lib/apercu.js): a score that changes on screen flashes for a moment (components/ScoreFlash.jsx) */
 @keyframes scoreflash { 0% { background: color-mix(in srgb, var(--lime) 55%, transparent); color: var(--fg); } 100% { background: transparent; } }
 html[data-ft~="flash"] .scoreflash { animation: scoreflash 1.3s ease-out; border-radius: 4px; }
+
+/* preview "projection" (lib/apercu.js): the Swiss table if the matches being played ended now */
+.projtoggle { display: none; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 10px; }
+html[data-ft~="projection"] .projtoggle { display: flex; }
+.projtoggle .lmdot { display: inline-block; vertical-align: 1px; }
+.projmove { margin-left: 6px; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.projmove.up { color: #3fb950; }
+.projmove.down { color: #e5484d; }
+.rtbl td.rproj { outline: 1px dashed color-mix(in srgb, var(--fg) 45%, transparent); outline-offset: -3px; }

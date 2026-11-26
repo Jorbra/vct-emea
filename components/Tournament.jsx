@@ -14,6 +14,7 @@ import Regional from "./Regional.jsx";
 import TeamCard, { Flag } from "./TeamCard.jsx";
 import {
   prizePool,
+  projectSwiss,
   rankTeams,
   records,
   result,
@@ -166,9 +167,23 @@ function SeriesRow({ m, byId, name }) {
 }
 
 /** Swiss table: record, maps, and one cell per round with score and opponent. Bar colour: top 2, advancing zone, out. */
-function SwissMatrix({ ranked, rec, swiss, byId }) {
+function SwissMatrix({ ranked: nowRanked, rec: nowRec, swiss: nowSwiss, byId, proj }) {
   const tr = useT();
+  const [projected, setProjected] = useState(false);
+  const on = projected && proj && proj.ids.size > 0;
+  const ranked = on ? proj.ranked : nowRanked;
+  const rec = on ? proj.rec : nowRec;
+  const swiss = on ? proj.swiss : nowSwiss;
+  const placeNow = Object.fromEntries(nowRanked.map((t, i) => [t.id, i]));
   return (
+    <>
+    {proj && proj.ids.size > 0 && (
+      <div className="projtoggle" role="group" aria-label={tr("Swiss table")}>
+        <button type="button" className={"btn sm" + (on ? "" : " pri")} aria-pressed={!on} onClick={() => setProjected(false)}>{tr("Current table")}</button>
+        <button type="button" className={"btn sm" + (on ? " pri" : "")} aria-pressed={on} onClick={() => setProjected(true)}><span className="lmdot" /> {tr("If the live matches ended now")}</button>
+        {on && <span className="hint">{tr("Each match being played goes to the team ahead in maps, or on the map being played.")}</span>}
+      </div>
+    )}
     <div className="tablewrap wide">
       <table className="rtbl">
         <thead>
@@ -184,9 +199,10 @@ function SwissMatrix({ ranked, rec, swiss, byId }) {
           {ranked.map((t, i) => {
             const R = rec[t.id];
             const zone = i < 2 ? "z1" : i < 8 ? "z2" : "z3";
+            const moved = on ? placeNow[t.id] - i : 0;
             return (
               <tr key={t.id} className={zone + (standing(rec, t.id) === "out" ? " out" : "")}>
-                <td className="rk"><span className="place">{i + 1}</span></td>
+                <td className="rk"><span className="place">{i + 1}</span>{moved !== 0 && <span className={"projmove " + (moved > 0 ? "up" : "down")} title={tr("{n} places", { n: Math.abs(moved) })}>{moved > 0 ? "▲" : "▼"}{Math.abs(moved)}</span>}</td>
                 <td><span className="pt"><Crest team={t} /><span>{t.name || "TBD"}</span></span></td>
                 <td className="num"><b>{R.w} - {R.l}</b></td>
                 <td className="num"><b>{R.mw} - {R.ml}</b></td>
@@ -201,7 +217,7 @@ function SwissMatrix({ ranked, rec, swiss, byId }) {
                   const res = result(m);
                   if (!res) return <td key={n} className="rc rp"><span className="rcin">{tr("vs")} {tag}</span></td>;
                   return (
-                    <td key={n} className={"rc " + (res.winner === t.id ? "rw" : "rl")}>
+                    <td key={n} className={"rc " + (res.winner === t.id ? "rw" : "rl") + (on && proj.ids.has(m.id) ? " rproj" : "")}>
                       <span className="rcin"><b>{home ? `${m.sa}-${m.sb}` : `${m.sb}-${m.sa}`}</b> {tag}</span>
                     </td>
                   );
@@ -215,6 +231,7 @@ function SwissMatrix({ ranked, rec, swiss, byId }) {
         </tbody>
       </table>
     </div>
+    </>
   );
 }
 
@@ -344,6 +361,13 @@ function TournamentView({ initial, start, archive }) {
   const rec = useMemo(() => records(teams, matches), [teams, matches]);
   const ranked = useMemo(() => rankTeams(teams, rec), [teams, rec]);
   const swiss = matches.filter((m) => m.stage === "swiss");
+  // the Swiss table if the matches being played ended now (shown on demand, in preview "projection")
+  const proj = useMemo(() => {
+    const p = projectSwiss(matches, (initial.live && initial.live.playoffs) || {});
+    if (!p.ids.size) return null;
+    const r = records(teams, p.matches);
+    return { ids: p.ids, rec: r, ranked: rankTeams(teams, r), swiss: p.matches.filter((m) => m.stage === "swiss") };
+  }, [teams, matches, initial.live]);
   const elim = matches.filter((m) => m.stage === "elim");
   const name = (id) => (id && byId[id] && byId[id].name) || "TBD";
 
@@ -484,7 +508,7 @@ function TournamentView({ initial, start, archive }) {
     <section>
       <h2>{tr("Results")}</h2>
       <h3 className="sub">{tr("Swiss Stage")}</h3>
-      <SwissMatrix ranked={ranked} rec={rec} swiss={swiss} byId={byId} />
+      <SwissMatrix ranked={ranked} rec={rec} swiss={swiss} byId={byId} proj={proj} />
       <p className="note">
         {tr("For detailed match results, open the")}{" "}
         <button className="linkbtn" onClick={() => setTab("swiss")}>{tr("Swiss Stage")}</button>{L(" tab.", ".")}
@@ -540,7 +564,7 @@ function TournamentView({ initial, start, archive }) {
       <section>
         <h2>{tr("Results")}</h2>
         <h3 className="sub">{tr("Overview")}</h3>
-        <SwissMatrix ranked={ranked} rec={rec} swiss={swiss} byId={byId} />
+        <SwissMatrix ranked={ranked} rec={rec} swiss={swiss} byId={byId} proj={proj} />
       </section>
 
       <section>
