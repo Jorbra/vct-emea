@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useClock } from "./clock.js";
 import { useT } from "./lang.jsx";
 import { Crest } from "./Crest.jsx";
 import { useOpenMatch } from "./openMatch.js";
@@ -20,12 +21,7 @@ const WEIGHT = (id) => (/^gf|^third/.test(id) ? 6 : /^sf/.test(id) ? 5 : /^qf/.t
 export default function FeaturedMatch({ events }) {
   const tr = useT();
   const open = useOpenMatch();
-  const [now, setNow] = useState(null);
-  useEffect(() => {
-    setNow(Date.now());
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
+  const now = useClock(1000); // the page's one clock (components/clock.js), paused while the tab is hidden
   const all = useMemo(() => events.flatMap((e) => e.items.filter((m) => m.a && m.b && m.a.name && m.b.name).map((m) => ({
     ...m, event: e.event, at: e.times[m.id] || "", live: !!e.live[m.id] && m.sa == null, score: e.live[m.id] || null,
     ex: (e.extra && e.extra[m.id]) || {}, stream: (e.extra && e.extra[m.id] && e.extra[m.id].stream) || e.stream || "",

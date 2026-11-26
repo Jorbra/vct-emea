@@ -2,6 +2,7 @@
 
 // A team's next match under its header: live with the score, else the next one with a countdown.
 import { useEffect, useState } from "react";
+import { useClock } from "./clock.js";
 import { useT } from "./lang.jsx";
 import { Crest } from "./Crest.jsx";
 import { EVENT_NAMES } from "../lib/paths.js";
@@ -16,8 +17,7 @@ const left = (ms) => {
 
 export function NextMatchBanner({ rows, name, live }) {
   const tr = useT();
-  const [now, setNow] = useState(null);
-  useEffect(() => { setNow(Date.now()); const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  const now = useClock(1000); // the page's one clock (components/clock.js), paused while the tab is hidden
   if (now == null) return null;
   const playing = rows.find((m) => m.live);
   const next = playing || rows.filter((m) => m.sa == null && m.at && new Date(m.at).getTime() > now && m.a && m.b && m.a.name && m.b.name).sort((x, y) => x.at.localeCompare(y.at))[0];

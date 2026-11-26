@@ -11,6 +11,7 @@ import { useOpenMatch } from "./openMatch.js";
 import { useFavorites } from "./favorites.js";
 import { teamHref, teamSlug } from "../lib/paths.js";
 import { Score, TeamTick } from "./visual.jsx";
+import { useClock } from "./clock.js";
 
 // The match times and live matches of the event shown, so any match box can show (or, in the editor, set) its own
 // without passing props down.
@@ -269,6 +270,13 @@ const EVENT_SHORT = {
 const COUNTDOWN_KEY = "vct-countdown"; // remembered per visitor
 
 /** "21h 43m 8s" under a day, "1d 21h 43m" (FR "1j 21h 43m") after; "" once the time has passed. */
+/** A countdown badge's text, drawn again every second on its own (the strip around it is not). */
+export function Countdown({ at, lang }) {
+  const now = useClock(1000);
+  const left = now == null ? 0 : new Date(at).getTime() - now;
+  return left > 0 ? countdownText(left, lang) : <WhenText iso={at} />;
+}
+
 export function countdownText(ms, lang = "fr") {
   if (ms <= 0) return "";
   const s = Math.floor(ms / 1000);
@@ -286,16 +294,14 @@ export function countdownText(ms, lang = "fr") {
  */
 export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent = false, today = false, skipToday = false }) {
   const tr = useT();
-  const [now, setNow] = useState(null); // the visitor's clock, known once on the client
+  // the visitor's clock, known once on the client: by the minute here (which matches are next); each badge counts the seconds itself
+  const now = useClock(60000);
   const [countdown, setCountdown] = useState(true);
   const fav = useFavorites();
   const ref = useRef(null);
   const [can, setCan] = useState({ l: false, r: false });
   useEffect(() => {
     try { if (localStorage.getItem(COUNTDOWN_KEY) === "0") setCountdown(false); } catch { /* storage blocked: keep the default */ }
-    setNow(Date.now());
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
   }, []);
   const label = (m) => m.round.map(([k, v]) => tr(k, v)).join(" · ");
   const open = useOpenMatch();
@@ -359,7 +365,7 @@ export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent 
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (open) open(m.event, m.id); else window.location.assign(m.href); } }}>
                 <span className="mctop">
                   {recent ? <span className="mcbadge done">{m.at ? <WhenText iso={m.at} /> : tr("Finished")}</span> : m.live ? <LiveBadge /> : (
-                    <span className="mcbadge">{countdown && left > 0 ? countdownText(left, tr.lang) : <WhenText iso={m.at} />}</span>
+                    <span className="mcbadge">{countdown && left > 0 ? <Countdown at={m.at} lang={tr.lang} /> : <WhenText iso={m.at} />}</span>
                   )}
                   {m.bo ? <span className="bobadge" title={tr("Best of {n} maps", { n: m.bo })}>Bo{m.bo}</span> : null}
                 </span>

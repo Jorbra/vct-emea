@@ -3,6 +3,7 @@
 // scores as they go), then a link to the day's recap once everything is over. Nothing on a day without a match.
 
 import { useEffect, useMemo, useState } from "react";
+import { useClock } from "./clock.js";
 import { useT } from "./lang.jsx";
 import { Crest } from "./Crest.jsx";
 import { EVENT_NAMES } from "../lib/paths.js";
@@ -14,12 +15,7 @@ const pad = (n) => String(n).padStart(2, "0");
 
 export default function MatchDay({ events }) {
   const tr = useT();
-  const [now, setNow] = useState(null);
-  useEffect(() => {
-    setNow(Date.now());
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
+  const now = useClock(1000); // the page's one clock (components/clock.js), paused while the tab is hidden
   const today = useMemo(() => {
     if (now == null) return [];
     const day = PARIS_DAY.format(new Date(now));
