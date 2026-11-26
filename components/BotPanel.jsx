@@ -108,7 +108,10 @@ export default function BotPanel() {
       </select>
     </label>
   );
-  const missing = d && d.registered ? d.commands.filter((c) => !d.registered.includes(c.name)).length : null;
+  const toAdd = d && d.registered ? d.commands.filter((c) => !d.registered.includes(c.name)).length : null;
+  // commands Discord still has that the bot no longer knows (the former French names): registering takes them away
+  const toDrop = d && d.registered ? d.registered.filter((n) => !d.commands.some((c) => c.name === n)).length : 0;
+  const missing = toAdd == null ? null : toAdd + toDrop;
   const state = (ok, label, value) => <span className={"bstate " + (ok ? "ok" : "bad")}>{ok ? "✅" : "⚠️"} {label} : <b>{value}</b></span>;
   const max = d ? Math.max(1, ...d.usage.days.map((x) => x.n)) : 1;
   const cmdMax = d && d.usage.byCmd.length ? d.usage.byCmd[0].n : 1;
@@ -121,7 +124,7 @@ export default function BotPanel() {
             <div className="botstate">
               {state(d.publicKey, tr("Public key on the server"), tr(d.publicKey ? "set" : "missing"))}
               {state(d.token && !d.error, tr("Bot token on the server"), tr(d.token ? (d.error ? "refused" : "set") : "missing"))}
-              {state(missing === 0, tr("Commands on Discord"), missing == null ? tr("unknown") : missing === 0 ? tr("up to date") : tr("{n} to register", { n: missing }))}
+              {state(missing === 0, tr("Commands on Discord"), missing == null ? tr("unknown") : missing === 0 ? tr("up to date") : [toAdd ? tr("{n} to register", { n: toAdd }) : "", toDrop ? tr("{n} former ones taken away", { n: toDrop }) : ""].filter(Boolean).join(" · "))}
               {missing > 0 && <button type="button" className="btn small pri" disabled={busy} onClick={() => call({ action: "register" }, () => load(s.guild))}>{tr("Register the commands with Discord")}</button>}
             </div>
             {d.invite && (

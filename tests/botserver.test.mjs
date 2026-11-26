@@ -43,7 +43,7 @@ test("the second set of commands: registered, can be turned off, required option
     assert.deepEqual(c.contexts, [0]);
   }
   assert.ok(COMMANDS.length <= 100, "Discord takes 100 commands at most");
-  assert.deepEqual(MOD2_COMMANDS.filter((c) => !c.default_member_permissions).map((c) => c.name), ["rappelmoi"]);
+  assert.deepEqual(MOD2_COMMANDS.filter((c) => !c.default_member_permissions).map((c) => c.name), ["remindme"]);
 });
 
 test("helpers: choices, results, winners, powerful roles, colours, transcript", () => {
@@ -147,20 +147,20 @@ test("a member's file: sanctions and notes listed, a warning removed by its numb
   const deps = { db, discord: d.fn, lang: "fr" };
   const w1 = addSanction(db, { guild: "G", user: "t5", kind: "warn", mod: "m", reason: "flood" });
   addSanction(db, { guild: "G", user: "t5", kind: "ban", mod: "m", reason: "triche" });
-  let r = await runMod2Command(ix("note", { membre: "t5", texte: "à surveiller" }, { resolved: tgt("t5", []) }), deps);
+  let r = await runMod2Command(ix("note", { user: "t5", text: "à surveiller" }, { resolved: tgt("t5", []) }), deps);
   assert.match(r.content, /Note #\d+ ajoutée/);
-  r = await runMod2Command(ix("sanctions", { membre: "t5" }, { resolved: tgt("t5", []) }), deps);
+  r = await runMod2Command(ix("modlogs", { user: "t5" }, { resolved: tgt("t5", []) }), deps);
   const text = r.embeds[0].description;
   assert.match(text, /📝 Note .*à surveiller/);
   assert.match(text, /🔨 Ban .*triche/);
   assert.match(r.embeds[0].footer.text, /1 avertissement\(s\) · 0 exclusion\(s\) · 0 expulsion\(s\) · 1 ban\(s\) · 1 note\(s\)/);
-  r = await runMod2Command(ix("retirer-avertissement", { numero: w1 }), deps);
+  r = await runMod2Command(ix("unwarn", { id: w1 }), deps);
   assert.match(r.content, new RegExp(`Avertissement n°${w1} retiré`));
-  r = await runMod2Command(ix("retirer-avertissement", { numero: w1 }), deps);
+  r = await runMod2Command(ix("unwarn", { id: w1 }), deps);
   assert.match(r.content, /Pas d'avertissement/);
   addSanction(db, { guild: "G", user: "t5", kind: "warn", mod: "m" });
   addSanction(db, { guild: "G", user: "t5", kind: "warn", mod: "m" });
-  r = await runMod2Command(ix("effacer-avertissements", { membre: "t5" }, { resolved: tgt("t5", []) }), deps);
+  r = await runMod2Command(ix("clearwarns", { user: "t5" }, { resolved: tgt("t5", []) }), deps);
   assert.match(r.content, /2 avertissement\(s\) effacé/);
 });
 
@@ -168,19 +168,19 @@ test("nickname and voice: done on members below, refused above, the reason in th
   const db = getDb();
   const d = fakeDiscord();
   const deps = { db, discord: d.fn, lang: "fr" };
-  let r = await runMod2Command(ix("pseudo", { membre: "t6", pseudo: "Calme" }, { resolved: tgt("t6", ["vip"]) }), deps);
+  let r = await runMod2Command(ix("nick", { user: "t6", nickname: "Calme" }, { resolved: tgt("t6", ["vip"]) }), deps);
   assert.match(r.content, /surnom « Calme »/);
   assert.equal(d.calls.find((c) => c.method === "PATCH" && c.path === "/guilds/G/members/t6").reason, "modo (m)");
-  r = await runMod2Command(ix("couper", { membre: "t6", micro: 1 }, { resolved: tgt("t6", ["vip"]) }), deps);
+  r = await runMod2Command(ix("mute", { user: "t6", action: 1 }, { resolved: tgt("t6", ["vip"]) }), deps);
   assert.deepEqual(d.calls.filter((c) => c.path === "/guilds/G/members/t6").pop().body, { mute: true });
-  r = await runMod2Command(ix("deplacer", { membre: "t6", salon: "V2" }, { resolved: tgt("t6", ["vip"]) }), deps);
+  r = await runMod2Command(ix("move", { user: "t6", channel: "V2" }, { resolved: tgt("t6", ["vip"]) }), deps);
   assert.deepEqual(d.calls.filter((c) => c.path === "/guilds/G/members/t6").pop().body, { channel_id: "V2" });
-  r = await runMod2Command(ix("deconnecter", { membre: "t6" }, { resolved: tgt("t6", ["vip"]) }), deps);
+  r = await runMod2Command(ix("disconnect", { user: "t6" }, { resolved: tgt("t6", ["vip"]) }), deps);
   assert.deepEqual(d.calls.filter((c) => c.path === "/guilds/G/members/t6").pop().body, { channel_id: null });
   const before = d.calls.length;
-  r = await runMod2Command(ix("pseudo", { membre: "t7", pseudo: "x" }, { resolved: tgt("t7", ["admin"]) }), deps);
+  r = await runMod2Command(ix("nick", { user: "t7", nickname: "x" }, { resolved: tgt("t7", ["admin"]) }), deps);
   assert.match(r.content, /égal ou supérieur/);
-  r = await runMod2Command(ix("couper", { membre: "t6", micro: 1 }, { perms: String(P.MANAGE_MESSAGES), resolved: tgt("t6", []) }), deps);
+  r = await runMod2Command(ix("mute", { user: "t6", action: 1 }, { perms: String(P.MANAGE_MESSAGES), resolved: tgt("t6", []) }), deps);
   assert.match(r.content, /pas la permission/);
   assert.equal(d.calls.filter((c) => c.method === "PATCH").length, d.calls.slice(0, before).filter((c) => c.method === "PATCH").length);
 });
@@ -201,13 +201,13 @@ test("tickets: a subject picked, add and remove a member, rename, priority, clai
   assert.equal(d.calls.find((c) => /\/threads$/.test(c.path)).body.name, "ticket-alice-support");
   const first = d.calls.find((c) => c.path === `/channels/${thread}/messages`).body;
   assert.deepEqual(first.components[0].components.map((b) => b.custom_id), ["tk|close", "tk|claim"]);
-  r = await runMod2Command(ix("ajouter", { membre: "b2" }, { channel: thread, resolved: tgt("b2", []) }), deps);
+  r = await runMod2Command(ix("add", { user: "b2" }, { channel: thread, resolved: tgt("b2", []) }), deps);
   assert.ok(d.calls.some((c) => c.method === "PUT" && c.path === `/channels/${thread}/thread-members/b2`));
-  r = await runMod2Command(ix("retirer", { membre: "a1" }, { channel: thread, resolved: tgt("a1", []) }), deps);
+  r = await runMod2Command(ix("remove", { user: "a1" }, { channel: thread, resolved: tgt("a1", []) }), deps);
   assert.match(r.content, /auteur du ticket ne peut pas/);
-  r = await runMod2Command(ix("priorite", { niveau: "urgente" }, { channel: thread }), deps);
+  r = await runMod2Command(ix("priority", { level: "urgente" }, { channel: thread }), deps);
   assert.equal(d.calls.filter((c) => c.method === "PATCH" && c.path === `/channels/${thread}`).pop().body.name, "🔴 ticket-alice-support");
-  r = await runMod2Command(ix("renommer", { nom: "paiement" }, { channel: thread }), deps);
+  r = await runMod2Command(ix("rename", { name: "paiement" }, { channel: thread }), deps);
   assert.equal(d.calls.filter((c) => c.method === "PATCH" && c.path === `/channels/${thread}`).pop().body.name, "🔴 paiement");
   r = await claimTicket({ ...deps, guild: "G", thread, user: { id: "m" }, permissions: "0" });
   assert.match(r.content, /Seule l'équipe/);
@@ -233,11 +233,11 @@ test("server life: role buttons only for harmless roles below one's own, a membe
   const db = getDb();
   const d = fakeDiscord();
   const deps = { db, discord: d.fn, lang: "fr" };
-  let r = await runMod2Command(ix("rolesboutons", { role1: "vip", role2: "helper" }), deps);
+  let r = await runMod2Command(ix("buttonroles", { role1: "vip", role2: "helper" }), deps);
   assert.match(r.content, /donne des pouvoirs/);
-  r = await runMod2Command(ix("rolesboutons", { role1: "admin" }), deps);
+  r = await runMod2Command(ix("buttonroles", { role1: "admin" }), deps);
   assert.match(r.content, /pouvoirs|égal ou supérieur/);
-  r = await runMod2Command(ix("rolesboutons", { role1: "vip", titre: "Rôles" }), deps);
+  r = await runMod2Command(ix("buttonroles", { role1: "vip", title: "Rôles" }), deps);
   assert.match(r.content, /Message de rôles posé/);
   assert.deepEqual(d.calls.filter((c) => c.path === "/channels/C/messages").pop().body.components[0].components.map((b) => b.custom_id), ["rb|vip"]);
   // a click on a role button (Discord's role ids are numbers)
@@ -261,7 +261,7 @@ test("polls, giveaways and reminders: votes counted (one per member), closed and
   const d = fakeDiscord();
   const t0 = Date.parse("2026-11-26T12:00:00Z");
   const deps = { db, discord: d.fn, lang: "fr", now: t0 };
-  let r = await runMod2Command(ix("sondage", { question: "Qui gagne ?", choix: "Fnatic ; Vitality", duree: 3600 }), deps);
+  let r = await runMod2Command(ix("poll", { question: "Qui gagne ?", choices: "Fnatic ; Vitality", duration: 3600 }), deps);
   assert.match(r.content, /Sondage publié/);
   const poll = db.prepare("SELECT * FROM bot_polls ORDER BY id DESC").get();
   const vote = (user, k) => handleButton({ guild_id: "G", member: { user: { id: user } }, data: { custom_id: `pv|${poll.id}|${k}` } }, deps);
@@ -270,13 +270,13 @@ test("polls, giveaways and reminders: votes counted (one per member), closed and
   r = await vote("u1", 1); // changes their vote
   assert.equal(r.type, 7);
   assert.match(r.data.embeds[0].description, /Vitality\*\*\n`██████████` 100% · 2/);
-  r = await runMod2Command(ix("tirage", { prix: "Un maillot", duree: 600, gagnants: 1 }), deps);
+  r = await runMod2Command(ix("giveaway", { prize: "Un maillot", duration: 600, winners: 1 }), deps);
   const gw = db.prepare("SELECT * FROM bot_giveaways ORDER BY id DESC").get();
   const join = (user) => handleButton({ guild_id: "G", member: { user: { id: user } }, data: { custom_id: `gv|${gw.id}` } }, deps);
   await join("u1");
   r = await join("u2");
   assert.equal(r.data.components[0].components[0].label, "Participer (2)");
-  r = await runMod2Command(ix("rappelmoi", { texte: "regarder la finale", dans: 600 }, { userId: "u9" }), deps);
+  r = await runMod2Command(ix("remindme", { text: "regarder la finale", in: 600 }, { userId: "u9" }), deps);
   assert.match(r.content, /message privé/);
   const done = await botTimers({ db, discord: d.fn, server: cleanServer({}), now: t0 + 2 * 3600000, rand: () => 0 });
   assert.ok(done.includes(`poll:${poll.id}`) && done.includes(`giveaway:${gw.id}`) && done.some((x) => x.startsWith("memo:")));

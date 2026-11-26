@@ -18,7 +18,7 @@ test("server commands: registered, can be turned off, each one for the members w
     assert.deepEqual(req, [...req].sort((x, y) => Number(y) - Number(x)), c.name);
   }
   const open = MOD_COMMANDS.filter((c) => !c.default_member_permissions).map((c) => c.name);
-  assert.deepEqual(open, ["serveur", "membre", "ticket", "fermer"]);
+  assert.deepEqual(open, ["serverinfo", "userinfo", "ticket", "close"]);
 });
 
 test("permissions and the order of roles: a moderator never acts on someone at or above them", () => {
@@ -83,25 +83,25 @@ test("moderation: warn (kept, told in private), time out, kick refused above one
   const db = getDb();
   const d = fakeDiscord();
   const deps = { db, discord: d.fn, lang: "fr" };
-  let r = await runModCommand(interaction("avertir", { membre: "t1", raison: "spam" }, { resolved: target("t1", ["vip"]) }), deps);
+  let r = await runModCommand(interaction("warn", { user: "t1", reason: "spam" }, { resolved: target("t1", ["vip"]) }), deps);
   assert.match(r.content, /averti \(1 avertissement en tout\)/);
   assert.ok(d.calls.some((c) => c.path === "/channels/dm1/messages" && /spam/.test(c.body.content)));
-  r = await runModCommand(interaction("avertissements", { membre: "t1" }, { resolved: target("t1", ["vip"]) }), deps);
+  r = await runModCommand(interaction("warnings", { user: "t1" }, { resolved: target("t1", ["vip"]) }), deps);
   assert.match(r.content, /spam — <@m>/);
-  r = await runModCommand(interaction("exclure", { membre: "t1", duree: 600, raison: "calme" }, { resolved: target("t1", ["vip"]) }), deps);
+  r = await runModCommand(interaction("timeout", { user: "t1", duration: 600, reason: "calme" }, { resolved: target("t1", ["vip"]) }), deps);
   assert.match(r.content, /exclu pour 10 minutes/);
   const patch = d.calls.find((c) => c.method === "PATCH" && c.path === "/guilds/G/members/t1");
   assert.ok(patch.body.communication_disabled_until);
   assert.match(patch.reason, /modo \(m\) : calme/);
-  r = await runModCommand(interaction("expulser", { membre: "t2" }, { resolved: target("t2", ["admin"]) }), deps);
+  r = await runModCommand(interaction("kick", { user: "t2" }, { resolved: target("t2", ["admin"]) }), deps);
   assert.match(r.content, /rôle égal ou supérieur/);
   assert.ok(!d.calls.some((c) => c.method === "DELETE" && c.path === "/guilds/G/members/t2"));
-  r = await runModCommand(interaction("bannir", { membre: "t3", messages: 86400 }, { resolved: { users: { t3: { id: "t3", username: "gone" } } } }), deps);
+  r = await runModCommand(interaction("ban", { user: "t3", delete_messages: 86400 }, { resolved: { users: { t3: { id: "t3", username: "gone" } } } }), deps);
   assert.match(r.content, /banni/);
   assert.equal(d.calls.find((c) => c.method === "PUT" && c.path === "/guilds/G/bans/t3").body.delete_message_seconds, 86400);
   // without the permission, nothing is asked of Discord
   const before = d.calls.length;
-  r = await runModCommand(interaction("bannir", { membre: "t4" }, { perms: String(P.MANAGE_MESSAGES), resolved: target("t4", []) }), deps);
+  r = await runModCommand(interaction("ban", { user: "t4" }, { perms: String(P.MANAGE_MESSAGES), resolved: target("t4", []) }), deps);
   assert.match(r.content, /pas la permission/);
   assert.equal(d.calls.length, before);
 });
@@ -110,15 +110,15 @@ test("server management: purge, lock keeps the channel's other rules, roles only
   const db = getDb();
   const d = fakeDiscord();
   const deps = { db, discord: d.fn, lang: "fr" };
-  let r = await runModCommand(interaction("purge", { nombre: 10 }), deps);
+  let r = await runModCommand(interaction("purge", { amount: 10 }), deps);
   assert.match(r.content, /2 messages effacés/);
   assert.deepEqual(d.calls.find((c) => c.path === "/channels/C/messages/bulk-delete").body.messages, ["m1", "m2"]);
-  r = await runModCommand(interaction("verrouiller", {}), deps);
+  r = await runModCommand(interaction("lock", {}), deps);
   const put = d.calls.find((c) => c.method === "PUT" && c.path === "/channels/C/permissions/G");
   assert.equal(BigInt(put.body.deny), 1024n | P.SEND | P.SEND_IN_THREADS); // the rule already there (1024) stays
-  r = await runModCommand(interaction("roledonner", { membre: "t1", role: "admin" }, { resolved: target("t1", []) }), deps);
+  r = await runModCommand(interaction("addrole", { user: "t1", role: "admin" }, { resolved: target("t1", []) }), deps);
   assert.match(r.content, /égal ou supérieur au tien/);
-  r = await runModCommand(interaction("roledonner", { membre: "t1", role: "vip" }, { resolved: target("t1", []) }), deps);
+  r = await runModCommand(interaction("addrole", { user: "t1", role: "vip" }, { resolved: target("t1", []) }), deps);
   assert.ok(d.calls.some((c) => c.method === "PUT" && c.path === "/guilds/G/members/t1/roles/vip"));
 });
 
@@ -143,4 +143,17 @@ test("tickets: one open at a time per member, a private thread, closed by its au
   // closed: a new one may be opened
   r = await openTicket({ ...deps, guild: "G", channel: "C", user });
   assert.match(r.content, /est ouvert/);
+});
+
+test("English names: a command turned off under its former French name stays off, and the lists match", async () => {
+  const { BOT_COMMANDS, RENAMED, botSettings } = await import("../lib/botstore.js");
+  const { MOD_NAMES } = await import("../lib/botmod.js");
+  const { MOD2_NAMES } = await import("../lib/botmod2.js");
+  for (const fr of Object.keys(RENAMED)) assert.ok(!COMMANDS.some((c) => c.name === fr), `${fr} is gone`);
+  for (const en of Object.values(RENAMED)) assert.ok([...MOD_NAMES, ...MOD2_NAMES].includes(en) && BOT_COMMANDS.includes(en), en);
+  const db = getDb();
+  db.prepare("INSERT INTO kv (key, value) VALUES ('bot_settings', ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value").run(JSON.stringify({ disabled: ["bannir", "sondage", "score"] }));
+  assert.deepEqual(botSettings(db).disabled.sort(), ["ban", "poll", "score"]);
+  // the site's own commands keep their French names
+  for (const fr of ["suivre", "rappel", "pronostic", "classement", "calendrier"]) assert.ok(COMMANDS.some((c) => c.name === fr), fr);
 });

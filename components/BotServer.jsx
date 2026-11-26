@@ -103,7 +103,7 @@ export default function BotServer({ d, busy, call, onSaved }) {
         </select>
       </label>
       {a.action === "timeout" && <label className="f">Durée de l'exclusion (minutes) <input type="number" min={1} max={10080} value={a.timeoutMin} onChange={(e) => set("automod.timeoutMin", Number(e.target.value))} /></label>}
-      {sw("Ajouter un avertissement au dossier du membre (visible avec /sanctions)", "automod.warn", a.warn)}
+      {sw("Ajouter un avertissement au dossier du membre (visible avec /modlogs)", "automod.warn", a.warn)}
       {many("Rôles exemptés", "automod.exemptRoles", roles, a.exemptRoles, "@")}
       {many("Salons exemptés", "automod.exemptChannels", channels, a.exemptChannels, "#")}
 

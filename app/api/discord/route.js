@@ -39,7 +39,7 @@ import { discord, postFile } from "../../../lib/botapi.js";
 import { logBot } from "../../../lib/botstore.js";
 
 // the server commands whose answer everyone in the channel sees; the others answer the moderator alone
-const MOD_PUBLIC = ["serveur", "membre", "lenteur", "verrouiller", "deverrouiller"];
+const MOD_PUBLIC = ["serverinfo", "userinfo", "slowmode", "lock", "unlock"];
 
 /** What the server commands need: the server settings, and a way to write in the moderation log channel. */
 function serverDeps(db, settings, now) {
@@ -215,7 +215,7 @@ export async function POST(req) {
   if (MOD2_NAMES.includes(name)) {
     if (!tokenSet()) return ephemeral({ content: L("Cette commande a besoin du jeton du bot (réglages du serveur du site).", "This command needs the bot's token (the site's server settings).") });
     countUse(db, name, user.id, now);
-    return later(i, ["ajouter", "retirer", "renommer", "priorite"].includes(name), () => runMod2Command(i, serverDeps(db, settings, now)));
+    return later(i, ["add", "remove", "rename", "priority"].includes(name), () => runMod2Command(i, serverDeps(db, settings, now)));
   }
   countUse(db, name, user.id, now);
   noteGuildUser(db, i.guild_id, user.id, now);
