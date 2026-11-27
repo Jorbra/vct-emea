@@ -9,7 +9,7 @@ import { Skeleton } from "./visual.jsx";
 import BotServer from "./BotServer.jsx";
 import { DiscordMessage, EmbedBuilder, MessageEditor, ModuleCard, Picker } from "./BotDash.jsx";
 import { CasesPage, CommandsPage, LogPage, TicketsPage } from "./BotPages.jsx";
-import { ActivityPanel, MembersPage } from "./BotMembers.jsx";
+import { ActivityPanel, MembersPage, TeamPanel } from "./BotMembers.jsx";
 import { QuickSearch } from "./BotSearch.jsx";
 import { MODULES, moduleState } from "../lib/botdash.js";
 import { P } from "../lib/botperms.js";
@@ -347,6 +347,31 @@ export default function BotPanel({ full = false }) {
 
             {page === "settings" && (
               <>
+                <section className="bsect bbackup">
+                  <h3 className="sub">💾 Sauvegarde des réglages</h3>
+                  <p className="hint">Tout le réglage du bot dans un fichier : modules, salons et rôles choisis, messages, règles des commandes, tickets, AutoMod, annonces. Aucun secret n&apos;y figure (ni jeton, ni mot de passe). Garde-le avant un gros changement : on le remet en place ici.</p>
+                  <div className="row">
+                    <button type="button" className="btn" disabled={busy} onClick={() => call({ action: "backup" }, (j) => {
+                      const a = document.createElement("a");
+                      a.href = URL.createObjectURL(new Blob([JSON.stringify(j.backup, null, 2)], { type: "application/json" }));
+                      a.download = `reglages-bot-${new Date().toISOString().slice(0, 10)}.json`;
+                      a.click();
+                      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+                    })}>⬇️ Télécharger la sauvegarde</button>
+                    <label className="btn">⬆️ Restaurer une sauvegarde
+                      <input type="file" accept="application/json,.json" className="sr-only" onChange={async (e) => {
+                        const file = e.target.files && e.target.files[0];
+                        e.target.value = "";
+                        if (!file) return;
+                        let backup = null;
+                        try { backup = JSON.parse(await file.text()); } catch { setMsg({ ok: false, text: "Ce fichier n'est pas lisible." }); return; }
+                        if (!backup || backup.kind !== "vct-bot-backup") { setMsg({ ok: false, text: "Ce fichier n'est pas une sauvegarde des réglages du bot." }); return; }
+                        if (!window.confirm(`Remplacer les réglages actuels par ceux de la sauvegarde du ${new Date(backup.at).toLocaleString("fr-FR")} ?`)) return;
+                        call({ action: "restore", backup }, (j) => { setD((x) => ({ ...x, server: j.server })); setS({ ...j.settings }); setSaved(JSON.stringify(j.settings)); });
+                      }} />
+                    </label>
+                  </div>
+                </section>
                 <div className="botstate">
                   <span className={"bstate " + (d.publicKey ? "ok" : "bad")}>{d.publicKey ? "✅" : "⚠️"} {tr("Public key on the server")} : <b>{tr(d.publicKey ? "set" : "missing")}</b></span>
                   <span className={"bstate " + (d.token && !d.error ? "ok" : "bad")}>{d.token && !d.error ? "✅" : "⚠️"} {tr("Bot token on the server")} : <b>{tr(d.token ? (d.error ? "refused" : "set") : "missing")}</b></span>
@@ -370,6 +395,7 @@ export default function BotPanel({ full = false }) {
 
             {page === "stats" && (
               <>
+                <TeamPanel guild={s.guild} onMember={openMember} />
                 <div className="botstats">
                   <span><b>{d.usage.total}</b> {tr("Uses (30 days)").toLowerCase()}</span>
                   <span><b>{d.usage.users}</b> {tr("Users").toLowerCase()}</span>

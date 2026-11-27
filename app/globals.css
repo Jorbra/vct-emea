@@ -4413,3 +4413,6 @@ html[data-ft~="stories2"] .story.seen .storyring { background: var(--line); }
 .bqskeys { margin: 0; padding: 6px 14px 8px; border-top: 1px solid var(--line); font-size: 12px; }
 .bdshort kbd { margin-left: 6px; padding: 0 5px; border: 1px solid var(--line); border-radius: 4px; font: 11px var(--font-body); opacity: .75; }
 @media (max-width: 640px) { .bdshort kbd { display: none; } }
+.bbackup .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.bbackup label.btn { cursor: pointer; }
+.bbackup label.btn:focus-within { outline: 2px solid var(--lime); outline-offset: 2px; }

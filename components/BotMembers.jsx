@@ -124,6 +124,33 @@ export function ActivityPanel({ guild, onMember, go, setup = [], missing = 0, to
   );
 }
 
+/** Each moderator's last 30 days: sanctions by kind, tickets taken, average rating. */
+export function TeamPanel({ guild, onMember }) {
+  const [t, setT] = useState(null);
+  useEffect(() => { ask({ action: "team", guild }).then(setT); }, [guild]);
+  const KINDS = ["warn", "timeout", "kick", "ban", "tempban", "note"];
+  return (
+    <section className="bsect" aria-label="Équipe de modération">
+      <h3 className="sub">🛡️ L&apos;équipe sur 30 jours</h3>
+      {!t ? <p className="note">Chargement…</p> : t.error ? <p className="err">{t.error}</p> : t.team.length === 0 ? <p className="note">Aucune sanction ni ticket pris en charge sur 30 jours.</p> : (
+        <div className="tablewrap"><table className="btable bteam">
+          <thead><tr><th>Modérateur</th><th>Sanctions</th>{KINDS.map((k) => <th key={k} title={kindName(k)}><span aria-hidden="true">{kindIcon(k)}</span><span className="sr-only">{kindName(k)}</span></th>)}<th>Tickets pris</th><th>Note moyenne</th></tr></thead>
+          <tbody>{t.team.map((m) => (
+            <tr key={m.mod}>
+              <td data-l="Modérateur"><Who id={m.mod} names={t.names} onMember={onMember} /></td>
+              <td data-l="Sanctions"><b>{m.total}</b></td>
+              {KINDS.map((k) => <td key={k} data-l={kindName(k)}>{m.kinds[k] || <span className="bmuted">–</span>}</td>)}
+              <td data-l="Tickets pris">{m.tickets || <span className="bmuted">–</span>}</td>
+              <td data-l="Note moyenne">{m.rating != null ? `${String(m.rating).replace(".", ",")}/5 (${m.rated})` : <span className="bmuted">–</span>}</td>
+            </tr>
+          ))}</tbody>
+        </table></div>
+      )}
+      <p className="hint">Les sanctions de l&apos;AutoMod ne sont pas comptées ; les notes, elles, ne comptent pas comme sanctions.</p>
+    </section>
+  );
+}
+
 /** A member's file: found by id, mention or name; their state on the server, sanctions, notes, tickets; a note added. */
 export function MembersPage({ guild, busy, call, start = "" }) {
   const [q, setQ] = useState(start);

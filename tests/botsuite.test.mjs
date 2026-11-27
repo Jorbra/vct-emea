@@ -120,3 +120,42 @@ test("member's file: a kick and a ban from the editor, the member told first, th
   assert.match(no.error, /n'a pas le droit/);
   assert.equal(db.prepare("SELECT COUNT(*) AS n FROM bot_sanctions WHERE guild = ?").get(g).n, before, "no case kept for a refused ban");
 });
+
+test("team: each moderator's 30 days, AutoMod left out, notes not counted as sanctions, tickets and ratings", async () => {
+  const { teamActivity } = await import("../lib/botactivity.js");
+  const db = getDb();
+  const g = "990000000000000005";
+  const now = Date.parse("2030-07-01T12:00:00Z");
+  const day = 86400000;
+  addSanction(db, { guild: g, user: "u1", kind: "warn", mod: "modA", at: now - day });
+  addSanction(db, { guild: g, user: "u2", kind: "ban", mod: "modA", at: now - 2 * day });
+  addSanction(db, { guild: g, user: "u2", kind: "note", mod: "modA", at: now - 2 * day });
+  addSanction(db, { guild: g, user: "u3", kind: "warn", mod: "modB", at: now - 40 * day }); // too old
+  addSanction(db, { guild: g, user: "u3", kind: "warn", mod: "auto", at: now - day }); // AutoMod
+  const ins = db.prepare("INSERT INTO bot_tickets (thread, guild, user, subject, opened, claimed, rating) VALUES (?, ?, ?, ?, ?, ?, ?)");
+  ins.run("tm1", g, "u1", "a", new Date(now - day).toISOString(), "modB", "5");
+  ins.run("tm2", g, "u1", "b", new Date(now - day).toISOString(), "modB", "4");
+  ins.run("tm3", g, "u1", "c", new Date(now - day).toISOString(), "modB", "");
+  const t = teamActivity(db, g, now);
+  assert.deepEqual(t.map((m) => m.mod), ["modB", "modA"]);
+  assert.equal(t[1].total, 2);
+  assert.deepEqual(t[1].kinds, { warn: 1, ban: 1, note: 1 });
+  assert.equal(t[0].tickets, 3);
+  assert.equal(t[0].rating, 4.5);
+  assert.equal(t[0].rated, 2);
+});
+
+test("backup: the bot's settings back in place from a backup, cleaned as any save", async () => {
+  const { botSettings, saveBotSettings } = await import("../lib/botstore.js");
+  const { botServer, saveBotServer } = await import("../lib/botserver.js");
+  const db = getDb();
+  saveBotServer(db, { tickets: { ...botServer(db).tickets, canned: [{ title: "Avant", text: "texte" }] } });
+  const backup = JSON.parse(JSON.stringify({ kind: "vct-bot-backup", version: 1, settings: botSettings(db), server: botServer(db) }));
+  saveBotServer(db, { tickets: { ...botServer(db).tickets, canned: [] } });
+  assert.deepEqual(botServer(db).tickets.canned, []);
+  // what the restore action does
+  saveBotSettings(db, backup.settings);
+  saveBotServer(db, { ...backup.server, modules: { ...backup.server.modules, polls: "pas un booléen" } });
+  assert.equal(botServer(db).tickets.canned[0].title, "Avant");
+  assert.equal(typeof botServer(db).modules.polls, "boolean", "a wrong value is cleaned, as on any save");
+});

@@ -96,3 +96,26 @@ Testé : un test de plus (avertissement avec raison obligatoire et message priv�
 - Une commande ouvre la page « Commandes » déjà filtrée ; un cas ouvre le tableau des sanctions sur ce cas.
 
 Testé : un test de plus (expulsion avec le message privé envoyé avant, bannissement qui efface 7 jours de messages, bannissement refusé sans cas gardé) ; recherche essayée dans l'éditeur local (« warn » vers la page Commandes filtrée, « #5 » vers le cas). **351 tests passent, build vert.** Pas testé avec le vrai bot.
+
+---
+
+# Suite : branche `bot-suite-4` (partie de `bot-suite-3`, donc avec les points 8 et 9)
+
+## 10. Sauvegarde des réglages (page « Réglages »)
+
+- **⬇️ Télécharger la sauvegarde** : tout le réglage du bot dans un fichier `.json` (modules, salons et rôles choisis, messages, règles des commandes, tickets, AutoMod, annonces). Aucun secret n'y figure : ni jeton, ni mot de passe.
+- **⬆️ Restaurer une sauvegarde** : choisis le fichier, confirme, et les réglages sont remis en place. Les règles AutoMod sont reposées sur Discord. Un fichier qui n'est pas une sauvegarde du bot est refusé. Les valeurs sont nettoyées comme à chaque enregistrement.
+
+## 11. L'équipe sur 30 jours (page « Statistiques »)
+
+![L'équipe sur 30 jours](docs/captures/bot-dashboard-equipe.jpg)
+
+Pour chaque modérateur :
+
+- ses sanctions, au total et par type ;
+- les tickets qu'il a pris en charge ;
+- la note moyenne laissée par les membres sur ces tickets.
+
+L'AutoMod n'est pas compté, et les notes ne comptent pas comme sanctions. Le nom d'un modérateur ouvre sa fiche.
+
+Testé : deux tests de plus (activité de l'équipe, restauration nettoyée) ; dans l'éditeur local, la sauvegarde téléchargée puis restaurée, et un mauvais fichier refusé. **353 tests passent, build vert.**

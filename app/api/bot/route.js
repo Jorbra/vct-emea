@@ -14,7 +14,7 @@ import { editorSanction } from "../../../lib/botadmin.js";
 import { botPermissions, filterLog, listCases, listTickets, revokeCase, setCaseReason, ticketTranscript, userNames } from "../../../lib/botadmin.js";
 import { postLog, addSanction } from "../../../lib/botserver.js";
 import { liveMessages, parseTranscript } from "../../../lib/botticket.js";
-import { commandUsage, createdAt, memberFile, memberId, serverActivity, todoOf, watchList } from "../../../lib/botactivity.js";
+import { commandUsage, createdAt, memberFile, memberId, serverActivity, teamActivity, todoOf, watchList } from "../../../lib/botactivity.js";
 
 /** The commands by category for the editor's "Commands" page: [{ label, list: [{ name, description, subs, perm }] }]. */
 function commandCategories() {
@@ -147,6 +147,11 @@ export async function POST(req) {
     const todo = todoOf(db, guildOf());
     const names = await namesFor([...todo.unclaimed.map((t) => t.user), ...todo.ending.map((r) => r.user), ...a.recentCases.flatMap((r) => [r.user, r.mod]), ...a.recentTickets.map((t) => t.user)]);
     return NextResponse.json({ ok: true, ...a, todo, names });
+  }
+  // the "Statistics" page: each moderator's last 30 days
+  if (b.action === "team") {
+    const team = teamActivity(db, guildOf());
+    return NextResponse.json({ ok: true, team, names: await namesFor(team.map((m) => m.mod)) });
   }
   // the "Members" page before any search: the members to keep an eye on
   if (b.action === "watch") {
@@ -311,6 +316,18 @@ ${text}`, allowed_mentions: { parse: [] } });
     }
   }
   // the server settings: saved, then Discord's AutoMod rules put in line with them
+  // the bot's whole setup in one file, and back: the settings and the server's (no secret is in them)
+  if (b.action === "backup") return NextResponse.json({ ok: true, backup: { kind: "vct-bot-backup", version: 1, at: new Date().toISOString(), settings: botSettings(db), server: botServer(db) } });
+  if (b.action === "restore") {
+    const k = b.backup || {};
+    if (k.kind !== "vct-bot-backup" || !k.settings || !k.server) return NextResponse.json({ error: "Ce fichier n'est pas une sauvegarde des réglages du bot." }, { status: 400 });
+    const settings = saveBotSettings(db, k.settings).settings;
+    const server = saveBotServer(db, k.server);
+    logBot(db, "réglages", `réglages restaurés depuis une sauvegarde du ${String(k.at || "").slice(0, 10) || "?"}`);
+    let automod = "";
+    if (botReady() && settings.guild) { try { const r = await syncAutomod(discord, settings.guild, server); automod = ` AutoMod : ${r.made} règle(s) créée(s), ${r.changed} mise(s) à jour, ${r.removed} retirée(s).`; } catch { automod = " Discord refuse les règles AutoMod pour le moment."; } }
+    return NextResponse.json({ ok: true, message: `Réglages restaurés.${automod}`, settings, server });
+  }
   if (b.action === "server") {
     const next = saveBotServer(db, b.server || {});
     const guild = (await import("../../../lib/botstore.js")).botSettings(db).guild;
