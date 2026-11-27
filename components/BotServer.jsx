@@ -99,6 +99,7 @@ export default function BotServer({ d, busy, call, onSaved, section = "" }) {
                 {chan("Salon de bienvenue", "welcome.channel", s.welcome.channel)}
                 {sw("Avec une image de bienvenue (avatar, pseudo, « Tu es le 1 234e membre »)", "arrival.image", s.arrival.image)}
                 <MessageEditor label="Message de bienvenue" value={s.welcome.text} max={1000} onChange={(v) => set("welcome.text", v)} embedsBelow={s.arrival.image ? [{ color: "#ff4655", text: "🖼️ *image de bienvenue*" }] : []} />
+                <p className="row btestrow"><button type="button" className="btn small" disabled={busy || dirty || !s.welcome.channel || !d.token} onClick={() => call({ action: "test-greeting", which: "welcome" })}>✉️ Envoyer un test dans le salon</button><small className="bmuted">{dirty ? "Enregistre d'abord : le test envoie le message enregistré." : "Le bot joue le nouveau membre ; marqué [TEST], personne n'est mentionné."}</small></p>
               </>
             )}
             {role("Rôle donné à l'arrivée", "welcome.role", s.welcome.role)}
@@ -112,6 +113,7 @@ export default function BotServer({ d, busy, call, onSaved, section = "" }) {
               <>
                 {chan("Salon d'au revoir", "goodbye.channel", s.goodbye.channel)}
                 <MessageEditor label="Message d'au revoir" value={s.goodbye.text} max={1000} vars={GOODBYE_VARS} onChange={(v) => set("goodbye.text", v)} />
+                <p className="row btestrow"><button type="button" className="btn small" disabled={busy || dirty || !s.goodbye.channel || !d.token} onClick={() => call({ action: "test-greeting", which: "goodbye" })}>✉️ Envoyer un test dans le salon</button><small className="bmuted">{dirty ? "Enregistre d'abord : le test envoie le message enregistré." : "Marqué [TEST]."}</small></p>
               </>
             )}
           </section>

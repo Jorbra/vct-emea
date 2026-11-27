@@ -119,3 +119,25 @@ Pour chaque modérateur :
 L'AutoMod n'est pas compté, et les notes ne comptent pas comme sanctions. Le nom d'un modérateur ouvre sa fiche.
 
 Testé : deux tests de plus (activité de l'équipe, restauration nettoyée) ; dans l'éditeur local, la sauvegarde téléchargée puis restaurée, et un mauvais fichier refusé. **353 tests passent, build vert.**
+
+---
+
+# Suite : branche `bot-suite-5` (partie de `bot-suite-4`, donc avec les points 8 à 11)
+
+## 12. Tester le message de bienvenue et d'au revoir
+
+Dans le module **Bienvenue & arrivées**, sous chaque message : **« ✉️ Envoyer un test dans le salon »**. Le bot publie le message enregistré dans son salon, marqué `[TEST]`, en jouant lui-même le nouveau membre : personne n'est mentionné. Tant qu'il y a des changements non enregistrés, le bouton attend : le test envoie toujours ce qui est enregistré.
+
+## 13. Alerte de nouveau ticket
+
+![Alerte de nouveau ticket](docs/captures/bot-dashboard-alerte-ticket.jpg)
+
+Tant que le tableau de bord est ouvert (dans l'éditeur ou sur `/admin/bot`), il vérifie chaque minute :
+
+- un **nouveau ticket** fait apparaître une alerte en bas à droite, avec un bouton « Voir » ;
+- le **titre de l'onglet** compte les tickets que personne n'a pris : « (1) Bot Discord… » ;
+- le nombre de tickets ouverts (raccourci « Tickets ») et la pastille d'erreurs du « Journal » se mettent à jour.
+
+Rien n'est vérifié quand l'onglet est caché.
+
+Testé : un test de plus (message de test marqué, sans mention, salon manquant, message désactivé) ; dans l'éditeur local, un ticket fictif ajouté pendant que le tableau de bord était ouvert fait bien apparaître l'alerte et « (1) » dans le titre. **354 tests passent, build vert.** Pas testé avec le vrai bot.

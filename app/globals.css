@@ -4416,3 +4416,8 @@ html[data-ft~="stories2"] .story.seen .storyring { background: var(--line); }
 .bbackup .row { display: flex; flex-wrap: wrap; gap: 8px; }
 .bbackup label.btn { cursor: pointer; }
 .bbackup label.btn:focus-within { outline: 2px solid var(--lime); outline-offset: 2px; }
+.btestrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 6px 0 0; }
+.btestrow small { font-size: 12.5px; }
+/* a new ticket, said while the dashboard is open */
+.btoast { position: fixed; right: 16px; bottom: 16px; z-index: 900; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); padding: 10px 12px 10px 14px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--lime); border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, .35); font-size: 14px; }
+.btoast span { overflow-wrap: anywhere; }

@@ -3,7 +3,7 @@
 // The Discord bot's dashboard, in the editor's home. The home shows the bot's state (online, latency, server, members),
 // shortcuts, and one card per module (switch, what it does, its state, "Configurer"); each module has its own page, and
 // the "Commandes", "Sanctions", "Tickets", "Journal", "Statistiques" and "Réglages" pages sit in the menu.
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "./lang.jsx";
 import { Skeleton } from "./visual.jsx";
 import BotServer from "./BotServer.jsx";
@@ -77,6 +77,9 @@ export default function BotPanel({ full = false }) {
   const [memberQ, setMemberQ] = useState("");
   const [todoAt, setTodoAt] = useState(null);
   const [seek, setSeek] = useState(false); // the quick search (Ctrl + K)
+  const [toast, setToast] = useState(null); // a new ticket, said while the dashboard is open
+  const lastTicket = useRef("");
+  const baseTitle = useRef("");
   const [startQ, setStartQ] = useState({ commands: "", cases: "" }); // the home's to-do box goes here, above the modules
   const [annTab, setAnnTab] = useState("settings");
   const [msg, setMsg] = useState({ ok: true, text: "" });
@@ -128,6 +131,26 @@ export default function BotPanel({ full = false }) {
     if (full) window.scrollTo({ top: 0 });
   };
   const openMember = (id) => { setMemberQ(String(id)); go("members"); };
+  const ready = !!d;
+  // every minute while the page is seen: a new ticket is said (a note at the bottom, and the tab's title counts the waiting
+  // ones), the open tickets and the errors of the day are refreshed in the menu and the shortcuts
+  useEffect(() => {
+    if (!d) return undefined;
+    if (!baseTitle.current) baseTitle.current = document.title;
+    const beat = async () => {
+      if (document.visibilityState !== "visible") return;
+      const j = await fetch("/api/bot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "pulse" }) }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+      if (!j) return;
+      const key = j.last ? `${j.last.thread}` : "";
+      if (lastTicket.current && key && key !== lastTicket.current) setToast({ thread: j.last.thread, subject: j.last.subject });
+      lastTicket.current = key || lastTicket.current;
+      document.title = j.waiting ? `(${j.waiting}) ${baseTitle.current}` : baseTitle.current;
+      setD((x) => (x ? { ...x, logErrors: j.errors, ticketStats: { ...(x.ticketStats || {}), open: j.open } } : x));
+    };
+    beat();
+    const id = setInterval(beat, 60000);
+    return () => { clearInterval(id); if (baseTitle.current) document.title = baseTitle.current; };
+  }, [ready]);
   // on the bot's own page, Ctrl + K (or Cmd + K) opens its quick search in place of the site's "Go to" (caught first);
   // in the editor's home, the site's keeps it and the button opens the bot's
   useEffect(() => {
@@ -425,6 +448,13 @@ export default function BotPanel({ full = false }) {
               </>
             )}
             {msg.text && <p className={msg.ok ? "okmsg" : "err"} role="status">{msg.text}</p>}
+            {toast && (
+              <div className="btoast" role="status">
+                <span>🎫 Nouveau ticket : <b>{toast.subject || "Sans sujet"}</b></span>
+                <button type="button" className="btn small pri" onClick={() => { setToast(null); go("tickets"); }}>Voir</button>
+                <button type="button" className="btn small" onClick={() => setToast(null)} aria-label="Fermer l'alerte">✕</button>
+              </div>
+            )}
             {seek && <QuickSearch items={seekItems} onClose={() => setSeek(false)} onCase={(q) => { setStartQ((x) => ({ ...x, cases: q })); go("cases"); }} onMember={openMember} />}
             </div>
             </div>

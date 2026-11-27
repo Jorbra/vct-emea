@@ -12,7 +12,7 @@ import { COMMANDS, HELP_GROUPS } from "../../../lib/discordbot.js";
 import { GROUPS, OLD_TO_NEW, RENAMED_SITE, cleanEmbed, cleanRules, toDiscordEmbed } from "../../../lib/botdash.js";
 import { editorSanction } from "../../../lib/botadmin.js";
 import { botPermissions, filterLog, listCases, listTickets, revokeCase, setCaseReason, ticketTranscript, userNames } from "../../../lib/botadmin.js";
-import { postLog, addSanction } from "../../../lib/botserver.js";
+import { postLog, addSanction, testGreeting } from "../../../lib/botserver.js";
 import { liveMessages, parseTranscript } from "../../../lib/botticket.js";
 import { commandUsage, createdAt, memberFile, memberId, serverActivity, teamActivity, todoOf, watchList } from "../../../lib/botactivity.js";
 
@@ -147,6 +147,15 @@ export async function POST(req) {
     const todo = todoOf(db, guildOf());
     const names = await namesFor([...todo.unclaimed.map((t) => t.user), ...todo.ending.map((r) => r.user), ...a.recentCases.flatMap((r) => [r.user, r.mod]), ...a.recentTickets.map((t) => t.user)]);
     return NextResponse.json({ ok: true, ...a, todo, names });
+  }
+  // the dashboard's pulse, every minute while it is open: the newest ticket, how many wait, the errors of the day
+  if (b.action === "pulse") {
+    const guild = guildOf();
+    const last = db.prepare("SELECT thread, subject, opened FROM bot_tickets WHERE guild = ? ORDER BY opened DESC LIMIT 1").get(guild) || null;
+    const waiting = db.prepare("SELECT COUNT(*) AS n FROM bot_tickets WHERE guild = ? AND closed = '' AND claimed = ''").get(guild).n;
+    const open = db.prepare("SELECT COUNT(*) AS n FROM bot_tickets WHERE guild = ? AND closed = ''").get(guild).n;
+    const errors = db.prepare("SELECT COUNT(*) AS n FROM bot_log WHERE ok = 0 AND at >= ?").get(new Date(Date.now() - 86400000).toISOString()).n;
+    return NextResponse.json({ ok: true, last, waiting, open, errors });
   }
   // the "Statistics" page: each moderator's last 30 days
   if (b.action === "team") {
@@ -327,6 +336,15 @@ ${text}`, allowed_mentions: { parse: [] } });
     let automod = "";
     if (botReady() && settings.guild) { try { const r = await syncAutomod(discord, settings.guild, server); automod = ` AutoMod : ${r.made} règle(s) créée(s), ${r.changed} mise(s) à jour, ${r.removed} retirée(s).`; } catch { automod = " Discord refuse les règles AutoMod pour le moment."; } }
     return NextResponse.json({ ok: true, message: `Réglages restaurés.${automod}`, settings, server });
+  }
+  // the welcome or goodbye message as saved, posted once in its channel, marked [TEST]
+  if (b.action === "test-greeting") {
+    if (!botReady()) return NextResponse.json({ error: "Le jeton du bot n'est pas réglé sur le serveur (DISCORD_BOT_TOKEN)." }, { status: 409 });
+    const g = gatewayState();
+    try {
+      const r = await testGreeting(discord, botServer(db), b.which === "goodbye" ? "goodbye" : "welcome", { botId: APP_ID, guildName: g.guildName || "", memberCount: g.memberCount ? String(g.memberCount) : "" });
+      return r.ok ? NextResponse.json(r) : NextResponse.json({ error: r.error }, { status: 400 });
+    } catch (e) { return NextResponse.json({ error: failText(e) }, { status: 502 }); }
   }
   if (b.action === "server") {
     const next = saveBotServer(db, b.server || {});

@@ -159,3 +159,19 @@ test("backup: the bot's settings back in place from a backup, cleaned as any sav
   assert.equal(botServer(db).tickets.canned[0].title, "Avant");
   assert.equal(typeof botServer(db).modules.polls, "boolean", "a wrong value is cleaned, as on any save");
 });
+
+test("greetings: the welcome and goodbye messages tested in their channel, marked [TEST], no one mentioned", async () => {
+  const { testGreeting } = await import("../lib/botserver.js");
+  const calls = [];
+  const discord = async (method, path, body) => { calls.push({ method, path, body }); return {}; };
+  const server = cleanServer({ welcome: { on: true, channel: "111111111111111111", text: "Bienvenue {user} sur **{server}** ! Tu es le {membercount}e." }, goodbye: { on: false, channel: "" } });
+  const w = await testGreeting(discord, server, "welcome", { botId: "999999999999999999", guildName: "VCT", memberCount: "500" });
+  assert.ok(w.ok);
+  assert.equal(calls[0].path, "/channels/111111111111111111/messages");
+  assert.equal(calls[0].body.content, "[TEST] Bienvenue <@999999999999999999> sur **VCT** ! Tu es le 500e.");
+  assert.deepEqual(calls[0].body.allowed_mentions, { parse: [] });
+  const g = await testGreeting(discord, server, "goodbye", {});
+  assert.match(g.error, /Choisis d'abord le salon du message d'au revoir/);
+  const off = await testGreeting(discord, cleanServer({ goodbye: { on: false, channel: "222222222222222222" } }), "goodbye", {});
+  assert.match(off.message, /désactivé/);
+});
