@@ -56,3 +56,23 @@ Un encadré au-dessus des modules dit ce qui attend quelqu'un :
 Quand il n'y a rien, l'encadré passe au vert : « ✅ Rien à faire pour le moment ».
 
 Testé : un test de plus (les tickets pris en charge ou fermés écartés, les sanctions qui finissent dans plus d'un jour ou déjà finies écartées) ; vérifié dans l'éditeur local. **349 tests passent, build vert.**
+
+---
+
+# Suite : branche `bot-suite-2` (partie de `main` ae07985)
+
+## 6. Agir depuis la fiche d'un membre
+
+![Agir depuis la fiche](docs/captures/bot-dashboard-membre-agir.jpg)
+
+- **⚠️ Avertir**, avec une raison (obligatoire ; les raisons du module Modération sont proposées). Comme `/warn add` : message privé au membre, et sanction automatique si le nombre d'avertissements le prévoit.
+- **🔇 Exclure** : 10 minutes, 1 heure, 6 heures, 1 jour, 3 jours, 1 semaine ou 28 jours, avec une raison facultative.
+- **🔊 Lever l'exclusion**, quand le membre est exclu.
+- Chaque action demande confirmation, va dans le journal du bot et dans le salon du journal. Le journal d'audit de Discord dit qu'elle vient du site et qui l'a faite. Les boutons sont cachés pour un membre banni ou parti.
+
+## 7. Journal en direct
+
+- La page « Journal » se met à jour toutes les 20 secondes (case « En direct », cochée par défaut).
+- Dans le menu, une **pastille rouge** à côté de « Journal » compte les erreurs du bot des dernières 24 heures.
+
+Testé : un test de plus (avertissement avec raison obligatoire et message privé, exclusion d'une heure avec la bonne date de fin et le journal d'audit, durée illisible, plus de 28 jours, levée) ; vérifié dans l'éditeur local. **350 tests passent, build vert.** Pas testé avec le vrai bot.

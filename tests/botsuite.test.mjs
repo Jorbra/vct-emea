@@ -63,3 +63,31 @@ test("to do: open tickets nobody took (oldest first), sanctions ending within a 
   assert.deepEqual(t.unclaimed.map((x) => x.thread), ["t-old", "t-new"]);
   assert.deepEqual(t.ending.map((r) => r.user), ["x"]);
 });
+
+test("member's file: a warning and a time-out given from the editor, as the commands give them", async () => {
+  const { editorSanction } = await import("../lib/botadmin.js");
+  const db = getDb();
+  const g = "990000000000000003";
+  const calls = [];
+  const discord = async (method, path, body, opts = {}) => { calls.push({ method, path, body, reason: opts.reason || "" }); if (path === "/users/@me/channels") return { id: "dm" }; return {}; };
+  const told = [];
+  const deps = { db, discord, server: cleanServer({}), guild: g, who: "Camille", notify: (t) => told.push(t), now: Date.parse("2030-05-01T12:00:00Z") };
+  assert.match((await editorSanction(deps, { user: "123456789012345678", kind: "warn", reason: "" })).error, /raison/);
+  const w = await editorSanction(deps, { user: "123456789012345678", kind: "warn", reason: "Spam" });
+  assert.ok(w.ok, w.error);
+  const row = db.prepare("SELECT kind, mod, reason FROM bot_sanctions WHERE guild = ? ORDER BY id DESC").get(g);
+  assert.deepEqual([row.kind, row.mod], ["warn", "editor"]);
+  assert.match(row.reason, /Spam \(Camille, depuis le site\)/);
+  assert.ok(calls.some((c) => c.path === "/channels/dm/messages"), "the member is told in private");
+  assert.match(told[0], /avertissement/);
+  const t = await editorSanction(deps, { user: "123456789012345678", kind: "timeout", duration: "1h", reason: "Insultes" });
+  assert.ok(t.ok, t.error);
+  const patch = calls.find((c) => c.method === "PATCH");
+  assert.equal(patch.body.communication_disabled_until, "2030-05-01T13:00:00.000Z");
+  assert.match(patch.reason, /depuis l'éditeur du site par Camille/);
+  assert.match((await editorSanction(deps, { user: "123456789012345678", kind: "timeout", duration: "plus tard" })).error, /Durée illisible/);
+  assert.match((await editorSanction(deps, { user: "123456789012345678", kind: "timeout", duration: "30d" })).error, /28 jours/);
+  const u = await editorSanction(deps, { user: "123456789012345678", kind: "untimeout" });
+  assert.ok(u.ok);
+  assert.equal(calls.filter((c) => c.method === "PATCH").pop().body.communication_disabled_until, null);
+});

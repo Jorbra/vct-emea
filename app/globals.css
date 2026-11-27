@@ -4393,3 +4393,11 @@ html[data-ft~="stories2"] .story.seen .storyring { background: var(--line); }
 .btodo ul { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; font-size: 14px; }
 .btodo li { overflow-wrap: anywhere; }
 .btodoslot:not(:empty) { margin-bottom: 14px; }
+/* a warning or a time-out from a member's file */
+.bmact { display: grid; gap: 8px; }
+.bmact h4.sub { margin: 4px 0 0; }
+.bmact .row, .bmactform .row { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.bmactform { display: grid; gap: 8px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.bmactform input[type="text"], .bmactform select { width: 100%; max-width: 420px; box-sizing: border-box; height: 34px; padding: 0 8px; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; font: 14px var(--font-body); }
+.bnavbadge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; margin-left: 6px; padding: 0 5px; border-radius: 999px; background: var(--danger); color: #fff; font: 700 11px var(--font-body); }
+.blayout > .bnav .bnavbadge { margin-left: auto; }

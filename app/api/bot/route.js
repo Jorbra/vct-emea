@@ -10,6 +10,7 @@ import { botTest, pinnedEmbed, updatePinned } from "../../../lib/botnotify.js";
 import { getState } from "../../../lib/db.js";
 import { COMMANDS, HELP_GROUPS } from "../../../lib/discordbot.js";
 import { GROUPS, OLD_TO_NEW, RENAMED_SITE, cleanEmbed, cleanRules, toDiscordEmbed } from "../../../lib/botdash.js";
+import { editorSanction } from "../../../lib/botadmin.js";
 import { botPermissions, filterLog, listCases, listTickets, revokeCase, setCaseReason, ticketTranscript, userNames } from "../../../lib/botadmin.js";
 import { postLog, addSanction } from "../../../lib/botserver.js";
 import { liveMessages, parseTranscript } from "../../../lib/botticket.js";
@@ -66,6 +67,8 @@ export async function GET(req) {
     server: botServer(db), gateway: gatewayState(), ticketStats: ticketStats(db),
     // the dashboard: the commands by category, what the former ones became, the bot's permissions on the server (modules' states)
     commandCats: commandCategories(), oldToNew: OLD_TO_NEW, botPerms: null, cmdUse: commandUsage(db),
+    // the bot's errors of the last 24 hours, shown beside "Journal" in the menu
+    logErrors: db.prepare("SELECT COUNT(*) AS n FROM bot_log WHERE ok = 0 AND at >= ?").get(new Date(Date.now() - 86400000).toISOString()).n,
     token: botReady(), publicKey: /^[0-9a-f]{64}$/i.test(process.env.DISCORD_PUBLIC_KEY || ""), guilds: [], channels: [], roles: [], error: "",
   };
   if (out.token) {
@@ -166,7 +169,7 @@ export async function POST(req) {
       } catch (e) { return NextResponse.json({ error: failText(e) }, { status: 502 }); }
     }
     const file = memberFile(db, guild, id);
-    const out = { ok: true, file, created: createdAt(id), member: null, banned: null, user: null };
+    const out = { ok: true, file, created: createdAt(id), member: null, banned: null, user: null, reasons: botServer(db).moderation.reasons };
     if (botReady() && guild) {
       try {
         const m = await discord("GET", `/guilds/${guild}/members/${id}`);
@@ -179,6 +182,14 @@ export async function POST(req) {
     if (out.user) out.user = { id: out.user.id, name: out.user.global_name || out.user.username, user: out.user.username, avatar: out.user.avatar ? `https://cdn.discordapp.com/avatars/${out.user.id}/${out.user.avatar}.png?size=128` : "" };
     out.names = await namesFor(file.sanctions.map((r) => r.mod).concat(file.tickets.map((t) => t.claimed)));
     return NextResponse.json(out);
+  }
+  // a warning or a time-out given from a member's file (lib/botadmin.js editorSanction)
+  if (b.action === "member-sanction") {
+    if (!botReady()) return NextResponse.json({ error: "Le jeton du bot n'est pas réglé sur le serveur (DISCORD_BOT_TOKEN)." }, { status: 409 });
+    const me = await currentEditor();
+    const server = botServer(db);
+    const r = await editorSanction({ db, discord, server, guild: guildOf(), who: me.who || "éditeur", logBot, notify: (text) => postLog(discord, server, { kind: "bot", title: "🛡️ Action depuis l'éditeur", lines: [text], at: Date.now() }) }, { user: memberId(b.id), kind: String(b.kind || ""), reason: b.reason, duration: b.duration });
+    return r.ok ? NextResponse.json(r) : NextResponse.json({ error: r.error }, { status: 400 });
   }
   // a note on a member from the editor: kept in their file, as /note does
   if (b.action === "member-note") {

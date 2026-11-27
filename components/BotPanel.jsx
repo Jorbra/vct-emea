@@ -180,7 +180,7 @@ export default function BotPanel({ full = false }) {
             </div>
             <div className="blayout">
             <nav className="bnav" aria-label="Pages du bot">
-              {PAGES.map(([k, l]) => <button key={k} type="button" aria-current={page === k ? "page" : undefined} onClick={() => go(k)}>{l}</button>)}
+              {PAGES.map(([k, l]) => <button key={k} type="button" aria-current={page === k ? "page" : undefined} onClick={() => go(k)}>{l}{k === "log" && d.logErrors > 0 && <span className="bnavbadge" title="Erreurs du bot ces dernières 24 heures">{d.logErrors}<span className="sr-only"> erreurs en 24 heures</span></span>}</button>)}
               <span className="bnavsep" aria-hidden="true">Modules</span>
               {MODULES.map((m) => {
                 const st = stateOf(m).state;

@@ -123,7 +123,7 @@ export function CommandsPage({ d, settings, busy, call, onSaved }) {
 
 // ---- sanctions ----
 
-export const KIND = { warn: ["⚠️", "Avertissement"], timeout: ["🔇", "Exclusion"], kick: ["👢", "Expulsion"], ban: ["🔨", "Bannissement"], tempban: ["⏳", "Ban temporaire"], unban: ["✅", "Débannissement"], note: ["📝", "Note"] };
+export const KIND = { warn: ["⚠️", "Avertissement"], timeout: ["🔇", "Exclusion"], kick: ["👢", "Expulsion"], ban: ["🔨", "Bannissement"], tempban: ["⏳", "Ban temporaire"], unban: ["✅", "Débannissement"], untimeout: ["🔊", "Exclusion levée"], note: ["📝", "Note"] };
 const REVOKE = { warn: "Retirer l'avertissement", ban: "Débannir", tempban: "Débannir", timeout: "Lever l'exclusion" };
 
 /** The sanctions' table: search by member, moderator, kind, date; a case's detail, its reason changed, revoked. */
@@ -264,14 +264,23 @@ export function TicketsPage({ guild, onMember }) {
 export function LogPage() {
   const [f, setF] = useState({ kind: "", errors: false, q: "" });
   const [data, setData] = useState(null);
+  const [live, setLive] = useState(true);
   const q = useDebounced(f.q);
-  useEffect(() => { ask({ action: "log", kind: f.kind, errors: f.errors, q }).then(setData); }, [f.kind, f.errors, q]);
+  const load = useCallback(() => ask({ action: "log", kind: f.kind, errors: f.errors, q }).then((j) => setData((cur) => (j.error && cur ? cur : j))), [f.kind, f.errors, q]);
+  useEffect(() => { load(); }, [load]);
+  // live: the new events come every 20 seconds while the page is seen
+  useEffect(() => {
+    if (!live) return undefined;
+    const id = setInterval(() => { if (document.visibilityState === "visible") load(); }, 20000);
+    return () => clearInterval(id);
+  }, [live, load]);
   return (
     <div className="bpage">
       <div className="bfilters" data-nodirty="">
         <select value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value })} aria-label="Type d'événement"><option value="">Tous les événements</option>{((data && data.kinds) || []).map((k) => <option key={k} value={k}>{k}</option>)}</select>
         <input type="search" value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} placeholder="Chercher dans le journal" aria-label="Chercher dans le journal" />
         <label className="chk"><input type="checkbox" checked={f.errors} onChange={(e) => setF({ ...f, errors: e.target.checked })} /> Seulement les erreurs</label>
+        <label className="chk"><input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} /> En direct (toutes les 20 s)</label>
       </div>
       {!data ? <p className="note">Chargement…</p> : data.error ? <p className="err">{data.error}</p> : data.log.length === 0 ? <p className="note">Rien dans le journal.</p> : (
         <ul className="blog">{data.log.map((x, k) => <li key={k} className={x.ok ? "" : "bad"}><small>{when(x.at)}</small><span className="bbadge">{x.kind}</span><span>{x.ok ? "" : "⚠️ "}{x.text}</span></li>)}</ul>

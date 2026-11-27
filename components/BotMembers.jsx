@@ -132,6 +132,7 @@ export function MembersPage({ guild, busy, call, start = "" }) {
   const [asked, setAsked] = useState("");
   const [read, setRead] = useState("");
   const [watch, setWatch] = useState(null);
+  const [act, setAct] = useState({ kind: "", reason: "", duration: "1h" });
   useEffect(() => { ask({ action: "watch", guild }).then(setWatch); }, [guild]);
   const find = useCallback((value) => {
     const v = String(value || "").trim();
@@ -221,6 +222,41 @@ export function MembersPage({ guild, busy, call, start = "" }) {
               </li>
             ))}</ol>
           )}
+          {/* acting needs the member on the server: not for one banned or gone (when Discord could tell) */}
+          {(m || data.banned == null) && <section className="bmact" aria-label="Sanctionner">
+            <h4 className="sub">Agir</h4>
+            <div className="row">
+              <button type="button" className={"btn small" + (act.kind === "warn" ? " pri" : "")} onClick={() => setAct({ ...act, kind: act.kind === "warn" ? "" : "warn" })}>⚠️ Avertir</button>
+              <button type="button" className={"btn small" + (act.kind === "timeout" ? " pri" : "")} onClick={() => setAct({ ...act, kind: act.kind === "timeout" ? "" : "timeout" })}>🔇 Exclure</button>
+              {m && m.timeout && Date.parse(m.timeout) > Date.now() && (
+                <button type="button" className="btn small" disabled={busy} onClick={() => { if (window.confirm("Lever l'exclusion de ce membre ? C'est fait tout de suite sur Discord.")) call({ action: "member-sanction", guild, id: f.id, kind: "untimeout" }, () => find(f.id)); }}>🔊 Lever l&apos;exclusion</button>
+              )}
+            </div>
+            {act.kind && (
+              <form className="bmactform" data-nodirty="" onSubmit={(e) => {
+                e.preventDefault();
+                const label = act.kind === "warn" ? "Avertir ce membre" : `Exclure ce membre (${act.duration})`;
+                if (window.confirm(`${label} ? C'est fait tout de suite sur Discord, et le membre reçoit un message privé.`)) call({ action: "member-sanction", guild, id: f.id, kind: act.kind, reason: act.reason, duration: act.duration }, () => { setAct({ kind: "", reason: "", duration: "1h" }); find(f.id); });
+              }}>
+                {act.kind === "timeout" && (
+                  <label className="f">Durée
+                    <select value={act.duration} onChange={(e) => setAct({ ...act, duration: e.target.value })}>
+                      {[["10m", "10 minutes"], ["1h", "1 heure"], ["6h", "6 heures"], ["1d", "1 jour"], ["3d", "3 jours"], ["1w", "1 semaine"], ["28d", "28 jours"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                    </select>
+                  </label>
+                )}
+                <label className="f">Raison{act.kind === "warn" ? "" : " (facultative)"}
+                  <input type="text" maxLength={300} value={act.reason} onChange={(e) => setAct({ ...act, reason: e.target.value })} list="bmreasons" />
+                </label>
+                <datalist id="bmreasons">{(data.reasons || []).map((r) => <option key={r} value={r} />)}</datalist>
+                <div className="row">
+                  <button type="submit" className="btn danger" disabled={busy || (act.kind === "warn" && !act.reason.trim())}>{act.kind === "warn" ? "Avertir" : "Exclure"}</button>
+                  <button type="button" className="btn" onClick={() => setAct({ ...act, kind: "" })}>Annuler</button>
+                </div>
+                <small className="bmuted">Comme avec les commandes : message privé au membre{act.kind === "warn" ? ", sanction automatique si le nombre d'avertissements le prévoit" : ""}, journal du bot et salon du journal. Le journal d&apos;audit de Discord dit que ça vient du site.</small>
+              </form>
+            )}
+          </section>}
           <form className="bnote" data-nodirty="" onSubmit={(e) => { e.preventDefault(); call({ action: "member-note", guild, id: f.id, text: note }, () => { setNote(""); find(f.id); }); }}>
             <label className="f">Ajouter une note pour l&apos;équipe
               <textarea rows={2} maxLength={380} value={note} onChange={(e) => setNote(e.target.value)} />
