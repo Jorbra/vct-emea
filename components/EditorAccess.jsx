@@ -8,13 +8,18 @@ import { adminHrefForPath } from "../lib/paths.js";
 
 /**
  * The way into the editor, on every page outside it, only for those who have access: the E key on a computer, a button on touch
- * screens. It opens on the event being looked at, or on the editor's home page. Anyone else sees nothing; /admin still asks for the password.
+ * screens. It opens on the event being looked at, or on the editor's home page, in a new tab: the site stays open in the first
+ * one. Anyone else sees nothing; /admin still asks for the password.
  */
-// the editor opens in a new tab: the site stays open in the first one (if the browser refuses the tab, in this one)
+// the editor in a new tab, as a link does it (a real link opening a tab is never taken for a pop-up, unlike window.open)
 export function openEditor(href = adminHrefForPath(window.location.pathname)) {
-  const w = window.open(href, "_blank");
-  if (w) w.opener = null;
-  else window.location.assign(href);
+  const a = document.createElement("a");
+  a.href = href;
+  a.target = "_blank";
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }
 
 export default function EditorAccess({ lang, isAdmin }) {
@@ -31,9 +36,12 @@ export default function EditorAccess({ lang, isAdmin }) {
   }, [inEditor, isAdmin]);
   if (inEditor || !isAdmin) return null;
   const tr = makeT(lang);
+  // the button is a plain link to a new tab; its address follows the page (tabs change it without a new page) just before
+  // it is used, so the browser opens it by itself
+  const aim = (e) => { e.currentTarget.href = adminHrefForPath(window.location.pathname); };
   return (
-    <a className="btn edfab pri" href="/admin" target="_blank" rel="noopener" title={tr("Open the editor (E key)")}
-      onClick={(e) => { e.preventDefault(); openEditor(); }}>
+    <a className="btn edfab pri" href={adminHrefForPath(pathname || "/")} target="_blank" rel="noopener" title={tr("Open the editor (E key)")}
+      onPointerDown={aim} onFocus={aim} onMouseEnter={aim}>
       {tr("Edit")}
     </a>
   );
