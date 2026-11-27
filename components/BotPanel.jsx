@@ -60,17 +60,24 @@ const asEmbed = (e) => ({
 });
 
 /** The Discord bot's dashboard, in the editor's home. */
-export default function BotPanel() {
+// a module's state in the side menu, said in words beside its coloured dot
+const STATE_WORD = { ready: "prêt", setup: "à configurer", missing: "droit ou intent manquant", off: "désactivé" };
+
+/** The page's address on the full-screen dashboard (/admin/bot?p=members). */
+const pageFromUrl = () => (typeof window === "undefined" ? "home" : new URLSearchParams(window.location.search).get("p") || "home");
+const urlOf = (p) => (p === "home" ? "/admin/bot" : `/admin/bot?p=${encodeURIComponent(p)}`);
+
+/** full: the dashboard on its own page (/admin/bot), each page with its address; else open in the editor's home. */
+export default function BotPanel({ full = false }) {
   const tr = useT();
   const [d, setD] = useState(null);
   const [s, setS] = useState(null);
-  const [page, setPage] = useState("home");
+  const [page, setPage] = useState(() => (full ? pageFromUrl() : "home"));
   const [memberQ, setMemberQ] = useState("");
   const [annTab, setAnnTab] = useState("settings");
   const [msg, setMsg] = useState({ ok: true, text: "" });
   const [busy, setBusy] = useState(false);
   const [ann, setAnn] = useState({ title: "", text: "", embed: true, mention: false, at: "", color: "#ff4655", image: "", fields: [] });
-  const [open, setOpen] = useState(false);
   const [kind, setKind] = useState("start");
   const [sample, setSample] = useState(null);
   const [saved, setSaved] = useState(""); // the settings as last saved, to tell what changed
@@ -92,7 +99,14 @@ export default function BotPanel() {
       });
     }).catch(() => { /* offline */ });
   }, []);
-  useEffect(() => { if (open && !d) load(); }, [open, d, load]);
+  useEffect(() => { if (!d) load(); }, [d, load]);
+  // the full-screen page: the browser's back and forward buttons move between the pages
+  useEffect(() => {
+    if (!full) return undefined;
+    const back = () => setPage(pageFromUrl());
+    window.addEventListener("popstate", back);
+    return () => window.removeEventListener("popstate", back);
+  }, [full]);
   const call = async (body, after) => {
     setBusy(true);
     setMsg({ ok: true, text: "" });
@@ -104,7 +118,11 @@ export default function BotPanel() {
       if (after) after(j);
     } catch (e) { setMsg({ ok: false, text: tr.server(e.message) }); } finally { setBusy(false); }
   };
-  const go = (p, tab) => { setPage(p); if (tab) setAnnTab(tab); setMsg({ ok: true, text: "" }); };
+  const go = (p, tab) => {
+    if (full && p !== page) window.history.pushState(null, "", urlOf(p));
+    setPage(p); if (tab) setAnnTab(tab); setMsg({ ok: true, text: "" });
+    if (full) window.scrollTo({ top: 0 });
+  };
   const openMember = (id) => { setMemberQ(String(id)); go("members"); };
   const set = (k, v) => setS((x) => ({ ...x, [k]: v }));
   const dirty = !!s && !!saved && JSON.stringify(s) !== saved;
@@ -130,8 +148,14 @@ export default function BotPanel() {
   );
   return (
     <section>
-      <details className="einfo botpanel" onToggle={(e) => setOpen(e.currentTarget.open)}>
-        <summary><b>🤖 {tr("Discord bot")}</b>{d && <small> · {g.on ? "🟢 en ligne" : "⚪ hors ligne"} · {d.usage.total} {tr("Uses (30 days)").toLowerCase()}</small>}</summary>
+      <div className={"einfo botpanel" + (full ? " full" : "")}>
+        {!full && (
+          <header className="bphead">
+            <b>🤖 {tr("Discord bot")}</b>
+            {d && <small>{g.on ? "🟢 en ligne" : "⚪ hors ligne"} · {d.usage.total} {tr("Uses (30 days)").toLowerCase()}</small>}
+            <a className="btn small" href={urlOf(page)}>⛶ Plein écran</a>
+          </header>
+        )}
         {!d || !s ? <div className="botbody"><Skeleton lines={5} /></div> : (
           <div className="botbody">
             {/* the bot's state and the common actions, on every page */}
@@ -153,9 +177,20 @@ export default function BotPanel() {
                 <button type="button" className="btn small" disabled={busy || !d.token} onClick={() => call({ action: "test" })}>✉️ Message de test</button>
               </div>
             </div>
+            <div className="blayout">
             <nav className="bnav" aria-label="Pages du bot">
-              {PAGES.map(([k, l]) => <button key={k} type="button" aria-current={page === k || (k === "home" && !!mod) ? "page" : undefined} onClick={() => go(k)}>{l}</button>)}
+              {PAGES.map(([k, l]) => <button key={k} type="button" aria-current={page === k ? "page" : undefined} onClick={() => go(k)}>{l}</button>)}
+              <span className="bnavsep" aria-hidden="true">Modules</span>
+              {MODULES.map((m) => {
+                const st = stateOf(m).state;
+                return (
+                  <button key={m.key} type="button" className="bnavmod" aria-current={page === `mod:${m.key}` ? "page" : undefined} onClick={() => go(`mod:${m.key}`)} title={STATE_WORD[st]}>
+                    <span aria-hidden="true">{m.icon}</span> {m.name}<i className={`bsdot s-${st}`} aria-label={STATE_WORD[st]} />
+                  </button>
+                );
+              })}
             </nav>
+            <div className="bmain">
 
             {page === "home" && (
               <>
@@ -344,9 +379,11 @@ export default function BotPanel() {
               </>
             )}
             {msg.text && <p className={msg.ok ? "okmsg" : "err"} role="status">{msg.text}</p>}
+            </div>
+            </div>
           </div>
         )}
-      </details>
+      </div>
     </section>
   );
 }

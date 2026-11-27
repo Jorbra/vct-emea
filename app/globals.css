@@ -4295,3 +4295,36 @@ html[data-ft~="stories2"] .story.seen .storyring { background: var(--line); }
   .bmfacts { grid-template-columns: 1fr; }
   .bmfacts dd { margin-bottom: 6px; }
 }
+
+/* ---- the bot dashboard: open in the editor, a side menu when there is room, its own full page (/admin/bot) ---- */
+.bphead { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.bphead small { font-size: 13px; color: var(--muted); flex: 1; }
+.bphead .btn { margin-left: auto; }
+.botpanel .botbody { container-type: inline-size; }
+.blayout { display: block; }
+.bnavsep { display: none; }
+.bnavmod .bsdot { display: none; }
+.bsdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: auto; flex: none; background: var(--muted); }
+.bsdot.s-ready { background: #3ba55d; }
+.bsdot.s-setup { background: #e0a526; }
+.bsdot.s-missing { background: var(--danger); }
+.bsdot.s-off { background: transparent; border: 1.5px solid var(--muted); }
+@container (min-width: 860px) {
+  .blayout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 20px; align-items: start; }
+  .blayout > .bnav { position: sticky; top: 12px; flex-direction: column; gap: 1px; overflow: visible; border-bottom: 0; margin: 0; padding: 6px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; }
+  .blayout > .bnav button { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 7px 10px; border: 0; border-left: 3px solid transparent; border-radius: 6px; white-space: normal; }
+  .blayout > .bnav button:hover { background: var(--surface); }
+  .blayout > .bnav button[aria-current="page"] { background: var(--surface); border-left-color: var(--lime); }
+  .bnavsep { display: block; padding: 12px 10px 4px; font: 700 11px var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .bnavmod { font-weight: 500 !important; font-size: 13.5px !important; }
+  .bnavmod .bsdot { display: inline-block; }
+  .bmain { min-width: 0; }
+}
+@container (max-width: 859px) {
+  .bnavmod { display: none !important; }
+}
+.botfull { padding: 14px clamp(10px, 2.5vw, 28px) 40px; max-width: 1500px; margin: 0 auto; }
+.botfullhead { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.botfullhead h1 { margin: 0; font: 700 26px var(--font-display); }
+.botpanel.full { margin: 0; }
+.botpanel.full .botbody { padding: 14px; }
