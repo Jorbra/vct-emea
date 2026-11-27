@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb } from "../../../lib/db.js";
-import { BOT_RIGHTS, P, closeTicket, reopenTicket } from "../../../lib/botmod.js";
+import { BOT_RIGHTS, P, closeTicket, failText, reopenTicket } from "../../../lib/botmod.js";
 import { botServer, saveBotServer, syncAutomod } from "../../../lib/botserver.js";
 import { gatewayState } from "../../../lib/botgateway.js";
 import { ticketStats } from "../../../lib/botmod3.js";
@@ -106,7 +106,7 @@ export async function POST(req) {
       logBot(db, "test", String(b.kind));
       return NextResponse.json({ ok: true, message: "Test message sent." });
     } catch (e) {
-      return NextResponse.json({ error: `Discord: ${e.message}` }, { status: 502 });
+      return NextResponse.json({ error: failText(e) }, { status: 502 });
     }
   }
   if (b.action === "unschedule") return reply(cancelScheduled(db, b.id));
@@ -157,7 +157,7 @@ export async function POST(req) {
         const matches = found.filter((m) => m.user && !m.user.bot).map((m) => ({ id: m.user.id, name: m.nick || m.user.global_name || m.user.username, user: m.user.username, avatar: m.user.avatar ? `https://cdn.discordapp.com/avatars/${m.user.id}/${m.user.avatar}.png?size=64` : "" }));
         if (matches.length !== 1) return NextResponse.json({ ok: true, matches });
         id = matches[0].id;
-      } catch (e) { return NextResponse.json({ error: `Discord : ${e.message}` }, { status: 502 }); }
+      } catch (e) { return NextResponse.json({ error: failText(e) }, { status: 502 }); }
     }
     const file = memberFile(db, guild, id);
     const out = { ok: true, file, created: createdAt(id), member: null, banned: null, user: null };
@@ -201,7 +201,7 @@ export async function POST(req) {
       try {
         await discord("POST", `/channels/${t.thread}/messages`, { content: `💬 **${who}** · équipe (depuis le site)
 ${text}`, allowed_mentions: { parse: [] } });
-      } catch (e) { return NextResponse.json({ error: `Discord : ${e.message}` }, { status: 502 }); }
+      } catch (e) { return NextResponse.json({ error: failText(e) }, { status: 502 }); }
       logBot(db, "ticket", `réponse de ${who} depuis l'éditeur`);
       return NextResponse.json({ ok: true, message: "Réponse envoyée dans le ticket." });
     }
@@ -221,6 +221,7 @@ ${text}`, allowed_mentions: { parse: [] } });
     const saved = ticketTranscript(db, guild, t.thread);
     let messages = [];
     let source = "none";
+    let gone = false; // the thread deleted on Discord: nothing can be written or reopened there
     if ((!t.closed || !saved) && botReady()) {
       try {
         const all = [];
@@ -233,13 +234,15 @@ ${text}`, allowed_mentions: { parse: [] } });
         }
         messages = liveMessages(all);
         source = "live";
-      } catch { /* the thread is gone or out of reach: the saved transcript, if any */ }
+      } catch (e) { if (e && e.code === 10003) gone = true; /* else out of reach: the saved transcript, if any */ }
+    } else if (t.closed && botReady()) {
+      try { await discord("GET", `/channels/${t.thread}`); } catch (e) { if (e && e.code === 10003) gone = true; }
     }
     if (source === "none" && saved) { messages = parseTranscript(saved).messages; source = "transcript"; }
     // the members the messages mention, by their names (Discord, with the token)
     const mentioned = messages.flatMap((m) => [...m.text.matchAll(/<@!?(\d{5,25})>/g)].map((x) => x[1]));
     const names = await namesFor([t.user, t.claimed, ...mentioned].slice(0, 30));
-    return NextResponse.json({ ok: true, ticket: t, messages, source, names, guild, transcript: saved });
+    return NextResponse.json({ ok: true, ticket: t, messages, source, names, guild, transcript: saved, gone });
   }
   if (b.action === "log") return NextResponse.json({ ok: true, log: filterLog(db, { kind: b.kind, errors: !!b.errors, q: b.q }), kinds: db.prepare("SELECT DISTINCT kind FROM bot_log ORDER BY kind").all().map((r) => r.kind) });
   // the "Commands" page: which are on, and each one's rules
@@ -287,7 +290,7 @@ ${text}`, allowed_mentions: { parse: [] } });
       const done = await updatePinned(db, getState(db));
       return NextResponse.json({ ok: true, message: done ? "Pinned message updated." : "Choose the pinned message's channel first." });
     } catch (e) {
-      return NextResponse.json({ error: `Discord: ${e.message}` }, { status: 502 });
+      return NextResponse.json({ error: failText(e) }, { status: 502 });
     }
   }
   // the server settings: saved, then Discord's AutoMod rules put in line with them
@@ -308,7 +311,7 @@ ${text}`, allowed_mentions: { parse: [] } });
       await registerCommands(COMMANDS);
       return NextResponse.json({ ok: true, message: "Commands registered." });
     } catch (e) {
-      return NextResponse.json({ error: `Discord: ${e.message}` }, { status: 502 });
+      return NextResponse.json({ error: failText(e) }, { status: 502 });
     }
   }
   return NextResponse.json(saveBotSettings(db, b));

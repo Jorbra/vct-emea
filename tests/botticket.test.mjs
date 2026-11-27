@@ -55,3 +55,14 @@ test("ticket: closed and reopened from the editor, the editor named (no mention 
   assert.match(o.content, /^🔓/);
   assert.match(calls.find((c) => c.method === "POST").body.content, /rouvert par \*\*Camille\*\* \(éditeur du site\)/);
 });
+
+test("ticket: Discord's errors said plainly, a deleted thread first", async () => {
+  const { failText } = await import("../lib/botmod.js");
+  const err = (code, status = 404, message = "Unknown Channel") => Object.assign(new Error(message), { code, status });
+  assert.match(failText(err(10003)), /n'existe plus sur Discord/);
+  assert.match(failText(err(50083, 400, "Thread is archived")), /archivé : rouvre-le/);
+  assert.match(failText(err(50001, 403, "Missing Access")), /ne voit pas ce salon/);
+  assert.match(failText(err(undefined, 503, "Service Unavailable")), /ne répond pas/);
+  assert.match(failText(err(99999, 400, "Something odd")), /Discord a refusé : Something odd/, "an unknown code keeps Discord's words");
+  assert.match(failText(err(10003), (fr, en) => en), /no longer exists/);
+});

@@ -53,7 +53,8 @@ export function TicketView({ guild, thread, onClose, onMember, onChanged }) {
     setSay({ ok: true, text: "" });
     const j = await ask({ ...body, guild, thread });
     setBusy(false);
-    if (j.error) { setSay({ ok: false, text: j.error }); return; }
+    // on an error too, the ticket is read again: a thread deleted on Discord shows as such
+    if (j.error) { setSay({ ok: false, text: j.error }); await load(); return; }
     setSay({ ok: true, text: j.message || "" });
     if (done) done();
     atEnd.current = true;
@@ -95,7 +96,7 @@ export function TicketView({ guild, thread, onClose, onMember, onChanged }) {
             {t.details && <div className="btkform"><b>Réponses au formulaire</b><p>{t.details}</p></div>}
             <p className="btksrc bmuted">
               {live ? "Messages lus en direct sur Discord, mis à jour toutes les 15 secondes." : data.source === "live" ? "Messages lus sur Discord." : data.source === "transcript" ? "Transcription enregistrée à la fermeture." : t.closed ? "Aucune transcription n'a été enregistrée pour ce ticket." : "Les messages d'un ticket ouvert se lisent avec le jeton du bot."}
-              {" "}<a href={`https://discord.com/channels/${data.guild}/${t.thread}`} target="_blank" rel="noreferrer noopener">Ouvrir dans Discord ↗</a>
+              {!data.gone && <>{" "}<a href={`https://discord.com/channels/${data.guild}/${t.thread}`} target="_blank" rel="noreferrer noopener">Ouvrir dans Discord ↗</a></>}
             </p>
             <div className="btkchat" ref={box} tabIndex={0} aria-label="Messages du ticket" onScroll={onScroll}>
               {msgs.length === 0 ? <p className="note">Aucun message à afficher.</p> : msgs.map((m, k) => {
@@ -122,7 +123,9 @@ export function TicketView({ guild, thread, onClose, onMember, onChanged }) {
               })}
             </div>
             {say.text && <p className={say.ok ? "okmsg" : "err"} role="status">{say.text}</p>}
-            {!t.closed ? (
+            {data.gone ? (
+              <p className="note warn btkgone">🗑️ Le fil de ce ticket a été supprimé sur Discord : on ne peut plus y répondre ni le rouvrir. {data.source === "transcript" ? "La transcription reste lisible ici." : ""}</p>
+            ) : !t.closed ? (
               <div className="btkact">
                 {!closing ? (
                   <form className="btkreply" onSubmit={(e) => { e.preventDefault(); act({ action: "ticket-reply", text: reply }, () => setReply("")); }}>
