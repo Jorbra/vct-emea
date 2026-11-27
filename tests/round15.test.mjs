@@ -43,8 +43,9 @@ test("bot: /agentaleatoire and /statsagents", () => {
 test("round 16: help grouped by theme, every map and agent offered", async () => {
   const { helpMessage, MAPS, AGENTS } = await import("../lib/discordbot.js");
   const help = helpMessage("fr");
-  assert.ok(help.embeds[0].fields.some((f) => /Agents et cartes/.test(f.name) && /\/meta/.test(f.value)));
-  assert.equal(helpMessage("fr", ["meta"]).embeds[0].fields.some((f) => /`\/meta/.test(f.value)), false);
+  const k = help.components[0].components[0].options.findIndex((o) => /Agents et cartes/.test(o.label));
+  assert.ok(k >= 0 && /\*\*\/meta\*\*/.test(helpMessage("fr", [], k).embeds[0].description));
+  assert.equal(/\*\*\/meta\*\*/.test(helpMessage("fr", ["meta"], k).embeds[0].description), false);
   assert.ok(MAPS.includes("Summit") && MAPS.includes("Lotus") && !MAPS.includes("Gauntlet"));
   assert.ok(AGENTS.includes("Jett") && AGENTS.length >= 28);
 });

@@ -180,7 +180,7 @@ test("right-click menus: Warn asks the reason, Timeout 10 min, report to the sta
   assert.ok(d.calls.some((c) => c.method === "DELETE" && c.path === "/channels/C/messages/M3"));
   // without the permission, no form
   r = contextMenu(menu("Warn", 2, "r1", {}, "0"), deps);
-  assert.match((await r.later()).content, /pas la permission/);
+  assert.match((await r.later()).content, /Permission manquante : il te faut « /);
 });
 
 test("tickets: limit per member, the subject's staff role pinged, closing with a reason, a rating, reopening, numbers for the editor", async () => {

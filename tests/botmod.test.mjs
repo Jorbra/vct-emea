@@ -3,7 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { getDb } from "../lib/db.js";
 import { MOD_COMMANDS, P, canActOn, canGiveRole, closeTicket, hasPerm, openTicket, purgeable, runModCommand, ticketName, topPosition } from "../lib/botmod.js";
-import { COMMANDS } from "../lib/discordbot.js";
+import { ALL_COMMANDS as COMMANDS } from "../lib/discordbot.js";
 import { BOT_COMMANDS } from "../lib/botstore.js";
 
 const ROLES = [{ id: "g", position: 0 }, { id: "mod", position: 5 }, { id: "vip", position: 3 }, { id: "admin", position: 8 }, { id: "botrole", position: 9, managed: true }];
@@ -102,7 +102,7 @@ test("moderation: warn (kept, told in private), time out, kick refused above one
   // without the permission, nothing is asked of Discord
   const before = d.calls.length;
   r = await runModCommand(interaction("ban", { user: "t4" }, { perms: String(P.MANAGE_MESSAGES), resolved: target("t4", []) }), deps);
-  assert.match(r.content, /pas la permission/);
+  assert.match(r.content, /Permission manquante : il te faut « /);
   assert.equal(d.calls.length, before);
 });
 

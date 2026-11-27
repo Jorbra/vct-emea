@@ -40,6 +40,10 @@ import { reopenTicket } from "../../../lib/botmod.js";
 import { botServer, postLog } from "../../../lib/botserver.js";
 import { discord, postFile } from "../../../lib/botapi.js";
 import { logBot } from "../../../lib/botstore.js";
+import { checkRule, dress, expandInteraction, moduleRefusal, templateSuggestions } from "../../../lib/botdash.js";
+
+// the delays between two uses of a command (the editor's rules), in memory: "command:user" → last use
+const cooldowns = (globalThis.__botCooldowns ||= new Map());
 
 // the server commands whose answer everyone in the channel sees; the others answer the moderator alone
 const MOD_PUBLIC = ["serverinfo", "userinfo", "slowmode", "lock", "unlock"];
@@ -58,7 +62,7 @@ function laterUpdate(i, work) {
   after(async () => {
     let out;
     try { out = await work(); } catch (e) { out = { content: `❌ ${e.message}` }; }
-    const { public: _shown, ...payload } = out || { content: "?" };
+    const { public: _shown, ...payload } = dress(out || { content: "?" });
     await editOriginal(i.application_id, i.token, { components: [], ...payload }).catch((e) => console.log(`[bot] answer: ${e.message}`));
   });
   return NextResponse.json({ type: 6 });
@@ -71,7 +75,7 @@ function later(i, visible, work) {
   after(async () => {
     let out;
     try { out = await work(); } catch (e) { out = { content: `❌ ${e.message}` }; }
-    const { public: _shown, ...payload } = out || { content: "?" };
+    const { public: _shown, ...payload } = dress(out || { content: "?" });
     await editOriginal(i.application_id, i.token, payload).catch((e) => console.log(`[bot] answer: ${e.message}`));
   });
   return NextResponse.json({ type: 5, data: visible ? {} : { flags: 64 } });
@@ -82,6 +86,8 @@ export const maxDuration = 30;
 
 const EMEA_REGION = /europe|emea|turkey|türkiye|middle east|mena|cis|africa/i;
 const ephemeral = (data) => NextResponse.json({ type: 4, data: { flags: 64, allowed_mentions: { parse: [] }, ...data } });
+// a refusal (module off, a rule of the editor, a command turned off): a red card only the author sees
+const refuse = (text) => ephemeral(dress({ content: text }));
 
 /** What the commands read, each part only when asked. */
 function context(db, lang, now) {
@@ -137,13 +143,32 @@ function context(db, lang, now) {
 const picksOf = (db, hash) => Object.fromEntries(db.prepare("SELECT event, id, pick FROM predictions WHERE hash = ?").all(hash).map((r) => [`${r.event}:${r.id}`, r.pick]));
 
 // Discord's calls for the bot (its "Interactions Endpoint URL"). Needs DISCORD_PUBLIC_KEY.
+// The editor may say, per command, that its answer is seen by everyone or by its author only: applied here to the first answer
+// (a message, or "thinking…", which the answer then follows).
 export async function POST(req) {
+  const box = { visibility: "default" };
+  const res = await handle(req, box);
+  if (box.visibility === "default" || !res || res.status !== 200) return res;
+  try {
+    const j = await res.clone().json();
+    if (j.type !== 4 && j.type !== 5) return res;
+    const data = { ...(j.data || {}) };
+    const flags = Number(data.flags || 0);
+    data.flags = box.visibility === "private" ? flags | 64 : flags & ~64;
+    return NextResponse.json({ ...j, data });
+  } catch { return res; }
+}
+
+async function handle(req, box) {
   const body = await req.text();
   if (!verifyDiscord(process.env.DISCORD_PUBLIC_KEY, req.headers.get("x-signature-ed25519"), req.headers.get("x-signature-timestamp"), body)) {
     return new NextResponse("Bad signature", { status: 401 });
   }
   let i;
   try { i = JSON.parse(body); } catch { return new NextResponse("Bad request", { status: 400 }); }
+  // the name Discord shows (/warn, /ticket…), then the interaction as the command it stands for (/warn add → warn)
+  const topName = (i.data && i.data.name) || "";
+  if (i.type === 2 || i.type === 4) i = expandInteraction(i);
   if (i.type === 1) return NextResponse.json({ type: 1 }); // Discord checking the address
   const db = getDb();
   const now = Date.now();
@@ -157,6 +182,9 @@ export async function POST(req) {
     // the server commands: the preset reasons (editor), readable durations
     if (i.data && SERVER_CMDS.includes(i.data.name)) {
       const focused = (i.data.options || []).find((o) => o.focused) || {};
+      const server = botServer(db);
+      if (focused.name === "template") return NextResponse.json({ type: 8, data: { choices: templateSuggestions(focused.value, server.embeds) } });
+      if (i.data.name === "ticket" && focused.name === "subject") return NextResponse.json({ type: 8, data: { choices: server.tickets.categories.filter((c) => !focused.value || c.name.toLowerCase().includes(String(focused.value).toLowerCase())).map((c) => ({ name: c.name, value: c.name })).slice(0, 25) } });
       const choices = focused.name === "reason" ? reasonSuggestions(focused.value, botServer(db).moderation.reasons) : ["duration", "in"].includes(focused.name) ? durationSuggestions(focused.value) : [];
       return NextResponse.json({ type: 8, data: { choices } });
     }
@@ -181,6 +209,13 @@ export async function POST(req) {
   // a prediction button
   if (i.type === 3) {
     const [kind, event, id, side] = String((i.data && i.data.custom_id) || "").split("|");
+    // /help's menu: the chosen category in place
+    if (kind === "hp") {
+      const { flags: _f, ...data } = helpMessage(settings.lang, settings.disabled, Number(((i.data && i.data.values) || [])[0]), ctx.site);
+      return NextResponse.json({ type: 7, data });
+    }
+    const off = moduleRefusal(botServer(db), kind);
+    if (off) return refuse(off);
     // a ticket's rating, in a private message (no server here): tr|<thread>|<stars>
     if (kind === "tr") return NextResponse.json(rateTicket(db, event, user.id, Number(id)));
     // a ban or kick confirmed (or not) by the moderator who asked: cf|<number>|yes|no
@@ -267,7 +302,17 @@ export async function POST(req) {
 
   if (i.type !== 2 || !i.data) return ephemeral({ content: "?" });
   const name = i.data.name;
-  if (settings.disabled.includes(name)) return ephemeral({ content: L("Cette commande est désactivée sur ce serveur.", "This command is turned off here.") });
+  if (settings.disabled.includes(name) || settings.disabled.includes(topName)) return refuse(L("❌ Cette commande est désactivée sur ce serveur.", "❌ This command is turned off here."));
+  // the module the command belongs to, and the editor's rules for it (roles, channels, delay, who sees the answer)
+  {
+    const server = botServer(db);
+    const off = moduleRefusal(server, name);
+    if (off) return refuse(off);
+    const rule = server.commandRules[topName];
+    const no = checkRule(rule, i, cooldowns, now, topName);
+    if (no) return refuse(no);
+    if (rule) box.visibility = rule.visibility;
+  }
   // a right-click menu on a member or a message (lib/botmod3.js)
   if (i.data.type === 2 || i.data.type === 3) {
     if (!tokenSet() || !i.guild_id) return ephemeral({ content: L("Indisponible ici.", "Not available here.") });
@@ -317,7 +362,7 @@ export async function POST(req) {
     const rows = seasonRanking(db, ctx.state(), { limit: 10, now, only: hashes }).map((r, k) => `${["🥇", "🥈", "🥉"][k] || `${k + 1}.`} **${r.name}** · ${r.points} pts (${r.good}/${r.total})`);
     return NextResponse.json({ type: 4, data: { embeds: [{ title: L("Pronostics · classement de ce serveur", "Predictions · this server's ranking"), description: rows.join("\n") || L("Personne de ce serveur n'a encore pronostiqué : `/pronostic`.", "Nobody here has predicted yet: `/pronostic`."), color: 0xff4655 }], allowed_mentions: { parse: [] } } });
   }
-  if (name === "aide") return NextResponse.json({ type: 4, data: helpMessage(settings.lang, settings.disabled) });
+  if (name === "aide" || name === "help") return NextResponse.json({ type: 4, data: helpMessage(settings.lang, settings.disabled, -1, ctx.site) });
   if (name === "mesprono") {
     const hash = discordVoter(db, user.id, process.env.SESSION_SECRET);
     const me = db.prepare("SELECT name FROM voters WHERE hash = ?").get(hash);

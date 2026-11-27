@@ -6,7 +6,7 @@ import { getDb } from "../lib/db.js";
 import { P, closeTicket, openTicket } from "../lib/botmod.js";
 import { MOD2_COMMANDS, P2, botTimers, buildTranscript, claimTicket, colorOf, drawWinners, handleButton, parseChoices, pollResults, powerfulRole, runMod2Command } from "../lib/botmod2.js";
 import { INVITE_REGEX, addSanction, automodRules, cleanServer, fillTemplate, handleEvent, isFlood, makeMemory, syncAutomod } from "../lib/botserver.js";
-import { COMMANDS } from "../lib/discordbot.js";
+import { ALL_COMMANDS as COMMANDS, COMMANDS as REGISTERED } from "../lib/discordbot.js";
 import { BOT_COMMANDS } from "../lib/botstore.js";
 
 const ROLES = [{ id: "G", position: 0, permissions: "0" }, { id: "mod", position: 5, permissions: String(P.MODERATE) }, { id: "vip", position: 3, permissions: "0" }, { id: "admin", position: 8, permissions: String(P.ADMIN) }, { id: "helper", position: 2, permissions: String(P.MANAGE_MESSAGES) }];
@@ -42,7 +42,7 @@ test("the second set of commands: registered, can be turned off, required option
     assert.deepEqual(req, [...req].sort((x, y) => Number(y) - Number(x)), c.name);
     assert.deepEqual(c.contexts, [0]);
   }
-  assert.ok(COMMANDS.length <= 100, "Discord takes 100 commands at most");
+  assert.ok(REGISTERED.length <= 100, "Discord takes 100 commands at most");
   assert.deepEqual(MOD2_COMMANDS.filter((c) => !c.default_member_permissions).map((c) => c.name), ["remindme"]);
 });
 
@@ -182,7 +182,7 @@ test("nickname and voice: done on members below, refused above, the reason in th
   r = await runMod2Command(ix("nick", { user: "t7", nickname: "x" }, { resolved: tgt("t7", ["admin"]) }), deps);
   assert.match(r.content, /égal ou supérieur/);
   r = await runMod2Command(ix("mute", { user: "t6", action: 1 }, { perms: String(P.MANAGE_MESSAGES), resolved: tgt("t6", []) }), deps);
-  assert.match(r.content, /pas la permission/);
+  assert.match(r.content, /Permission manquante : il te faut « /);
   assert.equal(d.calls.filter((c) => c.method === "PATCH").length, d.calls.slice(0, before).filter((c) => c.method === "PATCH").length);
 });
 
