@@ -4,6 +4,7 @@
 // table, the tickets with their transcripts, the log with filters. Written in French, as the server's editors read it.
 import { useCallback, useEffect, useState } from "react";
 import { MultiPicker } from "./BotDash.jsx";
+import { TicketView } from "./BotTicket.jsx";
 
 /** A call to the bot's API that only reads: its JSON, or { error }. */
 export async function ask(body) {
@@ -192,12 +193,11 @@ export function CasesPage({ guild, busy, call, onMember }) {
 export function TicketsPage({ guild, onMember }) {
   const [f, setF] = useState({ state: "", q: "" });
   const [data, setData] = useState(null);
-  const [read, setRead] = useState(null);
+  const [read, setRead] = useState("");
   const q = useDebounced(f.q);
   useEffect(() => { ask({ action: "tickets", guild, state: f.state, q }).then(setData); }, [guild, f.state, q]);
   const names = (data && data.names) || {};
   const st = data && data.stats;
-  const open = (t) => { setRead({ t, text: null }); ask({ action: "ticket", guild, thread: t.thread }).then((j) => setRead({ t, text: j.transcript || "" })); };
   return (
     <div className="bpage">
       {st && (
@@ -211,11 +211,12 @@ export function TicketsPage({ guild, onMember }) {
         <select value={f.state} onChange={(e) => setF({ ...f, state: e.target.value })} aria-label="État"><option value="">Tous</option><option value="open">Ouverts</option><option value="closed">Fermés</option></select>
         <input type="search" value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} placeholder="Sujet, auteur, catégorie" aria-label="Chercher un ticket" />
       </div>
-      {!data ? <p className="note">Chargement…</p> : data.error ? <p className="err">{data.error}</p> : data.tickets.length === 0 ? <p className="note">Aucun ticket.</p> : (
+      {!data ? <p className="note">Chargement…</p> : data.error ? <p className="err">{data.error}</p> : data.tickets.length === 0 ? <p className="note">Aucun ticket.</p> : (<>
+        <p className="hint">Clique sur un ticket pour le lire ici : ses messages, la personne qui l&apos;a pris en charge, la raison de fermeture et la note.</p>
         <div className="tablewrap"><table className="btable">
           <thead><tr><th>Sujet</th><th>Auteur</th><th>Catégorie</th><th>Ouvert</th><th>État</th><th>Pris en charge par</th><th>Note</th><th /></tr></thead>
           <tbody>{data.tickets.map((t) => (
-            <tr key={t.thread}>
+            <tr key={t.thread} className={"bclick" + (read === t.thread ? " sel" : "")} onClick={() => setRead(t.thread)} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") setRead(t.thread); }} title="Voir le ticket">
               <td data-l="Sujet"><b>{t.subject || "Sans sujet"}</b>{t.priority && <small className="bbadge">{t.priority}</small>}</td>
               <td data-l="Auteur"><Who id={t.user} names={names} onMember={onMember} /></td>
               <td data-l="Catégorie">{t.category || "–"}</td>
@@ -223,18 +224,12 @@ export function TicketsPage({ guild, onMember }) {
               <td data-l="État">{t.closed ? <>fermé {when(t.closed)}{t.reason ? <small className="bmuted"> · {t.reason}</small> : null}</> : <span className="bopen">ouvert</span>}</td>
               <td data-l="Pris en charge">{t.claimed ? names[t.claimed] || t.claimed : "–"}</td>
               <td data-l="Note">{t.rating ? "★".repeat(Number(t.rating)) + "☆".repeat(5 - Number(t.rating)) : "–"}</td>
-              <td>{t.size > 0 && <button type="button" className="btn small" onClick={() => open(t)}>Transcription</button>}</td>
+              <td><button type="button" className="btn small" onClick={(e) => { e.stopPropagation(); setRead(t.thread); }}>Voir le ticket</button></td>
             </tr>
           ))}</tbody>
         </table></div>
-      )}
-      {read && (
-        <aside className="bdetail" aria-label="Transcription">
-          <header><h3 className="sub">📄 {read.t.subject || read.t.thread}</h3><button type="button" className="btn small" onClick={() => setRead(null)}>Fermer</button></header>
-          {read.t.details && <p className="note">{read.t.details}</p>}
-          {read.text == null ? <p className="note">Chargement…</p> : <pre className="btranscript">{read.text || "Transcription vide."}</pre>}
-        </aside>
-      )}
+      </>)}
+      {read && <TicketView guild={guild} thread={read} onClose={() => setRead("")} onMember={onMember} />}
     </div>
   );
 }

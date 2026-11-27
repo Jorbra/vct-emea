@@ -4,6 +4,7 @@
 // server's editors read it.
 import { useCallback, useEffect, useState } from "react";
 import { ask, KIND, Who } from "./BotPages.jsx";
+import { TicketView } from "./BotTicket.jsx";
 
 const when = (iso) => (iso ? new Date(iso).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "–");
 const longDate = (iso) => new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
@@ -26,6 +27,7 @@ export function ActivityPanel({ guild, onMember, go }) {
   const [a, setA] = useState(null);
   const [metric, setMetric] = useState("members");
   const [hover, setHover] = useState(null);
+  const [read, setRead] = useState("");
   useEffect(() => { ask({ action: "activity", guild }).then(setA); }, [guild]);
   if (!a) return <p className="note">Chargement de l&apos;activité…</p>;
   if (a.error) return <p className="err">{a.error}</p>;
@@ -87,12 +89,13 @@ export function ActivityPanel({ guild, onMember, go }) {
           <h3 className="sub">Derniers tickets</h3>
           {a.recentTickets.length === 0 ? <p className="note">Aucun ticket.</p> : (
             <ul className="brecent">{a.recentTickets.map((x) => (
-              <li key={x.thread}>{x.closed ? <span aria-label="fermé">📁</span> : <span className="bopen">ouvert</span>} <b>{x.subject || "Sans sujet"}</b> <small className="bmuted">· <Who id={x.user} names={a.names} onMember={onMember} /> · {when(x.opened)}</small></li>
+              <li key={x.thread}>{x.closed ? <span aria-label="fermé">📁</span> : <span className="bopen">ouvert</span>} <button type="button" className="linkbtn" onClick={() => setRead(x.thread)}><b>{x.subject || "Sans sujet"}</b></button> <small className="bmuted">· <Who id={x.user} names={a.names} onMember={onMember} /> · {when(x.opened)}</small></li>
             ))}</ul>
           )}
           <button type="button" className="linkbtn" onClick={() => go("tickets")}>Tous les tickets →</button>
         </div>
       </div>
+      {read && <TicketView guild={guild} thread={read} onClose={() => setRead("")} onMember={onMember} />}
     </section>
   );
 }
@@ -103,6 +106,7 @@ export function MembersPage({ guild, busy, call, start = "" }) {
   const [data, setData] = useState(null);
   const [note, setNote] = useState("");
   const [asked, setAsked] = useState("");
+  const [read, setRead] = useState("");
   const find = useCallback((value) => {
     const v = String(value || "").trim();
     setAsked(v);
@@ -177,10 +181,11 @@ export function MembersPage({ guild, busy, call, start = "" }) {
           </form>
           <h4 className="sub">Tickets</h4>
           {f.tickets.length === 0 ? <p className="note">Aucun ticket.</p> : (
-            <ul className="brecent">{f.tickets.map((x) => <li key={x.thread}>{x.closed ? <span aria-label="fermé">📁</span> : <span className="bopen">ouvert</span>} <b>{x.subject || "Sans sujet"}</b> <small className="bmuted">· {when(x.opened)}{x.category ? ` · ${x.category}` : ""}{x.rating ? ` · ${"★".repeat(Number(x.rating))}` : ""}</small></li>)}</ul>
+            <ul className="brecent">{f.tickets.map((x) => <li key={x.thread}>{x.closed ? <span aria-label="fermé">📁</span> : <span className="bopen">ouvert</span>} <button type="button" className="linkbtn" onClick={() => setRead(x.thread)}><b>{x.subject || "Sans sujet"}</b></button> <small className="bmuted">· {when(x.opened)}{x.category ? ` · ${x.category}` : ""}{x.rating ? ` · ${"★".repeat(Number(x.rating))}` : ""}</small></li>)}</ul>
           )}
         </article>
       )}
+      {read && <TicketView guild={guild} thread={read} onClose={() => setRead("")} />}
     </div>
   );
 }

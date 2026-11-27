@@ -4328,3 +4328,43 @@ html[data-ft~="stories2"] .story.seen .storyring { background: var(--line); }
 .botfullhead h1 { margin: 0; font: 700 26px var(--font-display); }
 .botpanel.full { margin: 0; }
 .botpanel.full .botbody { padding: 14px; }
+
+/* ---- the bot dashboard: a ticket read here, as a Discord conversation (components/BotTicket.jsx) ---- */
+.btable tr.bclick { cursor: pointer; }
+.btable tr.bclick:hover td { background: var(--row-hover, rgba(127, 127, 127, .08)); }
+.btkback { position: fixed; inset: 0; z-index: 1000; background: rgba(0, 0, 0, .55); display: flex; justify-content: flex-end; }
+.btkview { width: min(760px, 100%); height: 100%; display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; background: var(--surface); border-left: 1px solid var(--line); box-shadow: -10px 0 30px rgba(0, 0, 0, .35); overflow: hidden; }
+.btkhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.btkhead h3 { margin: 0 0 2px; font: 700 20px var(--font-display); overflow-wrap: anywhere; }
+.btkhead small { color: var(--muted); font-size: 13px; }
+.btkfacts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 0; font-size: 14px; }
+.btkfacts dt { color: var(--muted); }
+.btkfacts dd { margin: 0; overflow-wrap: anywhere; }
+.btkform { padding: 8px 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; font-size: 14px; }
+.btkform p { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.btksrc { margin: 0; font-size: 12.5px; }
+.btkchat { flex: 1; min-height: 120px; overflow-y: auto; padding: 8px 0 12px; background: #313338; color: #dbdee1; border-radius: 8px; font: 15px/1.375 "gg sans", "Noto Sans", system-ui, sans-serif; }
+.btkchat .note { margin: 14px; color: #b5bac1; }
+.btkday { display: flex; align-items: center; gap: 8px; margin: 14px 16px 6px; color: #949ba4; font-size: 12px; font-weight: 600; }
+.btkday::before, .btkday::after { content: ""; flex: 1; height: 1px; background: #3f4147; }
+.btkmsg { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 0 14px; padding: 6px 16px 2px; margin-top: 10px; }
+.btkmsg.joined { margin-top: 0; padding-top: 1px; }
+.btkmsg:hover { background: #2e3035; }
+.btkav { grid-column: 1; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 16px; object-fit: cover; }
+.btkbody { grid-column: 2; min-width: 0; }
+.btkwho { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.btkwho b { color: #f2f3f5; font-weight: 600; }
+.btkwho small { color: #949ba4; font-size: 12px; }
+.btkchat .dbot { font-size: 10px; padding: 1px 4px; border-radius: 3px; background: #5865f2; color: #fff; font-weight: 600; }
+.btktext { white-space: pre-wrap; overflow-wrap: anywhere; }
+.btktext a, .btkembed a { color: #00a8fc; }
+.btktext code { padding: 1px 4px; background: #2b2d31; border-radius: 4px; font-size: 13px; }
+.btkchat .dmention { padding: 0 2px; border-radius: 3px; background: rgba(88, 101, 242, .3); color: #c9cdfb; font-weight: 500; }
+.btkembed { margin-top: 4px; max-width: 520px; padding: 8px 12px; background: #2b2d31; border-left: 4px solid #4e5058; border-radius: 4px; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.btkimg { display: block; margin-top: 6px; max-width: min(100%, 400px); max-height: 300px; border-radius: 8px; }
+.btkfile { display: inline-block; margin-top: 6px; padding: 8px 12px; background: #2b2d31; border: 1px solid #1e1f22; border-radius: 8px; color: #00a8fc; font-size: 14px; overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .btkview { padding: 12px; }
+  .btkmsg { padding-left: 10px; padding-right: 10px; gap: 0 10px; grid-template-columns: 34px minmax(0, 1fr); }
+  .btkav { width: 34px; height: 34px; }
+}

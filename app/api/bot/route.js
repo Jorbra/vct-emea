@@ -12,6 +12,7 @@ import { COMMANDS, HELP_GROUPS } from "../../../lib/discordbot.js";
 import { GROUPS, OLD_TO_NEW, RENAMED_SITE, cleanEmbed, cleanRules, toDiscordEmbed } from "../../../lib/botdash.js";
 import { botPermissions, filterLog, listCases, listTickets, revokeCase, setCaseReason, ticketTranscript, userNames } from "../../../lib/botadmin.js";
 import { postLog, addSanction } from "../../../lib/botserver.js";
+import { liveMessages, parseTranscript } from "../../../lib/botticket.js";
 import { commandUsage, createdAt, memberFile, memberId, serverActivity } from "../../../lib/botactivity.js";
 
 /** The commands by category for the editor's "Commands" page: [{ label, list: [{ name, description, subs, perm }] }]. */
@@ -183,7 +184,34 @@ export async function POST(req) {
     logBot(db, "moderation", `note ajoutée sur <@${id}> depuis l'éditeur`);
     return NextResponse.json({ ok: true, message: "Note ajoutée au dossier." });
   }
-  if (b.action === "ticket") return NextResponse.json({ ok: true, transcript: ticketTranscript(db, guildOf(), b.thread) });
+  // one ticket read here: its saved transcript, or its live messages while it is open (or when nothing was saved)
+  if (b.action === "ticket") {
+    const guild = guildOf();
+    const t = db.prepare("SELECT thread, user, subject, opened, closed, category, priority, claimed, reason, first_reply, rating, details FROM bot_tickets WHERE guild = ? AND thread = ?").get(guild, String(b.thread || ""));
+    if (!t) return NextResponse.json({ error: "Ticket introuvable." }, { status: 404 });
+    const saved = ticketTranscript(db, guild, t.thread);
+    let messages = [];
+    let source = "none";
+    if ((!t.closed || !saved) && botReady()) {
+      try {
+        const all = [];
+        let before = "";
+        for (let k = 0; k < 3; k++) {
+          const page = await discord("GET", `/channels/${t.thread}/messages?limit=100${before ? `&before=${before}` : ""}`);
+          all.push(...page);
+          if (page.length < 100) break;
+          before = page[page.length - 1].id;
+        }
+        messages = liveMessages(all);
+        source = "live";
+      } catch { /* the thread is gone or out of reach: the saved transcript, if any */ }
+    }
+    if (source === "none" && saved) { messages = parseTranscript(saved).messages; source = "transcript"; }
+    // the members the messages mention, by their names (Discord, with the token)
+    const mentioned = messages.flatMap((m) => [...m.text.matchAll(/<@!?(\d{5,25})>/g)].map((x) => x[1]));
+    const names = await namesFor([t.user, t.claimed, ...mentioned].slice(0, 30));
+    return NextResponse.json({ ok: true, ticket: t, messages, source, names, guild, transcript: saved });
+  }
   if (b.action === "log") return NextResponse.json({ ok: true, log: filterLog(db, { kind: b.kind, errors: !!b.errors, q: b.q }), kinds: db.prepare("SELECT DISTINCT kind FROM bot_log ORDER BY kind").all().map((r) => r.kind) });
   // the "Commands" page: which are on, and each one's rules
   if (b.action === "commands") {
