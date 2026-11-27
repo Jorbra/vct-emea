@@ -4421,3 +4421,30 @@ html[data-ft~="stories2"] .story.seen .storyring { background: var(--line); }
 /* a new ticket, said while the dashboard is open */
 .btoast { position: fixed; right: 16px; bottom: 16px; z-index: 900; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); padding: 10px 12px 10px 14px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--lime); border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, .35); font-size: 14px; }
 .btoast span { overflow-wrap: anywhere; }
+
+/* ---- stories, next step (components/Stories.jsx) ---- */
+/* the score is never dimmed with the losing side; the winner's number stands out */
+.storyteams > .storyscore { opacity: 1 !important; white-space: nowrap; display: flex; align-items: baseline; justify-content: center; gap: .18em; }
+html[data-ft~="stories2"] .storyscore .sl { opacity: .45; }
+html[data-ft~="stories2"] .storyscore .sw { color: #fff; }
+html[data-ft~="stories2"] .storyhead { margin: 0; max-width: 100%; font: 800 clamp(22px, 6vw, 30px)/1.15 var(--font-display); text-wrap: balance; text-shadow: 0 2px 16px rgba(0, 0, 0, .45); }
+html[data-ft~="stories2"] .storyhead span { display: block; margin-top: 4px; font: 600 15px var(--font-body); opacity: .8; }
+/* no map known: the winner's crest, large and blurred, behind the story */
+html[data-ft~="stories2"] .storyart.crestart { inset: 10% -20% 35%; background-size: contain; background-repeat: no-repeat; filter: blur(36px) brightness(.7) saturate(1.4); opacity: .55; }
+html[data-ft~="stories2"] .storymvp { margin: 0; padding: 6px 14px; border-radius: 999px; background: rgba(255, 255, 255, .1); font-weight: 700; font-size: 14px; }
+.storyacts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; pointer-events: auto; }
+html[data-ft~="stories2"] .storyacts .btn.st2 { display: inline-flex; align-items: center; background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .25); color: #fff; }
+.storyacts button { pointer-events: auto; }
+/* the story of the matches to come */
+.storyup { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; gap: 8px; pointer-events: auto; }
+.storyup a { display: grid; gap: 4px; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .14); color: #fff; text-decoration: none; text-align: left; }
+.storyup a:hover { background: rgba(255, 255, 255, .14); }
+.storyuptime { font: 800 13px var(--font-display); letter-spacing: .06em; text-transform: uppercase; color: var(--lime); }
+.storyupteams { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.storyupteams .crest { width: 26px; height: 26px; flex: none; }
+.storyupteams b { font: 700 15px var(--font-display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.storyupteams i { font-style: normal; font-size: 12px; opacity: .6; flex: none; }
+.storyup small { font-size: 12px; opacity: .7; }
+.storyview.isnext .storyglow { background: radial-gradient(ellipse at 50% 20%, rgba(201, 240, 60, .18), transparent 60%), linear-gradient(to bottom, rgba(0, 0, 0, .2), rgba(0, 0, 0, .7)); }
+.storycal { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--surface); border: 2px solid var(--bg); font-size: 22px; }
+.storyview { z-index: 1000; }
