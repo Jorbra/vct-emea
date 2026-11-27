@@ -199,6 +199,21 @@ export default function BotServer({ d, busy, call, onSaved, section = "" }) {
             {sw("À la fermeture, envoyer la transcription du ticket dans le salon du journal", "tickets.transcript", s.tickets.transcript)}
           </section>
           <section className="bsect">
+            <h3 className="sub">💬 Réponses enregistrées</h3>
+            <p className="hint">Les réponses que l&apos;équipe écrit souvent. Dans le panneau d&apos;un ticket (page « Tickets »), elles se choisissent dans la liste au-dessus de la zone de réponse. 20 au plus.</p>
+            <ul className="bcanned">
+              {(s.tickets.canned || []).map((c, k) => (
+                <li key={k}>
+                  <input type="text" maxLength={60} value={c.title} placeholder="Titre (par exemple : Compte à lier)" onChange={(e) => set(`tickets.canned.${k}.title`, e.target.value)} aria-label={`Titre de la réponse ${k + 1}`} />
+                  <textarea rows={2} maxLength={1800} value={c.text} placeholder="Le texte de la réponse" onChange={(e) => set(`tickets.canned.${k}.text`, e.target.value)} aria-label={`Texte de la réponse ${k + 1}`} />
+                  <button type="button" className="btn small" onClick={() => set("tickets.canned", s.tickets.canned.filter((_, j) => j !== k))}>Retirer</button>
+                </li>
+              ))}
+            </ul>
+            {(s.tickets.canned || []).length < 20 && <button type="button" className="btn small" onClick={() => set("tickets.canned", [...(s.tickets.canned || []), { title: "", text: "" }])}>Ajouter une réponse</button>}
+            <p className="hint">Une réponse sans titre ou sans texte n&apos;est pas gardée.</p>
+          </section>
+          <section className="bsect">
             <h3 className="sub">🪧 Panneau d&apos;ouverture</h3>
             <p className="hint">Posé avec <code>/ticket panel</code> dans le salon de ton choix ; retape-la après un changement.</p>
             <EmbedBuilder value={s.tickets.panel} vars={PANEL_VARS} onChange={(v) => set("tickets.panel", v)} buttons={cats.length > 1 ? [{ label: "🎫 Ouvrir un ticket : choisis le sujet ▾", style: "select" }] : [{ label: "🎫 Ouvrir un ticket" }]} />

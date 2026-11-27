@@ -129,6 +129,12 @@ export function TicketView({ guild, thread, onClose, onMember, onChanged }) {
               <div className="btkact">
                 {!closing ? (
                   <form className="btkreply" onSubmit={(e) => { e.preventDefault(); act({ action: "ticket-reply", text: reply }, () => setReply("")); }}>
+                    {(data.canned || []).length > 0 && (
+                      <select className="btkcanned" value="" aria-label="Réponse enregistrée" onChange={(e) => { const c = data.canned[Number(e.target.value)]; if (c) setReply((r) => (r.trim() ? `${r.trim()}\n\n${c.text}` : c.text)); }}>
+                        <option value="">💬 Réponse enregistrée…</option>
+                        {data.canned.map((c, k) => <option key={k} value={k}>{c.title}</option>)}
+                      </select>
+                    )}
                     <label className="sr-only" htmlFor="btkreply">Répondre dans le ticket</label>
                     <textarea id="btkreply" rows={2} maxLength={1800} value={reply} placeholder="Répondre dans le ticket… (Ctrl + Entrée pour envoyer)" onChange={(e) => setReply(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && reply.trim() && !busy) { e.preventDefault(); act({ action: "ticket-reply", text: reply }, () => setReply("")); } }} />

@@ -139,6 +139,21 @@ export function CasesPage({ guild, busy, call, onMember }) {
   const who = (id) => (id === "auto" ? "automatique" : id === "editor" ? "éditeur du site" : names[id] || id);
   const cur = sel && data && data.cases ? data.cases.find((c) => c.id === sel) : null;
   const state = (c) => (c.kind === "warn" ? "dans le dossier" : c.active ? "en cours" : c.done ? "levé" : c.until ? "fini" : "–");
+  // the shown cases counted by kind and by moderator
+  const list = (data && data.cases) || [];
+  const byKind = Object.entries(list.reduce((o, c) => ({ ...o, [c.kind]: (o[c.kind] || 0) + 1 }), {})).sort((a, b) => b[1] - a[1]);
+  const byMod = Object.entries(list.reduce((o, c) => ({ ...o, [c.mod]: (o[c.mod] || 0) + 1 }), {})).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  // the shown cases as a spreadsheet file (CSV, opened by Excel or LibreOffice)
+  const exportCsv = () => {
+    const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const rows = [["Cas", "Type", "Membre", "Identifiant du membre", "Modérateur", "Raison", "Date", "Jusqu'à", "État"], ...list.map((c) => [c.id, (KIND[c.kind] || ["", c.kind])[1], who(c.user), c.user, who(c.mod), c.reason, c.at, c.until || "", state(c)])];
+    const blob = new Blob(["\ufeff" + rows.map((r) => r.map(cell).join(";")).join("\r\n")], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `sanctions-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
   return (
     <div className="bpage">
       <div className="bfilters" data-nodirty="">
@@ -147,6 +162,14 @@ export function CasesPage({ guild, busy, call, onMember }) {
         <label className="bdate">Du <input type="date" value={f.from} onChange={(e) => setF({ ...f, from: e.target.value })} /></label>
         <label className="bdate">au <input type="date" value={f.to} onChange={(e) => setF({ ...f, to: e.target.value })} /></label>
       </div>
+      {list.length > 0 && (
+        <div className="bcasesum">
+          <span><b>{list.length}</b> cas{list.length >= 200 ? " (les 200 plus récents)" : ""}</span>
+          <span className="bmuted">Par type :</span> {byKind.map(([k, n]) => <span key={k} className="bchipnum">{(KIND[k] || ["", k])[0]} {n}</span>)}
+          <span className="bmuted">Par modérateur :</span> {byMod.map(([m, n]) => <span key={m} className="bchipnum">{who(m)} {n}</span>)}
+          <button type="button" className="btn small" onClick={exportCsv}>⬇️ Exporter (CSV)</button>
+        </div>
+      )}
       {!data ? <p className="note">Chargement…</p> : data.error ? <p className="err">{data.error}</p> : data.cases.length === 0 ? <p className="note">Aucune sanction ne correspond.</p> : (
         <div className="tablewrap"><table className="btable bcases">
           <thead><tr><th>Cas</th><th>Type</th><th>Membre</th><th>Modérateur</th><th>Raison</th><th>Date</th><th>État</th></tr></thead>

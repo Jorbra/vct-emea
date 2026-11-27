@@ -7,7 +7,7 @@ import { answerQuestion, gameRanking, guildUsers, makeQuestion, noteGuildUser, q
 import { botReady as tokenSet } from "../../../lib/botapi.js";
 import { allMatches } from "../../../lib/matchlist.js";
 import { botReady, editOriginal } from "../../../lib/botapi.js";
-import { botSettings, countUse, discordVoter, followsOf, toggleFollow, useLinkCode } from "../../../lib/botstore.js";
+import { botSettings, countUse, dbCooldowns, discordVoter, followsOf, toggleFollow, useLinkCode } from "../../../lib/botstore.js";
 import { openForPrediction, savePredictionFor } from "../../../lib/community.js";
 import { seasonRanking } from "../../../lib/fans.js";
 import { readFreeAgents } from "../../../lib/lft.js";
@@ -309,7 +309,7 @@ async function handle(req, box) {
     const off = moduleRefusal(server, name);
     if (off) return refuse(off);
     const rule = server.commandRules[topName];
-    const no = checkRule(rule, i, cooldowns, now, topName);
+    const no = checkRule(rule, i, dbCooldowns(db, cooldowns), now, topName);
     if (no) return refuse(no);
     if (rule) box.visibility = rule.visibility;
   }

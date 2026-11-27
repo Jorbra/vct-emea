@@ -107,6 +107,8 @@ export function MembersPage({ guild, busy, call, start = "" }) {
   const [note, setNote] = useState("");
   const [asked, setAsked] = useState("");
   const [read, setRead] = useState("");
+  const [watch, setWatch] = useState(null);
+  useEffect(() => { ask({ action: "watch", guild }).then(setWatch); }, [guild]);
   const find = useCallback((value) => {
     const v = String(value || "").trim();
     setAsked(v);
@@ -127,6 +129,29 @@ export function MembersPage({ guild, busy, call, start = "" }) {
         <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Pseudo, @mention ou identifiant" aria-label="Chercher un membre" />
         <button type="submit" className="btn pri" disabled={!q.trim()}>Chercher</button>
       </form>
+      {!asked && watch && !watch.error && (
+        <section className="bsect">
+          <h3 className="sub">👀 Membres à surveiller <small className="bmuted">{watch.watch.length}</small></h3>
+          <p className="hint">Ceux qui ont une sanction en cours (exclusion, bannissement) ou au moins 2 avertissements sur les 30 derniers jours.</p>
+          {watch.watch.length === 0 ? <p className="note">Personne pour le moment.</p> : (
+            <ul className="bwatch">{watch.watch.map((x) => (
+              <li key={x.user}>
+                <button type="button" className="bmatch" onClick={() => { setQ(x.user); find(x.user); }}>
+                  <span className="bavatar" aria-hidden="true">{((watch.names && watch.names[x.user]) || "?").slice(0, 1)}</span>
+                  <span>
+                    <b>{(watch.names && watch.names[x.user]) || x.user}</b>
+                    <small className="bmuted">{[
+                      x.running.length ? `${x.running.map((k) => kindName(k).toLowerCase()).join(", ")} en cours` : "",
+                      x.warns30 ? `${x.warns30} avertissement${x.warns30 > 1 ? "s" : ""} en 30 jours` : "",
+                      `dernière sanction le ${when(x.last)}`,
+                    ].filter(Boolean).join(" · ")}</small>
+                  </span>
+                </button>
+              </li>
+            ))}</ul>
+          )}
+        </section>
+      )}
       {!asked && <p className="hint">La fiche d&apos;un membre réunit son état sur le serveur, ses sanctions, les notes de l&apos;équipe et ses tickets. Le nom d&apos;un membre dans l&apos;accueil, les sanctions et les tickets ouvre aussi sa fiche.</p>}
       {asked && !data && <p className="note">Recherche…</p>}
       {data && data.error && <p className="err">{data.error}</p>}

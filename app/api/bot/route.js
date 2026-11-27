@@ -13,7 +13,7 @@ import { GROUPS, OLD_TO_NEW, RENAMED_SITE, cleanEmbed, cleanRules, toDiscordEmbe
 import { botPermissions, filterLog, listCases, listTickets, revokeCase, setCaseReason, ticketTranscript, userNames } from "../../../lib/botadmin.js";
 import { postLog, addSanction } from "../../../lib/botserver.js";
 import { liveMessages, parseTranscript } from "../../../lib/botticket.js";
-import { commandUsage, createdAt, memberFile, memberId, serverActivity } from "../../../lib/botactivity.js";
+import { commandUsage, createdAt, memberFile, memberId, serverActivity, watchList } from "../../../lib/botactivity.js";
 
 /** The commands by category for the editor's "Commands" page: [{ label, list: [{ name, description, subs, perm }] }]. */
 function commandCategories() {
@@ -144,6 +144,11 @@ export async function POST(req) {
     const names = await namesFor([...a.recentCases.flatMap((r) => [r.user, r.mod]), ...a.recentTickets.map((t) => t.user)]);
     return NextResponse.json({ ok: true, ...a, names });
   }
+  // the "Members" page before any search: the members to keep an eye on
+  if (b.action === "watch") {
+    const watch = watchList(db, guildOf());
+    return NextResponse.json({ ok: true, watch, names: await namesFor(watch.map((m) => m.user)) });
+  }
   // the "Members" page: a member found by id, mention or name, then their file
   if (b.action === "member") {
     const guild = guildOf();
@@ -242,7 +247,7 @@ ${text}`, allowed_mentions: { parse: [] } });
     // the members the messages mention, by their names (Discord, with the token)
     const mentioned = messages.flatMap((m) => [...m.text.matchAll(/<@!?(\d{5,25})>/g)].map((x) => x[1]));
     const names = await namesFor([t.user, t.claimed, ...mentioned].slice(0, 30));
-    return NextResponse.json({ ok: true, ticket: t, messages, source, names, guild, transcript: saved, gone });
+    return NextResponse.json({ ok: true, ticket: t, messages, source, names, guild, transcript: saved, gone, canned: botServer(db).tickets.canned });
   }
   if (b.action === "log") return NextResponse.json({ ok: true, log: filterLog(db, { kind: b.kind, errors: !!b.errors, q: b.q }), kinds: db.prepare("SELECT DISTINCT kind FROM bot_log ORDER BY kind").all().map((r) => r.kind) });
   // the "Commands" page: which are on, and each one's rules
