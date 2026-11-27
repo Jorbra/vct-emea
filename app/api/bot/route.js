@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { getDb } from "../../../lib/db.js";
-import { BOT_RIGHTS } from "../../../lib/botmod.js";
+import { BOT_RIGHTS, P, closeTicket, reopenTicket } from "../../../lib/botmod.js";
 import { botServer, saveBotServer, syncAutomod } from "../../../lib/botserver.js";
 import { gatewayState } from "../../../lib/botgateway.js";
 import { ticketStats } from "../../../lib/botmod3.js";
-import { APP_ID, botGuilds, botReady, discord, guildChannels, guildRoles, postMessage, registerCommands } from "../../../lib/botapi.js";
+import { APP_ID, botGuilds, botReady, discord, guildChannels, guildRoles, postFile, postMessage, registerCommands } from "../../../lib/botapi.js";
 import { botLog, botSettings, botUsage, cancelScheduled, logBot, saveBotSettings, scheduleAnnouncement, scheduledList } from "../../../lib/botstore.js";
 import { botTest, pinnedEmbed, updatePinned } from "../../../lib/botnotify.js";
 import { getState } from "../../../lib/db.js";
@@ -183,6 +183,35 @@ export async function POST(req) {
     addSanction(db, { guild: guildOf(), user: id, kind: "note", mod: "editor", reason: me.who ? `${text} (${me.who})` : text });
     logBot(db, "moderation", `note ajoutée sur <@${id}> depuis l'éditeur`);
     return NextResponse.json({ ok: true, message: "Note ajoutée au dossier." });
+  }
+  // a ticket answered, closed or reopened from the editor: the bot speaks, naming the editor
+  if (b.action === "ticket-reply" || b.action === "ticket-close" || b.action === "ticket-reopen") {
+    if (!botReady()) return NextResponse.json({ error: "Le jeton du bot n'est pas réglé sur le serveur (DISCORD_BOT_TOKEN) : impossible d'écrire dans le ticket." }, { status: 409 });
+    const guild = guildOf();
+    const t = db.prepare("SELECT thread, user, closed FROM bot_tickets WHERE guild = ? AND thread = ?").get(guild, String(b.thread || ""));
+    if (!t) return NextResponse.json({ error: "Ticket introuvable." }, { status: 404 });
+    const me = await currentEditor();
+    const who = String(me.who || "Éditeur").slice(0, 60);
+    const editor = { id: "editor", username: who, editor: true };
+    const perms = String(P.MANAGE_THREADS);
+    if (b.action === "ticket-reply") {
+      const text = String(b.text || "").trim().slice(0, 1800);
+      if (!text) return NextResponse.json({ error: "Écris la réponse." }, { status: 400 });
+      if (t.closed) return NextResponse.json({ error: "Ce ticket est fermé : rouvre-le pour répondre." }, { status: 400 });
+      try {
+        await discord("POST", `/channels/${t.thread}/messages`, { content: `💬 **${who}** · équipe (depuis le site)
+${text}`, allowed_mentions: { parse: [] } });
+      } catch (e) { return NextResponse.json({ error: `Discord : ${e.message}` }, { status: 502 }); }
+      logBot(db, "ticket", `réponse de ${who} depuis l'éditeur`);
+      return NextResponse.json({ ok: true, message: "Réponse envoyée dans le ticket." });
+    }
+    const server = botServer(db);
+    const r = b.action === "ticket-close"
+      ? await closeTicket({ db, discord, lang: botSettings(db).lang, logBot, guild, thread: t.thread, user: editor, permissions: perms, server, postFile, reason: String(b.reason || "") })
+      : await reopenTicket({ db, discord, guild, thread: t.thread, user: editor, permissions: perms, notify: (text) => postLog(discord, server, { kind: "bot", title: "🎫 Ticket", lines: [text], at: Date.now() }) });
+    // the bot's own answers say it: a lock for done, anything else ("already closed", Discord refusing) is an error
+    const ok = /^(🔒|🔓)/u.test(r.content || "");
+    return ok ? NextResponse.json({ ok: true, message: r.content }) : NextResponse.json({ error: r.content || "Discord a refusé." }, { status: 400 });
   }
   // one ticket read here: its saved transcript, or its live messages while it is open (or when nothing was saved)
   if (b.action === "ticket") {

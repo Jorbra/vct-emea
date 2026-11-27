@@ -2,7 +2,7 @@
 
 // One ticket read in the editor, as a Discord conversation: its details (subject, author, category, who took it, why it
 // was closed, the rating, the form's answers) and its messages, saved or live. Written in French, as the editors read it.
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { ask, Who } from "./BotPages.jsx";
 
 const when = (iso) => (iso ? new Date(iso).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "–");
@@ -29,11 +29,37 @@ function Text({ text, names }) {
 }
 
 /** The ticket, in a panel over the page. Escape or the button closes it. */
-export function TicketView({ guild, thread, onClose, onMember }) {
+export function TicketView({ guild, thread, onClose, onMember, onChanged }) {
   const [data, setData] = useState(null);
+  const [reply, setReply] = useState("");
+  const [reason, setReason] = useState("");
+  const [closing, setClosing] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [say, setSay] = useState({ ok: true, text: "" });
   const box = useRef(null);
   const closeRef = useRef(null);
-  useEffect(() => { setData(null); ask({ action: "ticket", guild, thread }).then(setData); }, [guild, thread]);
+  const atEnd = useRef(true);
+  const load = useCallback(() => ask({ action: "ticket", guild, thread }).then((j) => setData((cur) => (j.error && cur ? cur : j))), [guild, thread]);
+  useEffect(() => { setData(null); setSay({ ok: true, text: "" }); setClosing(false); atEnd.current = true; load(); }, [load]);
+  // an open ticket read live: its new messages come every 15 seconds while the panel is open and the page seen
+  const live = !!(data && data.source === "live" && data.ticket && !data.ticket.closed);
+  useEffect(() => {
+    if (!live) return undefined;
+    const id = setInterval(() => { if (document.visibilityState === "visible") load(); }, 15000);
+    return () => clearInterval(id);
+  }, [live, load]);
+  const act = async (body, done) => {
+    setBusy(true);
+    setSay({ ok: true, text: "" });
+    const j = await ask({ ...body, guild, thread });
+    setBusy(false);
+    if (j.error) { setSay({ ok: false, text: j.error }); return; }
+    setSay({ ok: true, text: j.message || "" });
+    if (done) done();
+    atEnd.current = true;
+    await load();
+    if (onChanged) onChanged();
+  };
   useEffect(() => {
     const key = (e) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", key);
@@ -41,7 +67,9 @@ export function TicketView({ guild, thread, onClose, onMember }) {
     return () => window.removeEventListener("keydown", key);
   }, [onClose]);
   // the conversation opens on its last messages, as on Discord
-  useEffect(() => { if (data && box.current) box.current.scrollTop = box.current.scrollHeight; }, [data]);
+  // (and stays on them as new ones come, unless the editor scrolled up to read)
+  useEffect(() => { if (data && box.current && atEnd.current) box.current.scrollTop = box.current.scrollHeight; }, [data]);
+  const onScroll = () => { const el = box.current; if (el) atEnd.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40; };
   const t = data && data.ticket;
   const names = (data && data.names) || {};
   const msgs = (data && data.messages) || [];
@@ -66,10 +94,10 @@ export function TicketView({ guild, thread, onClose, onMember }) {
             </dl>
             {t.details && <div className="btkform"><b>Réponses au formulaire</b><p>{t.details}</p></div>}
             <p className="btksrc bmuted">
-              {data.source === "live" ? "Messages lus en direct sur Discord." : data.source === "transcript" ? "Transcription enregistrée à la fermeture." : t.closed ? "Aucune transcription n'a été enregistrée pour ce ticket." : "Les messages d'un ticket ouvert se lisent avec le jeton du bot."}
+              {live ? "Messages lus en direct sur Discord, mis à jour toutes les 15 secondes." : data.source === "live" ? "Messages lus sur Discord." : data.source === "transcript" ? "Transcription enregistrée à la fermeture." : t.closed ? "Aucune transcription n'a été enregistrée pour ce ticket." : "Les messages d'un ticket ouvert se lisent avec le jeton du bot."}
               {" "}<a href={`https://discord.com/channels/${data.guild}/${t.thread}`} target="_blank" rel="noreferrer noopener">Ouvrir dans Discord ↗</a>
             </p>
-            <div className="btkchat" ref={box} tabIndex={0} aria-label="Messages du ticket">
+            <div className="btkchat" ref={box} tabIndex={0} aria-label="Messages du ticket" onScroll={onScroll}>
               {msgs.length === 0 ? <p className="note">Aucun message à afficher.</p> : msgs.map((m, k) => {
                 const prev = msgs[k - 1];
                 const newDay = !prev || dayOf(prev.at) !== dayOf(m.at);
@@ -93,6 +121,39 @@ export function TicketView({ guild, thread, onClose, onMember }) {
                 );
               })}
             </div>
+            {say.text && <p className={say.ok ? "okmsg" : "err"} role="status">{say.text}</p>}
+            {!t.closed ? (
+              <div className="btkact">
+                {!closing ? (
+                  <form className="btkreply" onSubmit={(e) => { e.preventDefault(); act({ action: "ticket-reply", text: reply }, () => setReply("")); }}>
+                    <label className="sr-only" htmlFor="btkreply">Répondre dans le ticket</label>
+                    <textarea id="btkreply" rows={2} maxLength={1800} value={reply} placeholder="Répondre dans le ticket… (Ctrl + Entrée pour envoyer)" onChange={(e) => setReply(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && reply.trim() && !busy) { e.preventDefault(); act({ action: "ticket-reply", text: reply }, () => setReply("")); } }} />
+                    <div className="row">
+                      <button type="submit" className="btn pri" disabled={busy || !reply.trim()}>Envoyer</button>
+                      <button type="button" className="btn danger" disabled={busy} onClick={() => setClosing(true)}>🔒 Fermer le ticket</button>
+                    </div>
+                    <small className="bmuted">Le bot écrit la réponse dans le fil, avec ton nom d&apos;éditeur.</small>
+                  </form>
+                ) : (
+                  <form className="btkreply" onSubmit={(e) => { e.preventDefault(); act({ action: "ticket-close", reason }, () => { setClosing(false); setReason(""); }); }}>
+                    <label className="f">Raison de la fermeture <small className="bmuted">(facultative, envoyée au membre)</small>
+                      <input type="text" maxLength={300} value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
+                    </label>
+                    <div className="row">
+                      <button type="submit" className="btn danger" disabled={busy}>Fermer le ticket</button>
+                      <button type="button" className="btn" disabled={busy} onClick={() => setClosing(false)}>Annuler</button>
+                    </div>
+                    <small className="bmuted">Comme sur Discord : transcription enregistrée, message privé au membre avec la note à donner, fil verrouillé.</small>
+                  </form>
+                )}
+              </div>
+            ) : (
+              <div className="btkact row">
+                <button type="button" className="btn" disabled={busy} onClick={() => act({ action: "ticket-reopen" })}>🔓 Rouvrir le ticket</button>
+                <small className="bmuted">Le fil est déverrouillé et le membre peut de nouveau écrire.</small>
+              </div>
+            )}
           </>
         )}
       </aside>

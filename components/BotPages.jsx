@@ -195,7 +195,8 @@ export function TicketsPage({ guild, onMember }) {
   const [data, setData] = useState(null);
   const [read, setRead] = useState("");
   const q = useDebounced(f.q);
-  useEffect(() => { ask({ action: "tickets", guild, state: f.state, q }).then(setData); }, [guild, f.state, q]);
+  const [stamp, setStamp] = useState(0);
+  useEffect(() => { ask({ action: "tickets", guild, state: f.state, q }).then(setData); }, [guild, f.state, q, stamp]);
   const names = (data && data.names) || {};
   const st = data && data.stats;
   return (
@@ -229,7 +230,7 @@ export function TicketsPage({ guild, onMember }) {
           ))}</tbody>
         </table></div>
       </>)}
-      {read && <TicketView guild={guild} thread={read} onClose={() => setRead("")} onMember={onMember} />}
+      {read && <TicketView guild={guild} thread={read} onClose={() => setRead("")} onMember={onMember} onChanged={() => setStamp((n) => n + 1)} />}
     </div>
   );
 }

@@ -34,3 +34,24 @@ test("ticket: the live messages in the same shape, with avatars and the bot mark
   assert.ok(isImage("https://cdn.discordapp.com/a/capture.png?ex=1"));
   assert.ok(!isImage("https://cdn.discordapp.com/a/rapport.pdf"));
 });
+
+test("ticket: closed and reopened from the editor, the editor named (no mention of a Discord account)", async () => {
+  const { getDb } = await import("../lib/db.js");
+  const { closeTicket, reopenTicket, P } = await import("../lib/botmod.js");
+  const db = getDb();
+  db.prepare("INSERT INTO bot_tickets (thread, guild, user, subject, opened) VALUES (?, ?, ?, ?, ?)").run("880000000000000001", "880000000000000000", "880000000000000009", "Aide", new Date().toISOString());
+  const calls = [];
+  const discord = async (method, path, body) => { calls.push({ method, path, body }); if (method === "GET") return []; if (path === "/users/@me/channels") return { id: "dm" }; return {}; };
+  const editor = { id: "editor", username: "Camille", editor: true };
+  const r = await closeTicket({ db, discord, guild: "880000000000000000", thread: "880000000000000001", user: editor, permissions: String(P.MANAGE_THREADS), reason: "Réglé" });
+  assert.match(r.content, /^🔒/);
+  const said = calls.find((c) => c.method === "POST" && c.path === "/channels/880000000000000001/messages").body.content;
+  assert.match(said, /fermé par \*\*Camille\*\* \(éditeur du site\) · Réglé/);
+  assert.doesNotMatch(said, /<@editor>/);
+  assert.equal(calls.some((c) => c.method === "PATCH" && c.body.locked === true), true, "the thread is locked");
+  assert.ok(db.prepare("SELECT closed FROM bot_tickets WHERE thread = ?").get("880000000000000001").closed);
+  calls.length = 0;
+  const o = await reopenTicket({ db, discord, guild: "880000000000000000", thread: "880000000000000001", user: editor, permissions: String(P.MANAGE_THREADS) });
+  assert.match(o.content, /^🔓/);
+  assert.match(calls.find((c) => c.method === "POST").body.content, /rouvert par \*\*Camille\*\* \(éditeur du site\)/);
+});

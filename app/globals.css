@@ -4368,3 +4368,10 @@ html[data-ft~="stories2"] .story.seen .storyring { background: var(--line); }
   .btkmsg { padding-left: 10px; padding-right: 10px; gap: 0 10px; grid-template-columns: 34px minmax(0, 1fr); }
   .btkav { width: 34px; height: 34px; }
 }
+/* a ticket answered, closed or reopened from the editor */
+.btkact { display: grid; gap: 6px; padding-top: 8px; border-top: 1px solid var(--line); }
+.btkact.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.btkreply { display: grid; gap: 6px; padding: 0 !important; }
+.btkreply textarea, .btkreply input[type="text"] { width: 100%; box-sizing: border-box; padding: 8px 10px; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; font: 14px var(--font-body); resize: vertical; }
+.btkreply .row { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.btkview .okmsg, .btkview .err { margin: 0; }
