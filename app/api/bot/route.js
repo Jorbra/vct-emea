@@ -11,7 +11,8 @@ import { getState } from "../../../lib/db.js";
 import { COMMANDS, HELP_GROUPS } from "../../../lib/discordbot.js";
 import { GROUPS, OLD_TO_NEW, RENAMED_SITE, cleanEmbed, cleanRules, toDiscordEmbed } from "../../../lib/botdash.js";
 import { botPermissions, filterLog, listCases, listTickets, revokeCase, setCaseReason, ticketTranscript, userNames } from "../../../lib/botadmin.js";
-import { postLog } from "../../../lib/botserver.js";
+import { postLog, addSanction } from "../../../lib/botserver.js";
+import { commandUsage, createdAt, memberFile, memberId, serverActivity } from "../../../lib/botactivity.js";
 
 /** The commands by category for the editor's "Commands" page: [{ label, list: [{ name, description, subs, perm }] }]. */
 function commandCategories() {
@@ -63,7 +64,7 @@ export async function GET(req) {
     // the server settings (moderation log, welcome, AutoMod, tickets) and the live connection's state (lib/botgateway.js)
     server: botServer(db), gateway: gatewayState(), ticketStats: ticketStats(db),
     // the dashboard: the commands by category, what the former ones became, the bot's permissions on the server (modules' states)
-    commandCats: commandCategories(), oldToNew: OLD_TO_NEW, botPerms: null,
+    commandCats: commandCategories(), oldToNew: OLD_TO_NEW, botPerms: null, cmdUse: commandUsage(db),
     token: botReady(), publicKey: /^[0-9a-f]{64}$/i.test(process.env.DISCORD_PUBLIC_KEY || ""), guilds: [], channels: [], roles: [], error: "",
   };
   if (out.token) {
@@ -135,6 +136,52 @@ export async function POST(req) {
     const all = listTickets(db, guild, { state: b.state });
     const names = await namesFor(all.slice(0, 150).flatMap((t) => [t.user, t.claimed]));
     return NextResponse.json({ ok: true, tickets: listTickets(db, guild, { state: b.state, q: b.q }, names), names, stats: ticketStats(db) });
+  }
+  // the home's activity: the last 30 days, the latest cases and tickets
+  if (b.action === "activity") {
+    const a = serverActivity(db, guildOf());
+    const names = await namesFor([...a.recentCases.flatMap((r) => [r.user, r.mod]), ...a.recentTickets.map((t) => t.user)]);
+    return NextResponse.json({ ok: true, ...a, names });
+  }
+  // the "Members" page: a member found by id, mention or name, then their file
+  if (b.action === "member") {
+    const guild = guildOf();
+    const q = String(b.q || "").trim().slice(0, 100);
+    let id = memberId(q);
+    if (!id) {
+      if (!q) return NextResponse.json({ ok: true, matches: [] });
+      if (!botReady() || !guild) return NextResponse.json({ ok: true, matches: [], hint: "Sans le jeton du bot, cherche avec l'identifiant du membre (clic droit → Copier l'identifiant)." });
+      try {
+        const found = await discord("GET", `/guilds/${guild}/members/search?query=${encodeURIComponent(q)}&limit=8`);
+        const matches = found.filter((m) => m.user && !m.user.bot).map((m) => ({ id: m.user.id, name: m.nick || m.user.global_name || m.user.username, user: m.user.username, avatar: m.user.avatar ? `https://cdn.discordapp.com/avatars/${m.user.id}/${m.user.avatar}.png?size=64` : "" }));
+        if (matches.length !== 1) return NextResponse.json({ ok: true, matches });
+        id = matches[0].id;
+      } catch (e) { return NextResponse.json({ error: `Discord : ${e.message}` }, { status: 502 }); }
+    }
+    const file = memberFile(db, guild, id);
+    const out = { ok: true, file, created: createdAt(id), member: null, banned: null, user: null };
+    if (botReady() && guild) {
+      try {
+        const m = await discord("GET", `/guilds/${guild}/members/${id}`);
+        out.member = { nick: m.nick || "", joined: m.joined_at || "", roles: m.roles || [], timeout: m.communication_disabled_until || "" };
+        out.user = m.user;
+      } catch { out.member = null; }
+      if (!out.user) { try { out.user = await discord("GET", `/users/${id}`); } catch { /* unknown */ } }
+      if (!out.member) { try { await discord("GET", `/guilds/${guild}/bans/${id}`); out.banned = true; } catch { out.banned = false; } }
+    }
+    if (out.user) out.user = { id: out.user.id, name: out.user.global_name || out.user.username, user: out.user.username, avatar: out.user.avatar ? `https://cdn.discordapp.com/avatars/${out.user.id}/${out.user.avatar}.png?size=128` : "" };
+    out.names = await namesFor(file.sanctions.map((r) => r.mod).concat(file.tickets.map((t) => t.claimed)));
+    return NextResponse.json(out);
+  }
+  // a note on a member from the editor: kept in their file, as /note does
+  if (b.action === "member-note") {
+    const id = memberId(b.id);
+    const text = String(b.text || "").trim().slice(0, 380);
+    if (!id || !text) return NextResponse.json({ error: "Écris la note." }, { status: 400 });
+    const me = await currentEditor();
+    addSanction(db, { guild: guildOf(), user: id, kind: "note", mod: "editor", reason: me.who ? `${text} (${me.who})` : text });
+    logBot(db, "moderation", `note ajoutée sur <@${id}> depuis l'éditeur`);
+    return NextResponse.json({ ok: true, message: "Note ajoutée au dossier." });
   }
   if (b.action === "ticket") return NextResponse.json({ ok: true, transcript: ticketTranscript(db, guildOf(), b.thread) });
   if (b.action === "log") return NextResponse.json({ ok: true, log: filterLog(db, { kind: b.kind, errors: !!b.errors, q: b.q }), kinds: db.prepare("SELECT DISTINCT kind FROM bot_log ORDER BY kind").all().map((r) => r.kind) });

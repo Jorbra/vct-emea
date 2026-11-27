@@ -17,6 +17,13 @@ export async function ask(body) {
 const when = (iso) => (iso ? new Date(iso).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "–");
 const useDebounced = (v, ms = 300) => { const [x, setX] = useState(v); useEffect(() => { const t = setTimeout(() => setX(v), ms); return () => clearTimeout(t); }, [v, ms]); return x; };
 
+/** A member's name that opens their file. */
+export function Who({ id, names, onMember }) {
+  const label = id === "auto" ? "automatique" : id === "editor" ? "éditeur du site" : (names && names[id]) || id;
+  if (!onMember || !/^\d{5,25}$/.test(String(id))) return <>{label}</>;
+  return <button type="button" className="linkbtn" onClick={(e) => { e.stopPropagation(); onMember(id); }} title="Ouvrir sa fiche">{label}</button>;
+}
+
 // ---- commands ----
 
 const EMPTY_RULE = { allowRoles: [], denyRoles: [], allowChannels: [], denyChannels: [], cooldown: 0, visibility: "default" };
@@ -30,12 +37,15 @@ export function CommandsPage({ d, settings, busy, call, onSaved }) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState(-1);
   const [open, setOpen] = useState("");
+  const [order, setOrder] = useState("cat");
+  const use = (n) => (d.cmdUse && d.cmdUse[n]) || 0;
   const dirty = JSON.stringify([disabled, rules]) !== saved;
   const rule = (n) => ({ ...EMPTY_RULE, ...(rules[n] || {}) });
   const setRule = (n, patch) => setRules((r) => ({ ...r, [n]: { ...EMPTY_RULE, ...(r[n] || {}), ...patch } }));
   const hasRule = (n) => { const r = rules[n]; return !!r && (r.allowRoles.length || r.denyRoles.length || r.allowChannels.length || r.denyChannels.length || r.cooldown || r.visibility !== "default"); };
   const query = q.trim().toLowerCase();
-  const cats = (d.commandCats || []).map((g, k) => ({ ...g, k, list: g.list.filter((c) => !query || `${c.name} ${c.description} ${c.subs.map((x) => x.name).join(" ")}`.toLowerCase().includes(query)) })).filter((g) => (cat < 0 || g.k === cat) && g.list.length);
+  const cats = (d.commandCats || []).map((g, k) => ({ ...g, k, list: g.list.filter((c) => !query || `${c.name} ${c.description} ${c.subs.map((x) => x.name).join(" ")}`.toLowerCase().includes(query)) })).filter((g) => (cat < 0 || g.k === cat) && g.list.length)
+    .map((g) => (order === "use" ? { ...g, list: [...g.list].sort((x, y) => use(y.name) - use(x.name)) } : order === "unused" ? { ...g, list: g.list.filter((c) => !use(c.name)) } : g)).filter((g) => g.list.length);
   const total = (d.commandCats || []).reduce((n, g) => n + g.list.length, 0);
   const save = () => call({ action: "commands", disabled, rules }, (j) => { setSaved(JSON.stringify([disabled, rules])); onSaved && onSaved(j); });
   return (
@@ -46,9 +56,12 @@ export function CommandsPage({ d, settings, busy, call, onSaved }) {
           <option value={-1}>Toutes les catégories</option>
           {(d.commandCats || []).map((g, k) => <option key={k} value={k}>{g.label}</option>)}
         </select>
+        <select value={order} onChange={(e) => setOrder(e.target.value)} aria-label="Ordre">
+          <option value="cat">Ordre des catégories</option><option value="use">Les plus utilisées d'abord</option><option value="unused">Jamais utilisées (30 j)</option>
+        </select>
         <span className="bmuted">{total - disabled.filter((n) => (d.commandCats || []).some((g) => g.list.some((c) => c.name === n))).length}/{total} activées</span>
       </div>
-      <p className="hint">Chaque commande peut être réservée à des rôles ou des salons, avoir un délai entre deux utilisations, et répondre à tous ou seulement à son auteur. Les membres qui peuvent « Gérer le serveur » passent toutes ces règles. Les permissions de Discord (Paramètres du serveur → Intégrations) restent valables en plus.</p>
+      <p className="hint">Le nombre à droite de chaque commande compte ses utilisations sur les 30 derniers jours. Chaque commande peut être réservée à des rôles ou des salons, avoir un délai entre deux utilisations, et répondre à tous ou seulement à son auteur. Les membres qui peuvent « Gérer le serveur » passent toutes ces règles. Les permissions de Discord (Paramètres du serveur → Intégrations) restent valables en plus.</p>
       {cats.map((g) => (
         <section key={g.k} className="bsect">
           <h3 className="sub">{g.label} <small className="bmuted">{g.list.length}</small></h3>
@@ -67,6 +80,7 @@ export function CommandsPage({ d, settings, busy, call, onSaved }) {
                       <b>{c.type === 1 ? "/" : ""}{c.name}</b>{c.subs.length > 0 && <small className="bsubs"> {c.subs.map((x) => x.name).join(" · ")}</small>}
                       <small>{c.description || (c.type === 2 ? "Clic droit sur un membre → Applications" : "Clic droit sur un message → Applications")}</small>
                     </div>
+                    <small className={"buse" + (use(c.name) ? "" : " none")} title="Utilisations sur les 30 derniers jours">{use(c.name) ? `${use(c.name)} utilisation${use(c.name) > 1 ? "s" : ""}` : "pas utilisée"}</small>
                     {hasRule(c.name) && <span className="bbadge">règles</span>}
                     <button type="button" className="btn small" aria-expanded={open === c.name} onClick={() => setOpen(open === c.name ? "" : c.name)}>{open === c.name ? "Fermer" : "Règles"}</button>
                   </div>
@@ -108,11 +122,11 @@ export function CommandsPage({ d, settings, busy, call, onSaved }) {
 
 // ---- sanctions ----
 
-const KIND = { warn: ["⚠️", "Avertissement"], timeout: ["🔇", "Exclusion"], kick: ["👢", "Expulsion"], ban: ["🔨", "Bannissement"], tempban: ["⏳", "Ban temporaire"], unban: ["✅", "Débannissement"], note: ["📝", "Note"] };
+export const KIND = { warn: ["⚠️", "Avertissement"], timeout: ["🔇", "Exclusion"], kick: ["👢", "Expulsion"], ban: ["🔨", "Bannissement"], tempban: ["⏳", "Ban temporaire"], unban: ["✅", "Débannissement"], note: ["📝", "Note"] };
 const REVOKE = { warn: "Retirer l'avertissement", ban: "Débannir", tempban: "Débannir", timeout: "Lever l'exclusion" };
 
 /** The sanctions' table: search by member, moderator, kind, date; a case's detail, its reason changed, revoked. */
-export function CasesPage({ guild, busy, call }) {
+export function CasesPage({ guild, busy, call, onMember }) {
   const [f, setF] = useState({ q: "", kind: "", from: "", to: "" });
   const [data, setData] = useState(null);
   const [sel, setSel] = useState(null);
@@ -139,7 +153,7 @@ export function CasesPage({ guild, busy, call }) {
             <tr key={c.id} className={sel === c.id ? "sel" : ""} onClick={() => { setSel(c.id); setReason(c.reason.replace(/ \(modifiée par [^)]*\)$/, "")); }} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") { setSel(c.id); setReason(c.reason); } }}>
               <td data-l="Cas"><b>#{c.id}</b></td>
               <td data-l="Type"><span className={`bkind k-${c.kind}`}>{(KIND[c.kind] || ["", c.kind])[0]} {(KIND[c.kind] || ["", c.kind])[1]}</span></td>
-              <td data-l="Membre">{who(c.user)}</td>
+              <td data-l="Membre"><Who id={c.user} names={names} onMember={onMember} /></td>
               <td data-l="Modérateur">{who(c.mod)}</td>
               <td data-l="Raison" className="breason">{c.reason || <i className="bmuted">sans raison</i>}</td>
               <td data-l="Date">{when(c.at)}</td>
@@ -152,7 +166,7 @@ export function CasesPage({ guild, busy, call }) {
         <aside className="bdetail" aria-label={`Cas #${cur.id}`}>
           <header><h3 className="sub">Cas #{cur.id} · {(KIND[cur.kind] || ["", cur.kind]).join(" ")}</h3><button type="button" className="btn small" onClick={() => setSel(null)}>Fermer</button></header>
           <dl>
-            <dt>Membre</dt><dd>{who(cur.user)} <small className="bmuted">{cur.user}</small></dd>
+            <dt>Membre</dt><dd><Who id={cur.user} names={names} onMember={onMember} /> <small className="bmuted">{cur.user}</small></dd>
             <dt>Modérateur</dt><dd>{who(cur.mod)}</dd>
             <dt>Date</dt><dd>{when(cur.at)}</dd>
             {cur.until && <><dt>Jusqu&apos;à</dt><dd>{when(cur.until)}</dd></>}
@@ -175,7 +189,7 @@ export function CasesPage({ guild, busy, call }) {
 // ---- tickets ----
 
 /** The tickets: open or closed, subject, author, who took it, rating; a transcript read here; the stats. */
-export function TicketsPage({ guild }) {
+export function TicketsPage({ guild, onMember }) {
   const [f, setF] = useState({ state: "", q: "" });
   const [data, setData] = useState(null);
   const [read, setRead] = useState(null);
@@ -203,7 +217,7 @@ export function TicketsPage({ guild }) {
           <tbody>{data.tickets.map((t) => (
             <tr key={t.thread}>
               <td data-l="Sujet"><b>{t.subject || "Sans sujet"}</b>{t.priority && <small className="bbadge">{t.priority}</small>}</td>
-              <td data-l="Auteur">{names[t.user] || t.user}</td>
+              <td data-l="Auteur"><Who id={t.user} names={names} onMember={onMember} /></td>
               <td data-l="Catégorie">{t.category || "–"}</td>
               <td data-l="Ouvert">{when(t.opened)}</td>
               <td data-l="État">{t.closed ? <>fermé {when(t.closed)}{t.reason ? <small className="bmuted"> · {t.reason}</small> : null}</> : <span className="bopen">ouvert</span>}</td>

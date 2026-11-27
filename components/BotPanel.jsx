@@ -9,6 +9,7 @@ import { Skeleton } from "./visual.jsx";
 import BotServer from "./BotServer.jsx";
 import { DiscordMessage, EmbedBuilder, MessageEditor, ModuleCard, Picker } from "./BotDash.jsx";
 import { CasesPage, CommandsPage, LogPage, TicketsPage } from "./BotPages.jsx";
+import { ActivityPanel, MembersPage } from "./BotMembers.jsx";
 import { MODULES, moduleState } from "../lib/botdash.js";
 import { P } from "../lib/botperms.js";
 
@@ -23,7 +24,7 @@ const AUTO_GROUPS = [
   ["As the events go", ["recap", "qualified", "fanRoles"]],
 ];
 // the menu: the home, then the pages that are not a module
-const PAGES = [["home", "🏠 Accueil"], ["commands", "⌨️ Commandes"], ["cases", "⚖️ Sanctions"], ["tickets", "🎫 Tickets"], ["log", "📜 Journal"], ["stats", "📈 Statistiques"], ["settings", "⚙️ Réglages"]];
+const PAGES = [["home", "🏠 Accueil"], ["commands", "⌨️ Commandes"], ["members", "👤 Membres"], ["cases", "⚖️ Sanctions"], ["tickets", "🎫 Tickets"], ["log", "📜 Journal"], ["stats", "📈 Statistiques"], ["settings", "⚙️ Réglages"]];
 // the announcements module's tabs
 const ANN_TABS = [["settings", "Salons et contenu"], ["auto", "Messages automatiques"], ["announce", "Écrire une annonce"], ["embeds", "Messages préparés (/embed)"], ["samples", "Exemples"], ["pin", "Message épinglé"]];
 const when = (iso) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -64,6 +65,7 @@ export default function BotPanel() {
   const [d, setD] = useState(null);
   const [s, setS] = useState(null);
   const [page, setPage] = useState("home");
+  const [memberQ, setMemberQ] = useState("");
   const [annTab, setAnnTab] = useState("settings");
   const [msg, setMsg] = useState({ ok: true, text: "" });
   const [busy, setBusy] = useState(false);
@@ -103,6 +105,7 @@ export default function BotPanel() {
     } catch (e) { setMsg({ ok: false, text: tr.server(e.message) }); } finally { setBusy(false); }
   };
   const go = (p, tab) => { setPage(p); if (tab) setAnnTab(tab); setMsg({ ok: true, text: "" }); };
+  const openMember = (id) => { setMemberQ(String(id)); go("members"); };
   const set = (k, v) => setS((x) => ({ ...x, [k]: v }));
   const dirty = !!s && !!saved && JSON.stringify(s) !== saved;
   const save = () => call({ action: "save", ...s }, () => setSaved(JSON.stringify(s)));
@@ -159,6 +162,7 @@ export default function BotPanel() {
                 <div className="bmods">
                   {MODULES.map((m) => <ModuleCard key={m.key} m={m} state={stateOf(m)} busy={busy} onToggle={(on) => toggleModule(m, on)} onOpen={() => go(`mod:${m.key}`)} />)}
                 </div>
+                <ActivityPanel guild={s.guild} go={go} onMember={openMember} />
                 {d.botPerms == null && d.token && <p className="hint">Les droits du bot sur le serveur n&apos;ont pas pu être lus : choisis le serveur dans Réglages.</p>}
               </>
             )}
@@ -281,8 +285,9 @@ export default function BotPanel() {
             )}
 
             {page === "commands" && <CommandsPage d={d} settings={s} busy={busy} call={call} onSaved={(j) => { setD((x) => ({ ...x, server: j.server })); setS((x) => ({ ...x, disabled: j.settings.disabled })); setSaved((old) => JSON.stringify({ ...JSON.parse(old || "{}"), disabled: j.settings.disabled })); }} />}
-            {page === "cases" && <CasesPage guild={s.guild} busy={busy} call={call} />}
-            {page === "tickets" && <TicketsPage guild={s.guild} />}
+            {page === "members" && <MembersPage guild={s.guild} busy={busy} call={call} start={memberQ} />}
+            {page === "cases" && <CasesPage guild={s.guild} busy={busy} call={call} onMember={openMember} />}
+            {page === "tickets" && <TicketsPage guild={s.guild} onMember={openMember} />}
             {page === "log" && <LogPage />}
 
             {page === "settings" && (
