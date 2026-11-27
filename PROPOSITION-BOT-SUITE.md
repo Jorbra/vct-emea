@@ -76,3 +76,23 @@ Testé : un test de plus (les tickets pris en charge ou fermés écartés, les s
 - Dans le menu, une **pastille rouge** à côté de « Journal » compte les erreurs du bot des dernières 24 heures.
 
 Testé : un test de plus (avertissement avec raison obligatoire et message privé, exclusion d'une heure avec la bonne date de fin et le journal d'audit, durée illisible, plus de 28 jours, levée) ; vérifié dans l'éditeur local. **350 tests passent, build vert.** Pas testé avec le vrai bot.
+
+---
+
+# Suite : branche `bot-suite-3` (partie de `main` bb2b62d)
+
+## 8. Expulser et bannir depuis la fiche d'un membre
+
+- **👢 Expulser** et **🔨 Bannir**, avec une raison obligatoire. Pour un bannissement, on choisit aussi d'effacer ou non ses messages des dernières 24 heures ou des 7 derniers jours.
+- Comme avec `/kick` et `/ban` : le **message privé part avant** (une fois dehors, le bot ne peut plus lui écrire), puis l'action va dans le journal du bot, le salon du journal et le journal d'audit de Discord.
+- Chaque action demande confirmation. Si Discord refuse (droit manquant, rôle trop bas), le message est clair et **aucun cas n'est gardé** dans le dossier.
+
+## 9. Recherche rapide
+
+![Recherche rapide](docs/captures/bot-dashboard-recherche.jpg)
+
+- Bouton **« 🔎 Rechercher »** dans la barre du haut. Sur la page plein écran `/admin/bot`, il s'ouvre aussi avec **Ctrl + K**. Dans l'éditeur, Ctrl + K garde sa fonction « Aller à » du site.
+- On tape une page, un module, une commande ou un menu clic droit, `#12` pour un cas, ou un pseudo pour la fiche d'un membre. Les flèches choisissent, Entrée ouvre, Échap ferme.
+- Une commande ouvre la page « Commandes » déjà filtrée ; un cas ouvre le tableau des sanctions sur ce cas.
+
+Testé : un test de plus (expulsion avec le message privé envoyé avant, bannissement qui efface 7 jours de messages, bannissement refusé sans cas gardé) ; recherche essayée dans l'éditeur local (« warn » vers la page Commandes filtrée, « #5 » vers le cas). **351 tests passent, build vert.** Pas testé avec le vrai bot.

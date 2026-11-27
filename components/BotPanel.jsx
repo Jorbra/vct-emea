@@ -10,6 +10,7 @@ import BotServer from "./BotServer.jsx";
 import { DiscordMessage, EmbedBuilder, MessageEditor, ModuleCard, Picker } from "./BotDash.jsx";
 import { CasesPage, CommandsPage, LogPage, TicketsPage } from "./BotPages.jsx";
 import { ActivityPanel, MembersPage } from "./BotMembers.jsx";
+import { QuickSearch } from "./BotSearch.jsx";
 import { MODULES, moduleState } from "../lib/botdash.js";
 import { P } from "../lib/botperms.js";
 
@@ -74,7 +75,9 @@ export default function BotPanel({ full = false }) {
   const [s, setS] = useState(null);
   const [page, setPage] = useState(() => (full ? pageFromUrl() : "home"));
   const [memberQ, setMemberQ] = useState("");
-  const [todoAt, setTodoAt] = useState(null); // the home's to-do box goes here, above the modules
+  const [todoAt, setTodoAt] = useState(null);
+  const [seek, setSeek] = useState(false); // the quick search (Ctrl + K)
+  const [startQ, setStartQ] = useState({ commands: "", cases: "" }); // the home's to-do box goes here, above the modules
   const [annTab, setAnnTab] = useState("settings");
   const [msg, setMsg] = useState({ ok: true, text: "" });
   const [busy, setBusy] = useState(false);
@@ -125,6 +128,20 @@ export default function BotPanel({ full = false }) {
     if (full) window.scrollTo({ top: 0 });
   };
   const openMember = (id) => { setMemberQ(String(id)); go("members"); };
+  // on the bot's own page, Ctrl + K (or Cmd + K) opens its quick search in place of the site's "Go to" (caught first);
+  // in the editor's home, the site's keeps it and the button opens the bot's
+  useEffect(() => {
+    if (!full) return undefined;
+    const key = (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); e.stopImmediatePropagation(); setSeek(true); } };
+    window.addEventListener("keydown", key, true);
+    return () => window.removeEventListener("keydown", key, true);
+  }, [full]);
+  const seekItems = d ? [
+    ...PAGES.map(([k, l]) => ({ label: l.replace(/^\S+\s/, ""), icon: l.split(" ")[0], hint: "page", words: k, run: () => go(k) })),
+    ...MODULES.map((m) => ({ label: m.name, icon: m.icon, hint: "module", words: m.text, run: () => go(`mod:${m.key}`) })),
+    ...(d.commandCats || []).flatMap((g) => g.list.map((c) => ({ label: c.type === 1 ? `/${c.name}` : c.name, icon: c.type === 1 ? "⌨️" : "🖱️", hint: c.description || "menu clic droit", words: c.subs.map((x) => x.name).join(" "), run: () => { setStartQ((x) => ({ ...x, commands: c.name })); go("commands"); } }))),
+    { label: "Écrire une annonce", icon: "📣", hint: "module Annonces", words: "annonce message publier", run: () => go("mod:announce", "announce") },
+  ] : [];
   const set = (k, v) => setS((x) => ({ ...x, [k]: v }));
   const dirty = !!s && !!saved && JSON.stringify(s) !== saved;
   const save = () => call({ action: "save", ...s }, () => setSaved(JSON.stringify(s)));
@@ -172,6 +189,7 @@ export default function BotPanel({ full = false }) {
               </div>
               <div className="bdshort">
                 {missing > 0 && <button type="button" className="btn small pri" disabled={busy} onClick={() => call({ action: "register" }, () => load(s.guild))}>⬆️ Enregistrer les commandes ({missing})</button>}
+                <button type="button" className="btn small" onClick={() => setSeek(true)} title={full ? "Ctrl + K" : undefined}>🔎 Rechercher{full && <kbd>Ctrl K</kbd>}</button>
                 <button type="button" className="btn small" onClick={() => go("mod:announce", "announce")}>📣 Écrire une annonce</button>
                 <button type="button" className="btn small" onClick={() => go("cases")}>⚖️ Sanctions</button>
                 <button type="button" className="btn small" onClick={() => go("tickets")}>🎫 Tickets{d.ticketStats && d.ticketStats.open ? ` (${d.ticketStats.open})` : ""}</button>
@@ -321,9 +339,9 @@ export default function BotPanel({ full = false }) {
               </div>
             )}
 
-            {page === "commands" && <CommandsPage d={d} settings={s} busy={busy} call={call} onSaved={(j) => { setD((x) => ({ ...x, server: j.server })); setS((x) => ({ ...x, disabled: j.settings.disabled })); setSaved((old) => JSON.stringify({ ...JSON.parse(old || "{}"), disabled: j.settings.disabled })); }} />}
+            {page === "commands" && <CommandsPage key={`c-${startQ.commands}`} startQ={startQ.commands} d={d} settings={s} busy={busy} call={call} onSaved={(j) => { setD((x) => ({ ...x, server: j.server })); setS((x) => ({ ...x, disabled: j.settings.disabled })); setSaved((old) => JSON.stringify({ ...JSON.parse(old || "{}"), disabled: j.settings.disabled })); }} />}
             {page === "members" && <MembersPage guild={s.guild} busy={busy} call={call} start={memberQ} />}
-            {page === "cases" && <CasesPage guild={s.guild} busy={busy} call={call} onMember={openMember} />}
+            {page === "cases" && <CasesPage key={`k-${startQ.cases}`} startQ={startQ.cases} guild={s.guild} busy={busy} call={call} onMember={openMember} />}
             {page === "tickets" && <TicketsPage guild={s.guild} onMember={openMember} />}
             {page === "log" && <LogPage />}
 
@@ -381,6 +399,7 @@ export default function BotPanel({ full = false }) {
               </>
             )}
             {msg.text && <p className={msg.ok ? "okmsg" : "err"} role="status">{msg.text}</p>}
+            {seek && <QuickSearch items={seekItems} onClose={() => setSeek(false)} onCase={(q) => { setStartQ((x) => ({ ...x, cases: q })); go("cases"); }} onMember={openMember} />}
             </div>
             </div>
           </div>

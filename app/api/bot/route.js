@@ -188,7 +188,7 @@ export async function POST(req) {
     if (!botReady()) return NextResponse.json({ error: "Le jeton du bot n'est pas réglé sur le serveur (DISCORD_BOT_TOKEN)." }, { status: 409 });
     const me = await currentEditor();
     const server = botServer(db);
-    const r = await editorSanction({ db, discord, server, guild: guildOf(), who: me.who || "éditeur", logBot, notify: (text) => postLog(discord, server, { kind: "bot", title: "🛡️ Action depuis l'éditeur", lines: [text], at: Date.now() }) }, { user: memberId(b.id), kind: String(b.kind || ""), reason: b.reason, duration: b.duration });
+    const r = await editorSanction({ db, discord, server, guild: guildOf(), who: me.who || "éditeur", logBot, notify: (text) => postLog(discord, server, { kind: "bot", title: "🛡️ Action depuis l'éditeur", lines: [text], at: Date.now() }) }, { user: memberId(b.id), kind: String(b.kind || ""), reason: b.reason, duration: b.duration, deleteDays: b.deleteDays });
     return r.ok ? NextResponse.json(r) : NextResponse.json({ error: r.error }, { status: 400 });
   }
   // a note on a member from the editor: kept in their file, as /note does

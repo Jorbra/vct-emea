@@ -91,3 +91,32 @@ test("member's file: a warning and a time-out given from the editor, as the comm
   assert.ok(u.ok);
   assert.equal(calls.filter((c) => c.method === "PATCH").pop().body.communication_disabled_until, null);
 });
+
+test("member's file: a kick and a ban from the editor, the member told first, the case taken back if Discord refuses", async () => {
+  const { editorSanction } = await import("../lib/botadmin.js");
+  const db = getDb();
+  const g = "990000000000000004";
+  const calls = [];
+  let refuse = false;
+  const discord = async (method, path, body, opts = {}) => {
+    calls.push({ method, path, body, reason: opts.reason || "" });
+    if (path === "/users/@me/channels") return { id: "dm" };
+    if (refuse && (method === "PUT" || method === "DELETE")) throw Object.assign(new Error("Missing Permissions"), { code: 50013, status: 403 });
+    return {};
+  };
+  const deps = { db, discord, server: cleanServer({}), guild: g, who: "Camille", now: Date.parse("2030-06-01T12:00:00Z") };
+  assert.match((await editorSanction(deps, { user: "223456789012345678", kind: "ban", reason: "" })).error, /raison du bannissement/);
+  const k = await editorSanction(deps, { user: "223456789012345678", kind: "kick", reason: "Hors sujet" });
+  assert.ok(k.ok, k.error);
+  const dm = calls.findIndex((c) => c.path === "/channels/dm/messages");
+  const kick = calls.findIndex((c) => c.method === "DELETE" && c.path === `/guilds/${g}/members/223456789012345678`);
+  assert.ok(dm >= 0 && kick > dm, "the private message goes before the kick");
+  const b = await editorSanction(deps, { user: "223456789012345678", kind: "ban", reason: "Raid", deleteDays: 7 });
+  assert.ok(b.ok, b.error);
+  assert.equal(calls.find((c) => c.method === "PUT").body.delete_message_seconds, 7 * 86400);
+  const before = db.prepare("SELECT COUNT(*) AS n FROM bot_sanctions WHERE guild = ?").get(g).n;
+  refuse = true;
+  const no = await editorSanction(deps, { user: "223456789012345678", kind: "ban", reason: "Encore" });
+  assert.match(no.error, /n'a pas le droit/);
+  assert.equal(db.prepare("SELECT COUNT(*) AS n FROM bot_sanctions WHERE guild = ?").get(g).n, before, "no case kept for a refused ban");
+});

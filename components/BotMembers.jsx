@@ -132,7 +132,7 @@ export function MembersPage({ guild, busy, call, start = "" }) {
   const [asked, setAsked] = useState("");
   const [read, setRead] = useState("");
   const [watch, setWatch] = useState(null);
-  const [act, setAct] = useState({ kind: "", reason: "", duration: "1h" });
+  const [act, setAct] = useState({ kind: "", reason: "", duration: "1h", deleteDays: 0 });
   useEffect(() => { ask({ action: "watch", guild }).then(setWatch); }, [guild]);
   const find = useCallback((value) => {
     const v = String(value || "").trim();
@@ -228,6 +228,8 @@ export function MembersPage({ guild, busy, call, start = "" }) {
             <div className="row">
               <button type="button" className={"btn small" + (act.kind === "warn" ? " pri" : "")} onClick={() => setAct({ ...act, kind: act.kind === "warn" ? "" : "warn" })}>⚠️ Avertir</button>
               <button type="button" className={"btn small" + (act.kind === "timeout" ? " pri" : "")} onClick={() => setAct({ ...act, kind: act.kind === "timeout" ? "" : "timeout" })}>🔇 Exclure</button>
+              <button type="button" className={"btn small" + (act.kind === "kick" ? " pri" : "")} onClick={() => setAct({ ...act, kind: act.kind === "kick" ? "" : "kick" })}>👢 Expulser</button>
+              <button type="button" className={"btn small danger" + (act.kind === "ban" ? " pri" : "")} onClick={() => setAct({ ...act, kind: act.kind === "ban" ? "" : "ban" })}>🔨 Bannir</button>
               {m && m.timeout && Date.parse(m.timeout) > Date.now() && (
                 <button type="button" className="btn small" disabled={busy} onClick={() => { if (window.confirm("Lever l'exclusion de ce membre ? C'est fait tout de suite sur Discord.")) call({ action: "member-sanction", guild, id: f.id, kind: "untimeout" }, () => find(f.id)); }}>🔊 Lever l&apos;exclusion</button>
               )}
@@ -235,8 +237,8 @@ export function MembersPage({ guild, busy, call, start = "" }) {
             {act.kind && (
               <form className="bmactform" data-nodirty="" onSubmit={(e) => {
                 e.preventDefault();
-                const label = act.kind === "warn" ? "Avertir ce membre" : `Exclure ce membre (${act.duration})`;
-                if (window.confirm(`${label} ? C'est fait tout de suite sur Discord, et le membre reçoit un message privé.`)) call({ action: "member-sanction", guild, id: f.id, kind: act.kind, reason: act.reason, duration: act.duration }, () => { setAct({ kind: "", reason: "", duration: "1h" }); find(f.id); });
+                const label = { warn: "Avertir ce membre", timeout: `Exclure ce membre (${act.duration})`, kick: "Expulser ce membre du serveur", ban: "Bannir ce membre du serveur" }[act.kind];
+                if (window.confirm(`${label} ? C'est fait tout de suite sur Discord, et le membre reçoit un message privé.`)) call({ action: "member-sanction", guild, id: f.id, kind: act.kind, reason: act.reason, duration: act.duration, deleteDays: act.deleteDays }, () => { setAct({ kind: "", reason: "", duration: "1h", deleteDays: 0 }); find(f.id); });
               }}>
                 {act.kind === "timeout" && (
                   <label className="f">Durée
@@ -245,15 +247,22 @@ export function MembersPage({ guild, busy, call, start = "" }) {
                     </select>
                   </label>
                 )}
-                <label className="f">Raison{act.kind === "warn" ? "" : " (facultative)"}
+                {act.kind === "ban" && (
+                  <label className="f">Effacer ses messages
+                    <select value={act.deleteDays} onChange={(e) => setAct({ ...act, deleteDays: Number(e.target.value) })}>
+                      <option value={0}>Ne rien effacer</option><option value={1}>Ceux des dernières 24 heures</option><option value={7}>Ceux des 7 derniers jours</option>
+                    </select>
+                  </label>
+                )}
+                <label className="f">Raison{act.kind === "timeout" ? " (facultative)" : ""}
                   <input type="text" maxLength={300} value={act.reason} onChange={(e) => setAct({ ...act, reason: e.target.value })} list="bmreasons" />
                 </label>
                 <datalist id="bmreasons">{(data.reasons || []).map((r) => <option key={r} value={r} />)}</datalist>
                 <div className="row">
-                  <button type="submit" className="btn danger" disabled={busy || (act.kind === "warn" && !act.reason.trim())}>{act.kind === "warn" ? "Avertir" : "Exclure"}</button>
+                  <button type="submit" className="btn danger" disabled={busy || (act.kind !== "timeout" && !act.reason.trim())}>{{ warn: "Avertir", timeout: "Exclure", kick: "Expulser", ban: "Bannir" }[act.kind]}</button>
                   <button type="button" className="btn" onClick={() => setAct({ ...act, kind: "" })}>Annuler</button>
                 </div>
-                <small className="bmuted">Comme avec les commandes : message privé au membre{act.kind === "warn" ? ", sanction automatique si le nombre d'avertissements le prévoit" : ""}, journal du bot et salon du journal. Le journal d&apos;audit de Discord dit que ça vient du site.</small>
+                <small className="bmuted">Comme avec les commandes : message privé au membre{act.kind === "warn" ? ", sanction automatique si le nombre d'avertissements le prévoit" : act.kind === "ban" || act.kind === "kick" ? " (envoyé avant, tant que le bot peut encore lui écrire)" : ""}, journal du bot et salon du journal. Le journal d&apos;audit de Discord dit que ça vient du site.</small>
               </form>
             )}
           </section>}

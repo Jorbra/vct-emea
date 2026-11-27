@@ -31,11 +31,11 @@ const EMPTY_RULE = { allowRoles: [], denyRoles: [], allowChannels: [], denyChann
 const VIS = [["default", "Comme prévu par la commande"], ["public", "Visible par tous"], ["private", "Seulement par l'auteur"]];
 
 /** Every command by category: on or off, and who may use it where (roles, channels), how often, who sees the answer. */
-export function CommandsPage({ d, settings, busy, call, onSaved }) {
+export function CommandsPage({ d, settings, busy, call, onSaved, startQ = "" }) {
   const [disabled, setDisabled] = useState(settings.disabled || []);
   const [rules, setRules] = useState((d.server && d.server.commandRules) || {});
   const [saved, setSaved] = useState(JSON.stringify([settings.disabled || [], (d.server && d.server.commandRules) || {}]));
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(startQ);
   const [cat, setCat] = useState(-1);
   const [open, setOpen] = useState("");
   const [order, setOrder] = useState("cat");
@@ -127,8 +127,8 @@ export const KIND = { warn: ["⚠️", "Avertissement"], timeout: ["🔇", "Excl
 const REVOKE = { warn: "Retirer l'avertissement", ban: "Débannir", tempban: "Débannir", timeout: "Lever l'exclusion" };
 
 /** The sanctions' table: search by member, moderator, kind, date; a case's detail, its reason changed, revoked. */
-export function CasesPage({ guild, busy, call, onMember }) {
-  const [f, setF] = useState({ q: "", kind: "", from: "", to: "" });
+export function CasesPage({ guild, busy, call, onMember, startQ = "" }) {
+  const [f, setF] = useState({ q: startQ, kind: "", from: "", to: "" });
   const [data, setData] = useState(null);
   const [sel, setSel] = useState(null);
   const [reason, setReason] = useState("");
