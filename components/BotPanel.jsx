@@ -74,6 +74,7 @@ export default function BotPanel({ full = false }) {
   const [s, setS] = useState(null);
   const [page, setPage] = useState(() => (full ? pageFromUrl() : "home"));
   const [memberQ, setMemberQ] = useState("");
+  const [todoAt, setTodoAt] = useState(null); // the home's to-do box goes here, above the modules
   const [annTab, setAnnTab] = useState("settings");
   const [msg, setMsg] = useState({ ok: true, text: "" });
   const [busy, setBusy] = useState(false);
@@ -194,10 +195,11 @@ export default function BotPanel({ full = false }) {
 
             {page === "home" && (
               <>
+                <div ref={setTodoAt} className="btodoslot" />
                 <div className="bmods">
                   {MODULES.map((m) => <ModuleCard key={m.key} m={m} state={stateOf(m)} busy={busy} onToggle={(on) => toggleModule(m, on)} onOpen={() => go(`mod:${m.key}`)} />)}
                 </div>
-                <ActivityPanel guild={s.guild} go={go} onMember={openMember} />
+                <ActivityPanel guild={s.guild} go={go} onMember={openMember} todoAt={todoAt} missing={missing || 0} setup={MODULES.map((m) => ({ ...m, ...stateOf(m) })).filter((m) => m.state === "setup" || m.state === "missing")} />
                 {d.botPerms == null && d.token && <p className="hint">Les droits du bot sur le serveur n&apos;ont pas pu être lus : choisis le serveur dans Réglages.</p>}
               </>
             )}

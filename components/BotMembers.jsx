@@ -3,6 +3,7 @@
 // The bot dashboard's activity (the home) and members' files (components/BotPanel.jsx). Written in French, as the
 // server's editors read it.
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { ask, KIND, Who } from "./BotPages.jsx";
 import { TicketView } from "./BotTicket.jsx";
 
@@ -23,7 +24,28 @@ function delta(now, before) {
 }
 
 /** The home's activity: the last 30 days in figures (against the 30 before), a chart per day, the latest cases and tickets. */
-export function ActivityPanel({ guild, onMember, go }) {
+/** "How long ago": 5 min, 3 h, 2 j. */
+const ago = (iso) => { const m = Math.max(1, Math.round((Date.now() - Date.parse(iso)) / 60000)); return m < 60 ? `${m} min` : m < 1440 ? `${Math.round(m / 60)} h` : `${Math.round(m / 1440)} j`; };
+const inTime = (iso) => { const m = Math.max(1, Math.round((Date.parse(iso) - Date.now()) / 60000)); return m < 60 ? `${m} min` : `${Math.round(m / 60)} h`; };
+
+/** What needs someone now: open tickets nobody took, modules to set up, commands to register, sanctions ending soon. */
+export function TodoBox({ a, setup = [], missing = 0, onMember, go, onTicket }) {
+  const t = (a && a.todo) || { unclaimed: [], ending: [] };
+  const items = [];
+  if (missing > 0) items.push(<li key="reg">⬆️ <b>{missing} commande{missing > 1 ? "s" : ""}</b> à enregistrer sur Discord : bouton « Enregistrer les commandes » en haut.</li>);
+  for (const x of t.unclaimed) items.push(<li key={x.thread}>🎫 Ticket ouvert depuis <b>{ago(x.opened)}</b>, personne ne l&apos;a pris : <button type="button" className="linkbtn" onClick={() => onTicket(x.thread)}>{x.subject || "Sans sujet"}</button> <small className="bmuted">· <Who id={x.user} names={a.names} onMember={onMember} /></small></li>);
+  for (const m of setup) items.push(<li key={m.key}>{m.state === "missing" ? "⚠️" : "🛠️"} <button type="button" className="linkbtn" onClick={() => go(`mod:${m.key}`)}>{m.name}</button> : {m.why || "à configurer"}</li>);
+  for (const r of t.ending) items.push(<li key={`e${r.id}`}>⏳ {r.kind === "tempban" ? "Ban temporaire" : "Exclusion"} de <Who id={r.user} names={a.names} onMember={onMember} /> qui finit dans <b>{inTime(r.until)}</b> <small className="bmuted">(cas #{r.id})</small></li>);
+  return (
+    <section className={"btodo" + (items.length ? "" : " done")} aria-label="À faire">
+      <h3 className="sub">{items.length ? `📌 À faire (${items.length})` : "✅ Rien à faire pour le moment"}</h3>
+      {items.length > 0 && <ul>{items}</ul>}
+    </section>
+  );
+}
+
+/** todoAt: the element at the top of the home where the to-do box goes (else it opens the activity). */
+export function ActivityPanel({ guild, onMember, go, setup = [], missing = 0, todoAt = null }) {
   const [a, setA] = useState(null);
   const [metric, setMetric] = useState("members");
   const [hover, setHover] = useState(null);
@@ -32,6 +54,7 @@ export function ActivityPanel({ guild, onMember, go }) {
   if (!a) return <p className="note">Chargement de l&apos;activité…</p>;
   if (a.error) return <p className="err">{a.error}</p>;
   const t = a.totals;
+  const todo = <TodoBox a={a} setup={setup} missing={missing} onMember={onMember} go={go} onTicket={setRead} />;
   const b = a.before;
   const tiles = [
     ["📥", "Arrivées", t.joins, b.joins], ["📤", "Départs", t.leaves, b.leaves], ["⚖️", "Sanctions", t.sanctions, b.sanctions],
@@ -45,6 +68,7 @@ export function ActivityPanel({ guild, onMember, go }) {
   const say = (d) => (two ? `${short(d.day)} : ${d.joins} arrivée${d.joins > 1 ? "s" : ""}, ${d.leaves} départ${d.leaves > 1 ? "s" : ""}` : `${short(d.day)} : ${val(d)}`);
   return (
     <section className="bact" aria-label="Activité du serveur">
+      {todoAt ? createPortal(todo, todoAt) : todo}
       <h3 className="sub">Activité des 30 derniers jours</h3>
       <div className="btiles">
         {tiles.map(([i, l, n, before]) => (

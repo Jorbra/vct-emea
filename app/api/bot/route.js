@@ -13,7 +13,7 @@ import { GROUPS, OLD_TO_NEW, RENAMED_SITE, cleanEmbed, cleanRules, toDiscordEmbe
 import { botPermissions, filterLog, listCases, listTickets, revokeCase, setCaseReason, ticketTranscript, userNames } from "../../../lib/botadmin.js";
 import { postLog, addSanction } from "../../../lib/botserver.js";
 import { liveMessages, parseTranscript } from "../../../lib/botticket.js";
-import { commandUsage, createdAt, memberFile, memberId, serverActivity, watchList } from "../../../lib/botactivity.js";
+import { commandUsage, createdAt, memberFile, memberId, serverActivity, todoOf, watchList } from "../../../lib/botactivity.js";
 
 /** The commands by category for the editor's "Commands" page: [{ label, list: [{ name, description, subs, perm }] }]. */
 function commandCategories() {
@@ -141,8 +141,9 @@ export async function POST(req) {
   // the home's activity: the last 30 days, the latest cases and tickets
   if (b.action === "activity") {
     const a = serverActivity(db, guildOf());
-    const names = await namesFor([...a.recentCases.flatMap((r) => [r.user, r.mod]), ...a.recentTickets.map((t) => t.user)]);
-    return NextResponse.json({ ok: true, ...a, names });
+    const todo = todoOf(db, guildOf());
+    const names = await namesFor([...todo.unclaimed.map((t) => t.user), ...todo.ending.map((r) => r.user), ...a.recentCases.flatMap((r) => [r.user, r.mod]), ...a.recentTickets.map((t) => t.user)]);
+    return NextResponse.json({ ok: true, ...a, todo, names });
   }
   // the "Members" page before any search: the members to keep an eye on
   if (b.action === "watch") {

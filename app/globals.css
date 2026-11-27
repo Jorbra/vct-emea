@@ -4386,3 +4386,10 @@ html[data-ft~="stories2"] .story.seen .storyring { background: var(--line); }
 .bcasesum { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 4px 0 10px; font-size: 13.5px; }
 .bcasesum .btn { margin-left: auto; }
 .bchipnum { padding: 2px 8px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* the home's to-do box (components/BotMembers.jsx) */
+.btodo { padding: 10px 14px; background: var(--surface-2); border: 1px solid var(--line); border-left: 4px solid #e0a526; border-radius: 10px; }
+.btodo.done { border-left-color: #3ba55d; }
+.btodo h3.sub { margin: 0; }
+.btodo ul { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; font-size: 14px; }
+.btodo li { overflow-wrap: anywhere; }
+.btodoslot:not(:empty) { margin-bottom: 14px; }

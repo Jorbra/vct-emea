@@ -44,3 +44,22 @@ test("members to watch: a sanction running or 2 warnings in 30 days, the running
   assert.deepEqual(w[0].running, ["timeout"]);
   assert.equal(w[1].warns30, 2);
 });
+
+test("to do: open tickets nobody took (oldest first), sanctions ending within a day", async () => {
+  const { todoOf } = await import("../lib/botactivity.js");
+  const db = getDb();
+  const g = "990000000000000002";
+  const now = Date.parse("2030-04-01T12:00:00Z");
+  const h = 3600000;
+  const ins = db.prepare("INSERT INTO bot_tickets (thread, guild, user, subject, opened, closed, claimed) VALUES (?, ?, ?, ?, ?, ?, ?)");
+  ins.run("t-new", g, "u", "Récent", new Date(now - h).toISOString(), "", "");
+  ins.run("t-old", g, "u", "Ancien", new Date(now - 30 * h).toISOString(), "", "");
+  ins.run("t-taken", g, "u", "Pris", new Date(now - 40 * h).toISOString(), "", "mod");
+  ins.run("t-closed", g, "u", "Fermé", new Date(now - 50 * h).toISOString(), new Date(now).toISOString(), "");
+  addSanction(db, { guild: g, user: "x", kind: "tempban", mod: "m", at: now - h, until: new Date(now + 5 * h).toISOString() });
+  addSanction(db, { guild: g, user: "y", kind: "timeout", mod: "m", at: now - h, until: new Date(now + 48 * h).toISOString() }); // not within a day
+  addSanction(db, { guild: g, user: "z", kind: "timeout", mod: "m", at: now - 2 * h, until: new Date(now - h).toISOString() }); // over
+  const t = todoOf(db, g, now);
+  assert.deepEqual(t.unclaimed.map((x) => x.thread), ["t-old", "t-new"]);
+  assert.deepEqual(t.ending.map((r) => r.user), ["x"]);
+});

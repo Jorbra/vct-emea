@@ -41,3 +41,18 @@ Au-dessus du tableau des sanctions, pour ce qui est affiché (donc avec les filt
 - Avec le vrai bot : le délai gardé en base sur un vrai serveur.
 
 Rien à refaire sur Discord.
+
+## 5. « À faire » en haut de l'accueil du bot
+
+![À faire](docs/captures/bot-dashboard-a-faire.jpg)
+
+Un encadré au-dessus des modules dit ce qui attend quelqu'un :
+
+- les **commandes à enregistrer** sur Discord ;
+- les **tickets ouverts que personne n'a pris en charge**, du plus ancien au plus récent, avec depuis combien de temps (un clic ouvre le ticket) ;
+- les **modules à configurer** ou auxquels il manque un droit, avec ce qu'il faut faire (un clic ouvre le module) ;
+- les **exclusions et bans temporaires qui finissent dans moins de 24 heures**.
+
+Quand il n'y a rien, l'encadré passe au vert : « ✅ Rien à faire pour le moment ».
+
+Testé : un test de plus (les tickets pris en charge ou fermés écartés, les sanctions qui finissent dans plus d'un jour ou déjà finies écartées) ; vérifié dans l'éditeur local. **349 tests passent, build vert.**
