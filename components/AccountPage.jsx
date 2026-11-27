@@ -153,7 +153,7 @@ function Inside({ name, onOut }) {
         </ul>
         <p className="hint">{tr("Match alerts are turned on device by device, since each one asks for its own permission. They follow your favorite teams.")}</p>
         <div className="row">
-          {role && <a className="btn pri" href="/admin">{tr("Open the editor")}</a>}
+          {role && <a className="btn pri" href="/admin" target="_blank" rel="noopener">{tr("Open the editor")}</a>}
           <button type="button" className="btn" onClick={logout}>{tr("Log out")}</button>
         </div>
       </section>
