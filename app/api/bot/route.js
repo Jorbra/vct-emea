@@ -8,7 +8,21 @@ import { APP_ID, botGuilds, botReady, discord, guildChannels, guildRoles, postMe
 import { botLog, botSettings, botUsage, cancelScheduled, logBot, saveBotSettings, scheduleAnnouncement, scheduledList } from "../../../lib/botstore.js";
 import { botTest, pinnedEmbed, updatePinned } from "../../../lib/botnotify.js";
 import { getState } from "../../../lib/db.js";
-import { COMMANDS } from "../../../lib/discordbot.js";
+import { COMMANDS, HELP_GROUPS } from "../../../lib/discordbot.js";
+import { GROUPS, OLD_TO_NEW, RENAMED_SITE, cleanEmbed, cleanRules, toDiscordEmbed } from "../../../lib/botdash.js";
+import { botPermissions, filterLog, listCases, listTickets, revokeCase, setCaseReason, ticketTranscript, userNames } from "../../../lib/botadmin.js";
+import { postLog } from "../../../lib/botserver.js";
+
+/** The commands by category for the editor's "Commands" page: [{ label, list: [{ name, description, subs, perm }] }]. */
+function commandCategories() {
+  const inner = (c) => (GROUPS[c.name] ? Object.values(GROUPS[c.name].subs) : [RENAMED_SITE[c.name] || c.name]);
+  const shown = COMMANDS.map((c) => ({ name: c.name, description: c.description, type: c.type || 1, perm: c.default_member_permissions || "", subs: (c.options || []).filter((o) => o.type === 1).map((o) => ({ name: o.name, description: o.description })), inner: inner(c) }));
+  const cats = HELP_GROUPS.map(([label, , names]) => ({ label, list: shown.filter((c) => c.type === 1 && c.inner.some((n) => names.includes(n))) })).filter((g) => g.list.length);
+  const rest = shown.filter((c) => c.type === 1 && !cats.some((g) => g.list.includes(c)));
+  if (rest.length) cats.push({ label: "➕ Autres", list: rest });
+  cats.push({ label: "🖱️ Clic droit", list: shown.filter((c) => c.type !== 1) });
+  return cats;
+}
 import { EVENT_NAMES } from "../../../lib/paths.js";
 import { badRequest, currentEditor, readBody, reply, unauthorised } from "../../../lib/session.js";
 
@@ -48,6 +62,8 @@ export async function GET(req) {
     invite: `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot%20applications.commands&permissions=${BOT_RIGHTS}`,
     // the server settings (moderation log, welcome, AutoMod, tickets) and the live connection's state (lib/botgateway.js)
     server: botServer(db), gateway: gatewayState(), ticketStats: ticketStats(db),
+    // the dashboard: the commands by category, what the former ones became, the bot's permissions on the server (modules' states)
+    commandCats: commandCategories(), oldToNew: OLD_TO_NEW, botPerms: null,
     token: botReady(), publicKey: /^[0-9a-f]{64}$/i.test(process.env.DISCORD_PUBLIC_KEY || ""), guilds: [], channels: [], roles: [], error: "",
   };
   if (out.token) {
@@ -57,6 +73,7 @@ export async function GET(req) {
       try { out.registered = (await discord("GET", `/applications/${APP_ID}/commands`)).map((c) => c.name); } catch { out.registered = null; }
       const g = guild || (out.guilds.length === 1 ? out.guilds[0].id : "");
       if (g) [out.channels, out.roles] = await Promise.all([guildChannels(g), guildRoles(g)]);
+      if (g) { try { out.botPerms = await botPermissions(discord, g, APP_ID); } catch { out.botPerms = null; } }
       out.guild = g;
     } catch (e) {
       out.error = e.status === 401 ? "Discord refuses the token on Vercel: reset it in the Bot tab and put the new one in DISCORD_BOT_TOKEN." : e.message;
@@ -91,6 +108,50 @@ export async function POST(req) {
     }
   }
   if (b.action === "unschedule") return reply(cancelScheduled(db, b.id));
+  // ---- the dashboard's pages ----
+  const guildOf = () => (b.guild && /^\d{5,25}$/.test(String(b.guild)) ? String(b.guild) : (botSettings(db).guild || ""));
+  const namesFor = async (ids) => (botReady() ? userNames(discord, ids) : {});
+  if (b.action === "cases") {
+    const guild = guildOf();
+    const raw = listCases(db, guild, { kind: b.kind, from: b.from, to: b.to, limit: 2000 });
+    const names = await namesFor(raw.slice(0, 200).flatMap((r) => [r.user, r.mod]));
+    return NextResponse.json({ ok: true, cases: listCases(db, guild, { q: b.q, kind: b.kind, from: b.from, to: b.to }, names), names });
+  }
+  if (b.action === "case-reason") {
+    const me = await currentEditor();
+    const r = setCaseReason(db, guildOf(), b.id, b.reason, me.who || "éditeur");
+    if (r.ok) logBot(db, "moderation", `cas #${b.id} · raison modifiée depuis l'éditeur`);
+    return r.ok ? NextResponse.json(r) : NextResponse.json({ error: r.error }, { status: 400 });
+  }
+  if (b.action === "case-revoke") {
+    if (!botReady()) return NextResponse.json({ error: "The bot's token is not set on Vercel (DISCORD_BOT_TOKEN)." }, { status: 409 });
+    const me = await currentEditor();
+    const server = botServer(db);
+    const r = await revokeCase({ db, discord, guild: guildOf(), who: me.who || "éditeur", logBot, notify: (text) => postLog(discord, server, { kind: "bot", title: "🛡️ Action depuis l'éditeur", lines: [text], at: Date.now() }) }, b.id);
+    return r.ok ? NextResponse.json(r) : NextResponse.json({ error: r.error }, { status: 400 });
+  }
+  if (b.action === "tickets") {
+    const guild = guildOf();
+    const all = listTickets(db, guild, { state: b.state });
+    const names = await namesFor(all.slice(0, 150).flatMap((t) => [t.user, t.claimed]));
+    return NextResponse.json({ ok: true, tickets: listTickets(db, guild, { state: b.state, q: b.q }, names), names, stats: ticketStats(db) });
+  }
+  if (b.action === "ticket") return NextResponse.json({ ok: true, transcript: ticketTranscript(db, guildOf(), b.thread) });
+  if (b.action === "log") return NextResponse.json({ ok: true, log: filterLog(db, { kind: b.kind, errors: !!b.errors, q: b.q }), kinds: db.prepare("SELECT DISTINCT kind FROM bot_log ORDER BY kind").all().map((r) => r.kind) });
+  // the "Commands" page: which are on, and each one's rules
+  if (b.action === "commands") {
+    const settings = saveBotSettings(db, { disabled: Array.isArray(b.disabled) ? b.disabled : undefined }).settings;
+    const server = saveBotServer(db, { commandRules: cleanRules(b.rules) });
+    return NextResponse.json({ ok: true, message: "Commandes enregistrées.", settings, server });
+  }
+  // a module's switch on the home page
+  if (b.action === "module") {
+    const cur = botServer(db);
+    const next = saveBotServer(db, { modules: { ...cur.modules, [String(b.key)]: !!b.on } });
+    // AutoMod: the bot's rules taken away or put back at once
+    if (b.key === "automod" && botReady() && botSettings(db).guild) { try { await syncAutomod(discord, botSettings(db).guild, next); } catch { /* said on the next save */ } }
+    return NextResponse.json({ ok: true, message: `Module ${b.on ? "activé" : "désactivé"}.`, server: next });
+  }
   if (b.action === "announce") {
     const s = (await import("../../../lib/botstore.js")).botSettings(db);
     const text = String(b.text || "").trim().slice(0, 1900);
@@ -99,14 +160,16 @@ export async function POST(req) {
     if (!channel) return NextResponse.json({ error: "Choose a channel first." }, { status: 400 });
     if (!text) return NextResponse.json({ error: "Write something first." }, { status: 400 });
     const mention = b.mention && s.role ? `<@&${s.role}> ` : "";
-    const payload = b.embed ? { content: mention || undefined, embeds: [{ description: text, color: 0xff4655, title: String(b.title || "").slice(0, 200) || undefined }], allowed_mentions: { parse: [], roles: mention ? [s.role] : [] } } : { content: mention + text, allowed_mentions: { parse: [], roles: mention ? [s.role] : [] } };
+    // the embed built in the editor (title, text, colour, image, fields), {server} filled in
+    const embed = b.embed ? toDiscordEmbed(cleanEmbed({ title: b.title, text, color: b.color, image: b.image, fields: b.fields }), { guild: gatewayState().guildName || "" }) : null;
+    const payload = embed ? { content: mention || undefined, embeds: [embed], allowed_mentions: { parse: [], roles: mention ? [s.role] : [] } } : { content: mention + text.replace(/{server}/g, gatewayState().guildName || ""), allowed_mentions: { parse: [], roles: mention ? [s.role] : [] } };
     if (b.at) {
       const me = await currentEditor();
       return reply(scheduleAnnouncement(db, { at: b.at, channel, payload, label: (String(b.title || "") || text).slice(0, 120), who: me.who || "main" }));
     }
     try {
       logBot(db, "annonce", (String(b.title || "") || text).slice(0, 120));
-      await postMessage(channel, b.embed ? { content: mention || undefined, embeds: [{ description: text, color: 0xff4655, title: String(b.title || "").slice(0, 200) || undefined }], allowed_mentions: { parse: [], roles: mention ? [s.role] : [] } } : { content: mention + text, allowed_mentions: { parse: [], roles: mention ? [s.role] : [] } });
+      await postMessage(channel, payload);
       return NextResponse.json({ ok: true, message: "Announcement sent." });
     } catch (e) {
       return NextResponse.json({ error: e.code === 50013 || e.code === 50001 ? "The bot cannot post in this channel: give it the right to see the channel and send messages." : `Discord: ${e.message}` }, { status: 502 });
