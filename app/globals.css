@@ -4471,3 +4471,15 @@ html[data-ft~="stories2"] .storyacts .btn.st2 { display: inline-flex; align-item
 .bmtools { margin-left: auto; display: flex; flex-wrap: wrap; gap: 6px; align-self: flex-start; }
 .bmtools a.btn { text-decoration: none; }
 [data-theme="light"] .bmtag.warn { color: #9a4d0b; }
+
+/* bot dashboard: access to the editor from Discord (components/BotAccess.jsx) */
+.bacclevel { margin: 10px 0; }
+.bacclevel p { margin: 0 0 6px; }
+.baccroles { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.baccrole { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px 2px 10px; border: 1px solid var(--line); border-left-width: 3px; border-radius: 999px; background: var(--surface-2); font-size: 13.5px; }
+.baccrole button { appearance: none; border: 0; background: none; color: var(--muted); font: 700 15px var(--font-body); cursor: pointer; padding: 0 6px; line-height: 1; }
+.baccrole button:hover { color: var(--fg); }
+.baccroles select { width: auto; height: 30px; padding: 0 8px; font-size: 13.5px; }
+.baccstaff { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.baccstaff li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.baccstaff li .btn { margin-left: auto; }

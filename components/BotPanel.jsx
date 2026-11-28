@@ -10,6 +10,7 @@ import BotServer from "./BotServer.jsx";
 import { DiscordMessage, EmbedBuilder, MessageEditor, ModuleCard, Picker } from "./BotDash.jsx";
 import { CasesPage, CommandsPage, LogPage, TicketsPage } from "./BotPages.jsx";
 import { ActivityPanel, MembersPage, TeamPanel } from "./BotMembers.jsx";
+import { EditorAccessRoles } from "./BotAccess.jsx";
 import { QuickSearch } from "./BotSearch.jsx";
 import { MODULES, moduleState } from "../lib/botdash.js";
 import { P } from "../lib/botperms.js";
@@ -25,6 +26,8 @@ const AUTO_GROUPS = [
   ["As the events go", ["recap", "qualified", "fanRoles"]],
 ];
 // the menu: the home, then the pages that are not a module
+// a moderator (lib/staffaccess.js) has these pages only, and no module
+const MOD_PAGES = ["home", "members", "cases", "tickets", "log", "stats"];
 const PAGES = [["home", "🏠 Accueil"], ["commands", "⌨️ Commandes"], ["members", "👤 Membres"], ["cases", "⚖️ Sanctions"], ["tickets", "🎫 Tickets"], ["log", "📜 Journal"], ["stats", "📈 Statistiques"], ["settings", "⚙️ Réglages"]];
 // the announcements module's tabs
 const ANN_TABS = [["settings", "Salons et contenu"], ["auto", "Messages automatiques"], ["announce", "Écrire une annonce"], ["embeds", "Messages préparés (/embed)"], ["samples", "Exemples"], ["pin", "Message épinglé"]];
@@ -107,6 +110,7 @@ export default function BotPanel({ full = false }) {
     }).catch(() => { /* offline */ });
   }, []);
   useEffect(() => { if (!d) load(); }, [d, load]);
+  useEffect(() => { if (d && d.me && d.me.level === "moderator" && !MOD_PAGES.includes(page)) setPage("home"); }, [d, page]);
   // the full-screen page: the browser's back and forward buttons move between the pages
   useEffect(() => {
     if (!full) return undefined;
@@ -178,7 +182,8 @@ export default function BotPanel({ full = false }) {
   const g = (d && d.gateway) || {};
   const guildName = d && s ? ((d.guilds || []).find((x) => x.id === s.guild) || {}).name || g.guildName || "" : "";
   const stateOf = (m) => moduleState(m, { server: d.server, settings: s, perms: d.botPerms, gateway: g, P });
-  const mod = page.startsWith("mod:") ? MODULES.find((m) => m.key === page.slice(4)) : null;
+  const modOnly = !!(d && d.me && d.me.level === "moderator");
+  const mod = !modOnly && page.startsWith("mod:") ? MODULES.find((m) => m.key === page.slice(4)) : null;
   const toggleModule = (m, on) => call({ action: "module", key: m.key, on }, (j) => setD((x) => ({ ...x, server: j.server })));
   const settingsBar = (
     <div className={"bsavebar" + (dirty ? " dirty" : "")}>
@@ -211,19 +216,19 @@ export default function BotPanel({ full = false }) {
                 {d.error && <span className="bbadge bad">{tr.server(d.error)}</span>}
               </div>
               <div className="bdshort">
-                {missing > 0 && <button type="button" className="btn small pri" disabled={busy} onClick={() => call({ action: "register" }, () => load(s.guild))}>⬆️ Enregistrer les commandes ({missing})</button>}
+                {!modOnly && missing > 0 && <button type="button" className="btn small pri" disabled={busy} onClick={() => call({ action: "register" }, () => load(s.guild))}>⬆️ Enregistrer les commandes ({missing})</button>}
                 <button type="button" className="btn small" onClick={() => setSeek(true)} title={full ? "Ctrl + K" : undefined}>🔎 Rechercher{full && <kbd>Ctrl K</kbd>}</button>
-                <button type="button" className="btn small" onClick={() => go("mod:announce", "announce")}>📣 Écrire une annonce</button>
+                {!modOnly && <button type="button" className="btn small" onClick={() => go("mod:announce", "announce")}>📣 Écrire une annonce</button>}
                 <button type="button" className="btn small" onClick={() => go("cases")}>⚖️ Sanctions</button>
                 <button type="button" className="btn small" onClick={() => go("tickets")}>🎫 Tickets{d.ticketStats && d.ticketStats.open ? ` (${d.ticketStats.open})` : ""}</button>
-                <button type="button" className="btn small" disabled={busy || !d.token} onClick={() => call({ action: "test" })}>✉️ Message de test</button>
+                {!modOnly && <button type="button" className="btn small" disabled={busy || !d.token} onClick={() => call({ action: "test" })}>✉️ Message de test</button>}
               </div>
             </div>
             <div className="blayout">
             <nav className="bnav" aria-label="Pages du bot">
-              {PAGES.map(([k, l]) => <button key={k} type="button" aria-current={page === k ? "page" : undefined} onClick={() => go(k)}>{l}{k === "log" && d.logErrors > 0 && <span className="bnavbadge" title="Erreurs du bot ces dernières 24 heures">{d.logErrors}<span className="sr-only"> erreurs en 24 heures</span></span>}</button>)}
-              <span className="bnavsep" aria-hidden="true">Modules</span>
-              {MODULES.map((m) => {
+              {PAGES.filter(([k]) => !modOnly || MOD_PAGES.includes(k)).map(([k, l]) => <button key={k} type="button" aria-current={page === k ? "page" : undefined} onClick={() => go(k)}>{l}{k === "log" && d.logErrors > 0 && <span className="bnavbadge" title="Erreurs du bot ces dernières 24 heures">{d.logErrors}<span className="sr-only"> erreurs en 24 heures</span></span>}</button>)}
+              {!modOnly && <span className="bnavsep" aria-hidden="true">Modules</span>}
+              {!modOnly && MODULES.map((m) => {
                 const st = stateOf(m).state;
                 return (
                   <button key={m.key} type="button" className="bnavmod" aria-current={page === `mod:${m.key}` ? "page" : undefined} onClick={() => go(`mod:${m.key}`)} title={STATE_WORD[st]}>
@@ -237,10 +242,11 @@ export default function BotPanel({ full = false }) {
             {page === "home" && (
               <>
                 <div ref={setTodoAt} className="btodoslot" />
-                <div className="bmods">
+                {modOnly && <p className="note">🛡️ Accès modérateur : membres, sanctions, tickets, journal et statistiques. Les réglages du bot sont pour les éditeurs.</p>}
+                {!modOnly && <div className="bmods">
                   {MODULES.map((m) => <ModuleCard key={m.key} m={m} state={stateOf(m)} busy={busy} onToggle={(on) => toggleModule(m, on)} onOpen={() => go(`mod:${m.key}`)} />)}
-                </div>
-                <ActivityPanel guild={s.guild} go={go} onMember={openMember} todoAt={todoAt} missing={missing || 0} setup={MODULES.map((m) => ({ ...m, ...stateOf(m) })).filter((m) => m.state === "setup" || m.state === "missing")} />
+                </div>}
+                <ActivityPanel guild={s.guild} go={go} onMember={openMember} todoAt={todoAt} missing={modOnly ? 0 : missing || 0} setup={modOnly ? [] : MODULES.map((m) => ({ ...m, ...stateOf(m) })).filter((m) => m.state === "setup" || m.state === "missing")} />
                 {d.botPerms == null && d.token && <p className="hint">Les droits du bot sur le serveur n&apos;ont pas pu être lus : choisis le serveur dans Réglages.</p>}
               </>
             )}
@@ -370,6 +376,7 @@ export default function BotPanel({ full = false }) {
 
             {page === "settings" && (
               <>
+                <EditorAccessRoles roles={(d.roles || []).filter((r) => r.id !== s.guild)} busy={busy} call={call} />
                 <section className="bsect bbackup">
                   <h3 className="sub">💾 Sauvegarde des réglages</h3>
                   <p className="hint">Tout le réglage du bot dans un fichier : modules, salons et rôles choisis, messages, règles des commandes, tickets, AutoMod, annonces. Aucun secret n&apos;y figure (ni jeton, ni mot de passe). Garde-le avant un gros changement : on le remet en place ici.</p>

@@ -27,7 +27,8 @@ function commandCategories() {
   return cats;
 }
 import { EVENT_NAMES } from "../../../lib/paths.js";
-import { badRequest, currentEditor, readBody, reply, unauthorised } from "../../../lib/session.js";
+import { badRequest, currentStaff, readBody, reply, unauthorised } from "../../../lib/session.js";
+import { dropStaff, listStaff, readAccess, saveAccess } from "../../../lib/staffaccess.js";
 
 export const dynamic = "force-dynamic";
 
@@ -52,9 +53,13 @@ async function sampleOf(db, kind, lang) {
   return null;
 }
 
+// what a moderator may do on the dashboard: read it, the members, the sanctions, the tickets, the journal
+const MODERATOR_ACTIONS = new Set(["cases", "case-reason", "case-revoke", "tickets", "ticket", "ticket-reply", "ticket-close", "ticket-reopen", "activity", "pulse", "team", "watch", "member-suggest", "member", "member-sanction", "member-note", "log"]);
+
 /** Editors only. GET: the bot's settings, its use, and the servers, channels and roles to pick from. */
 export async function GET(req) {
-  if (!(await currentEditor())) return unauthorised();
+  const me = await currentStaff();
+  if (!me) return unauthorised();
   const db = getDb();
   const settings = botSettings(db);
   const guild = new URL(req.url).searchParams.get("guild") || settings.guild;
@@ -69,6 +74,7 @@ export async function GET(req) {
     commandCats: commandCategories(), oldToNew: OLD_TO_NEW, botPerms: null, cmdUse: commandUsage(db),
     // the bot's errors of the last 24 hours, shown beside "Journal" in the menu
     logErrors: db.prepare("SELECT COUNT(*) AS n FROM bot_log WHERE ok = 0 AND at >= ?").get(new Date(Date.now() - 86400000).toISOString()).n,
+    me: { level: me.level, who: me.who }, access: me.level === "moderator" ? null : readAccess(db),
     token: botReady(), publicKey: /^[0-9a-f]{64}$/i.test(process.env.DISCORD_PUBLIC_KEY || ""), guilds: [], channels: [], roles: [], error: "",
   };
   if (out.token) {
@@ -89,9 +95,12 @@ export async function GET(req) {
 
 /** POST { action: "save", ...settings } | { action: "test" } | { action: "register" }. */
 export async function POST(req) {
-  if (!(await currentEditor())) return unauthorised();
+  const staff = await currentStaff();
+  if (!staff) return unauthorised();
   const b = await readBody(req);
   if (!b) return badRequest();
+  // a moderator (lib/staffaccess.js) has the members, the sanctions, the tickets and the journal, not the bot's settings
+  if (staff.level === "moderator" && !MODERATOR_ACTIONS.has(String(b.action || ""))) return NextResponse.json({ error: "Réservé aux éditeurs : ton rôle donne accès à la modération seulement." }, { status: 403 });
   const db = getDb();
   if (b.action === "test") {
     const r = await botTest(db);
@@ -113,6 +122,16 @@ export async function POST(req) {
     }
   }
   if (b.action === "unschedule") return reply(cancelScheduled(db, b.id));
+  // the editor opened from Discord (lib/staffaccess.js): the roles that open it, and who signed in that way. Changing
+  // them is for the main account only, since a role given to everyone would open the editor to everyone
+  if (b.action === "access") return NextResponse.json({ ok: true, access: readAccess(db), staff: listStaff(db), main: staff.who === "" });
+  if (b.action === "access-save" || b.action === "staff-drop") {
+    if (staff.who !== "") return NextResponse.json({ error: "Seul le compte principal peut choisir qui ouvre l'éditeur depuis Discord." }, { status: 403 });
+    if (b.action === "staff-drop") { dropStaff(db, String(b.id || "")); logBot(db, "moderation", "accès à l'éditeur retiré depuis l'éditeur"); return NextResponse.json({ ok: true, staff: listStaff(db), message: "Accès retiré." }); }
+    const access = saveAccess(db, { editor: b.editor, moderator: b.moderator }, botSettings(db).guild || "");
+    logBot(db, "moderation", `rôles qui ouvrent l'éditeur : ${access.editor.length} éditeur, ${access.moderator.length} modérateur`);
+    return NextResponse.json({ ok: true, access, staff: listStaff(db), message: "Rôles enregistrés." });
+  }
   // ---- the dashboard's pages ----
   const guildOf = () => (b.guild && /^\d{5,25}$/.test(String(b.guild)) ? String(b.guild) : (botSettings(db).guild || ""));
   const namesFor = async (ids) => (botReady() ? userNames(discord, ids) : {});
@@ -123,14 +142,14 @@ export async function POST(req) {
     return NextResponse.json({ ok: true, cases: listCases(db, guild, { q: b.q, kind: b.kind, from: b.from, to: b.to }, names), names });
   }
   if (b.action === "case-reason") {
-    const me = await currentEditor();
+    const me = staff;
     const r = setCaseReason(db, guildOf(), b.id, b.reason, me.who || "éditeur");
     if (r.ok) logBot(db, "moderation", `cas #${b.id} · raison modifiée depuis l'éditeur`);
     return r.ok ? NextResponse.json(r) : NextResponse.json({ error: r.error }, { status: 400 });
   }
   if (b.action === "case-revoke") {
     if (!botReady()) return NextResponse.json({ error: "The bot's token is not set on Vercel (DISCORD_BOT_TOKEN)." }, { status: 409 });
-    const me = await currentEditor();
+    const me = staff;
     const server = botServer(db);
     const r = await revokeCase({ db, discord, guild: guildOf(), who: me.who || "éditeur", logBot, notify: (text) => postLog(discord, server, { kind: "bot", title: "🛡️ Action depuis l'éditeur", lines: [text], at: Date.now() }) }, b.id);
     return r.ok ? NextResponse.json(r) : NextResponse.json({ error: r.error }, { status: 400 });
@@ -220,7 +239,7 @@ export async function POST(req) {
   // a warning or a time-out given from a member's file (lib/botadmin.js editorSanction)
   if (b.action === "member-sanction") {
     if (!botReady()) return NextResponse.json({ error: "Le jeton du bot n'est pas réglé sur le serveur (DISCORD_BOT_TOKEN)." }, { status: 409 });
-    const me = await currentEditor();
+    const me = staff;
     const server = botServer(db);
     const r = await editorSanction({ db, discord, server, guild: guildOf(), who: me.who || "éditeur", logBot, notify: (text) => postLog(discord, server, { kind: "bot", title: "🛡️ Action depuis l'éditeur", lines: [text], at: Date.now() }) }, { user: memberId(b.id), kind: String(b.kind || ""), reason: b.reason, duration: b.duration, deleteDays: b.deleteDays });
     return r.ok ? NextResponse.json(r) : NextResponse.json({ error: r.error }, { status: 400 });
@@ -230,7 +249,7 @@ export async function POST(req) {
     const id = memberId(b.id);
     const text = String(b.text || "").trim().slice(0, 380);
     if (!id || !text) return NextResponse.json({ error: "Écris la note." }, { status: 400 });
-    const me = await currentEditor();
+    const me = staff;
     addSanction(db, { guild: guildOf(), user: id, kind: "note", mod: "editor", reason: me.who ? `${text} (${me.who})` : text });
     logBot(db, "moderation", `note ajoutée sur <@${id}> depuis l'éditeur`);
     return NextResponse.json({ ok: true, message: "Note ajoutée au dossier." });
@@ -241,7 +260,7 @@ export async function POST(req) {
     const guild = guildOf();
     const t = db.prepare("SELECT thread, user, closed FROM bot_tickets WHERE guild = ? AND thread = ?").get(guild, String(b.thread || ""));
     if (!t) return NextResponse.json({ error: "Ticket introuvable." }, { status: 404 });
-    const me = await currentEditor();
+    const me = staff;
     const who = String(me.who || "Éditeur").slice(0, 60);
     const editor = { id: "editor", username: who, editor: true };
     const perms = String(P.MANAGE_THREADS);
@@ -322,7 +341,7 @@ ${text}`, allowed_mentions: { parse: [] } });
     const embed = b.embed ? toDiscordEmbed(cleanEmbed({ title: b.title, text, color: b.color, image: b.image, fields: b.fields }), { guild: gatewayState().guildName || "" }) : null;
     const payload = embed ? { content: mention || undefined, embeds: [embed], allowed_mentions: { parse: [], roles: mention ? [s.role] : [] } } : { content: mention + text.replace(/{server}/g, gatewayState().guildName || ""), allowed_mentions: { parse: [], roles: mention ? [s.role] : [] } };
     if (b.at) {
-      const me = await currentEditor();
+      const me = staff;
       return reply(scheduleAnnouncement(db, { at: b.at, channel, payload, label: (String(b.title || "") || text).slice(0, 120), who: me.who || "main" }));
     }
     try {

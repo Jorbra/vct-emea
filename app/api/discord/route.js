@@ -409,6 +409,26 @@ async function handle(req, box) {
     kvSet(db, "bot_prono_dm", on ? [...list, user.id].slice(-5000) : list.filter((u) => u !== user.id));
     return ephemeral({ content: on ? L("🔔 C'est noté : je t'enverrai un message privé quand des matchs arrivent dans les 3 heures et que tu ne les as pas pronostiqués. Refais `/rappelprono` pour arrêter.", "🔔 Noted: I'll DM you when matches start within 3 hours and you haven't predicted them. Run `/rappelprono` again to stop.") : L("🔕 Rappels de pronostic arrêtés.", "🔕 Prediction reminders stopped.") });
   }
+  // the editor opened from Discord (lib/staffaccess.js): a link for this member alone, if one of their roles opens it
+  if (name === "editeur") {
+    const { levelFor, makeStaffCode, readAccess } = await import("../../../lib/staffaccess.js");
+    if (!i.guild_id || i.guild_id !== settings.guild) return ephemeral({ content: L("Tape cette commande sur le serveur du site.", "Use this command on the site's server.") });
+    const access = readAccess(db);
+    const level = levelFor(access, (i.member && i.member.roles) || []);
+    if (!level) return ephemeral({ content: access.editor.length || access.moderator.length ? L("Aucun de tes rôles n'ouvre l'éditeur du site.", "None of your roles opens the site's editor.") : L("Aucun rôle n'ouvre encore l'éditeur : le compte principal du site les choisit dans le tableau de bord du bot (Réglages).", "No role opens the editor yet: the site's main account picks them in the bot's dashboard (Settings).") });
+    const displayName = (i.member && i.member.nick) || user.global_name || user.username || user.id;
+    const code = makeStaffCode(db, { id: user.id, name: displayName, level }, now);
+    // the address Discord reached the bot at is the site's own
+    const host = (req.headers.get("x-forwarded-host") || req.headers.get("host") || "").split(",")[0].trim();
+    const site = host ? `${(req.headers.get("x-forwarded-proto") || "https").split(",")[0]}://${host}` : ctx.site;
+    logBot(db, "moderation", `/editeur : lien de connexion donné à ${displayName} (${level === "editor" ? "éditeur" : "modérateur"})`);
+    return ephemeral({
+      content: level === "editor"
+        ? L("🔑 Ton lien pour ouvrir l'éditeur du site. Il ne marche qu'une fois, pendant 10 minutes : ne le partage pas. Ton accès dure tant que tu as le rôle.", "🔑 Your link to open the site's editor. It works once, for 10 minutes: do not share it. Your access lasts as long as you have the role.")
+        : L("🔑 Ton lien pour ouvrir le tableau de bord du bot (membres, sanctions, tickets). Il ne marche qu'une fois, pendant 10 minutes : ne le partage pas.", "🔑 Your link to open the bot's dashboard (members, sanctions, tickets). It works once, for 10 minutes: do not share it."),
+      components: [{ type: 1, components: [{ type: 2, style: 5, label: L("Ouvrir l'éditeur", "Open the editor"), url: `${site}/api/staff-login?code=${code}` }] }],
+    });
+  }
   if (name === "lier") {
     const who = useLinkCode(db, user.id, opt("code"), now);
     return ephemeral({ content: who ? L(`✅ C'est fait : tes pronostics Discord comptent maintenant pour **${who}**.`, `✅ Done: your Discord predictions now count for **${who}**.`) : L("Code inconnu ou trop vieux. Prends-en un nouveau sur la page Pronostics du site (il dure 15 minutes).", "Unknown or expired code. Get a new one on the site's Predictions page (it lasts 15 minutes).") });

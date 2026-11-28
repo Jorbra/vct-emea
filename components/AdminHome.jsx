@@ -708,10 +708,11 @@ function VisitorAccounts({ count, roles, call, onDone }) {
       <div className="row">
         <button type="button" className="btn" disabled={!name.trim()} onClick={() => role("owner")}>{tr("Make it the main account")}</button>
         <button type="button" className="btn" disabled={!name.trim()} onClick={() => role("editor")}>{tr("Give editor access")}</button>
+        <button type="button" className="btn" disabled={!name.trim()} onClick={() => role("moderator")}>{tr("Give moderator access (bot only)")}</button>
         <button type="button" className="btn" disabled={!name.trim()} onClick={() => role("")}>{tr("Take away the access")}</button>
       </div>
       {info && <p className="hint" role="status">{info}</p>}
-      {list.length > 0 && <ul className="acctroles">{list.map((r) => <li key={r.name}><b>{r.name}</b> <small>{r.role === "owner" ? tr("Main account") : tr("Editor")}</small></li>)}</ul>}
+      {list.length > 0 && <ul className="acctroles">{list.map((r) => <li key={r.name}><b>{r.name}</b> <small>{r.role === "owner" ? tr("Main account") : r.role === "moderator" ? tr("Moderator (bot only)") : tr("Editor")}</small></li>)}</ul>}
       {given && <p className="note" role="status">{tr("New password for {name}:", { name: given.name })} <code>{given.password}</code></p>}
     </details>
   );

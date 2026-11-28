@@ -6,7 +6,7 @@ import Admin from "../../components/Admin";
 import { getDb, getState } from "../../lib/db.js";
 import { LANG_COOKIE, normLang } from "../../lib/i18n.js";
 import { adminHref, parseAdminPath } from "../../lib/paths.js";
-import { currentEditor } from "../../lib/session.js";
+import { currentEditor, currentStaff } from "../../lib/session.js";
 import { rosterDiffs } from "../../lib/rosterdiff.js";
 import { readTeamInfo } from "../../lib/teamfetch.js";
 import { listEditors } from "../../lib/editors.js";
@@ -41,6 +41,8 @@ export default async function Page({ params }) {
   const href = adminHref(start);
   if (path !== href) redirect(href);
   const me = await currentEditor();
+  // a moderator has the bot's dashboard only
+  if (!me && (await currentStaff())) redirect("/admin/bot");
   const lang = normLang((await cookies()).get(LANG_COOKIE)?.value);
   // Nothing from the database is sent to someone who is not signed in.
   const db = getDb();
