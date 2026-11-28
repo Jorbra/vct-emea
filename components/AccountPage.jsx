@@ -104,11 +104,33 @@ function EditorAccessPanel() {
 }
 
 /** The account tied to Discord (lib/accountdiscord.js): a code for /lier, then the Discord name, and a way to undo it. */
-function DiscordPanel({ discord, onChange }) {
+// how "Lier avec Discord" went, said on the way back (app/api/discord-link: /compte?discord=…)
+const LINK_RESULT = {
+  ok: [true, "Your Discord account is linked."],
+  cancelled: [false, "Linking cancelled on Discord: nothing changed."],
+  expired: [false, "The link took too long or came from another browser: try again."],
+  error: [false, "Discord did not answer as expected: try again, or use the code with /lier."],
+  unavailable: [false, "Linking with Discord in one click is not set up on the site yet: use the code with /lier."],
+  signin: [false, "Sign in to your account first, then link Discord."],
+};
+
+function DiscordPanel({ discord, oauth, onChange }) {
   const tr = useT();
   const [code, setCode] = useState("");
   const [err, setErr] = useState("");
   const [copied, setCopied] = useState(false);
+  const [result, setResult] = useState(null);
+  // back from Discord: say how it went once, then take it off the address
+  useEffect(() => {
+    try {
+      const u = new URL(window.location.href);
+      const r = u.searchParams.get("discord");
+      if (!r) return;
+      if (LINK_RESULT[r]) setResult(LINK_RESULT[r]);
+      u.searchParams.delete("discord");
+      window.history.replaceState(null, "", u.pathname + u.search + u.hash);
+    } catch { /* an old browser: nothing said */ }
+  }, []);
   async function ask(action) {
     setErr("");
     try {
@@ -143,9 +165,17 @@ function DiscordPanel({ discord, onChange }) {
       ) : (
         <>
           <p className="hint">{tr("Link your Discord account: your predictions made with the bot count for this account, and the roles that open the editor give you access when you are signed in here.")}</p>
-          <button type="button" className="btn pri" onClick={() => ask("discord-code")}>{tr("Link my Discord")}</button>
+          {oauth ? (
+            <>
+              <form method="post" action="/api/discord-link" className="acctoauth">
+                <button type="submit" className="btn pri discordbtn">{tr("Link with Discord")}</button>
+              </form>
+              <p className="hint">{tr("Discord asks you to confirm, then brings you back here: the site only gets your Discord name and id.")} <button type="button" className="linkbtn" onClick={() => ask("discord-code")}>{tr("Or use a code with /lier")}</button></p>
+            </>
+          ) : <button type="button" className="btn pri" onClick={() => ask("discord-code")}>{tr("Link my Discord")}</button>}
         </>
       )}
+      {result && <p className={result[0] ? "okmsg" : "err"} role="status">{tr(result[1])}</p>}
       {err && <p className="err" role="alert">{err}</p>}
     </section>
   );
@@ -160,8 +190,9 @@ function Inside({ name, onOut }) {
   const [role, setRole] = useState("");
   const [level, setLevel] = useState("");
   const [discord, setDiscord] = useState(undefined);
+  const [oauth, setOauth] = useState(false);
   const reload = useCallback(() => {
-    fetch("/api/account").then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.account) { setRole(j.account.role || ""); setLevel(j.account.level || ""); setDiscord(j.account.discord || null); } }).catch(() => { /* offline */ });
+    fetch("/api/account").then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.account) { setRole(j.account.role || ""); setLevel(j.account.level || ""); setDiscord(j.account.discord || null); setOauth(!!j.account.discordOauth); } }).catch(() => { /* offline */ });
   }, []);
   useEffect(() => { reload(); }, [reload]);
   const say = (ok, text) => setNote({ ok, text });
@@ -208,7 +239,7 @@ function Inside({ name, onOut }) {
           <button type="button" className="btn" onClick={logout}>{tr("Log out")}</button>
         </div>
       </section>
-      {discord !== undefined && <DiscordPanel discord={discord} onChange={reload} />}
+      {discord !== undefined && <DiscordPanel discord={discord} oauth={oauth} onChange={reload} />}
       {role === "owner" && <EditorAccessPanel />}
       <section className="acctbox">
         <h2>{tr("Change my password")}</h2>

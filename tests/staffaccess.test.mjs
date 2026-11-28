@@ -114,3 +114,27 @@ test("account and Discord: a code ties them, predictions follow, the roles give 
   assert.equal(accountDiscord(db, N2), null);
   assert.equal(db.prepare("SELECT 1 FROM bot_links WHERE user = ?").get(U), undefined);
 });
+
+test("Lier avec Discord: the state is signed, for this account and this browser, 10 minutes; the tie needs no code", async () => {
+  const { accountDiscord, linkAccountTo, makeLinkState, readLinkState } = await import("../lib/accountdiscord.js");
+  const { signUp } = await import("../lib/accounts.js");
+  const S = "secret-de-test-pour-l-etat-oauth";
+  const { state, nonce } = makeLinkState(S, "Lucie", NOW);
+  assert.equal(readLinkState(S, state, nonce, NOW + MIN), "Lucie");
+  assert.equal(readLinkState(S, state, "un-autre-navigateur", NOW + MIN), "", "another browser");
+  assert.equal(readLinkState("autre-secret", state, nonce, NOW + MIN), "", "another secret");
+  assert.equal(readLinkState(S, state, nonce, NOW + 11 * MIN), "", "too old");
+  assert.equal(readLinkState(S, state, nonce, NOW - MIN), "", "from the future");
+  const [body, sig] = state.split(".");
+  const forged = Buffer.from(JSON.stringify({ ...JSON.parse(Buffer.from(body, "base64url").toString()), a: "Mallory" })).toString("base64url");
+  assert.equal(readLinkState(S, `${forged}.${sig}`, nonce, NOW + MIN), "", "another account");
+  assert.equal(readLinkState(S, "", nonce, NOW), "");
+  const db = getDb();
+  const N = `O${Date.now().toString(36)}`;
+  assert.ok(signUp(db, { name: N, password: "motdepasse1", token: `tok_${N}_abcdefghijklmnopqrstuv` }).ok);
+  assert.equal(linkAccountTo(db, "personne-de-ce-nom", { id: "444444444444444441", name: "x" }, NOW), "");
+  assert.equal(linkAccountTo(db, N, { id: "pas-un-id", name: "x" }, NOW), "");
+  assert.equal(linkAccountTo(db, N, { id: "444444444444444441", name: "lucie_dc" }, NOW), N);
+  assert.deepEqual(accountDiscord(db, N), { id: "444444444444444441", name: "lucie_dc" });
+  assert.ok(db.prepare("SELECT 1 FROM bot_links WHERE user = ?").get("444444444444444441"));
+});

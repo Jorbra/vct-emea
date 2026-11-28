@@ -32,7 +32,7 @@ export async function GET() {
   // the access the account has now, its own or its Discord roles' (lib/session.js)
   const staff = await currentStaff().catch(() => null);
   const level = staff && staff.account === readAccount(db, name).name ? staff.level : "";
-  return NextResponse.json({ account: { ...readAccount(db, name), discord: accountDiscord(db, name), level } }, { headers: noStore });
+  return NextResponse.json({ account: { ...readAccount(db, name), discord: accountDiscord(db, name), level, discordOauth: !!process.env.DISCORD_CLIENT_SECRET } }, { headers: noStore });
 }
 
 export async function POST(req) {

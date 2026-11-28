@@ -4527,5 +4527,8 @@ html[data-ft~="stories2"] .storyacts .btn.st2 { display: inline-flex; align-item
 .baccstaff li .btn { margin-left: auto; }
 
 /* account page: Discord (components/AccountPage.jsx) */
+.acctoauth { margin: 6px 0 4px; }
+.btn.discordbtn { background: #5865f2; border-color: #5865f2; color: #fff; }
+.btn.discordbtn:hover { background: #4752c4; border-color: #4752c4; }
 .acctcode { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .acctcode code { font-size: 18px; letter-spacing: .06em; padding: 6px 12px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); user-select: all; }
