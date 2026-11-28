@@ -4541,3 +4541,9 @@ html[data-ft~="stories2"] .storyacts .btn.st2 { display: inline-flex; align-item
 .mcwin .crest { width: 14px; height: 14px; min-width: 0; border-radius: 3px; background: none; border: 0; padding: 0; }
 .mcwin .crest img { width: 14px; height: 14px; object-fit: contain; }
 .fmmaps .mcwin .crest, .fmmaps .mcwin .crest img { width: 18px; height: 18px; }
+/* a map's chip: name, first logo, score, second logo */
+.mcchip { gap: 5px; }
+.mcmap { font-weight: 800; text-transform: uppercase; letter-spacing: .03em; margin-inline-end: 2px; }
+.mcsc { font-variant-numeric: tabular-nums; color: var(--muted); }
+.mcsc b { font-weight: 700; color: var(--fg); }
+.mcsc b.won { color: var(--lime-text, var(--lime)); }

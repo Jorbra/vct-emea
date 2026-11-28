@@ -49,3 +49,20 @@ export function MapWinner({ x, a, b }) {
   if (!team || !team.name) return null;
   return <span className="mcwin" title={team.name}><Crest team={team} /></span>;
 }
+
+/**
+ * A map's chip: its name, then the first team's logo, the score and the second team's logo ("Corrode [A] 9–13 [B]"). The
+ * winner's score stands out once the map is over. x: { map, a, b, done }; a and b: the match's two teams, sides as in x.
+ */
+export function MapScore({ x, a, b, children }) {
+  const over = x && x.done !== false && x.a != null && x.b != null && x.a !== x.b && Math.max(x.a, x.b) >= 13;
+  const logo = (t) => (t && t.name ? <span className="mcwin" title={t.name}><Crest team={t} /></span> : null);
+  return (
+    <>
+      {x.map ? <span className="mcmap">{x.map}</span> : null}
+      {logo(a)}
+      {children || <span className="mcsc"><b className={over && x.a > x.b ? "won" : ""}>{x.a}</b>–<b className={over && x.b > x.a ? "won" : ""}>{x.b}</b></span>}
+      {logo(b)}
+    </>
+  );
+}

@@ -6,7 +6,7 @@ import { ThemeSwitch } from "./theme.jsx";
 import { EmeaMark } from "./Brand.jsx";
 import SearchBar from "./SearchBar.jsx";
 import SiteNav from "./SiteNav.jsx";
-import { Crest, MapWinner } from "./Crest.jsx";
+import { Crest, MapScore } from "./Crest.jsx";
 import { Score } from "./visual.jsx";
 import { embedUrl } from "../lib/media.js";
 import { EVENT_NAMES } from "../lib/paths.js";
@@ -31,7 +31,7 @@ function Row({ m, on, onWatch, playable }) {
             {(m.live || over) && <Score className="tnscore" value={v ?? 0} />}
           </div>
         ))}
-        {m.live && (s.maps || []).length > 0 && <div className="mcchips">{s.maps.map((x, i) => <span key={i} className={"mcchip" + (!x.done && i === s.maps.length - 1 ? " now" : "")}>{!(!x.done && i === s.maps.length - 1) && <MapWinner x={x} a={m.a} b={m.b} />}{x.map} <Score value={`${x.a}–${x.b}`} /></span>)}</div>}
+        {m.live && (s.maps || []).length > 0 && <div className="mcchips">{s.maps.map((x, i) => <span key={i} className={"mcchip" + (!x.done && i === s.maps.length - 1 ? " now" : "")}><MapScore x={x} a={m.a} b={m.b}><Score value={`${x.a}–${x.b}`} /></MapScore></span>)}</div>}
       </div>
       <div className="tnmeta">
         <small>{tr(EVENT_NAMES[m.event] || m.event)}{label ? ` · ${label}` : ""}{m.bo ? ` · Bo${m.bo}` : ""}</small>
