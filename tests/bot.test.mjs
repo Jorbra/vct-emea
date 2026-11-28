@@ -190,3 +190,23 @@ test("round 4: live message, polls, guessing game, server users, fans' roles", a
   db.prepare("INSERT INTO kv (key, value) VALUES ('bot_roles', ?)").run(JSON.stringify({ g1: { "team-1": "555" } }));
   assert.deepEqual(x.fanRolesFor(db, "g1", ["team-1", "team-2"]), ["555"]);
 });
+
+test("bot usage by hour: Paris time, Monday first, the last 4 weeks only", async () => {
+  const { countUse, usageHours } = await import("../lib/botstore.js");
+  const { getDb } = await import("../lib/db.js");
+  const db = getDb();
+  db.exec("DELETE FROM bot_usage_hours");
+  const t = Date.parse("2031-01-06T20:15:00Z"); // a Monday, 21 h in Paris (winter)
+  countUse(db, "aide", "", t);
+  countUse(db, "aide", "", t + 60000);
+  countUse(db, "aide", "", Date.parse("2031-07-06T22:30:00Z")); // a Sunday 22:30 UTC: Monday 0 h in Paris (summer)
+  countUse(db, "aide", "", Date.parse("2030-11-01T10:00:00Z")); // too old for January
+  const h = usageHours(db, t + 3600000);
+  assert.equal(h.grid.length, 7);
+  assert.equal(h.grid[0][21], 2);
+  assert.equal(h.total, 2);
+  assert.equal(h.since, "2030-11-01");
+  const summer = usageHours(db, Date.parse("2031-07-07T08:00:00Z"));
+  assert.equal(summer.grid[0][0], 1);
+  assert.equal(summer.total, 1);
+});

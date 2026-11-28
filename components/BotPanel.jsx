@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "./lang.jsx";
 import { Skeleton } from "./visual.jsx";
 import BotServer from "./BotServer.jsx";
-import { DiscordMessage, EmbedBuilder, MessageEditor, ModuleCard, Picker } from "./BotDash.jsx";
+import { DiscordMessage, EmbedBuilder, MessageEditor, ModuleCard, Picker, UsageHours } from "./BotDash.jsx";
 import { CasesPage, CommandsPage, LogPage, TicketsPage } from "./BotPages.jsx";
 import { ActivityPanel, MembersPage, TeamPanel } from "./BotMembers.jsx";
 import { EditorAccessRoles } from "./BotAccess.jsx";
@@ -31,6 +31,18 @@ const MOD_PAGES = ["home", "members", "cases", "tickets", "log", "stats"];
 const PAGES = [["home", "🏠 Accueil"], ["commands", "⌨️ Commandes"], ["members", "👤 Membres"], ["cases", "⚖️ Sanctions"], ["tickets", "🎫 Tickets"], ["log", "📜 Journal"], ["stats", "📈 Statistiques"], ["settings", "⚙️ Réglages"]];
 // the announcements module's tabs
 const ANN_TABS = [["settings", "Salons et contenu"], ["auto", "Messages automatiques"], ["announce", "Écrire une annonce"], ["embeds", "Messages préparés (/embed)"], ["samples", "Exemples"], ["pin", "Message épinglé"]];
+// the home's filter over the modules' cards
+const MOD_FILTERS = [["all", "Tous"], ["on", "Activés"], ["todo", "À régler"], ["off", "Désactivés"]];
+const inFilter = (f, st) => f === "all" || (f === "on" ? st !== "off" : f === "off" ? st === "off" : st === "setup" || st === "missing");
+/** A CSV file the browser saves: rows of cells, ";" between them as French spreadsheets read it. */
+function saveCsv(name, rows) {
+  const cell = (v) => (/[";\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["\ufeff" + rows.map((r) => r.map(cell).join(";")).join("\r\n")], { type: "text/csv;charset=utf-8" }));
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
 const when = (iso) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
 /** One option as a switch, its whole row clickable. */
@@ -85,6 +97,7 @@ export default function BotPanel({ full = false }) {
   const baseTitle = useRef("");
   const [startQ, setStartQ] = useState({ commands: "", cases: "" }); // the home's to-do box goes here, above the modules
   const [annTab, setAnnTab] = useState("settings");
+  const [modFilter, setModFilter] = useState("all");
   const [msg, setMsg] = useState({ ok: true, text: "" });
   const [busy, setBusy] = useState(false);
   const [ann, setAnn] = useState({ title: "", text: "", embed: true, mention: false, at: "", color: "#ff4655", image: "", fields: [] });
@@ -243,8 +256,23 @@ export default function BotPanel({ full = false }) {
               <>
                 <div ref={setTodoAt} className="btodoslot" />
                 {modOnly && <p className="note">🛡️ Accès modérateur : membres, sanctions, tickets, journal et statistiques. Les réglages du bot sont pour les éditeurs.</p>}
+                {!modOnly && (() => {
+                  const states = MODULES.map((m) => stateOf(m).state);
+                  const readyN = states.filter((x) => x === "ready").length;
+                  return (
+                    <div className="bmodbar">
+                      <span className="bmodsum"><b>{readyN}/{MODULES.length}</b> modules prêts<i className="bmodmeter" aria-hidden="true"><i style={{ width: `${Math.round((readyN / MODULES.length) * 100)}%` }} /></i></span>
+                      <div className="bmfilter" role="group" aria-label="Filtrer les modules">
+                        {MOD_FILTERS.map(([k, l]) => {
+                          const n = states.filter((x) => inFilter(k, x)).length;
+                          return <button key={k} type="button" aria-pressed={modFilter === k} disabled={k !== "all" && !n} onClick={() => setModFilter(k)}>{l} <small>{n}</small></button>;
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
                 {!modOnly && <div className="bmods">
-                  {MODULES.map((m) => <ModuleCard key={m.key} m={m} state={stateOf(m)} busy={busy} onToggle={(on) => toggleModule(m, on)} onOpen={() => go(`mod:${m.key}`)} />)}
+                  {MODULES.filter((m) => inFilter(modFilter, stateOf(m).state)).map((m) => <ModuleCard key={m.key} m={m} state={stateOf(m)} busy={busy} onToggle={(on) => toggleModule(m, on)} onOpen={() => go(`mod:${m.key}`)} />)}
                 </div>}
                 <ActivityPanel guild={s.guild} go={go} onMember={openMember} todoAt={todoAt} missing={modOnly ? 0 : missing || 0} setup={modOnly ? [] : MODULES.map((m) => ({ ...m, ...stateOf(m) })).filter((m) => m.state === "setup" || m.state === "missing")} />
                 {d.botPerms == null && d.token && <p className="hint">Les droits du bot sur le serveur n&apos;ont pas pu être lus : choisis le serveur dans Réglages.</p>}
@@ -434,6 +462,7 @@ export default function BotPanel({ full = false }) {
                   <span><b>{d.usage.follows}</b> {tr("Following a team").toLowerCase()}</span>
                   <span><b>{d.usage.links}</b> {tr("Tied to a site name").toLowerCase()}</span>
                 </div>
+                <UsageHours hours={d.hours} />
                 <h3 className="sub">{tr("Uses per day (14 days)")}</h3>
                 <div className="visitbars" role="img" aria-label={tr("Uses per day (14 days)")}>
                   {d.usage.days.map((x) => <div key={x.day} className="vbar" title={`${x.day} : ${x.n}`}><i style={{ height: `${Math.round((x.n / max) * 100)}%` }} /><small>{x.day.slice(8)}</small></div>)}
@@ -452,6 +481,12 @@ export default function BotPanel({ full = false }) {
                     )}
                   </div>
                 </div>
+                <p className="row" style={{ marginTop: 12 }}>
+                  <button type="button" className="btn small" onClick={() => saveCsv(`bot-utilisations-${new Date().toISOString().slice(0, 10)}.csv`, [
+                    ["Jour", "Utilisations"], ...d.usage.days.map((x) => [x.day, x.n]), [], ["Commande (30 jours)", "Utilisations"], ...d.usage.byCmd.map((c) => [`/${c.cmd}`, c.n]),
+                    ...(d.hours && d.hours.total ? [[], ["Jour / heure (Paris)", ...Array.from({ length: 24 }, (_, h) => `${h} h`)], ...d.hours.grid.map((r, w) => [["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"][w], ...r])] : []),
+                  ])}>⬇️ Télécharger en CSV</button>
+                </p>
               </>
             )}
             {msg.text && <p className={msg.ok ? "okmsg" : "err"} role="status">{msg.text}</p>}

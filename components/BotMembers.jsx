@@ -50,7 +50,21 @@ export function ActivityPanel({ guild, onMember, go, setup = [], missing = 0, to
   const [metric, setMetric] = useState("members");
   const [hover, setHover] = useState(null);
   const [read, setRead] = useState("");
-  useEffect(() => { ask({ action: "activity", guild }).then(setA); }, [guild]);
+  const [fresh, setFresh] = useState(null); // when the activity was last read
+  const [loading, setLoading] = useState(false);
+  const refresh = useCallback(() => {
+    setLoading(true);
+    return ask({ action: "activity", guild }).then((j) => { if (j && !j.error) { setA(j); setFresh(new Date()); } else setA((x) => x || j); }).finally(() => setLoading(false));
+  }, [guild]);
+  // read again every 2 minutes while the page is seen, and when one comes back to it after a while
+  useEffect(() => {
+    refresh();
+    let last = Date.now();
+    const tick = () => { if (document.visibilityState === "visible" && Date.now() - last > 110000) { last = Date.now(); refresh(); } };
+    const id = setInterval(tick, 30000);
+    document.addEventListener("visibilitychange", tick);
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", tick); };
+  }, [refresh]);
   if (!a) return <p className="note">Chargement de l&apos;activité…</p>;
   if (a.error) return <p className="err">{a.error}</p>;
   const t = a.totals;
@@ -70,6 +84,10 @@ export function ActivityPanel({ guild, onMember, go, setup = [], missing = 0, to
     <section className="bact" aria-label="Activité du serveur">
       {todoAt ? createPortal(todo, todoAt) : todo}
       <h3 className="sub">Activité des 30 derniers jours</h3>
+      <p className="bactfresh" aria-live="polite">
+        {fresh && <span>À jour à {fresh.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} · se met à jour toute seule</span>}
+        <button type="button" className="btn small" disabled={loading} onClick={refresh} aria-label="Actualiser l'activité">{loading ? "…" : "↻"} Actualiser</button>
+      </p>
       <div className="btiles">
         {tiles.map(([i, l, n, before]) => (
           <div key={l} className="btile">

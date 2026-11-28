@@ -5,7 +5,7 @@ import { botServer, saveBotServer, syncAutomod } from "../../../lib/botserver.js
 import { gatewayState } from "../../../lib/botgateway.js";
 import { ticketStats } from "../../../lib/botmod3.js";
 import { APP_ID, botGuilds, botReady, discord, guildChannels, guildRoles, postFile, postMessage, registerCommands } from "../../../lib/botapi.js";
-import { botLog, botSettings, botUsage, cancelScheduled, logBot, saveBotSettings, scheduleAnnouncement, scheduledList } from "../../../lib/botstore.js";
+import { botLog, botSettings, botUsage, cancelScheduled, usageHours, logBot, saveBotSettings, scheduleAnnouncement, scheduledList } from "../../../lib/botstore.js";
 import { botTest, pinnedEmbed, updatePinned } from "../../../lib/botnotify.js";
 import { getState } from "../../../lib/db.js";
 import { COMMANDS, HELP_GROUPS } from "../../../lib/discordbot.js";
@@ -64,7 +64,7 @@ export async function GET(req) {
   const settings = botSettings(db);
   const guild = new URL(req.url).searchParams.get("guild") || settings.guild;
   const out = {
-    settings, usage: botUsage(db), commands: COMMANDS.map((c) => ({ name: c.name, description: c.description })), events: EVENT_NAMES,
+    settings, usage: botUsage(db), hours: usageHours(db), commands: COMMANDS.map((c) => ({ name: c.name, description: c.description })), events: EVENT_NAMES,
     pinPreview: pinnedEmbed(getState(db), settings.lang), registered: null, log: botLog(db), scheduled: scheduledList(db),
     // the link that gives the bot the rights its server commands need (lib/botmod.js), on a server it is already in too
     invite: `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot%20applications.commands&permissions=${BOT_RIGHTS}`,

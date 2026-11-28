@@ -211,3 +211,45 @@ export function ModuleCard({ m, state, onToggle, onOpen, busy }) {
     </article>
   );
 }
+
+// ---- the statistics' "when the server is active" ----
+
+const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+// five shades of one blue, the empty hour left blank: the darker, the busier
+const shade = (n, top) => (n <= 0 ? 0 : Math.min(5, Math.ceil((n / top) * 5)));
+
+/** Uses of the bot by weekday and hour (Paris time), as a grid of cells; hours: { grid, total, since } from lib/botstore.js. */
+export function UsageHours({ hours }) {
+  const [at, setAt] = useState(null);
+  if (!hours) return null;
+  const top = Math.max(1, ...hours.grid.flat());
+  let best = null;
+  hours.grid.forEach((row, w) => row.forEach((n, h) => { if (n > 0 && (!best || n > best.n)) best = { w, h, n }; }));
+  const say = (w, h) => `${DAYS[w]} ${h} h – ${h + 1} h : ${hours.grid[w][h]} utilisation${hours.grid[w][h] > 1 ? "s" : ""}`;
+  const since = hours.since ? new Date(`${hours.since}T12:00:00Z`).toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : "";
+  return (
+    <section className="bhours" aria-label="Heures d'activité du bot">
+      <h3 className="sub">Quand le bot sert le plus <small className="bmuted">(4 dernières semaines, heure de Paris)</small></h3>
+      {!hours.total ? <p className="note">Pas encore de données : les heures sont comptées à partir de cette version, à chaque commande ou clic sur un bouton du bot.</p> : (
+        <>
+          <p className="hint">{best && <>Le plus actif : <b>{DAYS[best.w].toLowerCase()} entre {best.h} h et {best.h + 1} h</b> ({best.n}). </>}{since && <>Compté depuis le {since}.</>}</p>
+          <div className="bhgrid" role="grid" aria-label="Utilisations par jour et par heure" onMouseLeave={() => setAt(null)}>
+            <span aria-hidden="true" />
+            {Array.from({ length: 24 }, (_, h) => <small key={h} className="bhh" aria-hidden="true">{h % 3 === 0 ? h : ""}</small>)}
+            {hours.grid.map((row, w) => (
+              <Fragment key={w}>
+                <small className="bhd" aria-hidden="true">{DAYS[w].slice(0, 3)}</small>
+                {row.map((n, h) => (
+                  <span key={h} role="gridcell" tabIndex={0} className={`bhc l${shade(n, top)}` + (at && at.w === w && at.h === h ? " on" : "")} aria-label={say(w, h)}
+                    onMouseEnter={() => setAt({ w, h })} onFocus={() => setAt({ w, h })} onBlur={() => setAt(null)} />
+                ))}
+              </Fragment>
+            ))}
+          </div>
+          <div className="baxis" aria-live="polite"><b>{at ? say(at.w, at.h) : <span className="bmuted">Survole ou touche une case pour le détail · max {top} en une heure</span>}</b></div>
+          <p className="blegend" aria-hidden="true"><span>Moins</span>{[0, 1, 2, 3, 4, 5].map((l) => <i key={l} className={`bsw bhc l${l}`} />)}<span>Plus</span></p>
+        </>
+      )}
+    </section>
+  );
+}
