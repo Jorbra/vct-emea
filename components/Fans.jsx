@@ -184,6 +184,13 @@ export function Groups({ token, group, named }) {
   );
 }
 
+const HOW = {
+  ios: "In Safari: Share button, then \"Add to Home Screen\".",
+  chrome: "In Chrome: the screen icon with an arrow on the right of the address bar, or menu ⋮ > Cast, save and share > Install page as app. Already installed? Look for VCT EMEA in the Start menu.",
+  edge: "In Edge: menu ⋯ > Apps > Install this site as an app. Already installed? Look for VCT EMEA in the Start menu.",
+  safari: "In Safari: File menu > Add to Dock.",
+};
+
 /** "Install the app": the browser's own prompt where there is one, the way to do it on iPhone otherwise. Hidden once installed. */
 export function InstallButton() {
   const tr = useT();
@@ -194,15 +201,20 @@ export function InstallButton() {
     if (window.matchMedia("(display-mode: standalone)").matches || navigator.standalone) return undefined;
     const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     if (ios) setKind("ios");
+    // on a computer, Chrome or Edge may not offer it (already installed, or declined not long ago): the button then says where
+    // the browser keeps it. Firefox cannot install a site, so it shows nothing there.
+    const ua = navigator.userAgent;
+    const desk = !ios && !/Android|Mobi/i.test(ua) && !/Firefox\//.test(ua);
+    const later = desk ? setTimeout(() => setKind((k) => k || (/Edg\//.test(ua) ? "edge" : /Chrome\//.test(ua) ? "chrome" : /Safari\//.test(ua) ? "safari" : "")), 2500) : null;
     const onPrompt = (e) => { e.preventDefault(); setPrompt(e); setKind("prompt"); };
     const onDone = () => setKind("");
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onDone);
-    return () => { window.removeEventListener("beforeinstallprompt", onPrompt); window.removeEventListener("appinstalled", onDone); };
+    return () => { clearTimeout(later); window.removeEventListener("beforeinstallprompt", onPrompt); window.removeEventListener("appinstalled", onDone); };
   }, []);
   if (!kind) return null;
   const go = async () => {
-    if (kind === "ios") { setHelp(!help); return; }
+    if (kind !== "prompt") { setHelp(!help); return; }
     prompt.prompt();
     const r = await prompt.userChoice.catch(() => null);
     if (r && r.outcome === "accepted") setKind("");
@@ -210,7 +222,7 @@ export function InstallButton() {
   return (
     <span className="installapp">
       <button type="button" className="btn" onClick={go}>📲 {tr("Install the app")}</button>
-      {help && <span className="hint" role="status"> {tr("In Safari: Share button, then \"Add to Home Screen\".")}</span>}
+      {help && <span className="hint" role="status"> {tr(HOW[kind])}</span>}
     </span>
   );
 }
