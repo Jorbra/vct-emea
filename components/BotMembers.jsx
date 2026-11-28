@@ -2,7 +2,7 @@
 
 // The bot dashboard's activity (the home) and members' files (components/BotPanel.jsx). Written in French, as the
 // server's editors read it.
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ask, KIND, Who } from "./BotPages.jsx";
 import { TicketView } from "./BotTicket.jsx";
@@ -152,6 +152,41 @@ export function TeamPanel({ guild, onMember }) {
 }
 
 /** A member's file: found by id, mention or name; their state on the server, sanctions, notes, tickets; a note added. */
+// the files opened lately, on this computer, per server
+const RECENT_KEY = "botRecentMembers";
+function readRecent(guild) {
+  try { const all = JSON.parse(localStorage.getItem(RECENT_KEY) || "{}"); return Array.isArray(all[guild]) ? all[guild] : []; } catch { return []; }
+}
+function keepRecent(guild, one) {
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem(RECENT_KEY) || "{}") || {}; } catch { /* broken: start again */ }
+  const list = one ? [one, ...(all[guild] || []).filter((x) => x.id !== one.id)].slice(0, 8) : [];
+  all[guild] = list;
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(all)); } catch { /* full or blocked */ }
+  return list;
+}
+
+/** A member's picture, or their initial. */
+function Face({ x, size = 28 }) {
+  return x.avatar ? <img src={x.avatar} alt="" width={size} height={size} className="bmface" /> : <span className="bavatar" aria-hidden="true" style={{ width: size, height: size }}>{String(x.name || "?").slice(0, 1)}</span>;
+}
+
+/** What the server knows of a member found, in small tags: running sanctions, warnings, cases, open tickets. */
+function Badges({ b, timeout }) {
+  const tags = [];
+  if (timeout) tags.push(["warn", "🔇 exclu"]);
+  if (b) {
+    for (const k of b.running) if (!(k === "timeout" && timeout)) tags.push(["warn", `${kindIcon(k)} ${kindName(k).toLowerCase()} en cours`]);
+    if (b.warns) tags.push(["", `⚠️ ${b.warns}`]);
+    if (b.cases > b.warns) tags.push(["", `⚖️ ${b.cases - b.warns}`]);
+    if (b.open) tags.push(["open", `🎫 ${b.open} ouvert${b.open > 1 ? "s" : ""}`]);
+    else if (b.tickets) tags.push(["", `🎫 ${b.tickets}`]);
+  }
+  if (!tags.length) return <span className="bmtags"><span className="bmtag clean">dossier vide</span></span>;
+  return <span className="bmtags" title="Avertissements, autres sanctions, tickets">{tags.map(([c, t]) => <span key={t} className={`bmtag ${c}`}>{t}</span>)}</span>;
+}
+const score = (x) => (x.timeout ? 100 : 0) + (x.badges ? x.badges.running.length * 50 + x.badges.cases * 5 + x.badges.open * 3 + x.badges.tickets : 0);
+
 export function MembersPage({ guild, busy, call, start = "" }) {
   const [q, setQ] = useState(start);
   const [data, setData] = useState(null);
@@ -160,14 +195,39 @@ export function MembersPage({ guild, busy, call, start = "" }) {
   const [read, setRead] = useState("");
   const [watch, setWatch] = useState(null);
   const [act, setAct] = useState({ kind: "", reason: "", duration: "1h", deleteDays: 0 });
+  const [sugg, setSugg] = useState(null);
+  const [at, setAt] = useState(-1);
+  const [recent, setRecent] = useState([]);
+  const [copied, setCopied] = useState(false);
+  const typed = useRef("");
   useEffect(() => { ask({ action: "watch", guild }).then(setWatch); }, [guild]);
+  useEffect(() => { setRecent(readRecent(guild)); }, [guild]);
   const find = useCallback((value) => {
     const v = String(value || "").trim();
     setAsked(v);
     setData(null);
+    setSugg(null);
+    setAt(-1);
+    setCopied(false);
     if (v) ask({ action: "member", guild, q: v }).then(setData);
   }, [guild]);
   useEffect(() => { if (start) { setQ(start); find(start); } }, [start, find]);
+  // suggestions while typing: names that start like it, or the member of a case "#12"
+  useEffect(() => {
+    const v = q.trim();
+    typed.current = v;
+    if (v === asked || (v.length < 2 && !/^#\d/.test(v)) || /^\d{17,21}$/.test(v)) { setSugg(null); return undefined; }
+    const t = setTimeout(() => ask({ action: "member-suggest", guild, q: v }).then((r) => { if (typed.current === v && r && !r.error) { setSugg(r); setAt(-1); } }), 300);
+    return () => clearTimeout(t);
+  }, [q, guild, asked]);
+  // a file opened is kept among the recent ones, on this computer
+  useEffect(() => {
+    if (!data || !data.file) return;
+    const u0 = data.user;
+    setRecent(keepRecent(guild, { id: data.file.id, name: (data.member && data.member.nick) || (u0 && u0.name) || data.file.id, avatar: (u0 && u0.avatar) || "" }));
+  }, [data, guild]);
+  const options = sugg ? [...(sugg.byCase ? [{ id: sugg.byCase.id, name: (sugg.names && sugg.names[sugg.byCase.id]) || sugg.byCase.id, caseNo: sugg.byCase.case }] : []), ...(sugg.matches || [])] : [];
+  const pick = (x) => { setQ(x.id); find(x.id); };
   const f = data && data.file;
   const u = data && data.user;
   const names = (data && data.names) || {};
@@ -177,10 +237,38 @@ export function MembersPage({ guild, busy, call, start = "" }) {
   const plural = (n, word) => `${word}${n > 1 && !/s$/.test(word) ? "s" : ""}`;
   return (
     <div className="bpage">
-      <form className="bfilters" data-nodirty="" onSubmit={(e) => { e.preventDefault(); find(q); }}>
-        <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Pseudo, @mention ou identifiant" aria-label="Chercher un membre" />
+      <form className="bfilters bmsearch" data-nodirty="" onSubmit={(e) => { e.preventDefault(); if (at >= 0 && options[at]) pick(options[at]); else find(q); }}>
+        <div className="bmsfield">
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Pseudo, @mention, identifiant ou n° de sanction (#12)" aria-label="Chercher un membre"
+            role="combobox" aria-expanded={options.length > 0} aria-controls="bmsugg" aria-autocomplete="list" aria-activedescendant={at >= 0 ? `bms-${at}` : undefined} autoComplete="off"
+            onBlur={() => setTimeout(() => setSugg(null), 150)}
+            onKeyDown={(e) => {
+              if (!options.length) return;
+              if (e.key === "ArrowDown") { e.preventDefault(); setAt((n) => Math.min(options.length - 1, n + 1)); }
+              else if (e.key === "ArrowUp") { e.preventDefault(); setAt((n) => Math.max(-1, n - 1)); }
+              else if (e.key === "Escape") { e.preventDefault(); setSugg(null); }
+            }} />
+          {options.length > 0 && (
+            <ul id="bmsugg" className="bmsugg" role="listbox" aria-label="Suggestions">{options.map((x, k) => (
+              <li key={`${x.id}-${k}`} id={`bms-${k}`} role="option" aria-selected={k === at} className={k === at ? "on" : ""} onMouseEnter={() => setAt(k)} onMouseDown={(e) => { e.preventDefault(); pick(x); }}>
+                <Face x={x} />
+                <span className="bmsname"><b>{x.name}</b> <small className="bmuted">{x.caseNo ? `concerné par la sanction n°${x.caseNo}` : `@${x.user}`}</small></span>
+                {!x.caseNo && <Badges b={x.badges} timeout={x.timeout} />}
+              </li>
+            ))}</ul>
+          )}
+        </div>
         <button type="submit" className="btn pri" disabled={!q.trim()}>Chercher</button>
+        {asked && <button type="button" className="btn" onClick={() => { setQ(""); setAsked(""); setData(null); setSugg(null); }}>Nouvelle recherche</button>}
       </form>
+      {!asked && recent.length > 0 && (
+        <section className="bsect">
+          <h3 className="sub">🕘 Consultés récemment <button type="button" className="linkbtn bmuted bmclear" onClick={() => setRecent(keepRecent(guild, null))}>effacer</button></h3>
+          <div className="bmrecent">{recent.map((x) => (
+            <button key={x.id} type="button" className="bmchip" onClick={() => pick(x)} title={x.id}><Face x={x} size={22} /> {x.name}</button>
+          ))}</div>
+        </section>
+      )}
       {!asked && watch && !watch.error && (
         <section className="bsect">
           <h3 className="sub">👀 Membres à surveiller <small className="bmuted">{watch.watch.length}</small></h3>
@@ -209,11 +297,12 @@ export function MembersPage({ guild, busy, call, start = "" }) {
       {data && data.error && <p className="err">{data.error}</p>}
       {data && data.matches && (data.matches.length === 0 ? <p className="note">{data.hint || "Aucun membre trouvé avec ce nom."}</p> : (
         <>
-          <p className="hint">{data.matches.length} membres trouvés : choisis-en un.</p>
-          <ul className="bmatches">{data.matches.map((x) => (
-            <li key={x.id}><button type="button" className="bmatch" onClick={() => { setQ(x.id); find(x.id); }}>
-              {x.avatar ? <img src={x.avatar} alt="" width={32} height={32} /> : <span className="bavatar" aria-hidden="true">{x.name.slice(0, 1)}</span>}
-              <span><b>{x.name}</b> <small className="bmuted">@{x.user}</small></span>
+          <p className="hint">{data.matches.length} membres trouvés : choisis-en un. Ceux qui ont déjà un dossier sont en haut.</p>
+          <ul className="bmatches">{[...data.matches].sort((x, y) => score(y) - score(x)).map((x) => (
+            <li key={x.id}><button type="button" className="bmatch" onClick={() => pick(x)}>
+              <Face x={x} size={32} />
+              <span><b>{x.name}</b> <small className="bmuted">@{x.user}{x.joined ? ` · arrivé le ${longDate(x.joined)}` : ""}</small></span>
+              <Badges b={x.badges} timeout={x.timeout} />
             </button></li>
           ))}</ul>
         </>
@@ -226,6 +315,10 @@ export function MembersPage({ guild, busy, call, start = "" }) {
               <h3>{(m && m.nick) || (u && u.name) || f.id}</h3>
               {(u || (m && m.nick)) && <small className="bmuted">{u ? `@${u.user} · ` : ""}{f.id}</small>}
               {state && <p className="bmstate"><span aria-hidden="true">{state[0]}</span> {state[1]}</p>}
+            </div>
+            <div className="bmtools">
+              <button type="button" className="btn small" onClick={() => { navigator.clipboard.writeText(f.id).then(() => setCopied(true), () => {}); }}>{copied ? "✔ Copié" : "📋 Copier l'identifiant"}</button>
+              <a className="btn small" href={`https://discord.com/users/${f.id}`} target="_blank" rel="noopener noreferrer">Profil Discord ↗</a>
             </div>
           </header>
           <dl className="bmfacts">

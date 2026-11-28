@@ -85,3 +85,28 @@ test("commands: uses shown as the editor lists them, grouped commands summing th
   assert.equal(u.kick, 5);
   assert.equal(u.unwarn, undefined, "a former name is not shown");
 });
+
+test("member search: a case number leads to its member, and what the server knows of each member found", async () => {
+  const { caseMember, memberBadges } = await import("../lib/botactivity.js");
+  const db = getDb();
+  fillBot(db);
+  const S = "777000000000000009";
+  const A = "333333333333333331";
+  const B = "333333333333333332";
+  addSanction(db, { guild: S, user: A, kind: "warn", mod: "m", reason: "spam", at: NOW - DAY });
+  addSanction(db, { guild: S, user: A, kind: "warn", mod: "m", reason: "spam", at: NOW - DAY });
+  addSanction(db, { guild: S, user: A, kind: "timeout", mod: "m", reason: "insultes", at: NOW - 60000, until: new Date(NOW + 3600000).toISOString() });
+  addSanction(db, { guild: S, user: A, kind: "note", mod: "m", reason: "à surveiller", at: NOW });
+  db.prepare("INSERT INTO bot_tickets (thread, guild, user, subject, opened) VALUES (?, ?, ?, ?, ?)").run("TS1", S, A, "Aide", new Date(NOW).toISOString());
+  db.prepare("INSERT INTO bot_tickets (thread, guild, user, subject, opened, closed) VALUES (?, ?, ?, ?, ?, ?)").run("TS2", S, A, "Avant", new Date(NOW - DAY).toISOString(), new Date(NOW).toISOString());
+  const id = db.prepare("SELECT id FROM bot_sanctions WHERE guild = ? AND user = ? AND kind = 'timeout'").get(S, A).id;
+  assert.equal(caseMember(db, S, `#${id}`), A);
+  assert.equal(caseMember(db, S, `cas ${id}`), A);
+  assert.equal(caseMember(db, S, "#999999"), "");
+  assert.equal(caseMember(db, "777000000000000002", `#${id}`), "");
+  assert.equal(caseMember(db, S, "Alice"), "");
+  const b = memberBadges(db, S, [A, B, A], NOW);
+  assert.deepEqual(b[A], { cases: 3, warns: 2, running: ["timeout"], tickets: 2, open: 1 });
+  assert.deepEqual(b[B], { cases: 0, warns: 0, running: [], tickets: 0, open: 0 });
+  assert.deepEqual(memberBadges(db, S, []), {});
+});

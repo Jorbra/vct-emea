@@ -14,7 +14,7 @@ import { editorSanction } from "../../../lib/botadmin.js";
 import { botPermissions, filterLog, listCases, listTickets, revokeCase, setCaseReason, ticketTranscript, userNames } from "../../../lib/botadmin.js";
 import { postLog, addSanction, testGreeting } from "../../../lib/botserver.js";
 import { liveMessages, parseTranscript } from "../../../lib/botticket.js";
-import { commandUsage, createdAt, memberFile, memberId, serverActivity, teamActivity, todoOf, watchList } from "../../../lib/botactivity.js";
+import { caseMember, commandUsage, createdAt, memberBadges, memberFile, memberId, serverActivity, teamActivity, todoOf, watchList } from "../../../lib/botactivity.js";
 
 /** The commands by category for the editor's "Commands" page: [{ label, list: [{ name, description, subs, perm }] }]. */
 function commandCategories() {
@@ -168,17 +168,37 @@ export async function POST(req) {
     return NextResponse.json({ ok: true, watch, names: await namesFor(watch.map((m) => m.user)) });
   }
   // the "Members" page: a member found by id, mention or name, then their file
+  // the members whose name starts like what is typed, with what the server knows of them (Discord searches the start of
+  // the nickname and of the user name); also used by the suggestions under the search field
+  const searchMembers = async (guild, q, limit) => {
+    const found = await discord("GET", `/guilds/${guild}/members/search?query=${encodeURIComponent(q)}&limit=${limit}`);
+    const matches = found.filter((m) => m.user && !m.user.bot).map((m) => ({
+      id: m.user.id, name: m.nick || m.user.global_name || m.user.username, user: m.user.username,
+      avatar: m.user.avatar ? `https://cdn.discordapp.com/avatars/${m.user.id}/${m.user.avatar}.png?size=64` : "",
+      joined: m.joined_at || "", timeout: m.communication_disabled_until && Date.parse(m.communication_disabled_until) > Date.now() ? m.communication_disabled_until : "",
+    }));
+    const badges = memberBadges(db, guild, matches.map((m) => m.id));
+    return matches.map((m) => ({ ...m, badges: badges[m.id] }));
+  };
+  if (b.action === "member-suggest") {
+    const guild = guildOf();
+    const q = String(b.q || "").trim().slice(0, 100);
+    const byCase = caseMember(db, guild, q);
+    if (byCase) return NextResponse.json({ ok: true, matches: [], byCase: { id: byCase, case: q.replace(/\D/g, "") }, names: await namesFor([byCase]) });
+    if (q.length < 2 || memberId(q) || !botReady() || !guild) return NextResponse.json({ ok: true, matches: [] });
+    try { return NextResponse.json({ ok: true, matches: await searchMembers(guild, q, 6) }); } catch { return NextResponse.json({ ok: true, matches: [] }); }
+  }
   if (b.action === "member") {
     const guild = guildOf();
     const q = String(b.q || "").trim().slice(0, 100);
-    let id = memberId(q);
+    let id = memberId(q) || caseMember(db, guild, q);
     if (!id) {
       if (!q) return NextResponse.json({ ok: true, matches: [] });
-      if (!botReady() || !guild) return NextResponse.json({ ok: true, matches: [], hint: "Sans le jeton du bot, cherche avec l'identifiant du membre (clic droit → Copier l'identifiant)." });
+      if (/^(?:#|cas\s*n?°?\s*)\d{1,7}$/i.test(q)) return NextResponse.json({ ok: true, matches: [], hint: `Aucune sanction n°${q.replace(/\D/g, "")} sur ce serveur.` });
+      if (!botReady() || !guild) return NextResponse.json({ ok: true, matches: [], hint: "Sans le jeton du bot, cherche avec l'identifiant du membre (clic droit → Copier l'identifiant) ou le numéro d'une de ses sanctions (#12)." });
       try {
-        const found = await discord("GET", `/guilds/${guild}/members/search?query=${encodeURIComponent(q)}&limit=8`);
-        const matches = found.filter((m) => m.user && !m.user.bot).map((m) => ({ id: m.user.id, name: m.nick || m.user.global_name || m.user.username, user: m.user.username, avatar: m.user.avatar ? `https://cdn.discordapp.com/avatars/${m.user.id}/${m.user.avatar}.png?size=64` : "" }));
-        if (matches.length !== 1) return NextResponse.json({ ok: true, matches });
+        const matches = await searchMembers(guild, q.replace(/^@/, ""), 12);
+        if (matches.length !== 1) return NextResponse.json({ ok: true, matches, hint: matches.length ? "" : `Aucun membre dont le pseudo ou le nom commence par « ${q} ». Discord cherche le début du nom : essaie les premières lettres, ou l'identifiant.` });
         id = matches[0].id;
       } catch (e) { return NextResponse.json({ error: failText(e) }, { status: 502 }); }
     }
