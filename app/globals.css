@@ -4541,3 +4541,48 @@ html[data-ft~="stories2"] .storyacts .btn.st2 { display: inline-flex; align-item
 .mcwin .crest { width: 14px; height: 14px; min-width: 0; border-radius: 3px; background: none; border: 0; padding: 0; }
 .mcwin .crest img { width: 14px; height: 14px; object-fit: contain; }
 .fmmaps .mcwin .crest, .fmmaps .mcwin .crest img { width: 18px; height: 18px; }
+
+/* ---- preview "cartes2": maps and scores easier to read (lib/apercu.js) */
+.mmmid { display: grid; justify-items: center; gap: 6px; }
+.mmpips, .mfmap .mcwin, .mmmaps .mcwin { display: none; }
+html[data-ft~="cartes2"] .mmpips { display: flex; gap: 14px; }
+.mmpips .pips { display: flex; gap: 4px; }
+.mmpips i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid currentColor; opacity: .45; }
+.mmpips i.on { background: var(--lime); border-color: var(--lime); opacity: 1; }
+.mmpage .mmpips { color: #fff; }
+/* overtime: a small "OT" / "Prol." after the score */
+html[data-ft~="cartes2"] :is(.mcchip[data-ot], .mfmap[data-ot] em, .mmmaps tr[data-ot] .mmmap b)::after { content: "OT"; margin-inline-start: 5px; padding: 0 4px; border-radius: 3px; font: 800 9px/14px var(--font-body); letter-spacing: .04em; background: color-mix(in srgb, #f5a623 22%, transparent); color: #f5a623; vertical-align: middle; }
+html[lang="fr"][data-ft~="cartes2"] :is(.mcchip[data-ot], .mfmap[data-ot] em, .mmmaps tr[data-ot] .mmmap b)::after { content: "Prol."; }
+html[lang="tr"][data-ft~="cartes2"] :is(.mcchip[data-ot], .mfmap[data-ot] em, .mmmaps tr[data-ot] .mmmap b)::after { content: "UZ"; }
+/* the winner's logo in the match page's maps */
+html[data-ft~="cartes2"] :is(.mfmap, .mmmaps) .mcwin { display: inline-flex; margin-inline-end: 5px; vertical-align: -2px; }
+.mfmap .mcwin .crest, .mfmap .mcwin .crest img { width: 16px; height: 16px; }
+/* the maps table: the map's picture faded behind its name */
+html[data-ft~="cartes2"] .mmmaps tr[style] .mmmap { background: linear-gradient(90deg, var(--surface) 15%, color-mix(in srgb, var(--surface) 70%, transparent)), var(--mapimg) center / cover no-repeat; border-radius: 4px; }
+
+/* ---- preview "rounds2": what the rounds tell (lib/apercu.js): hidden until it is open */
+html:not([data-ft~="rounds2"]) .ft-rounds2 { display: none !important; }
+.maproundsbox { --ra: var(--lime); --rb: #5aa9ff; display: grid; gap: 12px; margin: 10px 0 14px; }
+.maproundsbox h3 { margin: 0; }
+.maprounds { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.maprname { font: 700 15px var(--font-display); padding: 4px 8px; border-radius: 4px; background: linear-gradient(90deg, var(--surface) 30%, color-mix(in srgb, var(--surface) 55%, transparent)), var(--mapimg, none) center / cover no-repeat; }
+.maprname small { color: var(--muted); font-weight: 600; margin-inline-start: 6px; }
+.maprnotes { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+.maprnotes li { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--fg); }
+
+/* ---- preview "podium": the three first places of a finished qualifier */
+html:not([data-ft~="podium"]) .ft-podium { display: none !important; }
+.qpodium { display: grid; grid-template-columns: 1fr 1.2fr 1fr; align-items: end; gap: 10px; max-width: 640px; margin: 4px auto 18px; }
+.qpdstep { width: 100%; box-sizing: border-box; justify-self: stretch; display: grid; justify-items: center; gap: 6px; padding: 14px 10px 12px; border-radius: 10px 10px 4px 4px; text-align: center; color: var(--fg); text-decoration: none; background: var(--surface); border: 1px solid var(--line); }
+.qpdstep.empty { visibility: hidden; }
+.qpdstep .crest { width: 44px; height: 44px; }
+.qpdstep b { font: 800 15px/1.15 var(--font-display); overflow-wrap: anywhere; }
+.qpdstep small { color: var(--muted); font-size: 12px; }
+.qpdmedal { font-size: 22px; line-height: 1; }
+.qpdstep.p1 { padding-top: 22px; padding-bottom: 26px; border-color: color-mix(in srgb, #e9b949 60%, var(--line)); background: linear-gradient(180deg, color-mix(in srgb, #e9b949 18%, var(--surface)), var(--surface)); }
+.qpdstep.p1 .crest { width: 60px; height: 60px; }
+.qpdstep.p1 b { font-size: 19px; }
+.qpdstep.p2 { padding-bottom: 16px; border-color: color-mix(in srgb, #b8c0cc 50%, var(--line)); }
+.qpdstep.p3 { border-color: color-mix(in srgb, #c68a4e 50%, var(--line)); }
+.qpdstep:hover { transform: translateY(-2px); }
+@media (max-width: 520px) { .qpodium { gap: 6px; } .qpdstep b { font-size: 13px; } .qpdstep.p1 b { font-size: 15px; } }

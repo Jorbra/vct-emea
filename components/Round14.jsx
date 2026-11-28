@@ -107,7 +107,19 @@ export function StatsShortcuts() {
 export function VlrTables({ data, call, onDone }) {
   const tr = useT();
   const [asked, setAsked] = useState({});
+  const [all, setAll] = useState(false);
   if (!data || !data.events.length) return null;
+  // every match without its table at once (each one asked like the button of its line)
+  const againAll = async () => {
+    setAll(true);
+    let n = 0;
+    for (const m of data.missing) {
+      const k = `${m.event}:${m.id}`;
+      if (asked[k]) continue;
+      try { await call("/api/vlrreread", { event: m.event, id: m.id }); n += 1; setAsked((x) => ({ ...x, [k]: true })); } catch { /* the others still */ }
+    }
+    onDone(tr("Asked for {n} matches: vlr.gg's pages are read again over the next rounds.", { n }));
+  };
   const again = async (m) => {
     try { await call("/api/vlrreread", { event: m.event, id: m.id }); setAsked((x) => ({ ...x, [`${m.event}:${m.id}`]: true })); onDone(tr("Asked: vlr.gg's page is read again at the next round.")); } catch (e) { onDone(tr.server(e.message)); }
   };
@@ -127,11 +139,20 @@ export function VlrTables({ data, call, onDone }) {
       })}</div>
       {data.missing.length > 0 && (
         <>
-          <h3 className="sub">{tr("Finished matches without their table")}</h3>
+          <h3 className="sub">{tr("Finished matches without their table")} {data.missing.length > 1 && <button type="button" className="btn small" disabled={all} onClick={againAll}>⟳ {tr("Read them all again")}</button>}</h3>
           <ul className="vlrmiss">{data.missing.map((m) => {
             const k = `${m.event}:${m.id}`;
             return <li key={k}><a href={`/match/${m.event}/${m.id}`}>{m.a} vs {m.b}</a> <small>{tr(EVENT_NAMES[m.event] || m.event)}</small> <button type="button" className="btn small" disabled={asked[k]} onClick={() => again(m)}>{asked[k] ? "✓" : `⟳ ${tr("Read again")}`}</button></li>;
           })}</ul>
+        </>
+      )}
+      {(data.retry || []).length > 0 && (
+        <>
+          <h3 className="sub">{tr("Read again until complete")}</h3>
+          <p className="hint">{tr("Finished matches whose vlr.gg page still lacks maps or tables: read again every 15 minutes, then less often, for 2 days.")}</p>
+          <ul className="vlrmiss">{data.retry.map((m) => (
+            <li key={`${m.event}:${m.id}`}><a href={`/match/${m.event}/${m.id}`}>{m.a} vs {m.b}</a> <small>{tr(EVENT_NAMES[m.event] || m.event)} · {tr("read {n} times", { n: m.reads })} · {tr("next read around {time}", { time: new Date(m.next).toLocaleTimeString(tr.lang === "fr" ? "fr-FR" : undefined, { hour: "2-digit", minute: "2-digit" }) })}</small></li>
+          ))}</ul>
         </>
       )}
       {(data.without || []).length > 0 && (

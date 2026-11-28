@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useClock } from "./clock.js";
 import { useT } from "./lang.jsx";
-import { Crest, MapWinner } from "./Crest.jsx";
+import { Crest, MapWinner, overtime } from "./Crest.jsx";
 import { useOpenMatch } from "./openMatch.js";
 import { EVENT_NAMES } from "../lib/paths.js";
 import { formatMatchTime } from "../lib/schedule.js";
@@ -67,7 +67,7 @@ export default function FeaturedMatch({ events }) {
         {side(m.b, "b", cb)}
       </div>
       {maps.length > 0 && (
-        <div className="fmmaps">{maps.map((x, i) => <span key={i} className={"mcchip" + (kind === "live" && !x.done && i === maps.length - 1 ? " now" : "")}>{!(kind === "live" && !x.done && i === maps.length - 1) && <MapWinner x={x} a={m.a} b={m.b} />}{x.map ? `${x.map} ` : ""}{x.a}–{x.b}</span>)}</div>
+        <div className="fmmaps">{maps.map((x, i) => <span key={i} data-ot={overtime(x) || undefined} className={"mcchip" + (kind === "live" && !x.done && i === maps.length - 1 ? " now" : "")}>{!(kind === "live" && !x.done && i === maps.length - 1) && <MapWinner x={x} a={m.a} b={m.b} />}{x.map ? `${x.map} ` : ""}{x.a}–{x.b}</span>)}</div>
       )}
       <div className="fmacts">
         {kind === "live" && m.stream && <a className="btn pri cut" href="/live">▶ {tr("Watch")}</a>}

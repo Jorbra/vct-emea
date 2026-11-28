@@ -12,7 +12,7 @@ import { useOpenMatch } from "./openMatch.js";
 import { parseNote, sideScore } from "../lib/scoretext.js";
 import { useFavorites } from "./favorites.js";
 import { formatMatchTime } from "../lib/schedule.js";
-import { teamSlug } from "../lib/paths.js";
+import { teamHref, teamSlug } from "../lib/paths.js";
 import { useMatchTimes } from "./matchTime.jsx";
 import { MiniMap } from "./visual.jsx";
 
@@ -235,8 +235,23 @@ export default function Qualifier({ event, data, onGo, next = "playoffs", qualif
   );
   const pad = (list, n) => Array.from({ length: n }, (_, i) => list[i] || null);
 
+  // the final played: the three first places on a podium (preview "podium")
+  const done = podium(bracket).map(nameOf);
+  const step = (slot, place) => (slot ? (
+    <a className={"qpdstep p" + place} href={teamHref(slots[slot - 1].name)}>
+      <span className="qpdmedal" aria-hidden="true">{place === 1 ? "🏆" : place === 2 ? "🥈" : "🥉"}</span>
+      <Crest team={slots[slot - 1]} />
+      <b>{slots[slot - 1].name}</b>
+      <small>{place === 1 ? tr("Winner") : place === 2 ? tr("Finalist") : tr("Third place")}</small>
+    </a>
+  ) : <span className={"qpdstep empty p" + place} />);
   return (
     <div className="panel">
+      {done[0] && (
+        <section className="ft-podium qpodium" aria-label={tr("Podium")}>
+          {step(done[1], 2)}{step(done[0], 1)}{step(done[2], 3)}
+        </section>
+      )}
       <section>
         <h2>{tr("Format")}</h2>
         <ul className="fmt">

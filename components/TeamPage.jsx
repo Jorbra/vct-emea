@@ -381,6 +381,7 @@ function TeamTournament({ s }) {
         <div><b><RollNum text={`${pct}%`} /></b><span>{tr("Maps won")}</span></div>
         <div><b>{s.roundsW} – {s.roundsL}</b><span>{tr("Rounds")}</span></div>
         <div><b><RollNum text={diff > 0 ? `+${diff}` : String(diff)} /></b><span>+/–</span></div>
+        {s.pistolN > 0 && <div className="ft-rounds2" title={tr("{w} of {n} pistol rounds won", { w: s.pistolW, n: s.pistolN })}><b><RollNum text={`${Math.round((s.pistolW / s.pistolN) * 100)}%`} /></b><span>{tr("Pistol rounds")}</span></div>}
       </div>
       <Radar a={s.radar} title={tr("Where the team stands")} note={tr("Percentile among the teams with 3 maps at least")} />
       <MapPoolTiles list={s.byMap} />

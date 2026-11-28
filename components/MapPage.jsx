@@ -52,6 +52,7 @@ function View({ card, name = "", top = [], tiers = [], records = null, event, ev
             <span>{tr("Average gap")} : <b>{card.diff}</b> {tr("rounds")}</span>
             <span><b>{card.overtime}</b> {tr("in overtime")}</span>
             {card.attack != null && <span>{tr("Attack wins {a}% of the rounds, defence {d}%", { a: card.attack, d: 100 - card.attack })}</span>}
+            {card.pistolHalf != null && <span className="ft-rounds2" title={tr("Over {n} halves whose rounds are known", { n: card.pistols })}>{tr("The pistol round's winner takes the half {h}% of the time, and the next round {b}%", { h: card.pistolHalf, b: card.pistolBonus })}</span>}
           </div>
           {card.attack != null && (
             <div className="sidebar" role="img" aria-label={tr("Attack wins {a}% of the rounds, defence {d}%", { a: card.attack, d: 100 - card.attack })}>

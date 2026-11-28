@@ -49,3 +49,14 @@ export function MapWinner({ x, a, b }) {
   if (!team || !team.name) return null;
   return <span className="mcwin" title={team.name}><Crest team={team} /></span>;
 }
+
+/** A map that went to overtime (14–12, 15–13…). */
+export const overtime = (x) => !!x && x.a != null && x.b != null && Math.max(x.a, x.b) > 13;
+
+/** The maps each team has won toward the series, as dots under the score (Bo3: two dots each). Shown with the preview "cartes2". */
+export function SeriesPips({ bo, a, b, show }) {
+  const need = bo > 1 ? Math.ceil(bo / 2) : 0;
+  if (!need || !show) return null;
+  const row = (won, side) => <span className={"pips " + side}>{Array.from({ length: need }, (_, i) => <i key={i} className={i < (won || 0) ? "on" : ""} />)}</span>;
+  return <span className="mmpips" aria-hidden="true">{row(a, "a")}{row(b, "b")}</span>;
+}

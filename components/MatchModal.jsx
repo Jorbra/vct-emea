@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "./lang.jsx";
-import { Crest } from "./Crest.jsx";
+import { Crest, MapWinner, SeriesPips, overtime } from "./Crest.jsx";
 import LiveDetail from "./LiveDetail.jsx";
 import { CopyResult, ShareMatch, TimeLeft, useLiveTitle } from "./Maj40Bits.jsx";
 import { LiveBadge } from "./matchTime.jsx";
@@ -234,14 +234,14 @@ function MatchModal({ e, m, state, onClose, page = false }) {
         <div className="mmstate">{live ? <LiveBadge /> : done ? <span className="evstate done">{tr("Finished")}</span> : <span className="evstate">{tr("Upcoming")}</span>}{when && <span className="mmwhen">{when}</span>}{at && !done && !live && <TimeLeft at={at} />}</div>
         <div aria-live={live ? "polite" : undefined} className={"mmvs" + (page && frieze.length && mapSplash(frieze[frieze.length - 1].map) ? " withmap" : "")} style={{ ...(colorA ? { "--ta": colorA } : {}), ...(colorB ? { "--tb": colorB } : {}), ...(page && frieze.length && mapSplash(frieze[frieze.length - 1].map) ? { "--mapbg": `url(${mapSplash(frieze[frieze.length - 1].map)})` } : {}) }}>
           {team(m.a, "a")}
-          <Score className={"mmscore" + (live ? " lv" : "")} value={score} />
+          <span className="mmmid"><Score className={"mmscore" + (live ? " lv" : "")} value={score} /><SeriesPips bo={m.bo} a={done ? m.sa : live ? live.a : 0} b={done ? m.sb : live ? live.b : 0} show={(done && !(m.note && m.note.kind !== "raw")) || !!live} /></span>
           {team(m.b, "b")}
         </div>
         {page && frieze.length > 0 && (
           <div className="mfrieze" style={{ ...(colorA ? { "--ta": colorA } : {}), ...(colorB ? { "--tb": colorB } : {}) }} aria-label={tr("Maps")}>
             {frieze.map((x, i) => (
-              <span key={i} data-map={x.map} className={"mfmap spoil " + (x.a > x.b ? "wa" : x.b > x.a ? "wb" : "")} style={mapList(x.map) ? { "--mapimg": `url(${mapList(x.map)})` } : undefined}>
-                <small>{tr("Map #{n}", { n: i + 1 })}</small><b>{x.map || "?"}</b><em><span className={x.a > x.b ? "won" : ""}>{x.a}</span>–<span className={x.b > x.a ? "won" : ""}>{x.b}</span></em>{(x.a > x.b || x.b > x.a) && <i className="mfwin">{name(x.a > x.b ? m.a : m.b)}</i>}
+              <span key={i} data-map={x.map} data-ot={overtime(x) || undefined} className={"mfmap spoil " + (x.a > x.b ? "wa" : x.b > x.a ? "wb" : "")} style={mapList(x.map) ? { "--mapimg": `url(${mapList(x.map)})` } : undefined}>
+                <small>{tr("Map #{n}", { n: i + 1 })}</small><b>{x.map || "?"}</b><em><span className={x.a > x.b ? "won" : ""}>{x.a}</span>–<span className={x.b > x.a ? "won" : ""}>{x.b}</span></em>{(x.a > x.b || x.b > x.a) && <i className="mfwin"><MapWinner x={x} a={m.a} b={m.b} />{name(x.a > x.b ? m.a : m.b)}</i>}
               </span>
             ))}
           </div>
@@ -277,10 +277,10 @@ function MatchModal({ e, m, state, onClose, page = false }) {
                 const wa = x.a != null && x.b != null && x.a > x.b;
                 const wb = x.a != null && x.b != null && x.b > x.a;
                 return (
-                  <tr key={i}>
+                  <tr key={i} data-ot={overtime(x) || undefined} style={mapList(x.map) ? { "--mapimg": `url(${mapList(x.map)})` } : undefined}>
                     <td className={"mms" + (wa ? " w" : "")}>{x.a ?? "–"}</td>
                     <td className="mmmap">
-                      <b>{x.map || tr("Map {n}", { n: i + 1 })}</b>
+                      <b><MapWinner x={x} a={m.a} b={m.b} />{x.map || tr("Map {n}", { n: i + 1 })}</b>
                       {x.pick && <small>{x.pick === "d" ? tr("Decider") : tr("Pick: {team}", { team: name(x.pick === "a" ? m.a : m.b) })}</small>}
                     </td>
                     <td className={"mms" + (wb ? " w" : "")}>{x.b ?? "–"}</td>
