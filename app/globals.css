@@ -4535,3 +4535,9 @@ html[data-ft~="stories2"] .storyacts .btn.st2 { display: inline-flex; align-item
 .apopen { margin-top: 10px; }
 .apopen > summary { cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 600; }
 .apopen[open] > summary { margin-bottom: 4px; }
+/* the winner's logo at the start of a map's chip */
+.mcchip { display: inline-flex; align-items: center; gap: 4px; }
+.mcwin { display: inline-flex; flex: none; }
+.mcwin .crest { width: 14px; height: 14px; min-width: 0; border-radius: 3px; background: none; border: 0; padding: 0; }
+.mcwin .crest img { width: 14px; height: 14px; object-fit: contain; }
+.fmmaps .mcwin .crest, .fmmaps .mcwin .crest img { width: 18px; height: 18px; }

@@ -38,3 +38,14 @@ export function Crest({ team }) {
     </div>
   );
 }
+
+/**
+ * The logo of the team that won a map, at the start of its chip (13–8 → the first team's). Nothing while the map is being
+ * played or level. x: { a, b, done } as the chips have them; a and b: the match's two teams, sides as in x.
+ */
+export function MapWinner({ x, a, b }) {
+  if (!x || x.done === false || x.a == null || x.b == null || x.a === x.b) return null;
+  const team = x.a > x.b ? a : b;
+  if (!team || !team.name) return null;
+  return <span className="mcwin" title={team.name}><Crest team={team} /></span>;
+}

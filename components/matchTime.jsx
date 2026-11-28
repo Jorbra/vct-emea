@@ -4,7 +4,7 @@ import { localeOf } from "../lib/i18n.js";
 import { scoreLabel, sideScore } from "../lib/scoretext.js";
 import { pushAccount } from "./account.js";
 import { Fragment, createContext, useContext, useEffect, useRef, useState } from "react";
-import { Crest } from "./Crest.jsx";
+import { Crest, MapWinner } from "./Crest.jsx";
 import { useT } from "./lang.jsx";
 import { MAP_POOL, formatMatchTime, planRound } from "../lib/schedule.js";
 import { useOpenMatch } from "./openMatch.js";
@@ -377,7 +377,7 @@ export function MatchStrip({ events, Crest, showEvent = false, max = 12, recent 
                   // the maps: as they go when live, as played once over
                   const maps = m.live && m.score ? m.score.maps || [] : recent ? (m.ex && m.ex.maps) || [] : [];
                   const shown = maps.filter((x) => x.a != null && x.b != null);
-                  return shown.length > 0 && <span className="mcchips">{shown.map((x, k) => <span key={k} data-map={x.map || undefined} className={"mcchip" + (x.done === false || (m.live && k === shown.length - 1 && !x.done) ? " now" : x.a > x.b ? " wa" : " wb")}>{x.map ? `${x.map} ` : ""}{x.a}–{x.b}</span>)}</span>;
+                  return shown.length > 0 && <span className="mcchips">{shown.map((x, k) => <span key={k} data-map={x.map || undefined} className={"mcchip" + (x.done === false || (m.live && k === shown.length - 1 && !x.done) ? " now" : x.a > x.b ? " wa" : " wb")}>{!(m.live && k === shown.length - 1 && !x.done) && <MapWinner x={x} a={m.a} b={m.b} />}{x.map ? `${x.map} ` : ""}{x.a}–{x.b}</span>)}</span>;
                 })()}
                 {recent && m.ex && m.ex.mvp && <span className="mcmvp">MVP <b>{m.ex.mvp}</b></span>}
                 {m.live && m.stream && <a className="mcstream" href={m.stream} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>▶ {tr("Watch")}</a>}

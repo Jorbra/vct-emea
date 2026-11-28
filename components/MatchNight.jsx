@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { LangProvider, useT } from "./lang.jsx";
-import { Crest } from "./Crest.jsx";
+import { Crest, MapWinner } from "./Crest.jsx";
 import { EVENT_NAMES } from "../lib/paths.js";
 import { formatMatchTime } from "../lib/schedule.js";
 import { Score } from "./visual.jsx";
@@ -42,7 +42,7 @@ function Night({ initial }) {
                     {(m.live || over) && <Score className="ntscore" value={v ?? 0} />}
                   </div>
                 ))}
-                {m.live && (s.maps || []).length > 0 && <div className="mcchips">{s.maps.map((x, i) => <span key={i} className={"mcchip" + (!x.done && i === s.maps.length - 1 ? " now" : "")}>{x.map} {x.a}–{x.b}</span>)}</div>}
+                {m.live && (s.maps || []).length > 0 && <div className="mcchips">{s.maps.map((x, i) => <span key={i} className={"mcchip" + (!x.done && i === s.maps.length - 1 ? " now" : "")}>{!(!x.done && i === s.maps.length - 1) && <MapWinner x={x} a={m.a} b={m.b} />}{x.map} {x.a}–{x.b}</span>)}</div>}
               </a>
             );
           })}
