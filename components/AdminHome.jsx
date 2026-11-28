@@ -352,17 +352,24 @@ function ApercuPanel({ main, call, onDone }) {
       onDone(tr.server(j.message));
     } catch (e) { onDone(tr.server(e.message)); }
   };
+  const row = (x) => (
+    <li key={x.name}>
+      <div><b>{x.title}</b><small>{x.text}</small>{x.href && <a className="aplink" href={x.href} target="_blank" rel="noopener">{tr("See it")} ↗</a>}</div>
+      <span className={"apstate" + (x.public ? " on" : "")}>{x.public ? tr("Everyone") : tr("Editors only")}</span>
+      {main && <button type="button" className={"btn small" + (x.public ? "" : " pri")} onClick={() => flip(x)}>{x.public ? tr("Back to preview") : tr("Open to everyone")}</button>}
+    </li>
+  );
   return (
     <section>
       <details className="einfo" open={waiting > 0}>
         <summary><b>🧪 {tr("New things in preview")}</b> {waiting > 0 && <small>{tr("{n} waiting", { n: waiting })}</small>}</summary>
-        <ul className="apercu">{list.map((x) => (
-          <li key={x.name}>
-            <div><b>{x.title}</b><small>{x.text}</small>{x.href && <a className="aplink" href={x.href} target="_blank" rel="noopener">{tr("See it")} ↗</a>}</div>
-            <span className={"apstate" + (x.public ? " on" : "")}>{x.public ? tr("Everyone") : tr("Editors only")}</span>
-            {main && <button type="button" className={"btn small" + (x.public ? "" : " pri")} onClick={() => flip(x)}>{x.public ? tr("Back to preview") : tr("Open to everyone")}</button>}
-          </li>
-        ))}</ul>
+        {waiting > 0 ? <ul className="apercu">{list.filter((x) => !x.public).map(row)}</ul> : <p className="note">{tr("Nothing waiting in preview.")}</p>}
+        {waiting < list.length && (
+          <details className="apopen">
+            <summary>{tr("Already open to everyone ({n})", { n: list.length - waiting })}</summary>
+            <ul className="apercu">{list.filter((x) => x.public).map(row)}</ul>
+          </details>
+        )}
         <VisitorView />
         <p className="hint">{tr("A new thing in preview is seen only by the main account and the editors who are signed in. Open it to everyone once it looks right: no new deployment needed, and it can be put back.")}{!main && " " + tr("Only the main account can open a new thing to everyone.")}</p>
       </details>

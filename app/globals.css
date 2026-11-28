@@ -4532,3 +4532,6 @@ html[data-ft~="stories2"] .storyacts .btn.st2 { display: inline-flex; align-item
 .btn.discordbtn:hover { background: #4752c4; border-color: #4752c4; }
 .acctcode { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .acctcode code { font-size: 18px; letter-spacing: .06em; padding: 6px 12px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); user-select: all; }
+.apopen { margin-top: 10px; }
+.apopen > summary { cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 600; }
+.apopen[open] > summary { margin-bottom: 4px; }
