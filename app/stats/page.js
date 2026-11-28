@@ -23,7 +23,7 @@ export default async function Page({ searchParams }) {
     // the page gets the tables it shows, not the per-match lists
     // only what the tables show: the page stays light with hundreds of players
     const players = s.players.map(({ fk, fd, ...p }) => ({ ...p, fk, fd, agents: p.agents.slice(0, 3) }));
-    const teams = Object.fromEntries(Object.entries(s.teams).map(([k, t]) => [k, { name: t.name, maps: t.maps, mapsWon: t.mapsWon, roundsW: t.roundsW, roundsL: t.roundsL, byMap: t.byMap, best: t.best.slice(0, 1).map((p) => ({ name: p.name })) }]));
+    const teams = Object.fromEntries(Object.entries(s.teams).map(([k, t]) => [k, { name: t.name, maps: t.maps, mapsWon: t.mapsWon, roundsW: t.roundsW, roundsL: t.roundsL, pistolW: t.pistolW || 0, pistolN: t.pistolN || 0, byMap: t.byMap, best: t.best.slice(0, 1).map((p) => ({ name: p.name })) }]));
     return { players, teams, maps: s.maps, agents: x.agents, records: x.records, agentMaps: agentMapTable(readDetails(db, event)), form: playersInForm(getState(db), tournamentStats(getState(db), readDetails(db, ""))) };
   }) : null;
   return <StatsPage stats={stats} event={event} events={events} lang={normLang((await cookies()).get(LANG_COOKIE)?.value)} />;

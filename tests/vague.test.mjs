@@ -36,3 +36,24 @@ test("rounds: each half's pistol, then the half and the next round", async () =>
   assert.deepEqual(acc, { n: 2, half: 1, bonus: 1 });
   assert.deepEqual(halfPistols(R("aaa")), { n: 0, half: 0, bonus: 0 });
 });
+
+test("editor: the finished matches read again until complete, with their reads and the next one", async () => {
+  const { getState, openDb } = await import("../lib/db.js");
+  const { saveQualifierScore, setQualifierTeams } = await import("../lib/qactions.js");
+  const { allMatches } = await import("../lib/matchlist.js");
+  const { vlrReport } = await import("../lib/round14.js");
+  const db = openDb(":memory:");
+  setQualifierTeams(db, "q1", Array.from({ length: 8 }, (_, i) => `T${i}`).join("\n"));
+  const ms = allMatches(getState(db)).filter((m) => m.event === "q1" && m.a && m.b && m.a.name && m.b.name);
+  saveQualifierScore(db, { event: "q1", id: ms[0].id, sa: 2, sb: 0 });
+  saveQualifierScore(db, { event: "q1", id: ms[1].id, sa: 2, sb: 1 });
+  const now = Date.parse("2026-11-28T20:00:00Z");
+  const seen = {
+    [`q1:${ms[0].id}`]: { full: true, complete: false, reads: 2, at: "2026-11-28T19:50:00Z", first: "2026-11-28T19:00:00Z" },
+    [`q1:${ms[1].id}`]: { full: true, complete: true, reads: 1, at: "2026-11-28T19:50:00Z" },
+  };
+  const r = vlrReport(getState(db), seen, undefined, {}, now);
+  assert.deepEqual(r.retry.map((x) => [x.id, x.reads, x.next]), [[ms[0].id, 2, "2026-11-28T20:05:00.000Z"]]);
+  // 2 days after its first read: left as it is
+  assert.equal(vlrReport(getState(db), seen, undefined, {}, now + 2 * 86400000).retry.length, 0);
+});

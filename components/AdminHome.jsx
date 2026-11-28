@@ -352,6 +352,15 @@ function ApercuPanel({ main, call, onDone }) {
       onDone(tr.server(j.message));
     } catch (e) { onDone(tr.server(e.message)); }
   };
+  // every new thing still in preview, one after the other (each like its own button)
+  const openAll = async () => {
+    if (!window.confirm(tr("Open the {n} new things still in preview to everyone?", { n: waiting }))) return;
+    let n = 0;
+    for (const x of list.filter((y) => !y.public)) {
+      try { await call("/api/apercu", { name: x.name, public: true }); n += 1; setList((l) => l.map((y) => (y.name === x.name ? { ...y, public: true } : y))); } catch { /* the others still */ }
+    }
+    onDone(tr("{n} new things open to everyone", { n }));
+  };
   const row = (x) => (
     <li key={x.name}>
       <div><b>{x.title}</b><small>{x.text}</small>{x.href && <a className="aplink" href={x.href} target="_blank" rel="noopener">{tr("See it")} ↗</a>}</div>
@@ -364,6 +373,7 @@ function ApercuPanel({ main, call, onDone }) {
       <details className="einfo" open={waiting > 0}>
         <summary><b>🧪 {tr("New things in preview")}</b> {waiting > 0 && <small>{tr("{n} waiting", { n: waiting })}</small>}</summary>
         {waiting > 0 ? <ul className="apercu">{list.filter((x) => !x.public).map(row)}</ul> : <p className="note">{tr("Nothing waiting in preview.")}</p>}
+        {main && waiting > 1 && <p className="row"><button type="button" className="btn small" onClick={openAll}>{tr("Open all {n} to everyone", { n: waiting })}</button></p>}
         {waiting < list.length && (
           <details className="apopen">
             <summary>{tr("Already open to everyone ({n})", { n: list.length - waiting })}</summary>

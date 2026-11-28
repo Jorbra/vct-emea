@@ -101,7 +101,7 @@ function Teams({ teams }) {
     <StatCloud rows={cloud} fields={[["win", tr("Maps won")], ["rounds", tr("Rounds won")], ["diff", tr("Round difference per map")], ["maps", tr("Maps")]]} x="rounds" y="win" hrefOf={(t) => `/team/${t.slug}`} title={tr("Every team at a glance")} note={tr("3 maps at least")} />
     <div className="vlrscroll">
       <table className="vlrtable statstable">
-        <thead><tr><th className="vlrp">{tr("Team")}</th><th>{tr("Maps")}</th><th>%</th><th>{tr("Rounds")}</th><th>+/–</th><th>{tr("Best map")}</th><th>{tr("Best player")}</th></tr></thead>
+        <thead><tr><th className="vlrp">{tr("Team")}</th><th>{tr("Maps")}</th><th>%</th><th>{tr("Rounds")}</th><th>+/–</th><th>{tr("Best map")}</th><th>{tr("Best player")}</th><th className="ft-rounds2" title={tr("Pistol rounds")}>{tr("Pistols")}</th></tr></thead>
         <tbody>
           {list.map((t) => {
             const top = t.byMap.filter((m) => m.played).sort((x, y) => y.won / y.played - x.won / x.played || y.played - x.played)[0];
@@ -114,6 +114,7 @@ function Teams({ teams }) {
                 <td className={t.diff > 0 ? "vlrpos" : t.diff < 0 ? "vlrneg" : ""}>{t.diff > 0 ? `+${t.diff}` : t.diff}</td>
                 <td>{top ? `${top.map} (${top.won}/${top.played})` : "–"}</td>
                 <td>{t.best[0] ? <a href={`/player/${teamSlug(t.best[0].name)}`}>{t.best[0].name}</a> : "–"}</td>
+                <td className="ft-rounds2" title={t.pistolN ? tr("{w} of {n} pistol rounds won", { w: t.pistolW, n: t.pistolN }) : undefined}>{t.pistolN ? `${Math.round((t.pistolW / t.pistolN) * 100)}%` : "–"}</td>
               </tr>
             );
           })}
@@ -189,6 +190,7 @@ function Records({ r, event }) {
       {block(tr("Longest maps"), r.long, (x) => link(x, <>{x.a} <b>{x.sa}–{x.sb}</b> {x.b} · {x.map} <small>({tr("{n} rounds", { n: x.rounds })})</small></>))}
       {block(tr("Biggest wins on a map"), r.blowout, (x) => link(x, <><b>{x.winner}</b> {x.w}–{x.l} {x.loser} · {x.map}</>))}
       {block(tr("Comebacks: won after losing the first map"), r.comeback, (x) => link(x, <><b>{x.winner}</b> {x.sa}–{x.sb} {x.loser}</>))}
+      {(r.inMap || []).length > 0 && <div className="ft-rounds2">{block(tr("Comebacks inside a map"), r.inMap, (x) => link(x, <><b>{x.winner}</b> {x.w}–{x.l} {x.loser} · {x.map} <small>({tr("{n} rounds down", { n: x.down })})</small></>))}</div>}
       {event && <p className="hint"><a href={`/recap/${event}`}>{tr("Recap")} ›</a></p>}
     </div>
   );
