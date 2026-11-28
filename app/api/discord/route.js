@@ -451,7 +451,7 @@ async function handle(req, box) {
         });
       }
       const done = linkAccount(db, opt("code"), { id: user.id, name: (i.member && i.member.nick) || user.global_name || user.username }, now);
-      return ephemeral({ content: L(`✅ Ton Discord est lié au compte du site **${done}** : tes pronostics sur Discord comptent pour ce compte, et la page Mon compte le montre.`, `✅ Your Discord is linked to the site account **${done}**: your Discord predictions count for it, and the My account page shows it.`) });
+      return ephemeral({ content: L(`✅ Ton Discord est lié au compte du site **${done}**, pour de bon (tu peux le délier sur la page Mon compte). Tes pronostics sur Discord comptent pour ce compte.`, `✅ Your Discord is linked to the site account **${done}**: your Discord predictions count for it, and the My account page shows it.`) });
     }
     const who = useLinkCode(db, user.id, opt("code"), now);
     return ephemeral({ content: who ? L(`✅ C'est fait : tes pronostics Discord comptent maintenant pour **${who}**.`, `✅ Done: your Discord predictions now count for **${who}**.`) : L("Code inconnu ou trop vieux. Prends-en un nouveau sur la page Pronostics du site (il dure 15 minutes).", "Unknown or expired code. Get a new one on the site's Predictions page (it lasts 15 minutes).") });
