@@ -42,3 +42,21 @@ test("vlr.gg: an incomplete read is read again, every 15 minutes, then less ofte
   // an old read (no "complete" kept) that has it all is not read again
   assert.equal(rereadDue({ full: true, at: new Date(at).toISOString(), reads: 1, score: { sa: 2, sb: 0 }, extra: { pstats: ten, maps: [{ map: "Bind", a: 13, b: 5 }, { map: "Split", a: 7, b: 13 }] } }, at, now), false);
 });
+
+test("vlr.gg: a map not picked yet (\"TBD\", 0–0) is left out, one being played keeps its place", async () => {
+  const { parseVlrMatch } = await import("../lib/vlrmatch.js");
+  const game = (id, name, a, b) => `<div class="vm-stats-game " data-game-id="${id}"><div class="score">${a}</div><div class="map"><div class="map-name"> ${name} </div></div><div class="score">${b}</div></div>`;
+  const maps = (html) => parseVlrMatch(html).maps.map((m) => `${m.map} ${m.a}-${m.b}`);
+  assert.deepEqual(maps(game(1, "Bind", 13, 8) + game(2, "Lotus", 13, 4) + game(3, "TBD", 0, 0)), ["Bind 13-8", "Lotus 13-4"]);
+  assert.deepEqual(maps(game(1, "TBD", 0, 0)), []);
+  assert.deepEqual(maps(game(1, "TBD", 3, 2)), ["TBD 3-2"]);
+});
+
+test("the saved details: a \"TBD\" 0–0 map kept before is not shown", async () => {
+  const { getDb, getMatchExtra } = await import("../lib/db.js");
+  const db = getDb();
+  db.prepare("INSERT INTO mextra (event, id, maps) VALUES ('kickoff', 'tbd-test', ?) ON CONFLICT (event, id) DO UPDATE SET maps = excluded.maps")
+    .run(JSON.stringify([{ map: "Bind", a: 13, b: 8, pick: "" }, { map: "TBD", a: 0, b: 0, pick: "" }]));
+  assert.deepEqual(getMatchExtra(db).kickoff["tbd-test"].maps.map((m) => m.map), ["Bind"]);
+  db.prepare("DELETE FROM mextra WHERE event = 'kickoff' AND id = 'tbd-test'").run();
+});
