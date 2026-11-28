@@ -4483,3 +4483,7 @@ html[data-ft~="stories2"] .storyacts .btn.st2 { display: inline-flex; align-item
 .baccstaff { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
 .baccstaff li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
 .baccstaff li .btn { margin-left: auto; }
+
+/* account page: Discord (components/AccountPage.jsx) */
+.acctcode { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.acctcode code { font-size: 18px; letter-spacing: .06em; padding: 6px 12px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); user-select: all; }

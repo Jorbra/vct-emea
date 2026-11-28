@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LangProvider, LangSwitch, useT } from "./lang.jsx";
 import { ThemeSwitch } from "./theme.jsx";
 import { EmeaMark } from "./Brand.jsx";
@@ -93,12 +93,60 @@ function EditorAccessPanel() {
         <ul className="acctroles">
           {roles.map((r) => (
             <li key={r.name}>
-              <b>{r.name}</b> <small>{r.role === "owner" ? tr("Main account") : tr("Editor")}</small>
-              {r.role === "editor" && <button type="button" className="btn" onClick={() => give(r.name, "")}>{tr("Take away")}</button>}
+              <b>{r.name}</b> <small>{r.role === "owner" ? tr("Main account") : r.role === "moderator" ? tr("Moderator (bot only)") : tr("Editor")}</small>
+              {(r.role === "editor" || r.role === "moderator") && <button type="button" className="btn" onClick={() => give(r.name, "")}>{tr("Take away")}</button>}
             </li>
           ))}
         </ul>
       )}
+    </section>
+  );
+}
+
+/** The account tied to Discord (lib/accountdiscord.js): a code for /lier, then the Discord name, and a way to undo it. */
+function DiscordPanel({ discord, onChange }) {
+  const tr = useT();
+  const [code, setCode] = useState("");
+  const [err, setErr] = useState("");
+  const [copied, setCopied] = useState(false);
+  async function ask(action) {
+    setErr("");
+    try {
+      const j = await post({ action });
+      if (action === "discord-code") { setCode(j.code); setCopied(false); } else { setCode(""); onChange(); }
+    } catch (x) { setErr(tr.server(x.message)); }
+  }
+  // while a code is shown, the page looks every few seconds whether it was used
+  useEffect(() => {
+    if (!code) return undefined;
+    const t = setInterval(() => {
+      fetch("/api/account").then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.account && j.account.discord) { setCode(""); onChange(); } }).catch(() => { /* offline */ });
+    }, 4000);
+    return () => clearInterval(t);
+  }, [code, onChange]);
+  const command = `/lier ${code}`;
+  return (
+    <section className="acctbox acctdiscord">
+      <h2>{tr("Discord")}</h2>
+      {discord ? (
+        <>
+          <p>✅ {tr("Linked to {name} on Discord.", { name: discord.name })}</p>
+          <p className="hint">{tr("Your predictions made with the bot count for this account. If your roles on the server open the editor, this account opens it too.")}</p>
+          <button type="button" className="btn" onClick={() => { if (window.confirm(tr("Unlink your Discord account?"))) ask("discord-unlink"); }}>{tr("Unlink Discord")}</button>
+        </>
+      ) : code ? (
+        <>
+          <p>{tr("On the server, type this command (valid 15 minutes):")}</p>
+          <p className="acctcode"><code>{command}</code> <button type="button" className="btn" onClick={() => navigator.clipboard.writeText(command).then(() => setCopied(true), () => {})}>{copied ? tr("Copied") : tr("Copy")}</button></p>
+          <p className="hint">{tr("This page updates by itself once it is done. Never give this code to someone else.")}</p>
+        </>
+      ) : (
+        <>
+          <p className="hint">{tr("Link your Discord account: your predictions made with the bot count for this account, and the roles that open the editor give you access when you are signed in here.")}</p>
+          <button type="button" className="btn pri" onClick={() => ask("discord-code")}>{tr("Link my Discord")}</button>
+        </>
+      )}
+      {err && <p className="err" role="alert">{err}</p>}
     </section>
   );
 }
@@ -110,9 +158,12 @@ function Inside({ name, onOut }) {
   const [del, setDel] = useState("");
   const [delErr, setDelErr] = useState("");
   const [role, setRole] = useState("");
-  useEffect(() => {
-    fetch("/api/account").then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.account) setRole(j.account.role || ""); }).catch(() => { /* offline */ });
+  const [level, setLevel] = useState("");
+  const [discord, setDiscord] = useState(undefined);
+  const reload = useCallback(() => {
+    fetch("/api/account").then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.account) { setRole(j.account.role || ""); setLevel(j.account.level || ""); setDiscord(j.account.discord || null); } }).catch(() => { /* offline */ });
   }, []);
+  useEffect(() => { reload(); }, [reload]);
   const say = (ok, text) => setNote({ ok, text });
   async function logout() {
     await post({ action: "logout" }).catch(() => { /* the mark goes anyway */ });
@@ -153,10 +204,11 @@ function Inside({ name, onOut }) {
         </ul>
         <p className="hint">{tr("Match alerts are turned on device by device, since each one asks for its own permission. They follow your favorite teams.")}</p>
         <div className="row">
-          {role && <a className="btn pri" href="/admin" target="_blank" rel="noopener">{tr("Open the editor")}</a>}
+          {(role || level) && <a className="btn pri" href={(level || role) === "moderator" ? "/admin/bot" : "/admin"} target="_blank" rel="noopener">{tr("Open the editor")}</a>}
           <button type="button" className="btn" onClick={logout}>{tr("Log out")}</button>
         </div>
       </section>
+      {discord !== undefined && <DiscordPanel discord={discord} onChange={reload} />}
       {role === "owner" && <EditorAccessPanel />}
       <section className="acctbox">
         <h2>{tr("Change my password")}</h2>

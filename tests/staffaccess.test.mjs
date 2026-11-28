@@ -13,6 +13,7 @@ const MOD = "900000000000000002";
 
 test("staff: the roles chosen, @everyone and duplicates left out, a role in one level only", () => {
   const db = getDb();
+  saveAccess(db, {}, GUILD);
   assert.deepEqual(readAccess(db), { editor: [], moderator: [] });
   const a = saveAccess(db, { editor: [ED, ED, GUILD, "pas un rôle"], moderator: [MOD, ED] }, GUILD);
   assert.deepEqual(a, { editor: [ED], moderator: [MOD] });
@@ -75,4 +76,41 @@ test("staff: Discord out of reach keeps a recent check for an hour, a member gon
   makeStaffCode(db, { id, name: "Eve", level: "moderator" }, NOW);
   assert.equal(dropStaff(db, id), true);
   assert.equal(await checkStaff(db, id, down, NOW), null);
+});
+
+test("account and Discord: a code ties them, predictions follow, the roles give the account its level", async () => {
+  const { accountDiscord, accountOfCode, discordLevel, linkAccount, makeAccountCode, unlinkAccount } = await import("../lib/accountdiscord.js");
+  const { signUp } = await import("../lib/accounts.js");
+  const db = getDb();
+  const N1 = `L${Date.now().toString(36)}`;
+  const N2 = `${N1}b`;
+  const r = signUp(db, { name: N1, password: "motdepasse1", token: `tok_${N1}_abcdefghijklmnopqrstuv` });
+  assert.ok(r.ok, r.error);
+  const code = makeAccountCode(db, N1, NOW);
+  assert.match(code, /^[A-Z2-9]{6}$/);
+  assert.equal(accountOfCode(db, code, NOW + MIN), N1);
+  assert.equal(accountOfCode(db, code, NOW + 16 * MIN), "", "15 minutes");
+  const U = "333333333333333331";
+  assert.equal(linkAccount(db, code, { id: U, name: "lucie_dc" }, NOW + MIN), N1);
+  assert.deepEqual(accountDiscord(db, N1), { id: U, name: "lucie_dc" });
+  assert.equal(linkAccount(db, code, { id: U, name: "x" }, NOW + MIN), "", "used once");
+  assert.ok(db.prepare("SELECT 1 FROM bot_links WHERE user = ?").get(U), "predictions count for the account");
+  // the level from the roles, kept 10 minutes, no access when no role is chosen
+  saveAccess(db, { editor: [], moderator: [] }, GUILD);
+  let asked = 0;
+  const member = async () => { asked += 1; return { roles: [MOD] }; };
+  assert.equal(await discordLevel(db, U, member, NOW), "");
+  assert.equal(asked, 0, "Discord not asked when no role opens the editor");
+  saveAccess(db, { editor: [ED], moderator: [MOD] }, GUILD);
+  assert.equal(await discordLevel(db, U, member, NOW), "moderator");
+  assert.equal(await discordLevel(db, U, member, NOW + 5 * MIN), "moderator");
+  assert.equal(asked, 1);
+  assert.equal(await discordLevel(db, U, async () => null, NOW + 11 * MIN), "", "left the server");
+  // another account linked to the same Discord takes it over
+  signUp(db, { name: N2, password: "motdepasse1", token: `tok_${N2}_abcdefghijklmnopqrstu` });
+  linkAccount(db, makeAccountCode(db, N2, NOW), { id: U, name: "lucie_dc" }, NOW);
+  assert.equal(accountDiscord(db, N1), null);
+  assert.equal(unlinkAccount(db, N2), true);
+  assert.equal(accountDiscord(db, N2), null);
+  assert.equal(db.prepare("SELECT 1 FROM bot_links WHERE user = ?").get(U), undefined);
 });

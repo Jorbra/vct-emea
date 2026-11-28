@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import { ACCOUNT_COOKIE, ACCOUNT_MS, changePassword, deleteAccount, logIn, makeAccountToken, readAccount, readAccountToken, saveAccount, signUp } from "../../../lib/accounts.js";
 import { recordFailure, tooManyAttempts } from "../../../lib/auth.js";
 import { getDb } from "../../../lib/db.js";
-import { badRequest, readBody } from "../../../lib/session.js";
+import { accountDiscord, makeAccountCode, unlinkAccount } from "../../../lib/accountdiscord.js";
+import { badRequest, currentStaff, readBody } from "../../../lib/session.js";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,11 @@ const failed = (r) => NextResponse.json({ error: r.error }, { status: r.status, 
 export async function GET() {
   const name = await me();
   if (!name) return NextResponse.json({ account: null }, { headers: noStore });
-  return NextResponse.json({ account: readAccount(getDb(), name) }, { headers: noStore });
+  const db = getDb();
+  // the access the account has now, its own or its Discord roles' (lib/session.js)
+  const staff = await currentStaff().catch(() => null);
+  const level = staff && staff.account === readAccount(db, name).name ? staff.level : "";
+  return NextResponse.json({ account: { ...readAccount(db, name), discord: accountDiscord(db, name), level } }, { headers: noStore });
 }
 
 export async function POST(req) {
@@ -55,6 +60,9 @@ export async function POST(req) {
   if (!name) return NextResponse.json({ error: "Sign in again." }, { status: 401 });
   const key = `account:${ip}`;
   if (tooManyAttempts(key)) return NextResponse.json({ error: "Too many attempts. Try again in a few minutes." }, { status: 429 });
+  // the account tied to Discord (lib/accountdiscord.js): a code for /lier, or the tie undone
+  if (b.action === "discord-code") return NextResponse.json({ ok: true, code: makeAccountCode(db, name), discord: accountDiscord(db, name) }, { headers: noStore });
+  if (b.action === "discord-unlink") { unlinkAccount(db, name); return NextResponse.json({ ok: true, message: "Discord account unlinked.", discord: null }, { headers: noStore }); }
   if (b.action === "password") {
     const r = changePassword(db, name, { password: b.password, next: b.next });
     if (!r.ok) { recordFailure(key); return failed(r); }

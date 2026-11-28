@@ -214,6 +214,13 @@ async function handle(req, box) {
       const { flags: _f, ...data } = helpMessage(settings.lang, settings.disabled, Number(((i.data && i.data.values) || [])[0]), ctx.site);
       return NextResponse.json({ type: 7, data });
     }
+    // /lier confirmed by a member whose roles open the editor (lib/accountdiscord.js)
+    if (kind === "al") {
+      const { linkAccount } = await import("../../../lib/accountdiscord.js");
+      const done = linkAccount(db, event, { id: user.id, name: (i.member && i.member.nick) || user.global_name || user.username }, now);
+      if (done) logBot(db, "moderation", `/lier : compte du site ${done} lié à un membre qui a accès à l'éditeur`);
+      return NextResponse.json({ type: 7, data: { components: [], content: done ? L(`✅ Ton Discord est lié au compte du site **${done}**. Ce compte a maintenant l'accès que tes rôles donnent. Si ce n'est pas le tien, va sur Mon compte pour le délier, ou préviens le compte principal du site.`, `✅ Your Discord is linked to the site account **${done}**. That account now has the access your roles give.`) : L("Code inconnu ou trop vieux. Prends-en un nouveau sur la page Mon compte du site.", "Unknown or expired code. Get a new one on the site's My account page.") } });
+    }
     const off = moduleRefusal(botServer(db), kind);
     if (off) return refuse(off);
     // a ticket's rating, in a private message (no server here): tr|<thread>|<stars>
@@ -430,6 +437,22 @@ async function handle(req, box) {
     });
   }
   if (name === "lier") {
+    // a code from the account page: the site account and this Discord account tied (lib/accountdiscord.js)
+    const { accountOfCode, linkAccount } = await import("../../../lib/accountdiscord.js");
+    const account = accountOfCode(db, opt("code"), now);
+    if (account) {
+      const { levelFor, readAccess } = await import("../../../lib/staffaccess.js");
+      const level = i.guild_id && i.guild_id === settings.guild ? levelFor(readAccess(db), (i.member && i.member.roles) || []) : "";
+      // the roles open the editor: the account will have it too, so a code someone else gave would hand it to them
+      if (level) {
+        return ephemeral({
+          content: L(`⚠️ Ce code lie ton Discord au compte du site **${account}**. Tes rôles ouvrent l'éditeur : ce compte y aura accès lui aussi. Confirme seulement si **${account}** est bien ton compte, et jamais pour un code donné par quelqu'un d'autre.`, `⚠️ This code ties your Discord to the site account **${account}**. Your roles open the editor: that account will have it too. Confirm only if **${account}** is your own account, never for a code someone else gave you.`),
+          components: [{ type: 1, components: [{ type: 2, style: 4, label: L(`C'est mon compte : lier ${account}`, `It's my account: link ${account}`).slice(0, 80), custom_id: `al|${String(opt("code")).trim().toUpperCase().slice(0, 12)}` }] }],
+        });
+      }
+      const done = linkAccount(db, opt("code"), { id: user.id, name: (i.member && i.member.nick) || user.global_name || user.username }, now);
+      return ephemeral({ content: L(`✅ Ton Discord est lié au compte du site **${done}** : tes pronostics sur Discord comptent pour ce compte, et la page Mon compte le montre.`, `✅ Your Discord is linked to the site account **${done}**: your Discord predictions count for it, and the My account page shows it.`) });
+    }
     const who = useLinkCode(db, user.id, opt("code"), now);
     return ephemeral({ content: who ? L(`✅ C'est fait : tes pronostics Discord comptent maintenant pour **${who}**.`, `✅ Done: your Discord predictions now count for **${who}**.`) : L("Code inconnu ou trop vieux. Prends-en un nouveau sur la page Pronostics du site (il dure 15 minutes).", "Unknown or expired code. Get a new one on the site's Predictions page (it lasts 15 minutes).") });
   }

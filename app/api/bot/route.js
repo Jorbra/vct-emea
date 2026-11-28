@@ -129,6 +129,7 @@ export async function POST(req) {
     if (staff.who !== "") return NextResponse.json({ error: "Seul le compte principal peut choisir qui ouvre l'éditeur depuis Discord." }, { status: 403 });
     if (b.action === "staff-drop") { dropStaff(db, String(b.id || "")); logBot(db, "moderation", "accès à l'éditeur retiré depuis l'éditeur"); return NextResponse.json({ ok: true, staff: listStaff(db), message: "Accès retiré." }); }
     const access = saveAccess(db, { editor: b.editor, moderator: b.moderator }, botSettings(db).guild || "");
+    try { db.exec("DELETE FROM bot_account_roles"); } catch { /* no account tied yet */ } // the accounts tied to Discord are checked again
     logBot(db, "moderation", `rôles qui ouvrent l'éditeur : ${access.editor.length} éditeur, ${access.moderator.length} modérateur`);
     return NextResponse.json({ ok: true, access, staff: listStaff(db), message: "Rôles enregistrés." });
   }
