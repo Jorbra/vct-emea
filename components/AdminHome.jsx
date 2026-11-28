@@ -85,18 +85,59 @@ export default function AdminHome({ initial, onOpen, call, onDone }) {
       </div>
     );
   };
-  const todo = agenda.live.length + agenda.late.length;
+  // a match waiting for its score with both teams known can be entered now; one still waiting for a team ("TBD") waits
+  // for the round before it, so it is set apart and folded
+  const lateReady = agenda.late.filter((m) => m.a && m.b && m.a.name && m.b.name);
+  const lateBlocked = agenda.late.filter((m) => !(m.a && m.b && m.a.name && m.b.name));
+  const todo = agenda.live.length + lateReady.length;
   const A = initial.admin;
+  const [lateEvent, setLateEvent] = useState(""); // "" for every event
+  const [lateOpen, setLateOpen] = useState({}); // the groups shown in full
+  const byEvent = (list) => {
+    const out = new Map();
+    for (const m of list) { if (!out.has(m.event)) out.set(m.event, []); out.get(m.event).push(m); }
+    return [...out.entries()];
+  };
+  const lateGroups = byEvent(lateReady);
+  const shownGroups = lateGroups.filter(([e]) => !lateEvent || e === lateEvent);
+  const FIRST = 5;
   const todoSection = (
     <section>
       <h2>{tr("To do")}</h2>
-      {todo === 0 && <p className="note">{now == null ? " " : tr("Nothing waiting: no match is live or waiting for its score.")}</p>}
+      {todo === 0 && !lateBlocked.length && <p className="note">{now == null ? " " : tr("Nothing waiting: no match is live or waiting for its score.")}</p>}
       {agenda.live.length > 0 && <div className="ahlist">{agenda.live.map((m) => row(m, <LiveBadge />))}</div>}
-      {agenda.late.length > 0 && (
+      {lateReady.length > 0 && (
         <>
-          <h3 className="sub">{tr("Waiting for their score")} <small>({agenda.late.length})</small></h3>
-          <div className="ahlist">{agenda.late.map((m) => row(m))}</div>
+          <h3 className="sub">{tr("Waiting for their score")} <small>({lateReady.length})</small></h3>
+          {lateGroups.length > 1 && (
+            <div className="ahfilter" role="group" aria-label={tr("Event")}>
+              <button type="button" aria-pressed={!lateEvent} onClick={() => setLateEvent("")}>{tr("All")} <small>{lateReady.length}</small></button>
+              {lateGroups.map(([e, list]) => <button key={e} type="button" aria-pressed={lateEvent === e} onClick={() => setLateEvent(lateEvent === e ? "" : e)}>{tr(EVENT_NAMES[e] || e)} <small>{list.length}</small></button>)}
+            </div>
+          )}
+          {shownGroups.map(([e, list]) => {
+            const full = !!lateOpen[e] || list.length <= FIRST + 1;
+            return (
+              <div key={e} className="ahgroup">
+                {lateGroups.length > 1 && <h4 className="ahgtitle"><button type="button" className="linkbtn" onClick={() => onOpen(e, true)}>{tr(EVENT_NAMES[e] || e)}</button> <small>({list.length})</small></h4>}
+                <div className="ahlist">{(full ? list : list.slice(0, FIRST)).map((m) => row(m))}</div>
+                {list.length > FIRST + 1 && (
+                  <button type="button" className="linkbtn ahmore" onClick={() => setLateOpen((o) => ({ ...o, [e]: !o[e] }))}>
+                    {lateOpen[e] ? tr("Show fewer") : tr("Show the {n} others", { n: list.length - FIRST })}
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </>
+      )}
+      {lateBlocked.length > 0 && (
+        <details className="ahblocked">
+          <summary>{tr("{n} past matches still waiting for their teams", { n: lateBlocked.length })} <small>· {byEvent(lateBlocked).map(([e, l]) => `${tr(EVENT_NAMES[e] || e)} (${l.length})`).join(", ")}</small></summary>
+          <p className="hint">{tr("Their score can be entered once the round before gives them their teams: fill in that round first.")}</p>
+          <div className="ahlist">{lateBlocked.slice(0, 30).map((m) => row(m))}</div>
+          {lateBlocked.length > 30 && <p className="hint">{tr("And {n} more.", { n: lateBlocked.length - 30 })}</p>}
+        </details>
       )}
     </section>
   );
